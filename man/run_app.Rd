@@ -6,6 +6,9 @@
 \usage{
 run_app(...)
 }
+\arguments{
+\item{...}{Options. None at the moment, so leave empty.}
+}
 \description{
 Run the Shiny Application
 }
