@@ -11,13 +11,7 @@ app_ui <- function() {
         sidebarPanel(
           tabsetPanel(
             type = "tabs",
-            tabPanel(
-              "Select table",
-              seltable("tabseltable"),
-              nrowprint("tabseltable"),
-              #selid,
-              updatebutton("tabseltable")
-            )
+            tabseltable()
             #tabPanel(
             #  "Join tables",
             #  numericInput("temp", "Temp", 1)
