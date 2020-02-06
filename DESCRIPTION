@@ -16,7 +16,10 @@ Imports:
     golem,
     stringr,
     rlang,
-    glue
+    glue,
+    purrr
 RoxygenNote: 7.0.2
 URL: https://github.com/khvorov45/hcwstudyapp
 BugReports: https://github.com/khvorov45/hcwstudyapp/issues
+Suggests: 
+    testthat (>= 2.1.0)
