@@ -1,13 +1,36 @@
 #' @import shiny
 app_ui <- function() {
   tagList(
-    # Leave this function for adding external resources
+
     golem_add_external_resources(),
-    # List the first level UI elements here
+
     fluidPage(
-      h1("hcwstudyapp")
-    )
-  )
+
+      sidebarLayout(
+
+        sidebarPanel(
+          tabsetPanel(
+            type = "tabs",
+            tabPanel(
+              "Select table",
+              seltable("tabseltable"),
+              nrowprint("tabseltable"),
+              #selid,
+              updatebutton("tabseltable")
+            )
+            #tabPanel(
+            #  "Join tables",
+            #  numericInput("temp", "Temp", 1)
+            #)
+          ) # tabsetPanel
+        ), # sidebarPanel
+
+        mainPanel(
+          tableOutput("tableview")
+        )
+      ) # sidebarLayout
+    ) # fluidPage
+  ) # tagList
 }
 
 #' @import shiny
