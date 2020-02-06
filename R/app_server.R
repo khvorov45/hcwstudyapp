@@ -1,4 +1,4 @@
 #' @import shiny
-app_server <- function(input, output,session) {
-  # List the first level callModules here
+app_server <- function(input, output, session) {
+  print(golem::get_golem_options("token"))
 }

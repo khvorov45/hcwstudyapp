@@ -4,10 +4,12 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(...)
+run_app(token, ...)
 }
 \arguments{
-\item{...}{Options. None at the moment, so leave empty.}
+\item{token}{String or path to file containing the RedCap API token.}
+
+\item{...}{Not used.}
 }
 \description{
 Run the Shiny Application
