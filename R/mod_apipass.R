@@ -1,8 +1,8 @@
 #' Tab to input RedCap API token
 #' @noRd
-tabtoken <- function(label = "Token") {
+tabapipass <- function(label = "Password") {
   tabPanel(
     label,
-    token("tabtoken")
+    apipass("tabapipass")
   )
 }

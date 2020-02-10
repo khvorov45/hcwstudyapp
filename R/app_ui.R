@@ -11,7 +11,7 @@ app_ui <- function() {
         sidebarPanel(
           tabsetPanel(
             type = "tabs",
-            tabtoken(),
+            tabapipass(),
             tabseltable()
             #tabPanel(
             #  "Join tables",
