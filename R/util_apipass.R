@@ -16,3 +16,13 @@ process_apipass <- function(pass_path) {
     readChar(pass_path, file.info(pass_path)$size), side = "both"
   )
 }
+
+#' Checks if the given apipass hash is in opts
+#'
+#' @param apipass Password to check
+#' @param opts Options to check against
+#'
+#' @noRd
+apipass_matches <- function(apipass, opts = api_pass_hashes) {
+  openssl::sha256(apipass, key = api_pass_key) %in% opts
+}
