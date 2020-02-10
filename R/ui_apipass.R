@@ -5,6 +5,7 @@ apipass <- function(id, label = "") {
   passwordInput(
     ns("apipass"),
     label,
-    value = process_apipass("token")
+    # data-raw/token-alt only exists in development
+    value = process_apipass("data-raw/token-alt")
   )
 }
