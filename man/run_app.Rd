@@ -7,7 +7,7 @@
 run_app(token = "token", ...)
 }
 \arguments{
-\item{token}{String or path to file containing the token}
+\item{token}{Path to file containing the token}
 
 \item{...}{Not used.}
 }

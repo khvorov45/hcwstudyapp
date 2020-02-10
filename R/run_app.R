@@ -1,6 +1,6 @@
 #' Run the Shiny Application
 #'
-#' @param token String or path to file containing the token
+#' @param token Path to file containing the token
 #' @param ... Not used.
 #'
 #' @export
