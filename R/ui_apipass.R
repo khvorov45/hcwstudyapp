@@ -5,6 +5,6 @@ apipass <- function(id, label = "") {
   passwordInput(
     ns("apipass"),
     label,
-    value = process_apipass(golem::get_golem_options("token"))
+    value = process_apipass("token")
   )
 }
