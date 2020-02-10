@@ -1,12 +1,18 @@
-process_apipass <- function(pass_opt) {
-  if (is.null(pass_opt) | !is.character(pass_opt))
+#' Processes the RedCap api password
+#'
+#' If file is not found, returns an empty string.
+#'
+#' @param pass_path Path to file containing the token
+#'
+#' @noRd
+process_apipass <- function(pass_path) {
+  if (is.null(pass_path) | !is.character(pass_path))
     rlang::abort(
-      glue::glue(
-        "pass_opt should be a string or path to text file\n",
-      ),
+      glue::glue("pass_path should be a path to text file\n",),
       class = "wrong_apipass"
     )
-  if (file.exists(pass_opt))
-    pass_opt <- readChar(pass_opt, file.info(pass_opt)$size)
-  stringr::str_trim(pass_opt)
+  if (!file.exists(pass_path)) return("")
+  stringr::str_trim(
+    readChar(pass_path, file.info(pass_path)$size), side = "both"
+  )
 }

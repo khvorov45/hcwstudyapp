@@ -19,5 +19,5 @@ test_that("process_apipass works", {
       expect_equal(process_apipass(temptok), "ABC123")
     }
   )
-  expect_equal(process_apipass("   ABC123\r\n  "), "ABC123")
+  expect_equal(process_apipass("notafile"), "")
 })
