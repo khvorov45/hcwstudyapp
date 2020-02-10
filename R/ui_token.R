@@ -5,6 +5,6 @@ token <- function(id, label = "") {
   textInput(
     ns("token"),
     label,
-    value = ""
+    value = process_token("token")
   )
 }
