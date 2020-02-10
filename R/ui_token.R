@@ -2,7 +2,7 @@
 #' @noRd
 token <- function(id, label = "") {
   ns <- NS(id)
-  textInput(
+  passwordInput(
     ns("token"),
     label,
     value = process_token("token")
