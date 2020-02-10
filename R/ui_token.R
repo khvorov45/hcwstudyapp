@@ -1,4 +1,4 @@
-#' Input for the RedCap API token
+#' Input for the RedCap API password
 #' @noRd
 token <- function(id, label = "") {
   ns <- NS(id)
