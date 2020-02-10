@@ -3,7 +3,7 @@
 create_hash_values <- function(...) {
   purrr::map_chr(
     list(...),
-    ~ openssl::sha256(process_token(.x), key = "hcwskrsrv!")
+    ~ openssl::sha256(hcwstudyapp:::process_apipass(.x), key = "hcwskrsrv!")
   )
 }
 
