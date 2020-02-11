@@ -1,6 +1,6 @@
-## code to prepare `DATASET` dataset goes here
+# Setting up hashes for password checking
 
-api_pass_key <- "hcwskrsrv!"
+api_pass_key <- process_apipass("data-raw/key")
 
 create_hash_values <- function(...) {
   purrr::map_chr(
