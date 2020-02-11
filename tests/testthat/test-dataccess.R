@@ -10,4 +10,6 @@ test_that("RedCap download works", {
     names(dat_list),
     stringr::str_replace(unique(dat_ref$redcap_event_name), "_arm_1", "")
   )
+  scr <- get_tbl_screening(dat_list$baseline)
+  expect_equal(class(scr), c("tbl_df", "tbl", "data.frame"))
 })

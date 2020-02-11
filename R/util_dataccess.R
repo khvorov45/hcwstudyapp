@@ -20,7 +20,16 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
 reformat_cols <- function(raw) {
   raw %>%
     dplyr::mutate(
-      record_id = as.integer(.data$record_id)
+      record_id = as.integer(.data$record_id),
+      site_name = as.integer(.data$site_name),
+      screening_interest = as.integer(.data$screening_interest),
+      screening_age = as.integer(.data$screening_age),
+      screening_employee = as.integer(.data$screening_employee),
+      screening_recent_rx = as.integer(.data$screening_recent_rx),
+      screening_ill = as.integer(.data$screening_ill),
+      num_seas_vac = as.integer(.data$num_seas_vac),
+      eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
+      screening_complete = as.integer(.data$screening_complete)
     )
 }
 #' Convert to list
@@ -39,4 +48,17 @@ raw_to_list <- function(raw) {
       stringr::str_replace("_arm_1", "")
   )
   lst %>% purrr::map(~ dplyr::select(.x, -redcap_event_name))
+}
+
+#' Extracts the screening table from the baseline table
+#'
+#' @param baseline The baseline table
+#'
+#' @export
+get_tbl_screening <- function(baseline) {
+  baseline %>%
+    dplyr::select(
+      "record_id", "site_name", dplyr::starts_with("screening_"),
+      "num_seas_vac", "eligible_extra_bleed", "screening_complete"
+    )
 }
