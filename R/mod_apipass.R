@@ -10,5 +10,9 @@ tabapipass <- function(id = "apipass", label = "Password") {
 }
 
 server_apipass <- function(input, output, session) {
-  output$apipasscheck <- renderText(cli::symbol$tick)
+  observeEvent(input$updatebutton, {
+    correct_input <- apipass_matches(input$apipass, api_pass_hashes)
+    valid <- ifelse(correct_input, cli::symbol$tick, cli::symbol$cross)
+    output$apipasscheck <- renderText(valid)
+  })
 }
