@@ -22,7 +22,9 @@ Imports:
     openssl,
     cli,
     tibble,
-    REDCapR
+    dplyr,
+    REDCapR,
+    magrittr
 RoxygenNote: 7.0.2
 URL: https://github.com/khvorov45/hcwstudyapp
 BugReports: https://github.com/khvorov45/hcwstudyapp/issues
