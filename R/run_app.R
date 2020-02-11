@@ -16,6 +16,6 @@ run_app <- function(token = "token", ...) {
     )
   with_golem_options(
     app = shinyApp(ui = app_ui, server = app_server),
-    golem_opts = list(token = process_apipass(token), ...)
+    golem_opts = list(token = token, ...)
   )
 }
