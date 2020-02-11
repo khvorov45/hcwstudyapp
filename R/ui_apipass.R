@@ -9,3 +9,13 @@ apipass <- function(id, label = "") {
     value = process_apipass("data-raw/token-alt")
   )
 }
+
+#' Output for the checkmark
+#' @noRd
+apipasscheck <- function(id) {
+  ns <- NS(id)
+  textOutput(
+    ns("apipasscheck"),
+    inline = FALSE
+  )
+}
