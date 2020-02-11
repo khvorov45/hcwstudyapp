@@ -20,10 +20,8 @@ devtools::install_github("khvorov45/hcwstudyapp")
 
 ## Data access
 
-The data is stored on Melbourne Health’s
-[RedCap](https://biredcap.mh.org.au/) servers. This app accesses it via
-an API token. The token is not stored anywhere in code or in this
-repository.
+The data is stored on RedCap servers. This app accesses it via an API
+token. The token is not stored anywhere in code or in this repository.
 
 To see any data while using the app you need to input either the API
 token or (more conveniently) a password. Neither is stored in code or on
