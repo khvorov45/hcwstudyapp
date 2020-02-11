@@ -5,8 +5,7 @@ apipass <- function(id, label = "") {
   passwordInput(
     ns("apipass"),
     label,
-    # data-raw/token-alt only exists in development
-    value = process_apipass("data-raw/token-alt")
+    value = golem::get_golem_options("default_password")
   )
 }
 
