@@ -23,8 +23,9 @@ test_that("process_apipass works", {
 })
 
 test_that("apipass_matches works", {
-  opts <- purrr::map_chr(c("opt1", "opt2"), ~ openssl::sha256(.x, api_pass_key))
-  expect_true(apipass_matches("opt1", opts))
-  expect_true(apipass_matches("opt2", opts))
-  expect_false(apipass_matches("notanopt", opts))
+  api_pass_key <- "somekey"
+  opts <- openssl::sha256(c("opt1", "opt2"), api_pass_key)
+  expect_true(apipass_matches("opt1", api_pass_key, opts))
+  expect_true(apipass_matches("opt2", api_pass_key, opts))
+  expect_false(apipass_matches("notanopt", api_pass_key, opts))
 })

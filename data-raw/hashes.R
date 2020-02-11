@@ -1,6 +1,6 @@
 # Setting up hashes for password checking
 
-api_pass_key <- process_apipass("data-raw/key")
+api_pass_key <- process_apipass("key")
 
 create_hash_values <- function(...) {
   purrr::map_chr(
@@ -9,11 +9,6 @@ create_hash_values <- function(...) {
   )
 }
 
-api_pass_hashes <- create_hash_values(
-  "token", "data-raw/token-alt"
-)
+api_pass_hashes <- create_hash_values("token", "data-raw/token-alt")
 
-usethis::use_data(
-  api_pass_hashes, api_pass_key,
-  internal = TRUE, overwrite = TRUE
-)
+usethis::use_data(api_pass_hashes, internal = TRUE, overwrite = TRUE)

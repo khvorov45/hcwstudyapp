@@ -11,7 +11,9 @@ tabapipass <- function(id = "apipass", label = "Password") {
 
 server_apipass <- function(input, output, session) {
   observeEvent(input$updatebutton, {
-    correct_input <- apipass_matches(input$apipass, api_pass_hashes)
+    correct_input <- apipass_matches(
+      input$apipass, golem::get_golem_options("key"), api_pass_hashes
+    )
     valid <- ifelse(correct_input, cli::symbol$tick, cli::symbol$cross)
     output$apipasscheck <- renderText(valid)
   })

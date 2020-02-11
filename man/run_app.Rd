@@ -4,10 +4,12 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(token = "token", ...)
+run_app(token = "token", key = "key", ...)
 }
 \arguments{
 \item{token}{Path to file containing the token}
+
+\item{key}{Path to file containing the key used to create hashes}
 
 \item{...}{Not used.}
 }

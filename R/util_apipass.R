@@ -20,9 +20,10 @@ process_apipass <- function(pass_path) {
 #' Checks if the given apipass hash is in opts
 #'
 #' @param apipass Password to check
+#' @param key Key used for hash creation
 #' @param opts Options to check against
 #'
 #' @noRd
-apipass_matches <- function(apipass, opts = api_pass_hashes) {
-  openssl::sha256(apipass, key = api_pass_key) %in% opts
+apipass_matches <- function(apipass, key, opts = api_pass_hashes) {
+  openssl::sha256(apipass, key) %in% opts
 }
