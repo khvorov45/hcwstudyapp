@@ -50,12 +50,15 @@ raw_to_list <- function(raw) {
   lst %>% purrr::map(~ dplyr::select(.x, -redcap_event_name))
 }
 
-#' Extracts the screening table from the baseline table
+#' Extracts the participant table from the baseline table
+#'
+#' The participant table contains every attribute that each participant has
+#' one of.
 #'
 #' @param baseline The baseline table
 #'
 #' @export
-get_tbl_screening <- function(baseline) {
+get_tbl_participant <- function(baseline) {
   baseline %>%
     dplyr::select(
       "record_id", "site_name", dplyr::starts_with("screening_"),
