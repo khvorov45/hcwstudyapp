@@ -12,4 +12,6 @@ test_that("RedCap download works", {
   )
   part <- get_tbl_participant(dat_list$baseline)
   expect_equal(class(part), c("tbl_df", "tbl", "data.frame"))
+  all_tbls <- get_tbls(dat_list)
+  expect_named(all_tbls, c("participant"))
 })

@@ -53,7 +53,7 @@ raw_to_list <- function(raw) {
 #' Extracts the participant table from the baseline table
 #'
 #' The participant table contains every attribute that each participant has
-#' one of.
+#' one of except the screening-related attributes.
 #'
 #' @param baseline The baseline table
 #'
@@ -61,7 +61,17 @@ raw_to_list <- function(raw) {
 get_tbl_participant <- function(baseline) {
   baseline %>%
     dplyr::select(
-      "record_id", "site_name", dplyr::starts_with("screening_"),
-      "num_seas_vac", "eligible_extra_bleed", "screening_complete"
+      "record_id", "site_name", "num_seas_vac", "eligible_extra_bleed"
     )
+}
+
+#' Extracts all proper tables from the event tables
+#'
+#' @param raw_list List returned by \code{\link{raw_to_list}}
+#'
+#' @export
+get_tbls <- function(raw_list) {
+  list(
+    participant = get_tbl_participant(raw_list$baseline)
+  )
 }

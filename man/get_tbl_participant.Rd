@@ -11,5 +11,5 @@ get_tbl_participant(baseline)
 }
 \description{
 The participant table contains every attribute that each participant has
-one of.
+one of except the screening-related attributes.
 }
