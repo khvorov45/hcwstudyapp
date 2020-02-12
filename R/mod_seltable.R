@@ -1,11 +1,14 @@
 #' Tab with widgets to select a table
 #' @noRd
-tabseltable <- function(label = "Select table") {
+tabseltable <- function(id = "seltable", label = "Select table") {
   tabPanel(
     label,
-    seltable("tabseltable"),
-    nrowprint("tabseltable"),
-    #selid,
-    updatebutton("tabseltable")
+    seltable(id),
+    updatebutton(id)
   )
+}
+
+server_seltable <- function(input, output, session) {
+  observeEvent(input$updatebutton, {
+  })
 }
