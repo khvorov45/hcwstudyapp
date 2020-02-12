@@ -8,7 +8,8 @@ tabseltable <- function(id = "seltable", label = "Select table") {
   )
 }
 
-server_seltable <- function(input, output, session) {
+server_seltable <- function(input, output, session, password_verified) {
   observeEvent(input$updatebutton, {
+    print(password_verified)
   })
 }
