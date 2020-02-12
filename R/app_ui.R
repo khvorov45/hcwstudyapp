@@ -9,24 +9,23 @@ app_ui <- function() {
       sidebarLayout(
 
         sidebarPanel(
+
           tabsetPanel(
             type = "tabs",
             tabapipass(),
-            tabseltable()
-            #tabPanel(
-            #  "Join tables",
-            #  numericInput("temp", "Temp", 1)
-            #)
+            tabseltable(),
+            tabrecruitvh()
           ) # tabsetPanel
+
         ), # sidebarPanel
 
         mainPanel(
           tableOutput("tableview")
-        )
+        ) # mainPanel
       ) # sidebarLayout
     ) # fluidPage
   ) # tagList
-}
+} # app_ui
 
 #' @import shiny
 golem_add_external_resources <- function() {
