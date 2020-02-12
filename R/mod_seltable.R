@@ -10,6 +10,9 @@ tabseltable <- function(id = "seltable", label = "Select table") {
 
 server_seltable <- function(input, output, session, password_verified) {
   observeEvent(input$updatebutton, {
-    print(password_verified)
+    if (is.null(password_verified())) return()
+    if (!password_verified()) return()
+    all_dat <- down_trans_redcap(golem::get_golem_options("token"))
+    print(all_dat)
   })
 }

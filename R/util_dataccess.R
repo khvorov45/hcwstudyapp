@@ -75,3 +75,15 @@ get_tbls <- function(raw_list) {
     participant = get_tbl_participant(raw_list$baseline)
   )
 }
+
+#' Downloads REDCap's data and transforms it
+#'
+#' @inheritParams get_redcap_data
+#'
+#' @export
+down_trans_redcap <- function(token, uri = "https://biredcap.mh.org.au/api/") {
+  get_redcap_data(token, uri) %>%
+    reformat_cols() %>%
+    raw_to_list() %>%
+    get_tbls()
+}
