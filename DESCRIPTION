@@ -25,7 +25,10 @@ Imports:
     dplyr,
     REDCapR,
     magrittr,
-    ggplot2
+    ggplot2,
+    ggdark
+Remotes:
+  khvorov45/ggdark
 RoxygenNote: 7.0.2
 URL: https://github.com/khvorov45/hcwstudyapp
 BugReports: https://github.com/khvorov45/hcwstudyapp/issues
