@@ -26,7 +26,8 @@ Imports:
     REDCapR,
     magrittr,
     ggplot2,
-    ggdark
+    ggdark,
+    scales
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2

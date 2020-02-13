@@ -41,7 +41,9 @@ server_recruitvh <- function(input, output, session,
     if (is.null(all_data())) return()
     if (is.null(input$site)) return()
     subs <- all_data()$participant %>%
-      dplyr::mutate(num_seas_vac_fct = factor(num_seas_vac, levels = 0:5)) %>%
+      dplyr::mutate(
+        num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5)
+      ) %>%
       dplyr::filter(.data$site_name %in% input$site)
     output$plot <- renderPlot(plot_recruitvh(subs))
   })
