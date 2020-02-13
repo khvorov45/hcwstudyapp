@@ -6,7 +6,7 @@ app_ui <- function() {
 
     HTML(
       '<input type="text" id="client_tz_offset_sec"
-      name="client_tz_offset_sec" style="display: block;">'
+      name="client_tz_offset_sec" style="display: none;">'
     ),
 
     fluidPage(
