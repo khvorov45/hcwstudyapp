@@ -16,8 +16,12 @@ server_apipass <- function(input, output, session) {
     correct_input(apipass_matches(
       input$apipassword, golem::get_golem_options("key"), api_pass_hashes
     ))
-    valid <- ifelse(correct_input(), cli::symbol$tick, cli::symbol$cross)
-    output$check <- renderText(valid)
+    valid <- ifelse(
+      correct_input(),
+      glue::glue("<span class = 'tick'>{cli::symbol$tick}</span>"),
+      glue::glue("<span class = 'cross'>{cli::symbol$cross}</span>")
+    )
+    output$check <- renderUI(HTML(valid))
   })
   correct_input
 }

@@ -1,3 +1,11 @@
 #updatedata-time {
 	font-size: small;
 }
+
+.tick {
+	color: green;
+}
+
+.cross {
+	color: red;
+}

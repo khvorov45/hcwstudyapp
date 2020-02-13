@@ -11,7 +11,7 @@ apipassword <- function(id, label = "") {
 #' Output for the checkmark
 #' @noRd
 apipasscheck <- function(id) {
-  textOutput(
+  htmlOutput(
     id,
     inline = TRUE
   )
