@@ -13,6 +13,6 @@ apipassword <- function(id, label = "") {
 apipasscheck <- function(id) {
   textOutput(
     id,
-    inline = FALSE
+    inline = TRUE
   )
 }
