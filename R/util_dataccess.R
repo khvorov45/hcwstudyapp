@@ -5,9 +5,12 @@
 #'
 #' @export
 get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
-  tibble::as_tibble(
-    REDCapR::redcap_read_oneshot(uri, token, verbose = FALSE)$data
+  rcap <- REDCapR::redcap_read_oneshot(
+    uri, token,
+    verbose = FALSE,
+    raw_or_label = "label"
   )
+  tibble::as_tibble(rcap$data)
 }
 
 #' Reformat variables
@@ -20,16 +23,9 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
 reformat_cols <- function(raw) {
   raw %>%
     dplyr::mutate(
-      record_id = as.integer(.data$record_id),
-      site_name = as.integer(.data$site_name),
-      screening_interest = as.integer(.data$screening_interest),
-      screening_age = as.integer(.data$screening_age),
-      screening_employee = as.integer(.data$screening_employee),
-      screening_recent_rx = as.integer(.data$screening_recent_rx),
-      screening_ill = as.integer(.data$screening_ill),
+      redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
-      eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
-      screening_complete = as.integer(.data$screening_complete)
+      eligible_extra_bleed = as.integer(.data$eligible_extra_bleed)
     )
 }
 #' Convert to list
