@@ -4,6 +4,8 @@ app_ui <- function() {
 
     golem_add_external_resources(),
 
+    # Hidden input for client timezone determination
+    # Filled by javascript in www/script.js
     HTML(
       '<input type="text" id="client_tz_offset_sec"
       name="client_tz_offset_sec" style="display: none;">'
