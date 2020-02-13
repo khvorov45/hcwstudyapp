@@ -18,6 +18,17 @@ data collected for the repeated vaccinations healthcare worker project.
 devtools::install_github("khvorov45/hcwstudyapp")
 ```
 
+## Deployment
+
+``` r
+library(hcwstudyapp)
+run_app("path/to/token", "path/to/key")
+```
+
+Note that you need the `library(hcwstudyapp)` and
+`hcwstudyapp::run_app()` alone will not work because I need the geoms of
+`ggplot2` to be on `apropos` search path.
+
 ## Data access
 
 The data is stored on RedCap servers. This app accesses it via an API
