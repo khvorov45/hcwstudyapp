@@ -1,9 +1,8 @@
 #' Input for the RedCap API password
 #' @noRd
-apipass <- function(id, label = "") {
-  ns <- NS(id)
+apipassword <- function(id, label = "") {
   passwordInput(
-    ns("apipass"),
+    id,
     label,
     value = golem::get_golem_options("default_password")
   )
@@ -12,9 +11,8 @@ apipass <- function(id, label = "") {
 #' Output for the checkmark
 #' @noRd
 apipasscheck <- function(id) {
-  ns <- NS(id)
   textOutput(
-    ns("apipasscheck"),
+    id,
     inline = FALSE
   )
 }

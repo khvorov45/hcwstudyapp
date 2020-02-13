@@ -1,22 +1,23 @@
 #' Tab to input RedCap API token
 #' @noRd
-tabapipass <- function(id = "apipass", label = "Password") {
+ui_apipass <- function(id = "apipass", label = "Password") {
+  ns <- NS(id)
   tabPanel(
     label,
-    apipass(id),
-    updatebutton(id),
-    apipasscheck(id)
+    apipassword(ns("apipassword")),
+    updatebutton(ns("update"), "Update password"),
+    apipasscheck(ns("check"))
   )
 }
 
 server_apipass <- function(input, output, session) {
   correct_input <- reactiveVal()
-  observeEvent(input$updatebutton, {
+  observeEvent(input$update, {
     correct_input(apipass_matches(
-      input$apipass, golem::get_golem_options("key"), api_pass_hashes
+      input$apipassword, golem::get_golem_options("key"), api_pass_hashes
     ))
     valid <- ifelse(correct_input(), cli::symbol$tick, cli::symbol$cross)
-    output$apipasscheck <- renderText(valid)
+    output$check <- renderText(valid)
   })
-  return(correct_input)
+  correct_input
 }

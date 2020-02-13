@@ -6,23 +6,16 @@ app_ui <- function() {
 
     fluidPage(
 
-      sidebarLayout(
+      tabsetPanel(
+        type = "tabs",
 
-        sidebarPanel(
+        ui_apipass(),
+        ui_recruitvh()
 
-          tabsetPanel(
-            type = "tabs",
-            tabapipass(),
-            tabseltable(),
-            tabrecruitvh()
-          ) # tabsetPanel
+      ), # tabsetPanel
 
-        ), # sidebarPanel
+      ui_updatedata()
 
-        mainPanel(
-          tableOutput("tableview")
-        ) # mainPanel
-      ) # sidebarLayout
     ) # fluidPage
   ) # tagList
 } # app_ui

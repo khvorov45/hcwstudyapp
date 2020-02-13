@@ -4,7 +4,7 @@ tabseltable <- function(id = "seltable", label = "Select table") {
   tabPanel(
     label,
     seltable(id),
-    updatebutton(id)
+    updatebutton(id, "Update table")
   )
 }
 

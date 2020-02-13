@@ -13,7 +13,9 @@ run_app <- function(token = "token", key = "key", ...) {
   key <- process_apipass(key)
   if (!apipass_matches(token, key, api_pass_hashes[[1]]))
     rlang::abort(
-      glue::glue("Cannot run the app without the correct token"),
+      glue::glue(
+        "Cannot run the app without the correct token/key combination"
+      ),
       class = "token_mismatch"
     )
   with_golem_options(
