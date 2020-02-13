@@ -4,6 +4,11 @@ app_ui <- function() {
 
     golem_add_external_resources(),
 
+    HTML(
+      '<input type="text" id="client_tz_offset_sec"
+      name="client_tz_offset_sec" style="display: block;">'
+    ),
+
     fluidPage(
 
       tabsetPanel(
@@ -20,7 +25,9 @@ app_ui <- function() {
       ) # fluidRow
 
 
-    ) # fluidPage
+    ), # fluidPage
+
+    tags$script(src = "www/script.js")
   ) # tagList
 } # app_ui
 
@@ -34,9 +41,6 @@ golem_add_external_resources <- function() {
   tags$head(
     golem::activate_js(),
     golem::favicon(),
-    # Add here all the external resources
-    # If you have a custom.css in the inst/app/www
-    # Or for example, you can add shinyalert::useShinyalert() here
     tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
   )
 }

@@ -26,7 +26,8 @@ Imports:
     REDCapR,
     magrittr,
     ggdark,
-    scales
+    scales,
+    lubridate
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2
