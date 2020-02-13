@@ -14,7 +14,11 @@ app_ui <- function() {
 
       ), # tabsetPanel
 
-      ui_updatedata()
+      fluidRow(
+        column(3, ui_updatedata()),
+        column(9, ui_infolog())
+      ) # fluidRow
+
 
     ) # fluidPage
   ) # tagList
