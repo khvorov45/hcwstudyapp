@@ -6,6 +6,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
     label,
     sidebarLayout(
       sidebarPanel(
+        checkboxGroupInput(ns("site"), "", list()),
         updatebutton(ns("update"), "Update plot")
       ),
       mainPanel(
@@ -24,10 +25,24 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
 #' @noRd
 server_recruitvh <- function(input, output, session,
                              password_verified, all_data) {
+  # Update site input on password or data change
+  observe({
+    if (is.null(password_verified())) return()
+    if (!password_verified()) return()
+    if (is.null(all_data())) return()
+    sites <- unique(all_data()$participant$site_name)
+    updateCheckboxGroupInput(session, "site", choices = as.list(sites))
+  })
+
+  # Update only plot on update button press
   observeEvent(input$update, {
     if (is.null(password_verified())) return()
     if (!password_verified()) return()
     if (is.null(all_data())) return()
-    output$plot <- renderPlot(plot_recruitvh(all_data()$participant))
+    if (is.null(input$site)) return()
+    subs <- all_data()$participant %>%
+      dplyr::mutate(num_seas_vac_fct = factor(num_seas_vac, levels = 0:5)) %>%
+      dplyr::filter(.data$site_name %in% input$site)
+    output$plot <- renderPlot(plot_recruitvh(subs))
   })
 }
