@@ -1,8 +1,12 @@
 #' Button to update data
 #' @noRd
-ui_updatedata <- function(id = "updatedata", label = "Update data") {
+ui_updatedata <- function(id = "updatedata", label = "Update data", colw = 3) {
   ns <- NS(id)
-  updatebutton(ns("update"), label)
+  column(
+    colw,
+    updatebutton(ns("update"), label),
+    htmlOutput(ns("time"))
+  )
 }
 
 server_updatedata <- function(input, output, session, password_verified) {
@@ -11,6 +15,13 @@ server_updatedata <- function(input, output, session, password_verified) {
     if (is.null(password_verified())) return()
     if (!password_verified()) return()
     all_dat(down_trans_redcap(golem::get_golem_options("token")))
+    output$time <- renderUI({
+      HTML(
+        glue::glue(
+          "<p>Last data update:<br/>{as.character(Sys.time())}</p>"
+        )
+      )
+    })
   })
   all_dat
 }

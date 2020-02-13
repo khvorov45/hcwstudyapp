@@ -15,7 +15,7 @@ app_ui <- function() {
       ), # tabsetPanel
 
       fluidRow(
-        column(3, ui_updatedata()),
+        ui_updatedata(colw = 3),
         column(9, ui_infolog())
       ) # fluidRow
 
