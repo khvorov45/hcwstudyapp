@@ -2,6 +2,10 @@
 	font-size: small;
 }
 
+.tick, .cross {
+  font-size: large;
+}
+
 .tick {
 	color: green;
 }
@@ -9,3 +13,22 @@
 .cross {
 	color: red;
 }
+
+.row.bottom-row {
+	margin-top: 10px;
+}
+
+.form-control {
+	background-color: #0f0f0f;
+	border-color: #4d4d4d;
+	color: white;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+	background-color: #021b68;
+}
+
+.checkbox label {
+	color: white;
+}
+

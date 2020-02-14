@@ -27,7 +27,8 @@ Imports:
     magrittr,
     ggdark,
     scales,
-    lubridate
+    lubridate,
+    shinythemes
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2

@@ -12,7 +12,6 @@ app_ui <- function() {
     ),
 
     fluidPage(
-
       tabsetPanel(
         type = "tabs",
 
@@ -22,6 +21,7 @@ app_ui <- function() {
       ), # tabsetPanel
 
       fluidRow(
+        class = "bottom-row",
         ui_updatedata(colw = 3),
         column(9, ui_infolog())
       ) # fluidRow
@@ -43,6 +43,10 @@ golem_add_external_resources <- function() {
   tags$head(
     golem::activate_js(),
     golem::favicon(),
+    tags$link(
+      rel = "stylesheet", type = "text/css",
+      href = shinythemes::shinytheme("cyborg")
+    ),
     tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
   )
 }
