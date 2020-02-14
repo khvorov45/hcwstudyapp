@@ -33,13 +33,14 @@
 }
 
 /* Default and hover buttons */
-.btn-default, .btn-default:focus, .btn-default:hover, .checkbtn, .checkbtn:hover {
+.btn-default, .btn-default:hover, .btn-default:focus,  
+.checkbtn, .checkbtn:hover, .checkbtn:focus {
   background-color: #282828;
   border-color: #424242;
 }
 
 /* Pressed down button */
-.btn-default:active:focus {
+.btn-default:active, .btn-default:active:focus, .btn-default:active:hover {
   background-color: #101010;
   border-color: #424242;
 }
