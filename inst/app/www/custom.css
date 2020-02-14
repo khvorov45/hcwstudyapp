@@ -34,8 +34,7 @@
 
 /* Default and hover buttons */
 .btn-default, .btn-default:hover, .btn-default:focus,  
-.checkbtn, .checkbtn:hover, .checkbtn:focus, 
-.checkbtn:active, .checkbtn:active:hover {
+.checkbtn, .checkbtn:hover, .checkbtn:focus, .checkbtn.focus {
   background-color: #282828;
   border-color: #424242;
 }
@@ -46,7 +45,8 @@
   border-color: #424242;
 }
 
-.checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus, .checkbtn:active:focus {
+.checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus, 
+.checkbtn:active, .checkbtn:active:hover, .checkbtn:active:focus {
 	background-color: #021b68;
   border-color: #424242;
 }
