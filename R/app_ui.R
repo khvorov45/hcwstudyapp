@@ -27,7 +27,7 @@ app_ui <- function() {
       ), # fluidRow
 
       shinyWidgets::checkboxGroupButtons(
-        ns("site"), "", list("a0dfsgfgsdg", "dsfsfgdsfg"), direction = "vertical"
+        "site", "", list("a0dfsgfgsdg", "dsfsfgdsfg"), direction = "vertical"
       )
 
 
