@@ -32,11 +32,7 @@
 	color: white;
 }
 
-.checkbtn:hover, .checkbtn.active, .checkbtn.active:hover {
+.checkbtn:hover, .checkbtn.active, .checkbtn.active:hover, .checkbtn:active.focus {
 	background-color: #021b68;
-}
-
-.checkbtn:active.focus {
-	background-color: #440303;
 }
 
