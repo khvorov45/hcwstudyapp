@@ -24,7 +24,11 @@ app_ui <- function() {
         class = "bottom-row",
         ui_updatedata(colw = 3),
         column(9, ui_infolog())
-      ) # fluidRow
+      ), # fluidRow
+
+      shinyWidgets::checkboxGroupButtons(
+        ns("site"), "", list("a0dfsgfgsdg", "dsfsfgdsfg"), direction = "vertical"
+      )
 
 
     ), # fluidPage
