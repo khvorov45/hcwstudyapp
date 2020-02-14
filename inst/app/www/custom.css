@@ -35,7 +35,7 @@
 /* Default and hover buttons */
 .btn-default, .btn-default:hover, .btn-default:focus,  
 .checkbtn, .checkbtn:hover, .checkbtn:focus, 
-.checkbtn.focus, .checkbtn.focus:hover, .checkbtn.focus:focus {
+.checkbtn.focus, .checkbtn.focus:hover, .checkbtn.focus:focus .checkbtn.focus:active {
   background-color: #282828;
   border-color: #424242;
 }
