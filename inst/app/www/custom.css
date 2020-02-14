@@ -32,8 +32,15 @@
 	color: white;
 }
 
+/* Default and hover buttons */
 .btn-default, .btn-default:focus, .btn-default:hover, .checkbtn, .checkbtn:hover {
   background-color: #282828;
+  border-color: #424242;
+}
+
+/* Pressed down button */
+.btn-default:active:focus {
+  background-color: #101010;
   border-color: #424242;
 }
 
