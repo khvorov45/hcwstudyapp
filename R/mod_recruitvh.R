@@ -9,6 +9,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
         shinyWidgets::checkboxGroupButtons(
           ns("site"), "", list(), direction = "vertical"
         ),
+        sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
         updatebutton(ns("update"), "Update plot")
       ),
       mainPanel(
@@ -49,6 +50,6 @@ server_recruitvh <- function(input, output, session,
         num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5)
       ) %>%
       dplyr::filter(.data$site_name %in% input$site)
-    output$plot <- renderPlot(plot_recruitvh(subs))
+    output$plot <- renderPlot(plot_recruitvh(subs, isolate(input$fontsize)))
   })
 }

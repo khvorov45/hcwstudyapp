@@ -1,7 +1,7 @@
-plot_recruitvh <- function(dat) {
+plot_recruitvh <- function(dat, fontsize = 16) {
   dat %>%
     ggplot(aes(.data$num_seas_vac_fct)) +
-    ggdark::dark_theme_bw(base_size = 16, verbose = FALSE) +
+    ggdark::dark_theme_bw(base_size = fontsize, verbose = FALSE) +
     theme(
       panel.grid.minor = element_blank()
     ) +
