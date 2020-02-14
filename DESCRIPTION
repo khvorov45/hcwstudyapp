@@ -13,27 +13,28 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.6), ggplot2
 Imports: 
-    shiny, 
-    golem,
-    stringr,
-    rlang,
-    glue,
-    purrr,
-    openssl,
-    cli,
-    tibble,
-    dplyr,
-    REDCapR,
-    magrittr,
-    ggdark,
-    scales,
-    lubridate,
-    shinythemes
+  shiny, 
+  golem,
+  stringr,
+  rlang,
+  glue,
+  purrr,
+  openssl,
+  cli,
+  tibble,
+  dplyr,
+  REDCapR,
+  magrittr,
+  ggdark,
+  scales,
+  lubridate,
+  shinythemes,
+  shinyWidgets
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2
 URL: https://github.com/khvorov45/hcwstudyapp
 BugReports: https://github.com/khvorov45/hcwstudyapp/issues
 Suggests: 
-    testthat (>= 2.1.0),
-    withr
+  testthat (>= 2.1.0),
+  withr

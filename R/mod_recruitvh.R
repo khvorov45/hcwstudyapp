@@ -6,7 +6,9 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
     label,
     sidebarLayout(
       sidebarPanel(
-        checkboxGroupInput(ns("site"), "", list()),
+        shinyWidgets::checkboxGroupButtons(
+          ns("site"), "", list(), direction = "vertical"
+        ),
         updatebutton(ns("update"), "Update plot")
       ),
       mainPanel(
@@ -31,7 +33,9 @@ server_recruitvh <- function(input, output, session,
     if (!password_verified()) return()
     if (is.null(all_data())) return()
     sites <- unique(all_data()$participant$site_name)
-    updateCheckboxGroupInput(session, "site", choices = as.list(sites))
+    shinyWidgets::updateCheckboxGroupButtons(
+      session, "site", choices = as.list(sites)
+    )
   })
 
   # Update only plot on update button press
