@@ -50,3 +50,31 @@
   border-color: #424242;
 }
 
+/* Slider */
+.irs-slider {
+	background: #6a6a6a;
+	border: 1px solid #c6c6c6;
+}
+
+.irs-slider:hover, .irs-slider:focus {
+	background: #c6c6c6;
+	border: 1px solid #c6c6c6;
+}
+
+.irs-single, .irs-min, .irs-max {
+	display: none;
+}
+
+.irs-bar, .irs-bar-edge {
+	background: #021b68;
+	border: 1px solid #c6c6c6;
+}
+
+.irs-bar-edge {
+	border-right: 0;
+}
+
+.irs-line-right, .irs-line-mid {
+	background: #6a6a6a;
+}
+

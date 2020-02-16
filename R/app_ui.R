@@ -26,11 +26,6 @@ app_ui <- function() {
         column(9, ui_infolog())
       ), # fluidRow
 
-      shinyWidgets::checkboxGroupButtons(
-        "site", "", list("a0dfsgfgsdg", "dsfsfgdsfg"), direction = "vertical"
-      )
-
-
     ), # fluidPage
 
     tags$script(src = "www/script.js")
