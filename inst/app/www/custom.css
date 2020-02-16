@@ -14,7 +14,7 @@
 	color: red;
 }
 
-.row.bottom-row {
+.bottom-row {
 	margin-top: 10px;
 }
 
@@ -33,15 +33,14 @@
 }
 
 /* Default and hover buttons */
-.btn-default, .btn-default:hover, .btn-default:focus,  
-.checkbtn, .checkbtn:hover, .checkbtn:focus, 
-.checkbtn:active, .checkbtn:active:hover {
+.btn, .btn:hover, .btn:focus,  
+.checkbtn, .checkbtn:hover, .checkbtn:focus {
   background-color: #282828;
   border-color: #424242;
 }
 
 /* Pressed down button */
-.btn-default:active, .btn-default:active:hover, .btn-default:active:focus {
+.btn:active, .btn:active:hover, .btn:active:focus {
   background-color: #101010;
   border-color: #424242;
 }
