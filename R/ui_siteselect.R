@@ -10,3 +10,13 @@ siteselect <- function(id, label = "Site", choices = list("All"),
 update_siteselect <- function(session, id, new_choices) {
   updateSelectInput(session, id, choices = as.list(c("All", new_choices)))
 }
+
+#' Dynamically updates the above list on password or data change
+#' @noRd
+update_siteselect_dyn <- function(session, id, password_verified, all_data) {
+  observe({
+    if (!canexec(password_verified(), all_data())) return()
+    sites <- unique(all_data()$participant$site_name)
+    update_siteselect(session, id, sites)
+  })
+}

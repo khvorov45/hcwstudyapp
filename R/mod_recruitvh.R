@@ -26,21 +26,11 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
 #' @noRd
 server_recruitvh <- function(input, output, session,
                              password_verified, all_data) {
-  # Update site input on password or data change
-  observe({
-    if (is.null(password_verified())) return()
-    if (!password_verified()) return()
-    if (is.null(all_data())) return()
-    sites <- unique(all_data()$participant$site_name)
-    update_siteselect(session, "site", sites)
-  })
+  update_siteselect_dyn(session, "site", password_verified, all_data)
 
   # Update only plot on update button press
   observeEvent(input$update, {
-    if (is.null(password_verified())) return()
-    if (!password_verified()) return()
-    if (is.null(all_data())) return()
-    if (is.null(input$site)) return()
+    if (!canexec(password_verified(), all_data())) return()
     subs <- all_data()$participant %>%
       dplyr::mutate(
         num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5)
