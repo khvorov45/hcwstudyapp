@@ -56,17 +56,20 @@ raw_to_list <- function(raw) {
 #'
 #' @param baseline The baseline table
 #'
-#' @importFrom rlang .data
+#' @importFrom rlang .data !!!
 #'
 #' @export
 get_tbl_participant <- function(baseline) {
+  needed_cols <- c(
+    "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
+    "first_name", "surname",
+    "mobile_number", "email"
+  )
+  extr_cols <- needed_cols[needed_cols %in% colnames(baseline)]
   baseline %>%
     filter(!is.na(.data$consent)) %>%
     filter(.data$consent == "Yes") %>%
-    select(
-      "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
-      "mobile_number", "email"
-    )
+    select(!!!rlang::syms(extr_cols))
 }
 
 #' Extracts all proper tables from the event tables
