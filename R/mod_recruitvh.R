@@ -7,8 +7,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
     sidebarLayout(
       sidebarPanel(
         siteselect(ns("site")),
-        sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
-        updatebutton(ns("update"), "Update plot")
+        sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20)
       ),
       mainPanel(
         plotOutput(ns("plot"))
@@ -29,7 +28,7 @@ server_recruitvh <- function(input, output, session,
   update_siteselect_dyn(session, "site", password_verified, all_data)
 
   # Update only plot on update button press
-  observeEvent(input$update, {
+  observe({
     if (!canexec(password_verified(), all_data())) return()
     subs <- all_data()$participant %>%
       dplyr::mutate(
@@ -38,6 +37,6 @@ server_recruitvh <- function(input, output, session,
     if (input$site != "All") {
       subs <- dplyr::filter(subs, .data$site_name == input$site)
     }
-    output$plot <- renderPlot(plot_recruitvh(subs, isolate(input$fontsize)))
+    output$plot <- renderPlot(plot_recruitvh(subs, input$fontsize))
   })
 }
