@@ -1,33 +1,37 @@
+/* Info message for data update */
 #updatedata-time {
 	font-size: small;
 }
 
+/* Tick and cross for password */
 .tick, .cross {
   font-size: large;
 }
-
 .tick {
 	color: green;
 }
-
 .cross {
 	color: red;
 }
 
+/* Bottom row */
 .bottom-row {
 	margin-top: 10px;
 }
 
+/* Input */
 .form-control {
 	background-color: #0f0f0f;
-	border-color: #4d4d4d;
+	border-color: #424242;
 	color: white;
 }
 
+/* Tabs */
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
 	background-color: #021b68;
 }
 
+/* Checkbox */
 .checkbox label {
 	color: white;
 }
@@ -39,42 +43,73 @@
   border-color: #424242;
 }
 
+/* All buttons */
+.btn:active, .btn:active:hover, .btn:active:focus,
+.checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus {
+	border-color: #424242;
+}
+
 /* Pressed down button */
 .btn:active, .btn:active:hover, .btn:active:focus {
   background-color: #101010;
-  border-color: #424242;
 }
-
 .checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus {
 	background-color: #021b68;
-  border-color: #424242;
 }
 
 /* Slider */
+.irs-slider, .irs-slider:hover, .irs-slider:focus, .irs-line,
+.irs-bar, .irs-bar-edge, .irs-line-right, .irs-line-mid {
+	border: 1px solid #424242;
+}
+.irs-line {
+	background: #6a6a6a;
+}
 .irs-slider {
 	background: #6a6a6a;
-	border: 1px solid #c6c6c6;
 }
-
 .irs-slider:hover, .irs-slider:focus {
 	background: #c6c6c6;
-	border: 1px solid #c6c6c6;
 }
-
 .irs-single, .irs-min, .irs-max {
 	display: none;
 }
-
 .irs-bar, .irs-bar-edge {
 	background: #021b68;
-	border: 1px solid #c6c6c6;
 }
-
-.irs-bar-edge {
+.irs-bar-edge, .irs-line-right {
 	border-right: 0;
 }
-
+.irs-line-right {
+	border-left: 0;
+}
 .irs-line-right, .irs-line-mid {
 	background: #6a6a6a;
+}
+
+/* Drop-down list */
+.selectize-input.full {
+	background-color: #282828;
+	color: white;
+	border: 1px solid #424242;
+}
+.selectize-control.single .selectize-input::after {
+	border-color: #aaaaaa transparent transparent transparent;
+}
+.selectize-control.single .selectize-input.dropdown-active::after {
+	border-color: transparent transparent #aaaaaa transparent;
+}
+.selectize-input, .selectize-control.single .selectize-input.input-active {
+	background: #282828;
+}
+.selectize-dropdown, .selectize-dropdown.form-control {
+	background: #282828;
+}
+.selectize-dropdown .active {
+	background: #021b68;
+	color: white;
+}
+.selectize-dropdown, .selectize-input, .selectize-input input {
+	color: white;
 }
 

@@ -6,9 +6,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
     label,
     sidebarLayout(
       sidebarPanel(
-        shinyWidgets::checkboxGroupButtons(
-          ns("site"), "", list(), direction = "vertical"
-        ),
+        siteselect(ns("site")),
         sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
         updatebutton(ns("update"), "Update plot")
       ),
@@ -34,9 +32,7 @@ server_recruitvh <- function(input, output, session,
     if (!password_verified()) return()
     if (is.null(all_data())) return()
     sites <- unique(all_data()$participant$site_name)
-    shinyWidgets::updateCheckboxGroupButtons(
-      session, "site", choices = as.list(sites)
-    )
+    update_siteselect(session, "site", sites)
   })
 
   # Update only plot on update button press
@@ -48,8 +44,10 @@ server_recruitvh <- function(input, output, session,
     subs <- all_data()$participant %>%
       dplyr::mutate(
         num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5)
-      ) %>%
-      dplyr::filter(.data$site_name %in% input$site)
+      )
+    if (input$site != "All") {
+      subs <- dplyr::filter(subs, .data$site_name == input$site)
+    }
     output$plot <- renderPlot(plot_recruitvh(subs, isolate(input$fontsize)))
   })
 }

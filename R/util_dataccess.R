@@ -23,6 +23,7 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
 reformat_cols <- function(raw) {
   raw %>%
     dplyr::mutate(
+      record_id = as.integer(.data$record_id),
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed)
@@ -57,7 +58,8 @@ raw_to_list <- function(raw) {
 get_tbl_participant <- function(baseline) {
   baseline %>%
     dplyr::select(
-      "record_id", "site_name", "num_seas_vac", "eligible_extra_bleed"
+      "record_id", "site_name", "num_seas_vac", "eligible_extra_bleed",
+      "mobile_number", "email"
     )
 }
 
