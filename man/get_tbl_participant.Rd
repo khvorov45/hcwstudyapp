@@ -10,6 +10,8 @@ get_tbl_participant(baseline)
 \item{baseline}{The baseline table}
 }
 \description{
-The participant table contains every attribute that each participant has
-one of except the screening-related attributes.
+Everyone who has consented is a participant. I'm relying on the 'consent'
+variable for this. The participant table contains every attribute that each
+participant has one of except the screening-related attributes (not everyone
+who is screened consents).
 }

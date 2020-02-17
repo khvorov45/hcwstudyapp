@@ -10,7 +10,7 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
     verbose = FALSE,
     raw_or_label = "label"
   )
-  tibble::as_tibble(rcap$data)
+  as_tibble(rcap$data)
 }
 
 #' Reformat variables
@@ -22,7 +22,7 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
 #' @export
 reformat_cols <- function(raw) {
   raw %>%
-    dplyr::mutate(
+    mutate(
       record_id = as.integer(.data$record_id),
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
@@ -38,27 +38,33 @@ reformat_cols <- function(raw) {
 #' @export
 raw_to_list <- function(raw) {
   lst <- raw %>%
-    dplyr::group_split(.data$redcap_event_name) %>%
-    purrr::map(~ dplyr::select_if(.x, function(vec) !all(is.na(vec))))
-  names(lst) <- purrr::map_chr(
+    group_split(.data$redcap_event_name) %>%
+    map(~ select_if(.x, function(vec) !all(is.na(vec))))
+  names(lst) <- map_chr(
     lst, function(dat) unique(dat$redcap_event_name) %>%
       stringr::str_replace("_arm_1", "")
   )
-  lst %>% purrr::map(~ dplyr::select(.x, -redcap_event_name))
+  lst %>% map(~ select(.x, -redcap_event_name))
 }
 
 #' Extracts the participant table from the baseline table
 #'
-#' The participant table contains every attribute that each participant has
-#' one of except the screening-related attributes.
+#' Everyone who has consented is a participant. I'm relying on the 'consent'
+#' variable for this. The participant table contains every attribute that each
+#' participant has one of except the screening-related attributes (not everyone
+#' who is screened consents).
 #'
 #' @param baseline The baseline table
+#'
+#' @importFrom rlang .data
 #'
 #' @export
 get_tbl_participant <- function(baseline) {
   baseline %>%
-    dplyr::select(
-      "record_id", "site_name", "num_seas_vac", "eligible_extra_bleed",
+    filter(!is.na(.data$consent)) %>%
+    filter(.data$consent == "Yes") %>%
+    select(
+      "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
       "mobile_number", "email"
     )
 }
