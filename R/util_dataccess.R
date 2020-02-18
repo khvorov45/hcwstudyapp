@@ -72,6 +72,18 @@ get_tbl_participant <- function(baseline) {
     select(!!!rlang::syms(extr_cols))
 }
 
+#' Extracts the symptom table from the raw list
+#'
+#' Binds rows of all symptom surveys
+#'
+#' @param raw_list Raw data list
+#'
+#' @export
+get_tbl_symptom <- function(raw_list) {
+  need <- stringr::str_detect(names(raw_list), "weekly survey")
+  bind_rows(raw_list[need])
+}
+
 #' Extracts all proper tables from the event tables
 #'
 #' @param raw_list List returned by \code{\link{raw_to_list}}
@@ -79,7 +91,8 @@ get_tbl_participant <- function(baseline) {
 #' @export
 get_tbls <- function(raw_list) {
   list(
-    participant = get_tbl_participant(raw_list$baseline)
+    participant = get_tbl_participant(raw_list$baseline),
+    symptom = get_tbl_symptom(raw_list)
   )
 }
 
