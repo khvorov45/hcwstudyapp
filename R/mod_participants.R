@@ -10,7 +10,7 @@ ui_participants <- function(id = "participants", label = "Participants") {
         shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names")
       ),
       mainPanel(
-        tableOutput(ns("table"))
+        DT::dataTableOutput(ns("table"))
       )
     )
   )
@@ -45,10 +45,16 @@ server_participants <- function(input, output, session,
       subs <- filter(subs, !!rlang::sym(siten) == input$site) %>%
         select(-!!rlang::sym(siten))
     }
-    output$table <- renderTable(
-      {subs},
-      striped = TRUE,
-      align = "c"
+    output$table <- DT::renderDataTable(
+      {subs}, style = "bootstrap4",
+      rownames = FALSE,
+      options = list(
+        dom = "t",
+        columnDefs = list(
+          list(className = 'dt-center', targets = 1:ncol(subs) - 1)
+        ),
+        scrollX = TRUE
+      )
     )
   })
 }

@@ -29,7 +29,8 @@ Imports:
   scales,
   lubridate,
   shinythemes,
-  shinyWidgets
+  shinyWidgets,
+  DT
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2

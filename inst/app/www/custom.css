@@ -1,3 +1,8 @@
+/* Link outline */
+a {
+	outline: none;
+}
+
 /* Password input */
 #apipass-update, #updatedata-update, #updatedata-time {
 	margin-top: 25px;
@@ -38,7 +43,6 @@
 /* Tabs */
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
 	background-color: #021b68;
-	outline: none;
 }
 
 /* Checkbox */
@@ -123,11 +127,21 @@
 	color: white;
 }
 
-/* PickerInput from shinyWidgets */
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+/* PickerInput from shinyWidgets and table selections */
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus,
+.dropdown-menu > .active > a, .dropdown-menu > .active > a:hover, .dropdown-menu > .active > a:focus,
+.pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus, 
+.pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus, 
+.pagination > li > span:focus {
 	background-color: #021b68;
 }
-.dropdown-menu > .active > a, .dropdown-menu > .active > a:hover, .dropdown-menu > .active > a:focus {
-	background-color: #021b68;
+
+/* Table */
+.table.dataTable tbody td.active, .table.dataTable tbody tr.active td {
+	background-color: #021b68 !important;
+}
+
+.sorting::before {
+	color: white;
 }
 
