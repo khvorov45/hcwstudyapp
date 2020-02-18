@@ -2,10 +2,9 @@
 #' @noRd
 ui_updatedata <- function(id = "updatedata", label = "Update data", colw = 3) {
   ns <- NS(id)
-  column(
-    colw,
-    updatebutton(ns("update"), label),
-    htmlOutput(ns("time"))
+  fluidRow(
+    column(3, updatebutton(ns("update"), label)),
+    column(9, htmlOutput(ns("time")))
   )
 }
 

@@ -1,3 +1,12 @@
+/* Password input */
+#apipass-update, #updatedata-update, #updatedata-time {
+	margin-top: 25px;
+}
+#apipass-check {
+	position: relative;
+	top: 12px;
+}
+
 /* Info message for data update */
 #updatedata-time {
 	font-size: small;

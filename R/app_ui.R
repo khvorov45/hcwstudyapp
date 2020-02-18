@@ -12,20 +12,19 @@ app_ui <- function() {
     ),
 
     fluidPage(
+
+      fluidRow(
+        column(6, ui_apipass()),
+        column(6, ui_updatedata())
+      ),
+
       tabsetPanel(
         type = "tabs",
 
-        ui_apipass(),
         ui_recruitvh(),
         ui_participants()
 
       ), # tabsetPanel
-
-      fluidRow(
-        class = "bottom-row",
-        ui_updatedata(colw = 3),
-        column(9, ui_infolog())
-      ), # fluidRow
 
     ), # fluidPage
 

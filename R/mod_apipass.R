@@ -2,11 +2,13 @@
 #' @noRd
 ui_apipass <- function(id = "apipass", label = "Password") {
   ns <- NS(id)
-  tabPanel(
-    label,
-    apipassword(ns("apipassword")),
-    updatebutton(ns("update"), "Update password"),
-    apipasscheck(ns("check"))
+  fluidRow(
+    column(6, apipassword(ns("apipassword"))),
+    column(
+      6,
+      updatebutton(ns("update"), "Update password"),
+      apipasscheck(ns("check"))
+    )
   )
 }
 

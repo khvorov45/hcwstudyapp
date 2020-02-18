@@ -1,6 +1,6 @@
 #' Input for the RedCap API password
 #' @noRd
-apipassword <- function(id, label = "") {
+apipassword <- function(id, label = "Password") {
   passwordInput(
     id,
     label,
