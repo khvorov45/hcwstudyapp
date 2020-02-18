@@ -6,7 +6,8 @@ ui_participants <- function(id = "participants", label = "Participants") {
     label,
     sidebarLayout(
       sidebarPanel(
-        siteselect(ns("site"))
+        siteselect(ns("site")),
+        shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names")
       ),
       mainPanel(
         tableOutput(ns("table"))
@@ -15,6 +16,7 @@ ui_participants <- function(id = "participants", label = "Participants") {
   )
 }
 
+#' @importFrom rlang !!
 server_participants <- function(input, output, session,
                                 password_verified, all_data) {
   update_siteselect_dyn(session, "site", password_verified, all_data)
@@ -23,10 +25,30 @@ server_participants <- function(input, output, session,
   observe({
     if (!canexec(password_verified(), all_data())) return()
     subs <- all_data()$participant
+    og_names <- names(subs)
+    new_names <- recode(
+      og_names,
+      "record_id" = "Record ID",
+      "pid" = "PID",
+      "site_name" = "Site",
+      "num_seas_vac" = "Seasons vaccinated",
+      "eligible_extra_bleed" = "Eligible for extra bleed",
+      "first_name" = "First name",
+      "surname" = "Last name",
+      "mobile_number" = "Mobile",
+      "email" = "Email"
+    )
+    if (!input$varnames) names(subs) <- new_names
     if (input$site != "All") {
-      subs <- filter(subs, .data$site_name == input$site) %>%
-        select(-"site_name")
+      if (input$varnames) siten <- "site_name"
+      else siten <- "Site"
+      subs <- filter(subs, !!rlang::sym(siten) == input$site) %>%
+        select(-!!rlang::sym(siten))
     }
-    output$table <- renderTable({subs})
+    output$table <- renderTable(
+      {subs},
+      striped = TRUE,
+      align = "c"
+    )
   })
 }
