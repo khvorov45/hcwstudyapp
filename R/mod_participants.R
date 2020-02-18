@@ -7,7 +7,8 @@ ui_participants <- function(id = "participants", label = "Participants") {
     sidebarLayout(
       sidebarPanel(
         siteselect(ns("site")),
-        shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names")
+        shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names"),
+        varselect(ns("vars"))
       ),
       mainPanel(
         DT::dataTableOutput(ns("table"))
@@ -21,7 +22,8 @@ server_participants <- function(input, output, session,
                                 password_verified, all_data) {
   update_siteselect_dyn(session, "site", password_verified, all_data)
 
-  # Update on update button press
+  # Update table
+  part_tbl <- reactiveVal(tibble())
   observe({
     if (!canexec(password_verified(), all_data())) return()
     subs <- all_data()$participant
@@ -38,12 +40,26 @@ server_participants <- function(input, output, session,
       "mobile_number" = "Mobile",
       "email" = "Email"
     )
-    if (!input$varnames) names(subs) <- new_names
+    if (!input$varnames) {
+      names(subs) <- new_names
+      update_varselect(session, "vars", new_names)
+    }
+    else update_varselect(session, "vars", og_names)
+    part_tbl(subs)
+  })
+
+  observe({
+    if (!canexec(password_verified(), all_data())) return()
+    print(part_tbl())
+    subs <- part_tbl()
     if (input$site != "All") {
       if (input$varnames) siten <- "site_name"
       else siten <- "Site"
       subs <- filter(subs, !!rlang::sym(siten) == input$site) %>%
         select(-!!rlang::sym(siten))
+    }
+    if (!is.null(input$vars)) {
+      subs <- subs[colnames(subs) %in% input$vars]
     }
     output$table <- DT::renderDataTable(
       {subs}, style = "bootstrap4",

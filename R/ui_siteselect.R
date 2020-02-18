@@ -1,8 +1,10 @@
 #' List of sites to select
 #' @noRd
 siteselect <- function(id, label = "Site", choices = list("All"),
-                       selected = NULL, multiple = FALSE) {
-  shinyWidgets::pickerInput(id, label, choices, selected = "All", multiple)
+                       selected = "All") {
+  shinyWidgets::pickerInput(
+    id, label, choices, selected, multiple = FALSE
+  )
 }
 
 #' Updates the above list, makes sure 'all' is persistent
