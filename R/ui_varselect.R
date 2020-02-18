@@ -19,18 +19,18 @@ update_varselect <- function(session, id, new_choices) {
 #' @param session,input From server function
 #' @param id Id of varselect element
 #' @param password_verified,all_data Reactive values I pass around
-#' @param tbl_name Name of table in \code{all_data}
+#' @param tbl Reactive tEable to take names from
 #' @param use_ognames_name Name of boolean input to determine which names to use
 #'
 #' @noRd
 update_varselect_dyn <- function(session, id, password_verified,
-                                 all_data, tbl_name,
+                                 all_data, tbl,
                                  input, use_ognames_name) {
   ret_tbl <- reactiveVal(tibble())
   observe({
     use_ognames <- input[[use_ognames_name]]
     if (!canexec(password_verified(), all_data())) return()
-    subs <- all_data()[[tbl_name]]
+    subs <- tbl()
     og_names <- names(subs)
     new_names <- altnames(og_names)
     if (!use_ognames) {

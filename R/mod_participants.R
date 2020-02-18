@@ -23,8 +23,8 @@ server_participants <- function(input, output, session,
   update_siteselect_dyn(session, "site", password_verified, all_data)
 
   part_tbl <- update_varselect_dyn(
-    session, "vars", password_verified, all_data, "participant",
-    input, "varnames"
+    session, "vars", password_verified, all_data,
+    reactive({all_data()$participant}), input, "varnames"
   )
 
   observe({
