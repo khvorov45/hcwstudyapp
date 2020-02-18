@@ -113,3 +113,11 @@
 	color: white;
 }
 
+/* PickerInput from shinyWidgets */
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+	background-color: #021b68;
+}
+.dropdown-menu > .active > a, .dropdown-menu > .active > a:hover, .dropdown-menu > .active > a:focus {
+	background-color: #021b68;
+}
+
