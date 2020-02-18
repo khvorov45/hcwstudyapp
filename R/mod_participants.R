@@ -22,45 +22,31 @@ server_participants <- function(input, output, session,
                                 password_verified, all_data) {
   update_siteselect_dyn(session, "site", password_verified, all_data)
 
-  # Update table
-  part_tbl <- reactiveVal(tibble())
-  observe({
-    if (!canexec(password_verified(), all_data())) return()
-    subs <- all_data()$participant
-    og_names <- names(subs)
-    new_names <- recode(
-      og_names,
-      "record_id" = "Record ID",
-      "pid" = "PID",
-      "site_name" = "Site",
-      "num_seas_vac" = "Seasons vaccinated",
-      "eligible_extra_bleed" = "Eligible for extra bleed",
-      "first_name" = "First name",
-      "surname" = "Last name",
-      "mobile_number" = "Mobile",
-      "email" = "Email"
-    )
-    if (!input$varnames) {
-      names(subs) <- new_names
-      update_varselect(session, "vars", new_names)
-    }
-    else update_varselect(session, "vars", og_names)
-    part_tbl(subs)
-  })
+  part_tbl <- update_varselect_dyn(
+    session, "vars", password_verified, all_data, "participant",
+    input, "varnames"
+  )
 
   observe({
     if (!canexec(password_verified(), all_data())) return()
-    print(part_tbl())
     subs <- part_tbl()
+
+    # Site filter
     if (input$site != "All") {
       if (input$varnames) siten <- "site_name"
       else siten <- "Site"
       subs <- filter(subs, !!rlang::sym(siten) == input$site) %>%
         select(-!!rlang::sym(siten))
     }
+
+    # Column selection
     if (!is.null(input$vars)) {
       subs <- subs[colnames(subs) %in% input$vars]
     }
+
+    # Filter all missing
+    subs <- subs[apply(subs, 1, function(vec) any(!is.na(vec))), ]
+
     output$table <- DT::renderDataTable(
       {subs}, style = "bootstrap4",
       rownames = FALSE,
