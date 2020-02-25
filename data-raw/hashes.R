@@ -1,5 +1,7 @@
 # Setting up hashes for password checking
 
+library(tidyverse)
+
 # 'key' is a file containing hash key in project directory
 api_pass_key <- readLines("key")
 
@@ -7,16 +9,16 @@ api_pass_key <- readLines("key")
 api_token <- readLines("token")
 
 # 'site-passwords' is a space-separated table in data-raw
-site_passwords <- readr::read_table2(
+site_passwords <- read_table2(
   "data-raw/site-passwords",
-  col_types = readr::cols_only(
-    site = readr::col_character(),
-    password = readr::col_character()
+  col_types = cols_only(
+    site = col_character(),
+    password = col_character()
   )
 )
 
 create_hash_values <- function(passwords) {
-  purrr::map_chr(passwords, ~ openssl::sha256(.x, key = api_pass_key))
+  map_chr(passwords, ~ openssl::sha256(.x, key = api_pass_key))
 }
 
 site_passwords_hashes <- site_passwords %>%
