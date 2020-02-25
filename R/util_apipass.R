@@ -1,29 +1,26 @@
-#' Processes the RedCap api password
-#'
-#' If file is not found, returns an empty string.
-#'
-#' @param pass_path Path to file containing the token
-#'
-#' @noRd
-process_apipass <- function(pass_path) {
-  if (is.null(pass_path) | !is.character(pass_path))
-    rlang::abort(
-      glue::glue("pass_path should be a path to text file\n",),
-      class = "wrong_apipass"
-    )
-  if (!file.exists(pass_path)) return("")
-  stringr::str_trim(
-    readChar(pass_path, file.info(pass_path)$size), side = "both"
-  )
-}
-
 #' Checks if the given apipass hash is in opts
 #'
-#' @param apipass Password to check
+#' @param apipass Password (not hashed) to check
 #' @param key Key used for hash creation
-#' @param opts Options to check against
+#' @param opts Options (hashed) to check against
 #'
 #' @noRd
-apipass_matches <- function(apipass, key, opts = api_pass_hashes) {
+apipass_matches <- function(apipass, key, opts) {
   openssl::sha256(apipass, key) %in% opts
+}
+
+#' Finds the access group that corresponds to apipass
+#'
+#' Returns 'none' when no match is found
+#'
+#' @param apipass Password (not hashed)
+#' @param key Key used for hash creation
+#' @param hash_tbl A table with columns 'access' and 'hash'
+#'
+#' @noRd
+find_apipass_match <- function(apipass, key,
+                               hash_tbl = hash_list$password_hashes) {
+  mtch <- hash_tbl$access[hash_tbl$hash == openssl::sha256(apipass, key)]
+  if (identical(mtch, character(0))) mtch <- "none"
+  mtch
 }

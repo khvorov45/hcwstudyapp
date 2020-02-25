@@ -1,5 +1,7 @@
 #' Access the raw RedCap data table
 #'
+#' Will subset by access_group when it is not 'all'
+#'
 #' @param token Redcap api token
 #' @param uri Redcap uri
 #'
@@ -29,22 +31,31 @@ reformat_cols <- function(raw) {
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed)
     )
 }
-#' Convert to list
+
+#' Subsets raw REDCap table by access group defined by sites
 #'
-#' Convert raw data to a list where each entry is an event
+#' If all - doesn't do anything
+#' If none - removes all rows
 #'
-#' @param raw Raw redcap data
+#' @inheritParams reformat_cols
+#' @param access_group Access group to subset the data
 #'
 #' @export
-raw_to_list <- function(raw) {
-  lst <- raw %>%
-    group_split(.data$redcap_event_name) %>%
-    map(~ select_if(.x, function(vec) !all(is.na(vec))))
-  names(lst) <- map_chr(
-    lst, function(dat) unique(dat$redcap_event_name) %>%
-      stringr::str_replace("_arm_1", "")
-  )
-  lst %>% map(~ select(.x, -redcap_event_name))
+redcap_subset <- function(raw, access_group) {
+  if (access_group == "all") return(raw)
+  if (access_group == "none") return(filter(raw, .data$record_id == -1))
+  all_sites <- unique(stats::na.omit(raw$site_name))
+  if (!all(all_sites %in% site_altnames))
+    rlang::abort(
+      "Site names in data not recognised",
+      class = "redcap_extra_sites"
+    )
+  ids <- raw %>%
+    filter(.data$site_name == get_site_name(access_group)) %>%
+    pull(.data$record_id)
+  raw_subset <- raw %>%
+    filter(.data$record_id %in% ids)
+  raw_subset
 }
 
 #' Extracts the participant table from the baseline table
@@ -54,56 +65,43 @@ raw_to_list <- function(raw) {
 #' participant has one of except the screening-related attributes (not everyone
 #' who is screened consents).
 #'
-#' @param baseline The baseline table
+#' @inheritParams reformat_cols
 #'
 #' @importFrom rlang .data !!!
 #'
 #' @export
-get_tbl_participant <- function(baseline) {
+get_tbl_participant <- function(raw) {
   needed_cols <- c(
     "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
     "first_name", "surname",
     "mobile_number", "email"
   )
-  extr_cols <- needed_cols[needed_cols %in% colnames(baseline)]
-  baseline %>%
-    filter(!is.na(.data$consent)) %>%
+  raw %>%
     filter(.data$consent == "Yes") %>%
-    select(!!!rlang::syms(extr_cols))
-}
-
-#' Extracts the symptom table from the raw list
-#'
-#' Binds rows of all symptom surveys
-#'
-#' @param raw_list Raw data list
-#'
-#' @export
-get_tbl_symptom <- function(raw_list) {
-  need <- stringr::str_detect(names(raw_list), "weekly survey")
-  bind_rows(raw_list[need])
+    select(!!!rlang::syms(needed_cols))
 }
 
 #' Extracts all proper tables from the event tables
 #'
-#' @param raw_list List returned by \code{\link{raw_to_list}}
+#' @inheritParams reformat_cols
 #'
 #' @export
-get_tbls <- function(raw_list) {
+get_tbls <- function(raw) {
   list(
-    participant = get_tbl_participant(raw_list$baseline),
-    symptom = get_tbl_symptom(raw_list)
+    participant = get_tbl_participant(raw)
   )
 }
 
 #' Downloads REDCap's data and transforms it
 #'
 #' @inheritParams get_redcap_data
+#' @inheritParams redcap_subset
 #'
 #' @export
-down_trans_redcap <- function(token, uri = "https://biredcap.mh.org.au/api/") {
+down_trans_redcap <- function(token, uri = "https://biredcap.mh.org.au/api/",
+                              access_group = "all") {
   get_redcap_data(token, uri) %>%
     reformat_cols() %>%
-    raw_to_list() %>%
+    redcap_subset(access_group) %>%
     get_tbls()
 }

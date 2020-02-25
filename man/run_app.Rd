@@ -4,12 +4,19 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(token = "token", key = "key", ...)
+run_app(
+  token = "token",
+  key = "key",
+  uri = "https://biredcap.mh.org.au/api/",
+  ...
+)
 }
 \arguments{
 \item{token}{Path to file containing the token}
 
 \item{key}{Path to file containing the key used to create hashes}
+
+\item{uri}{REDCap API uri}
 
 \item{...}{Not used.}
 }

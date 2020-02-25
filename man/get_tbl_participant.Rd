@@ -4,10 +4,10 @@
 \alias{get_tbl_participant}
 \title{Extracts the participant table from the baseline table}
 \usage{
-get_tbl_participant(baseline)
+get_tbl_participant(raw)
 }
 \arguments{
-\item{baseline}{The baseline table}
+\item{raw}{Raw redcap data}
 }
 \description{
 Everyone who has consented is a participant. I'm relying on the 'consent'

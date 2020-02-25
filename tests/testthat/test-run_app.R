@@ -1,6 +1,10 @@
 test_that("run_app works", {
-  expect_error(
-    run_app("data-raw/token-alt"),
-    class = "token_mismatch"
-  )
+  withr::with_tempfile(c("token", "key"), {
+    write("wrong_key", key)
+    write("wrong_token", token)
+    expect_error(
+      run_app(token, key),
+      class = "token_key_mismatch"
+    )
+  })
 })

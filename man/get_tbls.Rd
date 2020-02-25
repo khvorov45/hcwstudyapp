@@ -4,10 +4,10 @@
 \alias{get_tbls}
 \title{Extracts all proper tables from the event tables}
 \usage{
-get_tbls(raw_list)
+get_tbls(raw)
 }
 \arguments{
-\item{raw_list}{List returned by \code{\link{raw_to_list}}}
+\item{raw}{Raw redcap data}
 }
 \description{
 Extracts all proper tables from the event tables

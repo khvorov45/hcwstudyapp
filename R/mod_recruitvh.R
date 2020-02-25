@@ -18,25 +18,27 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
 
 #' Server for recruitvh
 #'
-#' @param password_verified Reactive value returned by apipass
+#' @param input,output,session Standard
+#' @param dat REDCap data (list of tables, subset by access group elsewhere)
 #'
 #' @import ggplot2
 #'
 #' @noRd
-server_recruitvh <- function(input, output, session,
-                             password_verified, all_data) {
-  update_siteselect_dyn(session, "site", password_verified, all_data)
+server_recruitvh <- function(input, output, session, dat) {
+  update_siteselect_dyn(session, "site", dat)
 
-  # Update only plot on update button press
-  observe({
-    if (!canexec(password_verified(), all_data())) return()
-    subs <- all_data()$participant %>%
+  # Add a factor for x on data change
+  dat_plot <- eventReactive(dat(), {
+    dat()$participant %>%
       dplyr::mutate(
         num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5)
       )
-    if (input$site != "All") {
-      subs <- dplyr::filter(subs, .data$site_name == input$site)
-    }
-    output$plot <- renderPlot(plot_recruitvh(subs, input$fontsize))
+  })
+
+  # Filter on site change
+  dat_plot_filt <- filter_siteselect_dyn(reactive(input$site), dat_plot)
+
+  output$plot <- renderPlot({
+    plot_recruitvh(dat_plot_filt(), input$fontsize)
   })
 }

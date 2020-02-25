@@ -30,7 +30,8 @@ Imports:
   lubridate,
   shinythemes,
   shinyWidgets,
-  DT
+  DT,
+  shinyjs
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2

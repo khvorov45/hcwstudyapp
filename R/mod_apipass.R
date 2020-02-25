@@ -1,4 +1,7 @@
-#' Tab to input RedCap API token
+#' Password input
+#'
+#' Masked text input and an update button next to it
+#'
 #' @noRd
 ui_apipass <- function(id = "apipass", label = "Password") {
   ns <- NS(id)
@@ -12,18 +15,29 @@ ui_apipass <- function(id = "apipass", label = "Password") {
   )
 }
 
+#' Password input processing
+#'
+#' Returns reactive access group.
+#' Prints cross if incorrect password.
+#' Prints two ticks if access to everything is granted
+#' Prints one tick for single-site access
+#'
+#' @noRd
 server_apipass <- function(input, output, session) {
-  correct_input <- reactiveVal()
+  access_group <- eventReactive(input$update, {
+    find_apipass_match(input$apipassword, golem::get_golem_options("key"))
+  })
   observeEvent(input$update, {
-    correct_input(apipass_matches(
-      input$apipassword, golem::get_golem_options("key"), api_pass_hashes
-    ))
-    valid <- ifelse(
-      correct_input(),
-      glue::glue("<span class = 'tick'>{cli::symbol$tick}</span>"),
-      glue::glue("<span class = 'cross'>{cli::symbol$cross}</span>")
+    valid <- case_when(
+      access_group() == "all" ~ glue::glue(
+        "<span class = 'tick'>{cli::symbol$tick}{cli::symbol$tick}</span>"
+      ),
+      access_group() == "none" ~ glue::glue(
+        "<span class = 'cross'>{cli::symbol$cross}</span>"
+      ),
+      TRUE ~  glue::glue("<span class = 'tick'>{cli::symbol$tick}</span>")
     )
     output$check <- renderUI(HTML(valid))
   })
-  correct_input
+  access_group
 }

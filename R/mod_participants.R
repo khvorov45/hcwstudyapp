@@ -7,7 +7,7 @@ ui_participants <- function(id = "participants", label = "Participants") {
     sidebarLayout(
       sidebarPanel(
         siteselect(ns("site")),
-        shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names"),
+        #shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names"),
         varselect(ns("vars"))
       ),
       mainPanel(
@@ -17,43 +17,34 @@ ui_participants <- function(id = "participants", label = "Participants") {
   )
 }
 
+#' Server for participants
+#'
+#' @inheritParams server_recruitvh
+#'
 #' @importFrom rlang !!
-server_participants <- function(input, output, session,
-                                password_verified, all_data) {
-  update_siteselect_dyn(session, "site", password_verified, all_data)
+#'
+#' @noRd
+server_participants <- function(input, output, session, dat) {
+  update_siteselect_dyn(session, "site", dat)
+  update_varselect_dyn(session, "vars", reactive(dat()$participant))
 
-  part_tbl <- update_varselect_dyn(
-    session, "vars", password_verified, all_data,
-    reactive({all_data()$participant}), input, "varnames"
+  tbl_filtered <- filter_siteselect_dyn(
+    reactive(input$site), reactive(dat()$participant)
+  )
+  tbl_selected <- select_vars_dyn(
+    reactive(input$vars), tbl_filtered
   )
 
   observe({
-    if (!canexec(password_verified(), all_data())) return()
-    subs <- part_tbl()
-
-    # Site filter
-    if (input$site != "All") {
-      if (input$varnames) siten <- "site_name"
-      else siten <- "Site"
-      subs <- filter(subs, !!rlang::sym(siten) == input$site) %>%
-        select(-!!rlang::sym(siten))
-    }
-
-    # Column selection
-    if (!is.null(input$vars)) {
-      subs <- subs[colnames(subs) %in% input$vars]
-    }
-
-    # Filter all missing
-    subs <- subs[apply(subs, 1, function(vec) any(!is.na(vec))), ]
-
+    tbl <- tbl_selected()
     output$table <- DT::renderDataTable(
-      {subs}, style = "bootstrap4",
+      tbl,
+      style = "bootstrap4",
       rownames = FALSE,
       options = list(
         dom = "t",
         columnDefs = list(
-          list(className = 'dt-center', targets = 1:ncol(subs) - 1)
+          list(className = 'dt-center', targets = 1:ncol(tbl) - 1)
         ),
         scrollX = TRUE
       )

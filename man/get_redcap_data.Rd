@@ -12,5 +12,5 @@ get_redcap_data(token, uri = "https://biredcap.mh.org.au/api/")
 \item{uri}{Redcap uri}
 }
 \description{
-Access the raw RedCap data table
+Will subset by access_group when it is not 'all'
 }

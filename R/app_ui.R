@@ -3,6 +3,7 @@ app_ui <- function() {
   tagList(
 
     golem_add_external_resources(),
+    shinyjs::useShinyjs(),
 
     # Hidden input for client timezone determination
     # Filled by javascript in www/script.js

@@ -4,12 +4,18 @@
 \alias{down_trans_redcap}
 \title{Downloads REDCap's data and transforms it}
 \usage{
-down_trans_redcap(token, uri = "https://biredcap.mh.org.au/api/")
+down_trans_redcap(
+  token,
+  uri = "https://biredcap.mh.org.au/api/",
+  access_group = "all"
+)
 }
 \arguments{
 \item{token}{Redcap api token}
 
 \item{uri}{Redcap uri}
+
+\item{access_group}{Access group to subset the data}
 }
 \description{
 Downloads REDCap's data and transforms it

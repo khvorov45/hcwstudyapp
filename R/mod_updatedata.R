@@ -1,4 +1,7 @@
-#' Button to update data
+#' Update data UI
+#'
+#' Button to update and an info message with timestamp next to it
+#'
 #' @noRd
 ui_updatedata <- function(id = "updatedata", label = "Update data", colw = 3) {
   ns <- NS(id)
@@ -8,27 +11,42 @@ ui_updatedata <- function(id = "updatedata", label = "Update data", colw = 3) {
   )
 }
 
+#' Update data
+#'
+#' Button to update and an info message with timestamp next to it
+#'
+#' @param input,output,session standard
+#' @param access_group Reactive access group
+#' @param client_tz_offset_sec Reactive time offset (from UTC)
+#'
+#' @noRd
 server_updatedata <- function(input, output, session,
-                              password_verified, client_tz_offset_sec) {
-  all_dat <- reactiveVal()
+                              access_group, client_tz_offset_sec) {
+  redcap_data <- reactive({
+    input$update
+    down_trans_redcap(
+      golem::get_golem_options("token"),
+      golem::get_golem_options("uri"),
+      access_group()
+    )
+  })
 
-  # Update on correct password update
   observe({
-    if (is.null(password_verified())) return()
-    if (password_verified())
-      all_dat(update_data(output, client_tz_offset_sec()))
+    input$update
+    if (access_group() == "none") return()
+    print_timestamp(output, client_tz_offset_sec())
   })
 
-  # Update on button press
-  observeEvent(input$update, {
-    if (is.null(password_verified())) return()
-    if (!password_verified()) return()
-    all_dat(update_data(output, client_tz_offset_sec()))
-  })
-  all_dat
+  redcap_data
 }
 
-update_data <- function(output, offset) {
+#' Prints timestamp for data update
+#'
+#' @param output Standard
+#' @param offset Time offset (from UTC) in seconds
+#'
+#' @noRd
+print_timestamp <- function(output, offset) {
   curtime <- lubridate::as_datetime(Sys.time(), tz = "UTC") - offset
   output$time <- renderUI({
     HTML(
@@ -37,5 +55,4 @@ update_data <- function(output, offset) {
       )
     )
   })
-  down_trans_redcap(golem::get_golem_options("token"))
 }

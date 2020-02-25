@@ -1,14 +1,19 @@
 #' List of variables to show
 #' @noRd
 varselect <- function(id, label = "Variables", choices = list()) {
-  shinyWidgets::pickerInput(id, label, choices, multiple = TRUE)
+  shinyWidgets::pickerInput(
+    id, label, choices, multiple = TRUE,
+    options = shinyWidgets::pickerOptions(
+      actionsBox = TRUE
+    )
+  )
 }
 
 #' Updates the above list
 #' @noRd
 update_varselect <- function(session, id, new_choices) {
   shinyWidgets::updatePickerInput(
-    session, id, choices = as.list(new_choices)
+    session, id, choices = as.list(new_choices), selected = as.list(new_choices)
   )
 }
 
@@ -16,29 +21,20 @@ update_varselect <- function(session, id, new_choices) {
 #'
 #' Returns the data with the appropriate names
 #'
-#' @param session,input From server function
+#' @param session From server function
 #' @param id Id of varselect element
-#' @param password_verified,all_data Reactive values I pass around
-#' @param tbl Reactive tEable to take names from
-#' @param use_ognames_name Name of boolean input to determine which names to use
+#' @param dat Reactive data to take names from
 #'
 #' @noRd
-update_varselect_dyn <- function(session, id, password_verified,
-                                 all_data, tbl,
-                                 input, use_ognames_name) {
-  ret_tbl <- reactiveVal(tibble())
+update_varselect_dyn <- function(session, id, dat) {
   observe({
-    use_ognames <- input[[use_ognames_name]]
-    if (!canexec(password_verified(), all_data())) return()
-    subs <- tbl()
-    og_names <- names(subs)
-    new_names <- altnames(og_names)
-    if (!use_ognames) {
-      names(subs) <- new_names
-      update_varselect(session, id, new_names)
-    }
-    else update_varselect(session, id, og_names)
-    ret_tbl(subs)
+    update_varselect(session, id, colnames(dat()))
   })
-  ret_tbl
+}
+
+select_vars_dyn <- function(vars, tbl) {
+  reactive({
+    if (is.null(vars())) return(tbl())
+    tbl()[vars()]
+  })
 }
