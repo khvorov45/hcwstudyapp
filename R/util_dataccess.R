@@ -28,7 +28,8 @@ reformat_cols <- function(raw) {
       record_id = as.integer(.data$record_id),
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
-      eligible_extra_bleed = as.integer(.data$eligible_extra_bleed)
+      eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
+      ili_definition = as.integer(.data$ili_definition)
     )
 }
 
@@ -81,6 +82,24 @@ get_tbl_participant <- function(raw) {
     select(!!!rlang::syms(needed_cols))
 }
 
+#' Extracts the symptom table
+#'
+#' @inheritParams reformat_cols
+#'
+#' @export
+get_tbl_symptom <- function(raw) {
+  needed_cols <- c(
+    "record_id", "pid", "date_symptom_survey", "ili_definition"
+  )
+  consented <- raw %>% filter(.data$consent == "Yes") %>% pull(.data$record_id)
+  raw %>%
+    filter(
+      .data$record_id %in% consented,
+      stringr::str_detect(.data$redcap_event_name, "weekly survey ")
+    ) %>%
+    select(!!!rlang::syms(needed_cols))
+}
+
 #' Extracts all proper tables from the event tables
 #'
 #' @inheritParams reformat_cols
@@ -88,7 +107,8 @@ get_tbl_participant <- function(raw) {
 #' @export
 get_tbls <- function(raw) {
   list(
-    participant = get_tbl_participant(raw)
+    participant = get_tbl_participant(raw),
+    symptom = get_tbl_symptom(raw)
   )
 }
 
