@@ -89,7 +89,7 @@ get_tbl_participant <- function(raw) {
 #' @export
 get_tbl_symptom <- function(raw) {
   needed_cols <- c(
-    "record_id", "pid", "date_symptom_survey", "ili_definition"
+    "record_id", "date_symptom_survey", "ili_definition"
   )
   consented <- raw %>% filter(.data$consent == "Yes") %>% pull(.data$record_id)
   raw %>%
