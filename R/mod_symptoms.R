@@ -4,7 +4,9 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
   ns <- NS(id)
   tablepanel(
     ns, label,
-    sliderInput(ns("dates"), "Date range", 0, 100, c(20, 80))
+    dateRangeInput(
+      ns("dates"), "Date range", "2020-05-04", "2020-10-12"
+    )
   )
 }
 

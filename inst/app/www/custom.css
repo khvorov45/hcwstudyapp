@@ -142,3 +142,8 @@ a {
 	color: white;
 }
 
+/* Date picker */
+.datepicker table tr td.day:hover {
+	background: #01238a;
+}
+
