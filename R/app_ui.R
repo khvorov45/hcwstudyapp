@@ -15,8 +15,11 @@ app_ui <- function() {
     fluidPage(
 
       fluidRow(
-        column(6, ui_apipass()),
-        column(6, ui_updatedata())
+        column(5, ui_apipass()),
+        column(6, ui_updatedata()),
+        column(1, HTML(
+          "<a href='https://github.com/khvorov45/hcwstudyapp'>Source</a>"
+        ))
       ),
 
       tabsetPanel(
