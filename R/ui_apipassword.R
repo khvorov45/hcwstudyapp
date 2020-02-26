@@ -4,7 +4,7 @@ apipassword <- function(id, label = "Password") {
   passwordInput(
     id,
     label,
-    value = golem::get_golem_options("default_password")
+    value = Sys.getenv("REDAPIPASS")
   )
 }
 
