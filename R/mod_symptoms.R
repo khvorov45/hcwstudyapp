@@ -2,7 +2,10 @@
 #' @noRd
 ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
   ns <- NS(id)
-  tablepanel(ns, label)
+  tablepanel(
+    ns, label,
+    sliderInput(ns("dates"), "Date range", 0, 100, c(20, 80))
+  )
 }
 
 #' Server for symptoms
@@ -20,5 +23,6 @@ server_symptoms <- function(input, output, session, redcap_data) {
       select("record_id", "pid", "site_name", everything())
   })
   update_tablepanel_dyn(session, tbl)
-  observe({print(tbl())})
+  tbl_new <- update_tbl_dyn(input, tbl)
+  render_tablepanel_table(output, tbl_new)
 }

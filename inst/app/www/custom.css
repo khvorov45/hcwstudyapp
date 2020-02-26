@@ -42,7 +42,7 @@ a {
 
 /* Tabs */
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
-	background-color: #021b68;
+	background-color: #01238a;
 }
 
 /* Checkbox */
@@ -51,7 +51,7 @@ a {
 }
 
 /* Default and hover buttons */
-.btn, .btn:hover, .btn:focus,  
+.btn, .btn:hover, .btn:focus,
 .checkbtn, .checkbtn:hover, .checkbtn:focus {
   background-color: #282828;
   border-color: #424242;
@@ -68,16 +68,12 @@ a {
   background-color: #101010;
 }
 .checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus {
-	background-color: #021b68;
+	background-color: #01238a;
 }
 
 /* Slider */
-.irs-slider, .irs-slider:hover, .irs-slider:focus, .irs-line,
-.irs-bar, .irs-bar-edge, .irs-line-right, .irs-line-mid {
+.irs-slider, .irs-slider:hover, .irs-slider:focus {
 	border: 1px solid #424242;
-}
-.irs-line {
-	background: #6a6a6a;
 }
 .irs-slider {
 	background: #6a6a6a;
@@ -85,17 +81,18 @@ a {
 .irs-slider:hover, .irs-slider:focus {
 	background: #c6c6c6;
 }
-.irs-single, .irs-min, .irs-max {
+.irs-single, .irs-min, .irs-max, .irs-from, .irs-to {
 	display: none;
 }
+.irs-line {
+	background: #6a6a6a;
+	border: 0;
+}
+.irs-bar, .irs-bar-edge, .irs-line-right, .irs-line-left, .irs-line-mid {
+	border: 0;
+}
 .irs-bar, .irs-bar-edge {
-	background: #021b68;
-}
-.irs-bar-edge, .irs-line-right {
-	border-right: 0;
-}
-.irs-line-right {
-	border-left: 0;
+	background: #01238a;
 }
 .irs-line-right, .irs-line-mid {
 	background: #6a6a6a;
@@ -120,7 +117,7 @@ a {
 	background: #282828;
 }
 .selectize-dropdown .active {
-	background: #021b68;
+	background: #01238a;
 	color: white;
 }
 .selectize-dropdown, .selectize-input, .selectize-input input {
@@ -130,15 +127,15 @@ a {
 /* PickerInput from shinyWidgets and table selections */
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus,
 .dropdown-menu > .active > a, .dropdown-menu > .active > a:hover, .dropdown-menu > .active > a:focus,
-.pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus, 
-.pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus, 
+.pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus,
+.pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus,
 .pagination > li > span:focus {
-	background-color: #021b68;
+	background-color: #01238a;
 }
 
 /* Table */
 .table.dataTable tbody td.active, .table.dataTable tbody tr.active td {
-	background-color: #021b68 !important;
+	background-color: #01238a !important;
 }
 
 .sorting::before {
