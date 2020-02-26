@@ -2,19 +2,7 @@
 #' @noRd
 ui_participants <- function(id = "participants", label = "Participants") {
   ns <- NS(id)
-  tabPanel(
-    label,
-    sidebarLayout(
-      sidebarPanel(
-        siteselect(ns("site")),
-        #shinyWidgets::prettyCheckbox(ns("varnames"), "Variable names"),
-        varselect(ns("vars"))
-      ),
-      mainPanel(
-        DT::dataTableOutput(ns("table"))
-      )
-    )
-  )
+  tablepanel(ns, label)
 }
 
 #' Server for participants

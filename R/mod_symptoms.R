@@ -2,9 +2,7 @@
 #' @noRd
 ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
   ns <- NS(id)
-  tabPanel(
-    label
-  )
+  tablepanel(ns, label)
 }
 
 #' Server for symptoms
