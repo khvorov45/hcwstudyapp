@@ -7,4 +7,5 @@ app_server <- function(input, output, session) {
   )
   callModule(server_recruitvh, "recruitvh", redcap_data)
   callModule(server_participants, "participants", redcap_data)
+  callModule(server_symptoms, "symptoms", redcap_data)
 }
