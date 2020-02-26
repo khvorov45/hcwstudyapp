@@ -13,29 +13,8 @@ ui_participants <- function(id = "participants", label = "Participants") {
 #'
 #' @noRd
 server_participants <- function(input, output, session, dat) {
-  update_siteselect_dyn(session, "site", dat)
-  update_varselect_dyn(session, "vars", reactive(dat()$participant))
-
-  tbl_filtered <- filter_siteselect_dyn(
-    reactive(input$site), reactive(dat()$participant)
-  )
-  tbl_selected <- select_vars_dyn(
-    reactive(input$vars), tbl_filtered
-  )
-
-  observe({
-    tbl <- tbl_selected()
-    output$table <- DT::renderDataTable(
-      tbl,
-      style = "bootstrap4",
-      rownames = FALSE,
-      options = list(
-        dom = "t",
-        columnDefs = list(
-          list(className = 'dt-center', targets = 1:ncol(tbl) - 1)
-        ),
-        scrollX = TRUE
-      )
-    )
-  })
+  tbl <- reactive(dat()$participant)
+  update_tablepanel_dyn(session, tbl)
+  tbl_new <- update_tbl_dyn(input, tbl)
+  render_tablepanel_table(output, tbl_new)
 }

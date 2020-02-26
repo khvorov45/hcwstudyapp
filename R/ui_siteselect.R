@@ -19,7 +19,7 @@ update_siteselect <- function(session, id, new_choices) {
 #' @noRd
 update_siteselect_dyn <- function(session, id, dat) {
   observe({
-    sites <- unique(dat()$participant$site_name)
+    sites <- unique(dat()$site_name)
     update_siteselect(session, id, sites)
   })
 }
