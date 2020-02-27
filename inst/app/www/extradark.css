@@ -71,9 +71,6 @@
 .irs-slider:hover, .irs-slider:focus {
 	background: #c6c6c6;
 }
-.irs-single, .irs-min, .irs-max, .irs-from, .irs-to {
-	display: none;
-}
 .irs-line {
 	background: #6a6a6a;
 	border: 0;

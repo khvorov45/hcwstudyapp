@@ -33,3 +33,8 @@ a {
 .cross {
 	color: red;
 }
+
+/* Slider */
+.irs-single, .irs-min, .irs-max, .irs-from, .irs-to {
+	display: none;
+}

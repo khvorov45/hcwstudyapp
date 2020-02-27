@@ -7,5 +7,5 @@ ui_themeswtich <- function(id = "themeswitch") {
 }
 
 server_themeswitch <- function(input, output, session) {
-  observe({print(input$themeswitch)})
+  observe({session$sendCustomMessage("themeswitch", input$themeswitch)})
 }
