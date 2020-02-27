@@ -25,6 +25,15 @@ server_symptoms <- function(input, output, session, redcap_data) {
       select("record_id", "pid", "site_name", everything())
   })
   update_tablepanel_dyn(session, tbl)
-  tbl_new <- update_tbl_dyn(input, tbl)
+
+  tbl_fdate <- reactive({
+    filter(
+        tbl(),
+        .data$date_symptom_survey >= input$dates[[1]],
+        .data$date_symptom_survey <= input$dates[[2]],
+      )
+  })
+
+  tbl_new <- update_tbl_dyn(input, tbl_fdate)
   render_tablepanel_table(output, tbl_new)
 }

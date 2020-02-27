@@ -27,7 +27,7 @@ update_siteselect_dyn <- function(session, id, dat) {
 #' Dynamically filters tbl to only rows with site input
 #' @noRd
 filter_siteselect_dyn <- function(site, tbl) {
-  eventReactive(site(), {
+  reactive({
     site_sel <- ifelse(is.null(site()), "All", site())
     subs <- tbl()
     if (site_sel != "All") {

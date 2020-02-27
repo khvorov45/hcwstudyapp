@@ -143,7 +143,9 @@ a {
 }
 
 /* Date picker */
-.datepicker table tr td.day:hover {
+.datepicker table tr td.day:hover,
+.datepicker .datepicker-switch:hover, .datepicker .next:hover, .datepicker .prev:hover, .datepicker tfoot tr th:hover,
+.datepicker table tr td span.focused, .datepicker table tr td span:hover {
 	background: #01238a;
 }
 
