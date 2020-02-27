@@ -26,10 +26,13 @@ app_ui <- function() {
         ))
       ),
 
-      # Password and data update
+      # Password, data update and theme swtich
       fluidRow(
         column(5, ui_apipass()),
-        column(6, ui_updatedata()),
+        column(5, ui_updatedata()),
+        column(2, shinyWidgets::switchInput(
+          inputId = "themeswitch", onLabel = "Dark", offLabel = "Light"
+        ))
       ),
 
       # Tabs with functionality

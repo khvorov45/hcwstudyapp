@@ -9,7 +9,7 @@ a {
 }
 
 /* Password input */
-#apipass-update, #updatedata-update, #updatedata-time {
+#apipass-update, #updatedata-update, #updatedata-time, .bootstrap-switch-id-themeswitch {
 	margin-top: 25px;
 }
 #apipass-check {
@@ -20,6 +20,7 @@ a {
 /* Info message for data update */
 #updatedata-time {
 	font-size: small;
+	margin-left: 10px;
 }
 
 /* Tick and cross for password */
@@ -31,6 +32,21 @@ a {
 }
 .cross {
 	color: red;
+}
+
+/* Theme switch */
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary, .bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary {
+	color: #fff;
+	background: #000;
+}
+
+.bootstrap-switch, .bootstrap-switch.bootstrap-switch-focused {
+	border: 1px solid #424242;
+	box-shadow: none;
+}
+
+.bootstrap-switch .bootstrap-switch-label {
+	background: #01238a;
 }
 
 /* Nav bars */
