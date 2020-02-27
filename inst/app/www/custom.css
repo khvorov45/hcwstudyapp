@@ -57,13 +57,17 @@ a {
 
 /* Default and hover buttons */
 .btn, .btn:hover, .btn:focus,
-.checkbtn, .checkbtn:hover, .checkbtn:focus {
+.checkbtn, .checkbtn:hover, .checkbtn:focus,
+.radiobtn, .radiobtn:hover, .radiobtn:focus,
+.btn-group, .btn-group:hover, .btn-group:focus,
+.btn-group-toggle, .btn-group-toggle:hover, .btn-group-toggle:focus {
   background-color: #282828;
   border-color: #424242;
 }
 
 /* All buttons */
 .btn:active, .btn:active:hover, .btn:active:focus,
+.radiobtn.active, .radiobtn.active:hover, .radiobtn.active:focus,
 .checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus {
 	border-color: #424242;
 }
@@ -72,7 +76,8 @@ a {
 .btn:active, .btn:active:hover, .btn:active:focus {
   background-color: #101010;
 }
-.checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus {
+.checkbtn.active, .checkbtn.active:hover, .checkbtn.active:focus,
+.radiobtn.active, .radiobtn.active:hover, .radiobtn.active:focus {
 	background-color: #01238a;
 }
 

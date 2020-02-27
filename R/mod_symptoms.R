@@ -6,6 +6,14 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
     ns, label,
     dateRangeInput(
       ns("dates"), "Date range", "2020-05-04", "2020-10-12"
+    ),
+    shinyWidgets::radioGroupButtons(
+      ns("subsetili"), "",
+      list(
+        "All ILI" = "all", "Subjects with ILI" = "sub", "Rows with ILI" = "row"
+      ),
+      direction = "vertical",
+      justified = TRUE
     )
   )
 }
