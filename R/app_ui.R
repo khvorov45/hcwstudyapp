@@ -14,14 +14,25 @@ app_ui <- function() {
 
     fluidPage(
 
+      # Title and contact details
       fluidRow(
-        column(5, ui_apipass()),
-        column(6, ui_updatedata()),
-        column(1, HTML(
-          "<a href='https://github.com/khvorov45/hcwstudyapp'>Source</a>"
+        column(6, h3("HCW Cohort Study")),
+        column(6, HTML(
+          "<div id='contact'>
+          <a href='https://github.com/khvorov45/hcwstudyapp'>Source</a>
+          <br/>
+          hcwcohortstudy@influenzacentre.org
+          </div>"
         ))
       ),
 
+      # Password and data update
+      fluidRow(
+        column(5, ui_apipass()),
+        column(6, ui_updatedata()),
+      ),
+
+      # Tabs with functionality
       tabsetPanel(
         type = "tabs",
 

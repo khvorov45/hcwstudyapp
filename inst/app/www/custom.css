@@ -3,6 +3,11 @@ a {
 	outline: none;
 }
 
+/* Contact details */
+#contact {
+	text-align: right;
+}
+
 /* Password input */
 #apipass-update, #updatedata-update, #updatedata-time {
 	margin-top: 25px;
