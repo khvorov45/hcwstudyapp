@@ -41,7 +41,12 @@ update_tablepanel_dyn <- function(session, tbl) {
 #' @noRd
 update_tbl_dyn <- function(input, tbl) {
   tbl_filtered <- filter_siteselect_dyn(reactive(input$site), tbl)
-  select_vars_dyn(reactive(input$vars), tbl_filtered)
+  tbl_selected <- select_vars_dyn(reactive(input$vars), tbl_filtered)
+  # Remove rows with all missing
+  reactive({
+    subs <- tbl_selected()
+    subs[apply(subs, 1, function(vec) any(!is.na(vec))), ]
+  })
 }
 
 #' Renders the output table
