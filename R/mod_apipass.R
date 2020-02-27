@@ -9,8 +9,10 @@ ui_apipass <- function(id = "apipass", label = "Password") {
     column(6, apipassword(ns("apipassword"))),
     column(
       6,
-      updatebutton(ns("update"), "Update password"),
-      apipasscheck(ns("check"))
+      fluidRow(
+        updatebutton(ns("update"), "Update password"),
+        apipasscheck(ns("check"))
+      )
     )
   )
 }
