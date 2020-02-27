@@ -60,9 +60,17 @@ golem_add_external_resources <- function() {
     golem::activate_js(),
     golem::favicon(),
     tags$link(
+      id = "shinytheme-css",
       rel = "stylesheet", type = "text/css",
       href = shinythemes::shinytheme("cyborg")
     ),
-    tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
+    tags$link(
+      id = "always-css",
+      rel = "stylesheet", type = "text/css", href = "www/always.css"
+    ),
+    tags$link(
+      id = "extradark-css",
+      rel = "stylesheet", type = "text/css", href = "www/extradark.css"
+    )
   )
 }

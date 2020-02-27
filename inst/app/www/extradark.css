@@ -1,39 +1,3 @@
-/* Link outline */
-a {
-	outline: none;
-}
-
-/* Contact details */
-#contact {
-	text-align: right;
-}
-
-/* Password input */
-#apipass-update, #updatedata-update, #updatedata-time, .bootstrap-switch-id-themeswitch-themeswitch {
-	margin-top: 25px;
-}
-#apipass-check {
-	position: relative;
-	top: 12px;
-}
-
-/* Info message for data update */
-#updatedata-time {
-	font-size: small;
-	margin-left: 10px;
-}
-
-/* Tick and cross for password */
-.tick, .cross {
-  font-size: large;
-}
-.tick {
-	color: green;
-}
-.cross {
-	color: red;
-}
-
 /* Theme switch */
 .bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary, .bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary {
 	color: #fff;
