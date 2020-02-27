@@ -42,7 +42,23 @@ server_symptoms <- function(input, output, session, redcap_data) {
       )
   })
 
-  tbl_new <- update_tbl_dyn(input, tbl_fdate)
+  tbl_fili <- reactive({
+    if (input$subsetili == "all") {
+      tbl_fdate()
+    } else if (input$subsetili == "sub") {
+      subs <- tbl_fdate()
+      sub_ili <- subs %>%
+        group_by(.data$record_id) %>%
+        filter(any(.data$ili_definition == 1L)) %>%
+        ungroup() %>%
+        pull(.data$record_id)
+      filter(subs, .data$record_id %in% sub_ili)
+    } else {
+      filter(tbl_fdate(), .data$ili_definition == 1L)
+    }
+  })
+
+  tbl_new <- update_tbl_dyn(input, tbl_fili)
   render_tablepanel_table(output, tbl_new)
 
   output$download <- download_data(output, "symptoms", tbl_new)
