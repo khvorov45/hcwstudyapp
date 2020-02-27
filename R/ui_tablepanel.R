@@ -12,7 +12,8 @@ tablepanel <- function(ns, label, ...) {
       sidebarPanel(
         siteselect(ns("site")),
         varselect(ns("vars")),
-        ...
+        ...,
+        downloadButton(ns("download"), "Download")
       ),
       mainPanel(
         DT::dataTableOutput(ns("table"))
@@ -65,4 +66,11 @@ render_tablepanel_table <- function(output, tbl) {
       )
     )
   })
+}
+
+download_data <- function(output, name, data) {
+  output$download <- downloadHandler(
+    filename = function() {glue::glue("{name}.csv")},
+    content = function(file) {readr::write_csv(data(), file)}
+  )
 }

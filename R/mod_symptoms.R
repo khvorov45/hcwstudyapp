@@ -36,4 +36,6 @@ server_symptoms <- function(input, output, session, redcap_data) {
 
   tbl_new <- update_tbl_dyn(input, tbl_fdate)
   render_tablepanel_table(output, tbl_new)
+
+  output$download <- download_data(output, "symptoms", tbl_new)
 }

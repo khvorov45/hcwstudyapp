@@ -31,7 +31,8 @@ Imports:
   shinythemes,
   shinyWidgets,
   DT,
-  shinyjs
+  shinyjs,
+  readr
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.0.2
