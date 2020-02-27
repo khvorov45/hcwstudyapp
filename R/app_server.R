@@ -1,5 +1,6 @@
 #' @import shiny
 app_server <- function(input, output, session) {
+  callModule(server_themeswitch, "themeswitch")
   client_tz_offset_sec <- reactive(as.numeric(input$client_tz_offset_sec))
   access_group <- callModule(server_apipass, "apipass")
   redcap_data <- callModule(

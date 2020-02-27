@@ -30,9 +30,7 @@ app_ui <- function() {
       fluidRow(
         column(5, ui_apipass()),
         column(5, ui_updatedata()),
-        column(2, shinyWidgets::switchInput(
-          inputId = "themeswitch", onLabel = "Dark", offLabel = "Light"
-        ))
+        column(2, ui_themeswtich())
       ),
 
       # Tabs with functionality
