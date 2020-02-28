@@ -1,7 +1,14 @@
-plot_recruitvh <- function(dat, fontsize = 16) {
+plot_recruitvh <- function(dat, fontsize = 16, dark = TRUE) {
+  if (dark) {
+    ggdark::darken_geoms()
+    pltheme <- ggdark::dark_theme_bw(base_size = fontsize, verbose = FALSE)
+  } else {
+    ggdark::lighten_geoms()
+    pltheme <- theme_bw(base_size = fontsize)
+  }
   dat %>%
     ggplot(aes(.data$num_seas_vac_fct)) +
-    ggdark::dark_theme_bw(base_size = fontsize, verbose = FALSE) +
+    pltheme +
     theme(
       panel.grid.minor = element_blank()
     ) +

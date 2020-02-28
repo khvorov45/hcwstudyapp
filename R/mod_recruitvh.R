@@ -24,7 +24,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
 #' @import ggplot2
 #'
 #' @noRd
-server_recruitvh <- function(input, output, session, dat) {
+server_recruitvh <- function(input, output, session, dat, dark) {
   update_siteselect_dyn(session, "site", dat)
 
   # Add a factor for x on data change
@@ -39,6 +39,6 @@ server_recruitvh <- function(input, output, session, dat) {
   dat_plot_filt <- filter_siteselect_dyn(reactive(input$site), dat_plot)
 
   output$plot <- renderPlot({
-    plot_recruitvh(dat_plot_filt(), input$fontsize)
+    plot_recruitvh(dat_plot_filt(), input$fontsize, dark())
   })
 }
