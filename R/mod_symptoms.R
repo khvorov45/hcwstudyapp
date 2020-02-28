@@ -14,6 +14,13 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
       ),
       direction = "vertical",
       justified = TRUE
+    ),
+    shinyWidgets::checkboxGroupButtons(
+      ns("subsetswab"), "Swabs",
+      list("Yes" = "yes", "No" = "no", "Missing" = "na"),
+      direction = "horizontal",
+      justified = TRUE,
+      selected = c("yes", "no", "na")
     )
   )
 }
