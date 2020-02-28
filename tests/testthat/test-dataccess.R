@@ -18,12 +18,16 @@ test_that("RedCap download and reformatting works", {
 
   part <- get_tbl_participant(dat_ref)
   expect_equal(class(part), c("tbl_df", "tbl", "data.frame"))
+  expect_equal(nrow(part), length(unique(part$record_id)))
 
   sympt <- get_tbl_symptom(dat_ref)
   expect_equal(class(sympt), c("tbl_df", "tbl", "data.frame"))
 
+  swab <- get_tbl_swab(dat_ref)
+  expect_equal(class(swab), c("tbl_df", "tbl", "data.frame"))
+
   all_tbls <- get_tbls(dat_ref)
-  expect_named(all_tbls, c("participant", "symptom"))
+  expect_named(all_tbls, c("participant", "symptom", "swab"))
 
   all_tbls2 <- down_trans_redcap(tok, uri, "all")
   expect_equal(all_tbls, all_tbls2)

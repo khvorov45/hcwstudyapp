@@ -59,6 +59,16 @@ redcap_subset <- function(raw, access_group) {
   raw_subset
 }
 
+#' Subsets the REDCap table to only those who consented
+#'
+#' @inheritParams reformat_cols
+#'
+#' @export
+subset_consent <- function(raw) {
+  consented <- raw %>% filter(.data$consent == "Yes") %>% pull(.data$record_id)
+  filter(raw, .data$record_id %in% consented)
+}
+
 #' Extracts the participant table from the baseline table
 #'
 #' Everyone who has consented is a participant. I'm relying on the 'consent'
@@ -66,37 +76,49 @@ redcap_subset <- function(raw, access_group) {
 #' participant has one of except the screening-related attributes (not everyone
 #' who is screened consents).
 #'
-#' @inheritParams reformat_cols
+#' @param raw_consented Consented subset of the REDCap table
 #'
 #' @importFrom rlang .data !!!
 #'
 #' @export
-get_tbl_participant <- function(raw) {
+get_tbl_participant <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
     "first_name", "surname",
     "mobile_number", "email"
   )
-  raw %>%
-    filter(.data$consent == "Yes") %>%
+  raw_consented %>%
+    filter(.data$redcap_event_name == "baseline") %>%
     select(!!!rlang::syms(needed_cols))
 }
 
 #' Extracts the symptom table
 #'
-#' @inheritParams reformat_cols
+#' @inheritParams get_tbl_participant
 #'
 #' @export
-get_tbl_symptom <- function(raw) {
+get_tbl_symptom <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "date_symptom_survey", "ili_definition"
   )
-  consented <- raw %>% filter(.data$consent == "Yes") %>% pull(.data$record_id)
-  raw %>%
+  raw_consented %>%
     filter(
-      .data$record_id %in% consented,
       stringr::str_detect(.data$redcap_event_name, "weekly survey ")
     ) %>%
+    select(!!!rlang::syms(needed_cols))
+}
+
+#' Extracts the swab table
+#'
+#' @inheritParams get_tbl_participant
+#'
+#' @export
+get_tbl_swab <- function(raw_consented) {
+  needed_cols <- c(
+    "record_id", "swab_collection", "samp_date"
+  )
+  raw_consented %>%
+    filter(.data$redcap_event_name == "infection") %>%
     select(!!!rlang::syms(needed_cols))
 }
 
@@ -106,9 +128,11 @@ get_tbl_symptom <- function(raw) {
 #'
 #' @export
 get_tbls <- function(raw) {
+  raw_consented <- subset_consent(raw)
   list(
-    participant = get_tbl_participant(raw),
-    symptom = get_tbl_symptom(raw)
+    participant = get_tbl_participant(raw_consented),
+    symptom = get_tbl_symptom(raw_consented),
+    swab = get_tbl_swab(raw_consented)
   )
 }
 
