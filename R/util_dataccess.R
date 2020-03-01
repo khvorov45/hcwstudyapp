@@ -29,8 +29,7 @@ reformat_cols <- function(raw) {
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
-      ili_definition = as.integer(.data$ili_definition),
-      survey_week = as.integer(.data$survey_week)
+      ili_definition = as.integer(.data$ili_definition)
     )
 }
 

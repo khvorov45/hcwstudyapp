@@ -17,10 +17,10 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
     ),
     shinyWidgets::checkboxGroupButtons(
       ns("subsetswab"), "Swabs",
-      list("Yes" = "yes", "No" = "no", "Missing" = "na"),
+      list("Yes", "No", "Missing"),
       direction = "horizontal",
       justified = TRUE,
-      selected = c("yes", "no", "na")
+      selected = c("Yes", "No", "Missing")
     )
   )
 }
@@ -37,6 +37,10 @@ server_symptoms <- function(input, output, session, redcap_data) {
       redcap_data()$participant,
       "record_id"
     ) %>%
+      left_join(
+        rename(redcap_data()$swab, date_symptom_survey = .data$survey_week),
+        c("record_id", "date_symptom_survey")
+      ) %>%
       select("record_id", "pid", "site_name", everything())
   })
   update_tablepanel_dyn(session, tbl)
@@ -65,7 +69,18 @@ server_symptoms <- function(input, output, session, redcap_data) {
     }
   })
 
-  tbl_new <- update_tbl_dyn(input, tbl_fili)
+  tbl_fswab <- reactive({
+    mutate(
+      tbl_fili(),
+      swab_collection_2 = if_else(
+        is.na(.data$swab_collection), "Missing", .data$swab_collection
+      )
+    ) %>%
+      filter(.data$swab_collection_2 %in% input$subsetswab) %>%
+      select(-"swab_collection_2")
+  })
+
+  tbl_new <- update_tbl_dyn(input, tbl_fswab)
   render_tablepanel_table(output, tbl_new)
 
   output$download <- download_data(output, "symptoms", tbl_new)
