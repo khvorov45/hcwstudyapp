@@ -29,7 +29,8 @@ reformat_cols <- function(raw) {
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
-      ili_definition = as.integer(.data$ili_definition)
+      ili_definition = as.integer(.data$ili_definition),
+      survey_week = as.integer(.data$survey_week)
     )
 }
 
@@ -115,7 +116,7 @@ get_tbl_symptom <- function(raw_consented) {
 #' @export
 get_tbl_swab <- function(raw_consented) {
   needed_cols <- c(
-    "record_id", "swab_collection", "samp_date"
+    "record_id", "swab_collection", "samp_date", "survey_week"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "infection") %>%
