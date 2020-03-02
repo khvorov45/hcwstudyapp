@@ -25,7 +25,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
 #'
 #' @noRd
 server_recruitvh <- function(input, output, session, dat, dark) {
-  update_siteselect_dyn(session, "site", dat)
+  update_siteselect_dyn(session, "site", reactive(dat()$participant))
 
   # Add a factor for x on data change
   dat_plot <- eventReactive(dat(), {
