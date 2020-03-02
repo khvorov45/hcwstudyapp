@@ -39,7 +39,8 @@ app_ui <- function() {
 
         ui_recruitvh(),
         ui_participants(),
-        ui_symptoms()
+        ui_symptoms(),
+        ui_swabs()
 
       ), # tabsetPanel
 
