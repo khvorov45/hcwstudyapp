@@ -116,7 +116,7 @@ get_tbl_symptom <- function(raw_consented) {
 get_tbl_swab <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "swab_collection", "samp_date", "survey_week",
-    "site_rec_date", "site_test_date"
+    "site_rec_date", "site_test_date", "doherty_swab_sent_date"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "infection") %>%
