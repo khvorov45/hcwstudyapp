@@ -25,7 +25,6 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
 reformat_cols <- function(raw) {
   raw %>%
     mutate(
-      record_id = as.integer(.data$record_id),
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
