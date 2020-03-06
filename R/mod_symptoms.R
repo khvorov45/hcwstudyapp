@@ -10,7 +10,9 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
     shinyWidgets::radioGroupButtons(
       ns("subsetili"), "",
       list(
-        "All ILI" = "all", "Subjects with ILI" = "sub", "Rows with ILI" = "row"
+        "Completed surveys" = "all",
+        "All records for subjects with ARI" = "sub",
+        "All surveys with ARI" = "row"
       ),
       direction = "vertical",
       justified = TRUE
