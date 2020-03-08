@@ -62,12 +62,12 @@ server_symptoms <- function(input, output, session, redcap_data) {
       subs <- tbl_fdate()
       sub_ili <- subs %>%
         group_by(.data$record_id) %>%
-        filter(any(.data$ili_definition == 1L)) %>%
+        filter(any(.data$ari_definition == 1L)) %>%
         ungroup() %>%
         pull(.data$record_id)
       filter(subs, .data$record_id %in% sub_ili)
     } else {
-      filter(tbl_fdate(), .data$ili_definition == 1L)
+      filter(tbl_fdate(), .data$ari_definition == 1L)
     }
   })
 

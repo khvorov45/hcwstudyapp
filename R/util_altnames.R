@@ -5,8 +5,6 @@ var_altnames <- c(
   "site_name" = "Site",
   "num_seas_vac" = "Seasons vaccinated",
   "eligible_extra_bleed" = "Eligible for extra bleed",
-  "first_name" = "First name",
-  "surname" = "Last name",
   "mobile_number" = "Mobile",
   "email" = "Email"
 )
