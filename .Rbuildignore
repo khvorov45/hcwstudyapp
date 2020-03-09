@@ -9,4 +9,4 @@ $run_dev.*
 ^token$
 ^key$
 ^\.travis\.yml$
-^notes$
+^todo\.md$
