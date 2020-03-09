@@ -33,6 +33,8 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
 #'
 #' @noRd
 server_symptoms <- function(input, output, session, redcap_data) {
+
+  # Join surveys to contact to swab
   tbl <- reactive({
     inner_join(
       redcap_data()$symptom,
@@ -45,16 +47,30 @@ server_symptoms <- function(input, output, session, redcap_data) {
       ) %>%
       select("record_id", "pid", "site_name", everything())
   })
+
+  # Standard table panel
   update_tablepanel_dyn(session, tbl)
 
-  tbl_fdate <- reactive({
-    filter(
-        tbl(),
-        .data$date_symptom_survey >= input$dates[[1]],
-        .data$date_symptom_survey <= input$dates[[2]],
-      )
+  # Update dates to min/max
+  observe({
+    sympt <- redcap_data()$symptom
+    updateDateRangeInput(
+      session, "dates",
+      start = min(sympt$date_symptom_survey, na.rm = TRUE),
+      end = max(sympt$date_symptom_survey, na.rm = TRUE)
+    )
   })
 
+  # Filter by date
+  tbl_fdate <- reactive({
+    filter(
+      tbl(),
+      .data$date_symptom_survey >= input$dates[[1]],
+      .data$date_symptom_survey <= input$dates[[2]],
+    )
+  })
+
+  # Filter by ARI
   tbl_fili <- reactive({
     if (input$subsetili == "all") {
       tbl_fdate()
@@ -71,6 +87,7 @@ server_symptoms <- function(input, output, session, redcap_data) {
     }
   })
 
+  # Filter by swab
   tbl_fswab <- reactive({
     mutate(
       tbl_fili(),
@@ -82,8 +99,10 @@ server_symptoms <- function(input, output, session, redcap_data) {
       select(-"swab_collection_2")
   })
 
+  # Render
   tbl_new <- update_tbl_dyn(input, tbl_fswab)
   render_tablepanel_table(output, tbl_new)
 
+  # Download
   output$download <- download_data(output, "symptoms", tbl_new)
 }
