@@ -25,19 +25,17 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
 #'
 #' @noRd
 server_recruitvh <- function(input, output, session, dat, dark) {
-  update_siteselect_dyn(session, "site", reactive(dat()$participant))
 
-  # Add a factor for x on data change
-  dat_plot <- eventReactive(dat(), {
-    dat()$participant %>%
-      dplyr::mutate(
-        num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5)
-      )
-  })
+  # Participant table
+  part <- reactive(dat()$participant)
+
+  # Update siteselect
+  update_siteselect_dyn(session, "site", part)
 
   # Filter on site change
-  dat_plot_filt <- filter_siteselect_dyn(reactive(input$site), dat_plot)
+  dat_plot_filt <- filter_siteselect_dyn(reactive(input$site), part)
 
+  # Render
   output$plot <- renderPlot({
     plot_recruitvh(dat_plot_filt(), input$fontsize, dark())
   })

@@ -42,14 +42,19 @@ reformat_cols <- function(raw) {
 #'
 #' @export
 redcap_subset <- function(raw, access_group) {
-  if (access_group == "all") return(raw)
-  if (access_group == "none") return(filter(raw, .data$record_id == -1))
+  if (access_group == "all") {
+    return(raw)
+  }
+  if (access_group == "none") {
+    return(filter(raw, .data$record_id == -1))
+  }
   all_sites <- unique(stats::na.omit(raw$site_name))
-  if (!all(all_sites %in% site_altnames))
+  if (!all(all_sites %in% site_altnames)) {
     rlang::abort(
       "Site names in data not recognised",
       class = "redcap_extra_sites"
     )
+  }
   ids <- raw %>%
     filter(.data$site_name == get_site_name(access_group)) %>%
     pull(.data$record_id)
@@ -64,7 +69,9 @@ redcap_subset <- function(raw, access_group) {
 #'
 #' @export
 subset_consent <- function(raw) {
-  consented <- raw %>% filter(.data$consent == "Yes") %>% pull(.data$record_id)
+  consented <- raw %>%
+    filter(.data$consent == "Yes") %>%
+    pull(.data$record_id)
   filter(raw, .data$record_id %in% consented)
 }
 
