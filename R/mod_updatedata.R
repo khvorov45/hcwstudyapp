@@ -33,7 +33,9 @@ server_updatedata <- function(input, output, session,
 
   observe({
     input$update
-    if (access_group() == "none") return()
+    if (access_group() == "none") {
+      return()
+    }
     print_timestamp(output, client_tz_offset_sec())
   })
 

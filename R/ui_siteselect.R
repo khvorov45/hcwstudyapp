@@ -2,16 +2,19 @@
 #' @noRd
 siteselect <- function(id, label = "Site", choices = list(), selected = NULL) {
   shinyWidgets::pickerInput(
-    id, label, choices, selected, multiple = FALSE
+    id, label, choices, selected,
+    multiple = FALSE
   )
 }
 
 #' Updates the above list
 #' @noRd
 update_siteselect <- function(session, id, new_choices) {
-  if (length(new_choices) > 1L)
+  if (length(new_choices) > 1L) {
     new_choices <- as.list(c("All", new_choices))
-  else new_choices <- as.list(new_choices)
+  } else {
+    new_choices <- as.list(new_choices)
+  }
   shinyWidgets::updatePickerInput(session, id, choices = new_choices)
 }
 
@@ -28,7 +31,8 @@ update_siteselect_dyn <- function(session, id, dat) {
 #' @noRd
 filter_siteselect_dyn <- function(site, tbl) {
   reactive({
-    site_sel <- ifelse(is.null(site()), "All", site())
+    site_cur <- site()
+    site_sel <- ifelse(is.null(site_cur), "All", site_cur)
     subs <- tbl()
     if (site_sel != "All") {
       subs <- dplyr::filter(subs, .data$site_name == site_sel)
