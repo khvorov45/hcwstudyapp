@@ -28,7 +28,8 @@ reformat_cols <- function(raw) {
       redcap_event_name = tolower(.data$redcap_event_name),
       num_seas_vac = as.integer(.data$num_seas_vac),
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
-      ari_definition = as.integer(.data$ari_definition)
+      ari_definition = as.integer(.data$ari_definition),
+      site_name = if_else(is.na(.data$site_name), "(Missing)", .data$site_name)
     )
 }
 

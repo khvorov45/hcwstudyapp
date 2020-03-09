@@ -16,7 +16,8 @@ site_altnames <- c(
   "melbourne" = "Alfred Hospital",
   "newcastle" = "John Hunter Hospital",
   "perth" = "Perth Children's Hospital",
-  "sydney" = "Children's Hospital Westmead"
+  "sydney" = "Children's Hospital Westmead",
+  "(Missing)" = "(Missing)"
 )
 
 #' Returns the site name given the access group
