@@ -4,7 +4,7 @@
 
 # Recruitment
 
-[] Numbers, total to top
+[x] Numbers, total to top
 [] Filter by study group
 
 # Baseline
