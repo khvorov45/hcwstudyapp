@@ -2,9 +2,13 @@ plot_recruitvh <- function(dat, fontsize = 16, dark = TRUE) {
   if (dark) {
     ggdark::darken_geoms()
     pltheme <- ggdark::dark_theme_bw(base_size = fontsize, verbose = FALSE)
+    barcol <- "gray25"
+    textcol <- "gray75"
   } else {
     ggdark::lighten_geoms()
     pltheme <- theme_bw(base_size = fontsize)
+    barcol <- "gray75"
+    textcol <- "gray25"
   }
   dat %>%
     mutate(
@@ -25,10 +29,10 @@ plot_recruitvh <- function(dat, fontsize = 16, dark = TRUE) {
       "Number recruited",
       labels = scales::number_format(1)
     ) +
-    geom_col() +
+    geom_col(fill = barcol) +
     geom_text(
       aes(y = 0.1, label = .data$n),
-      col = "black", size = fontsize, vjust = 0
+      col = textcol, size = fontsize, vjust = 0
     ) +
     geom_text(
       aes(label = glue::glue("Total: {sum(.data$n)}"), y = max(.data$n) + 1),
