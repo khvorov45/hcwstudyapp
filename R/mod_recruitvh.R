@@ -7,6 +7,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
     sidebarLayout(
       sidebarPanel(
         siteselect(ns("site")),
+        binfilt(ns("filteraddb"), "Consent to additional bleeds"),
         sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20)
       ),
       mainPanel(
@@ -35,8 +36,13 @@ server_recruitvh <- function(input, output, session, dat, dark) {
   # Filter on site change
   dat_plot_filt <- filter_siteselect_dyn(reactive(input$site), part)
 
+  # Filter by consent to additional bleed
+  dat_confilt <- binfilt_fun(
+    dat_plot_filt, reactive(input$filteraddb), "add_bleed"
+  )
+
   # Render
   output$plot <- renderPlot({
-    plot_recruitvh(dat_plot_filt(), input$fontsize, dark())
+    plot_recruitvh(dat_confilt(), input$fontsize, dark())
   })
 }

@@ -91,6 +91,7 @@ subset_consent <- function(raw) {
 get_tbl_participant <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
+    "add_bleed",
     "mobile_number", "email"
   )
   raw_consented %>%
