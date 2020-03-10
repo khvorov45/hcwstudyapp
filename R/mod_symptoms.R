@@ -17,7 +17,7 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
       direction = "vertical",
       justified = TRUE
     ),
-    binfilt(ns, "Swabs")
+    binfilt(ns("subsetswab"), "Swabs")
   )
 }
 
@@ -82,16 +82,9 @@ server_symptoms <- function(input, output, session, redcap_data) {
   })
 
   # Filter by swab
-  tbl_fswab <- reactive({
-    mutate(
-      tbl_fili(),
-      swab_collection_2 = if_else(
-        is.na(.data$swab_collection), "Missing", .data$swab_collection
-      )
-    ) %>%
-      filter(.data$swab_collection_2 %in% input$subsetswab) %>%
-      select(-"swab_collection_2")
-  })
+  tbl_fswab <- binfilt_fun(
+    tbl_fili, reactive(input$subsetswab), "swab_collection"
+  )
 
   # Render
   tbl_new <- update_tbl_dyn(input, tbl_fswab)
