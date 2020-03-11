@@ -1,6 +1,6 @@
 # Data
 
-[] box positions - separate file uploaded to the database. Cannot access through API.
+[] box positions - separate file uploaded to the database. Cannot access through API. Can only access record-associated files.
 
 # Recruitment
 
