@@ -1,7 +1,6 @@
 #' @import shiny
 app_ui <- function() {
   tagList(
-
     golem_add_external_resources(),
     shinyjs::useShinyjs(),
 
@@ -39,11 +38,10 @@ app_ui <- function() {
 
         ui_recruitvh(),
         ui_participants(),
+        ui_baseline(),
         ui_symptoms(),
         ui_swabs()
-
       ), # tabsetPanel
-
     ), # fluidPage
 
     tags$script(src = "www/script.js")
@@ -52,9 +50,8 @@ app_ui <- function() {
 
 #' @import shiny
 golem_add_external_resources <- function() {
-
   addResourcePath(
-    'www', system.file('app/www', package = 'hcwstudyapp')
+    "www", system.file("app/www", package = "hcwstudyapp")
   )
 
   tags$head(
