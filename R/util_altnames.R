@@ -28,7 +28,10 @@ site_altnames <- c(
 #' @noRd
 get_site_name <- function(access_group) {
   if (!access_group %in% names(site_altnames)) {
-    rlang::abort(glue::glue("access group '{access_group}' not recognised"))
+    rlang::abort(
+      glue::glue("access group '{access_group}' not recognised"),
+      class = "unknown_access_group"
+    )
   }
   site_altnames[names(site_altnames) == access_group][[1]]
 }

@@ -57,3 +57,16 @@ test_that("Subsetting by access_group works", {
   expect_equal(colnames(dat_empty), colnames(dat))
   expect_equal(nrow(dat_empty), 0)
 })
+
+test_that("access group fails when group isn't recognised", {
+  expect_error(
+    get_site_name("unknown_group"),
+    class = "unknown_access_group"
+  )
+})
+
+test_that("Alternative variable names are variables", {
+  skip_if_no_tok(tok)
+  dat <- get_redcap_data(tok, uri)
+  expect_true(all(names(var_altnames) %in% colnames(dat)))
+})
