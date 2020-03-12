@@ -92,7 +92,8 @@ get_tbl_participant <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
     "add_bleed",
-    "mobile_number", "email"
+    "mobile_number", "email", "a1_gender", "a2_dob", "a3_atsi", "a4_children",
+    "a5_height", "a6_weight"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "baseline") %>%

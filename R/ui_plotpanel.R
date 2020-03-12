@@ -28,11 +28,14 @@ plotpanel <- function(ns, label, ...) {
 #'
 #' @noRd
 plotpanel_fun <- function(input, output, session, tbl, dark, plot_fun,
-                          process_fun) {
+                          process_fun, plot_fun_args = list()) {
   update_siteselect_dyn(session, "site", tbl)
   sitefilt <- filter_siteselect_dyn(reactive(input$site), tbl)
   fullfilt <- process_fun(sitefilt)
   output$plot <- renderPlot({
-    plot_fun(fullfilt(), input$fontsize, dark())
+    do.call(
+      plot_fun,
+      c(list(fullfilt(), input$fontsize, dark()), plot_fun_args)
+    )
   })
 }

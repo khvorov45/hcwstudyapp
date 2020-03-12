@@ -6,7 +6,12 @@ ui_baseline <- function(id = "baseline", label = "Baseline") {
     label,
     tabsetPanel(
       type = "tabs",
-      plotpanel(ns, "Histograms")
+      plotpanel(
+        ns, "Histograms",
+        shinyWidgets::pickerInput(
+          ns("var_name"), "Variable", list("a1_gender")
+        )
+      )
     )
   )
 }
@@ -24,6 +29,9 @@ server_baseline <- function(input, output, session, dat, dark) {
     plot_hist,
     function(tbl) {
       tbl
-    }
+    },
+    list(
+      var_name = input$var_name
+    )
   )
 }

@@ -4,7 +4,9 @@
 \name{var_altnames}
 \alias{var_altnames}
 \title{Alternative variable names}
-\format{An object of class \code{character} of length 7.}
+\format{
+An object of class \code{character} of length 7.
+}
 \usage{
 var_altnames
 }

@@ -4,7 +4,9 @@
 \name{site_altnames}
 \alias{site_altnames}
 \title{Access group names}
-\format{An object of class \code{character} of length 7.}
+\format{
+An object of class \code{character} of length 7.
+}
 \usage{
 site_altnames
 }
