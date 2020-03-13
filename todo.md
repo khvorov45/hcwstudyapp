@@ -9,7 +9,7 @@
 
 # Baseline
 
-[] histograms of age, sex
+[x] histograms of age, sex
 [] missing data in baseline Q
 
 # Symptoms
