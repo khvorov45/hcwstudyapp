@@ -93,11 +93,15 @@ get_tbl_participant <- function(raw_consented) {
     "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
     "add_bleed",
     "mobile_number", "email", "a1_gender", "a2_dob", "a3_atsi", "a4_children",
-    "a5_height", "a6_weight"
+    "a5_height", "a6_weight", "date_screening"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "baseline") %>%
-    select(!!!rlang::syms(needed_cols))
+    select(!!!rlang::syms(needed_cols)) %>%
+    mutate(
+      age_screening = lubridate::interval(.data$a2_dob, .data$date_screening) /
+        lubridate::dyears(1)
+    )
 }
 
 #' Extracts the symptom table

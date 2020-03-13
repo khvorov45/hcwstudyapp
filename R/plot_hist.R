@@ -8,11 +8,12 @@ plot_hist <- function(dat, fontsize, dark, var_lab) {
     ggdark::lighten_geoms()
     pltheme <- theme_bw(base_size = fontsize)
   }
-  var_names <- c("Gender" = "a1_gender")
-  geoms <- list("Gender" = geom_bar())
+  var_names <- c("Gender" = "a1_gender", "Age" = "age_screening")
+  geoms <- list("Gender" = geom_bar(), "Age" = geom_histogram(binwidth = 1))
+  x_labs <- list("Gender" = "Gender", "Age" = "Age at screening")
   dat %>%
     ggplot(aes(!!rlang::sym(var_names[[var_lab]]))) +
     pltheme +
-    xlab(var_lab) +
+    xlab(x_labs[[var_lab]]) +
     geoms[[var_lab]]
 }
