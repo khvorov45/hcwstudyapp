@@ -37,8 +37,8 @@ app_ui <- function() {
         type = "tabs",
 
         ui_recruitvh(),
-        ui_participants(),
         ui_baseline(),
+        ui_participants(),
         ui_symptoms(),
         ui_swabs()
       ), # tabsetPanel

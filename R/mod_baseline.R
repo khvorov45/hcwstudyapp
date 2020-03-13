@@ -2,17 +2,11 @@
 #' @noRd
 ui_baseline <- function(id = "baseline", label = "Baseline") {
   ns <- NS(id)
-  tabPanel(
-    label,
-    tabsetPanel(
-      type = "tabs",
-      plotpanel(
-        ns, "Histograms",
-        shinyWidgets::pickerInput(
-          ns("var_lab"), "Variable",
-          list("Gender", "Age")
-        )
-      )
+  plotpanel(
+    ns, label,
+    shinyWidgets::pickerInput(
+      ns("var_lab"), "Variable",
+      list("Gender", "Age")
     )
   )
 }
