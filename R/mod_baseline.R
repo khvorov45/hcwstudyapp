@@ -9,7 +9,8 @@ ui_baseline <- function(id = "baseline", label = "Baseline") {
       plotpanel(
         ns, "Histograms",
         shinyWidgets::pickerInput(
-          ns("var_name"), "Variable", list("a1_gender")
+          ns("var_lab"), "Variable",
+          list("Gender")
         )
       )
     )
@@ -31,7 +32,7 @@ server_baseline <- function(input, output, session, dat, dark) {
       tbl
     },
     list(
-      var_name = input$var_name
+      var_lab = input$var_lab
     )
   )
 }

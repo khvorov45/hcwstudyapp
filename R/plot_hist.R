@@ -1,6 +1,6 @@
 #' Plots a histogram
 #' @noRd
-plot_hist <- function(dat, fontsize, dark, var_name) {
+plot_hist <- function(dat, fontsize, dark, var_lab) {
   if (dark) {
     ggdark::darken_geoms()
     pltheme <- ggdark::dark_theme_bw(base_size = fontsize, verbose = FALSE)
@@ -8,13 +8,11 @@ plot_hist <- function(dat, fontsize, dark, var_name) {
     ggdark::lighten_geoms()
     pltheme <- theme_bw(base_size = fontsize)
   }
-  if (var_name == "a1_gender") {
-    the_geom <- geom_bar()
-  } else {
-    the_geom <- geom_histogram(bins = 30)
-  }
+  var_names <- c("Gender" = "a1_gender")
+  geoms <- list("Gender" = geom_bar())
   dat %>%
-    ggplot(aes(!!rlang::sym(var_name))) +
+    ggplot(aes(!!rlang::sym(var_names[[var_lab]]))) +
     pltheme +
-    the_geom
+    xlab(var_lab) +
+    geoms[[var_lab]]
 }
