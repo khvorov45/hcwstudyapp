@@ -20,6 +20,7 @@ site_altnames <- c(
   "(Missing)" = "(Missing)"
 )
 
+#' Names for options in the medical history
 medicalhx_altnames <- c(
   "1" = "Cardiac disease",
   "2" = "Renal disiase",
@@ -30,6 +31,24 @@ medicalhx_altnames <- c(
   "7" = "Diabetes or other metabolic disorder",
   "8" = "Smoker",
   "9" = "None"
+)
+
+#' Names for options in swab results
+swabres_altnames <- c(
+  "1" = "Influenza A (unsubtyped)",
+  "2" = "Influenza A H3",
+  "3" = "Influenza A H1",
+  "4" = "Influenza B (no lineage)",
+  "5" = "Influenza B Vic",
+  "6" = "Influenza B Yam",
+  "7" = "Influenza C",
+  "8" = "Parainfluenza",
+  "9" = "Human metapneumovirus",
+  "10" = "Picornavirus",
+  "11" = "Adenovirus",
+  "12" = "Coronavirus",
+  "13" = "Other",
+  "14" = "Negative"
 )
 
 #' Returns the site name given the access group

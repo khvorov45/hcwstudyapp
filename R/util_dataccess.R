@@ -30,7 +30,8 @@ reformat_cols <- function(raw) {
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
       ari_definition = as.integer(.data$ari_definition),
       site_name = if_else(is.na(.data$site_name), "(Missing)", .data$site_name),
-      b1_medicalhx = redcap_to_listcol("b1_medicalhx", medicalhx_altnames, raw)
+      b1_medicalhx = redcap_to_listcol("b1_medicalhx", medicalhx_altnames, raw),
+      swab_result = redcap_to_listcol("swab_result", swabres_altnames, raw)
     )
 }
 
@@ -135,7 +136,7 @@ get_tbl_swab <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "swab_collection", "samp_date", "survey_week",
     "site_rec_date", "site_test_date", "doherty_swab_sent_date",
-    "symptom_duration"
+    "symptom_duration", "swab_result"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "infection") %>%
