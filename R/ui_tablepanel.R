@@ -66,9 +66,9 @@ render_tablepanel_table <- function(output, tbl) {
       style = "bootstrap4",
       rownames = FALSE,
       options = list(
-        dom = "t",
+        dom = "pt",
         columnDefs = list(
-          list(className = 'dt-center', targets = 1:ncol(tbl) - 1)
+          list(className = "dt-center", targets = 1:ncol(tbl) - 1)
         ),
         scrollX = TRUE
       )
@@ -85,7 +85,11 @@ render_tablepanel_table <- function(output, tbl) {
 #' @noRd
 download_data <- function(output, name, data) {
   output$download <- downloadHandler(
-    filename = function() {glue::glue("{name}.csv")},
-    content = function(file) {readr::write_csv(data(), file)}
+    filename = function() {
+      glue::glue("{name}.csv")
+    },
+    content = function(file) {
+      readr::write_csv(data(), file)
+    }
   )
 }
