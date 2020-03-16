@@ -33,7 +33,8 @@ Imports:
   DT,
   shinyjs,
   readr,
-  forcats
+  forcats,
+  tidyr
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.1.0

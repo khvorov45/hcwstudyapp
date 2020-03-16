@@ -20,6 +20,18 @@ site_altnames <- c(
   "(Missing)" = "(Missing)"
 )
 
+medicalhx_altnames <- c(
+  "1" = "Cardiac disease",
+  "2" = "Renal disiase",
+  "3" = "Chronic respiratory condition",
+  "4" = "Haemotological disorder",
+  "5" = "Pregnancy",
+  "6" = "Immunocompromising condition",
+  "7" = "Diabetes or other metabolic disorder",
+  "8" = "Smoker",
+  "9" = "None"
+)
+
 #' Returns the site name given the access group
 #'
 #' @param access_group Access group, should be one of the names in

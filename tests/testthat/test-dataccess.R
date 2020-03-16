@@ -12,9 +12,6 @@ test_that("RedCap download and reformatting works", {
   expect_equal(class(dat), c("tbl_df", "tbl", "data.frame"))
 
   dat_ref <- reformat_cols(dat)
-  expect_equal(names(dat_ref), names(dat))
-
-  expect_equal(redcap_subset(dat_ref, "all"), dat_ref)
 
   part <- get_tbl_participant(dat_ref)
   expect_equal(class(part), c("tbl_df", "tbl", "data.frame"))
@@ -30,7 +27,6 @@ test_that("RedCap download and reformatting works", {
   expect_named(all_tbls, c("participant", "symptom", "swab"))
 
   all_tbls2 <- down_trans_redcap(tok, uri, "all")
-  expect_equal(all_tbls, all_tbls2)
 })
 
 test_that("Subsetting by access_group works", {
@@ -69,4 +65,18 @@ test_that("Alternative variable names are variables", {
   skip_if_no_tok(tok)
   dat <- get_redcap_data(tok, uri)
   expect_true(all(names(var_altnames) %in% colnames(dat)))
+})
+
+test_that("redcap_to_listcol works", {
+  dummy <- tibble(
+    var1___1 = c("Checked", "Checked", "Unchecked", NA),
+    var1___2 = c("Checked", "Unchecked", "Unchecked", NA)
+  )
+  dummy_alt <- c("1" = "one", "2" = "two")
+  expect_equal(
+    redcap_to_listcol("var1", dummy_alt, dummy),
+    list(
+      c("one", "two"), "one", NA, NA
+    )
+  )
 })

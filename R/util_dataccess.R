@@ -29,7 +29,8 @@ reformat_cols <- function(raw) {
       num_seas_vac = as.integer(.data$num_seas_vac),
       eligible_extra_bleed = as.integer(.data$eligible_extra_bleed),
       ari_definition = as.integer(.data$ari_definition),
-      site_name = if_else(is.na(.data$site_name), "(Missing)", .data$site_name)
+      site_name = if_else(is.na(.data$site_name), "(Missing)", .data$site_name),
+      b1_medicalhx = redcap_to_listcol("b1_medicalhx", medicalhx_altnames, raw)
     )
 }
 
@@ -90,10 +91,15 @@ subset_consent <- function(raw) {
 #' @export
 get_tbl_participant <- function(raw_consented) {
   needed_cols <- c(
-    "record_id", "pid", "site_name", "num_seas_vac", "eligible_extra_bleed",
-    "add_bleed",
-    "mobile_number", "email", "a1_gender", "a2_dob", "a3_atsi", "a4_children",
-    "a5_height", "a6_weight", "date_screening"
+    "record_id", "pid", "site_name", "date_screening",
+    "num_seas_vac", "eligible_extra_bleed", "add_bleed",
+    "mobile_number", "email",
+    "a1_gender", "a2_dob", "a3_atsi", "a4_children",
+    "a5_height", "a6_weight",
+    "b1_medicalhx",
+    "c1_yrs_employed", "c2_emp_status", "c3_occupation",
+    "c3_spec",
+    "c4_spec", "c5_clin_care", "d1_future_vacc"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "baseline") %>%
@@ -162,4 +168,40 @@ down_trans_redcap <- function(token, uri = "https://biredcap.mh.org.au/api/",
     reformat_cols() %>%
     redcap_subset(access_group) %>%
     get_tbls()
+}
+
+#' Converts RedCAP's checkbox representation into a list-column
+#'
+#' @param data RedCAP table
+#' @param var_name Name (also prefix) of the checkbox variable
+#' @param var_key Named list that converts numbers to labels
+#'
+#' @importFrom rlang :=
+#'
+#' @noRd
+redcap_to_listcol <- function(var_name, var_key, data) {
+  internal_fun <- function(resp, check) {
+    if (all(is.na(check)) | all(check == "Unchecked")) {
+      return(list(NA))
+    }
+    list(resp[check == "Checked"])
+  }
+  data %>%
+    select(
+      !!!rlang::syms(glue::glue("{var_name}___{names(var_key)}"))
+    ) %>%
+    mutate(row_index = row_number()) %>%
+    tidyr::pivot_longer(-.data$row_index, var_name, values_to = "response") %>%
+    mutate(
+      !!rlang::sym(var_name) := stringr::str_replace(
+        !!rlang::sym(var_name), glue::glue("{var_name}___"), ""
+      ) %>% recode(!!!var_key)
+    ) %>%
+    group_by(.data$row_index) %>%
+    summarise(
+      !!rlang::sym(var_name) := internal_fun(
+        !!rlang::sym(var_name), .data$response
+      )
+    ) %>%
+    pull(!!rlang::sym(var_name))
 }
