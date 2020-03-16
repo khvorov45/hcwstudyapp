@@ -1,6 +1,6 @@
 #' Table of participants and their contact information
 #' @noRd
-ui_participants <- function(id = "participants", label = "Participants") {
+ui_participants <- function(id = "participants", label = "Contact") {
   ns <- NS(id)
   tablepanel(ns, label)
 }
@@ -13,7 +13,7 @@ ui_participants <- function(id = "participants", label = "Participants") {
 #'
 #' @noRd
 server_participants <- function(input, output, session, dat) {
-  tbl <- reactive(dat()$participant)
+  tbl <- reactive(dat()$participant_essential)
   update_tablepanel_dyn(session, tbl)
   tbl_new <- update_tbl_dyn(input, tbl)
   render_tablepanel_table(output, tbl_new)

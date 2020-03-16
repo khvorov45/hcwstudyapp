@@ -152,6 +152,8 @@ get_tbls <- function(raw) {
   raw_consented <- subset_consent(raw)
   list(
     participant = get_tbl_participant(raw_consented),
+    participant_essential = get_tbl_participant(raw_consented) %>%
+      select("record_id", "pid", "site_name", "mobile_number", "email"),
     symptom = get_tbl_symptom(raw_consented),
     swab = get_tbl_swab(raw_consented)
   )

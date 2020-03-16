@@ -21,7 +21,7 @@ ui_swabs <- function(id = "swabs", label = "Swabs") {
 server_swabs <- function(input, output, session, dat) {
   tbl <- reactive({
     all_dat <- dat()
-    inner_join(all_dat$swab, all_dat$participant, "record_id") %>%
+    inner_join(all_dat$swab, all_dat$participant_essential, "record_id") %>%
       select("record_id", "pid", "site_name", everything())
   })
   update_tablepanel_dyn(session, tbl)
@@ -37,7 +37,9 @@ server_swabs <- function(input, output, session, dat) {
         unique() %>%
         inner_join(tbl_current, c("record_id", "samp_date", "survey_week")) %>%
         select("record_id", "pid", "site_name", everything())
-    } else tbl_current
+    } else {
+      tbl_current
+    }
   })
 
   tbl_new <- update_tbl_dyn(input, tbl_orphan)

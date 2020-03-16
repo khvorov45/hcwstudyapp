@@ -24,7 +24,9 @@ test_that("RedCap download and reformatting works", {
   expect_equal(class(swab), c("tbl_df", "tbl", "data.frame"))
 
   all_tbls <- get_tbls(dat_ref)
-  expect_named(all_tbls, c("participant", "symptom", "swab"))
+  expect_named(
+    all_tbls, c("participant", "participant_essential", "symptom", "swab")
+  )
 
   all_tbls2 <- down_trans_redcap(tok, uri, "all")
 })

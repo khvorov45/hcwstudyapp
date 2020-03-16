@@ -32,7 +32,7 @@ server_symptoms <- function(input, output, session, redcap_data) {
   tbl <- reactive({
     inner_join(
       redcap_data()$symptom,
-      redcap_data()$participant,
+      redcap_data()$participant_essential,
       "record_id"
     ) %>%
       left_join(
