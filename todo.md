@@ -22,7 +22,7 @@
 
 # Swabs
 
-[] add results
+[x] add results
 
 # Site
 
