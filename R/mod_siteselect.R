@@ -3,10 +3,10 @@
 #' Button to select site
 #'
 #' @noRd
-ui_siteselect <- function(id = "siteselect2", label = "Site") {
+ui_siteselect <- function(id = "siteselect", label = "Site") {
   ns <- NS(id)
   shinyWidgets::pickerInput(
-    ns("site2"), label,
+    ns("site"), label,
     choices = list(), selected = list(),
     multiple = FALSE
   )
@@ -20,18 +20,18 @@ ui_siteselect <- function(id = "siteselect2", label = "Site") {
 server_siteselect <- function(input, output, session, data) {
   observe({
     sites <- unique(data()$participant_essential$site_name)
-    update_siteselect2(session, "site2", sites)
+    update_siteselect(session, "site", sites)
   })
   sitedata <- reactive({
     cur_dat <- data()
-    if (is.null(input$site2)) {
+    if (is.null(input$site)) {
       return(cur_dat)
     }
-    if (input$site2 == "All") {
+    if (input$site == "All") {
       return(cur_dat)
     }
     site_ids <- cur_dat$participant_essential %>%
-      filter(.data$site_name == input$site2) %>%
+      filter(.data$site_name == input$site) %>%
       pull("record_id")
     map(cur_dat, ~ filter(.x, .data$record_id %in% site_ids))
   })
@@ -40,7 +40,7 @@ server_siteselect <- function(input, output, session, data) {
 
 #' Updates the above list
 #' @noRd
-update_siteselect2 <- function(session, id, new_choices) {
+update_siteselect <- function(session, id, new_choices) {
   if (length(new_choices) > 1L) {
     new_choices <- as.list(c("All", new_choices))
   } else {
