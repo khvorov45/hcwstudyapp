@@ -2,7 +2,7 @@
 #' @noRd
 ui_participants <- function(id = "participants", label = "Contact") {
   ns <- NS(id)
-  tablepanel(ns, label, siteselect(ns("site")))
+  tablepanel(ns, label)
 }
 
 #' Server for participants

@@ -4,7 +4,6 @@ ui_baseline <- function(id = "baseline", label = "Baseline") {
   ns <- NS(id)
   tabPanel(
     label,
-    siteselect(ns("site")),
     tabsetPanel(
       type = "tabs",
       plotpanel(

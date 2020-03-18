@@ -28,7 +28,6 @@ tablepanel <- function(ns, label, ...) {
 #'
 #' @noRd
 update_tablepanel_dyn <- function(session, tbl) {
-  update_siteselect_dyn(session, "site", tbl)
   update_varselect_dyn(session, "vars", tbl)
 }
 
@@ -42,8 +41,7 @@ update_tablepanel_dyn <- function(session, tbl) {
 #'
 #' @noRd
 update_tbl_dyn <- function(input, tbl) {
-  tbl_filtered <- filter_siteselect_dyn(reactive(input$site), tbl)
-  tbl_selected <- select_vars_dyn(reactive(input$vars), tbl_filtered)
+  tbl_selected <- select_vars_dyn(reactive(input$vars), tbl)
   # Remove rows with all missing
   reactive({
     subs <- tbl_selected() %>% unique()

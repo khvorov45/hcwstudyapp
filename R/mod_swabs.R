@@ -4,7 +4,6 @@ ui_swabs <- function(id = "swabs", label = "Swabs") {
   ns <- NS(id)
   tablepanel(
     ns, label,
-    siteselect(ns("site")),
     shinyWidgets::prettyCheckbox(ns("orphan"), "Orphan"),
     HTML(
       "Orphan swabs are swabs whose survey_week does not

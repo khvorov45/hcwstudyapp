@@ -9,12 +9,12 @@ a {
 }
 
 /* Password input */
-#apipass-update, #updatedata-update, #updatedata-time, .bootstrap-switch-id-themeswitch-themeswitch {
+#apipass-update, #updatedata-update, #updatedata-time, .bootstrap-switch-id-themeswitch-themeswitch  {
 	margin-top: 25px;
 }
 #apipass-check {
 	position: relative;
-	top: 12px;
+	top: -65px;
 }
 
 /* Info message for data update */

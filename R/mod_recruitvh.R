@@ -4,7 +4,6 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
   ns <- NS(id)
   plotpanel(
     ns, label,
-    siteselect(ns("site")),
     binfilt(ns("filteraddb"), "Consent to additional bleeds")
   )
 }

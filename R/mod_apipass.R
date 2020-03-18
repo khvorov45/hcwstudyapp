@@ -6,14 +6,12 @@
 ui_apipass <- function(id = "apipass", label = "Password") {
   ns <- NS(id)
   fluidRow(
-    column(6, apipassword(ns("apipassword"))),
+    column(5, apipassword(ns("apipassword"))),
     column(
-      6,
-      fluidRow(
-        updatebutton(ns("update"), "Update password"),
-        apipasscheck(ns("check"))
-      )
+      5,
+      updatebutton(ns("update"), "Update password"), apipasscheck(ns("check"))
     )
+    # column(2, apipasscheck(ns("check")))
   )
 }
 
@@ -37,7 +35,7 @@ server_apipass <- function(input, output, session) {
       access_group() == "none" ~ glue::glue(
         "<span class = 'cross'>{cli::symbol$cross}</span>"
       ),
-      TRUE ~  glue::glue("<span class = 'tick'>{cli::symbol$tick}</span>")
+      TRUE ~ glue::glue("<span class = 'tick'>{cli::symbol$tick}</span>")
     )
     output$check <- renderUI(HTML(valid))
   })

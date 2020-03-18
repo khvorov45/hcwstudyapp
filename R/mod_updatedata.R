@@ -3,11 +3,11 @@
 #' Button to update and an info message with timestamp next to it
 #'
 #' @noRd
-ui_updatedata <- function(id = "updatedata", label = "Update data", colw = 3) {
+ui_updatedata <- function(id = "updatedata", label = "Update data") {
   ns <- NS(id)
   fluidRow(
-    column(3, updatebutton(ns("update"), label)),
-    column(9, htmlOutput(ns("time")))
+    column(5, updatebutton(ns("update"), label)),
+    column(7, htmlOutput(ns("time")))
   )
 }
 

@@ -27,8 +27,9 @@ app_ui <- function() {
 
       # Password, data update and theme swtich
       fluidRow(
-        column(5, ui_apipass()),
-        column(5, ui_updatedata()),
+        column(4, ui_apipass()),
+        column(4, ui_updatedata()),
+        column(2, ui_siteselect()),
         column(2, ui_themeswtich())
       ),
 
