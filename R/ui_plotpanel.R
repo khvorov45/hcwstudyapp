@@ -10,7 +10,6 @@ plotpanel <- function(ns, label, ...) {
     label,
     sidebarLayout(
       sidebarPanel(
-        siteselect(ns("site")),
         ...,
         sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20)
       ),

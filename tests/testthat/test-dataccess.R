@@ -25,7 +25,11 @@ test_that("RedCap download and reformatting works", {
 
   all_tbls <- get_tbls(dat_ref)
   expect_named(
-    all_tbls, c("participant", "participant_essential", "symptom", "swab")
+    all_tbls,
+    c(
+      "participant_essential", "participant_recruit", "participant_baseline",
+      "symptom", "swab"
+    )
   )
 
   all_tbls2 <- down_trans_redcap(tok, uri, "all")

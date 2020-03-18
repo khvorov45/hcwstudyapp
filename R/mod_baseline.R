@@ -2,11 +2,21 @@
 #' @noRd
 ui_baseline <- function(id = "baseline", label = "Baseline") {
   ns <- NS(id)
-  plotpanel(
-    ns, label,
-    shinyWidgets::pickerInput(
-      ns("var_lab"), "Variable",
-      list("Gender", "Age")
+  tabPanel(
+    label,
+    siteselect(ns("site")),
+    tabsetPanel(
+      type = "tabs",
+      plotpanel(
+        ns, "Histograms",
+        shinyWidgets::pickerInput(
+          ns("var_lab"), "Variable",
+          list("Gender", "Age")
+        )
+      ),
+      tablepanel(
+        ns, "Questionnaire"
+      )
     )
   )
 }
@@ -19,10 +29,15 @@ ui_baseline <- function(id = "baseline", label = "Baseline") {
 #'
 #' @noRd
 server_baseline <- function(input, output, session, dat, dark) {
+  tbl <- reactive(inner_join(
+    dat()$participant_essential,
+    dat()$participant_baseline,
+    "record_id"
+  ))
   observe({
     var_lab <- input$var_lab
     plotpanel_fun(
-      input, output, session, reactive(dat()$participant), dark,
+      input, output, session, tbl, dark,
       plot_hist,
       function(tbl) {
         tbl
@@ -32,4 +47,8 @@ server_baseline <- function(input, output, session, dat, dark) {
       )
     )
   })
+  update_tablepanel_dyn(session, tbl)
+  tbl_new <- update_tbl_dyn(input, tbl)
+  render_tablepanel_table(output, tbl_new)
+  output$download <- download_data(output, "baseline_questionnaire", tbl_new)
 }

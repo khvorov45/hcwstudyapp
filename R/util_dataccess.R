@@ -94,7 +94,7 @@ get_tbl_participant <- function(raw_consented) {
   needed_cols <- c(
     "record_id", "pid", "site_name", "date_screening",
     "num_seas_vac", "eligible_extra_bleed", "add_bleed",
-    "mobile_number", "email",
+    "mobile_number", "email", "baseline_q_date",
     "a1_gender", "a2_dob", "a3_atsi", "a4_children",
     "a5_height", "a6_weight",
     "b1_medicalhx",
@@ -150,10 +150,26 @@ get_tbl_swab <- function(raw_consented) {
 #' @export
 get_tbls <- function(raw) {
   raw_consented <- subset_consent(raw)
+  all_part <- get_tbl_participant(raw_consented)
   list(
-    participant = get_tbl_participant(raw_consented),
-    participant_essential = get_tbl_participant(raw_consented) %>%
+    participant_essential = all_part %>%
       select("record_id", "pid", "site_name", "mobile_number", "email"),
+    participant_recruit = all_part %>%
+      select(
+        "record_id", "date_screening",
+        "num_seas_vac", "eligible_extra_bleed", "add_bleed",
+        "mobile_number", "email"
+      ),
+    participant_baseline = all_part %>%
+      select(
+        "record_id", "baseline_q_date",
+        "a1_gender", "a2_dob", "a3_atsi", "a4_children",
+        "a5_height", "a6_weight",
+        "b1_medicalhx",
+        "c1_yrs_employed", "c2_emp_status", "c3_occupation",
+        "c3_spec",
+        "c4_spec", "c5_clin_care", "d1_future_vacc", "age_screening"
+      ),
     symptom = get_tbl_symptom(raw_consented),
     swab = get_tbl_swab(raw_consented)
   )

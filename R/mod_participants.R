@@ -2,7 +2,7 @@
 #' @noRd
 ui_participants <- function(id = "participants", label = "Contact") {
   ns <- NS(id)
-  tablepanel(ns, label)
+  tablepanel(ns, label, siteselect(ns("site")))
 }
 
 #' Server for participants
@@ -17,5 +17,5 @@ server_participants <- function(input, output, session, dat) {
   update_tablepanel_dyn(session, tbl)
   tbl_new <- update_tbl_dyn(input, tbl)
   render_tablepanel_table(output, tbl_new)
-  output$download <- download_data(output, "participants", tbl_new)
+  output$download <- download_data(output, "contact", tbl_new)
 }

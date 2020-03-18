@@ -10,7 +10,6 @@ tablepanel <- function(ns, label, ...) {
     label,
     sidebarLayout(
       sidebarPanel(
-        siteselect(ns("site")),
         varselect(ns("vars")),
         ...,
         downloadButton(ns("download"), "Download")
