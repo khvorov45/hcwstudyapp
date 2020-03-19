@@ -17,7 +17,7 @@ ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
       direction = "vertical",
       justified = TRUE
     ),
-    binfilt(ns("subsetswab"), "Swabs")
+    ui_binfilt(ns("binfilt"), "Swab collection", "swab_collection")
   )
 }
 
@@ -82,8 +82,8 @@ server_symptoms <- function(input, output, session, redcap_data) {
   })
 
   # Filter by swab
-  tbl_fswab <- binfilt_fun(
-    tbl_fili, reactive(input$subsetswab), "swab_collection"
+  tbl_fswab <- callModule(
+    server_binfilt, "binfilt", tbl_fili, "swab_collection"
   )
 
   # Render
