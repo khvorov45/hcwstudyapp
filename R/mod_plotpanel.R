@@ -17,6 +17,9 @@ ui_plotpanel <- function(id, label, data_ui = list(),
         plot_ui,
         hr(),
         ui_varselect(ns("vars"), "Table variables"),
+        shinyWidgets::pickerInput(
+          ns("nrow"), "Rows per page", list("All", "100", "50", "10")
+        ),
         tbl_ui,
         downloadButton(ns("download"), "Download data")
       ),
@@ -46,7 +49,12 @@ server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
   observe({
     tbl <- tbl()
     vars <- vars()
-    output$table <- table_render(tbl, vars)
+    if (input$nrow == "All") {
+      nrow <- nrow(tbl)
+    } else {
+      nrow <- as.numeric(input$nrow)
+    }
+    output$table <- table_render(tbl, vars, nrow)
   })
   output$download <- table_download(tbl, data_name)
 }

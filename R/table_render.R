@@ -1,4 +1,4 @@
-table_render <- function(tbl, vars = NULL) {
+table_render <- function(tbl, vars = NULL, pagelength = 100) {
   if (!is.null(vars)) tbl <- tbl[vars]
   DT::renderDataTable(
     tbl,
@@ -9,7 +9,8 @@ table_render <- function(tbl, vars = NULL) {
       columnDefs = list(
         list(className = "dt-center", targets = 1:ncol(tbl) - 1)
       ),
-      scrollX = TRUE
+      scrollX = TRUE,
+      pageLength = pagelength
     )
   )
 }
