@@ -16,7 +16,7 @@ ui_plotpanel <- function(id, label, data_ui = list(),
         sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
         plot_ui,
         hr(),
-        # varselect(ns("vars"), "Table variables"),
+        ui_varselect(ns("vars"), "Table variables"),
         tbl_ui,
         downloadButton(ns("download"), "Download data")
       ),
@@ -36,6 +36,7 @@ ui_plotpanel <- function(id, label, data_ui = list(),
 #' @noRd
 server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
                              plot_fun_args = list(), data_name = "data") {
+  vars <- callModule(server_varselect, "vars", tbl)
   output$plot <- renderPlot({
     do.call(
       plot_fun,
@@ -44,7 +45,8 @@ server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
   })
   observe({
     tbl <- tbl()
-    output$table <- table_render(tbl)
+    vars <- vars()
+    output$table <- table_render(tbl, vars)
   })
   output$download <- table_download(tbl, data_name)
 }

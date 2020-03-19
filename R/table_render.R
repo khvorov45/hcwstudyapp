@@ -1,4 +1,5 @@
-table_render <- function(tbl) {
+table_render <- function(tbl, vars = NULL) {
+  if (!is.null(vars)) tbl <- tbl[vars]
   DT::renderDataTable(
     tbl,
     style = "bootstrap4",

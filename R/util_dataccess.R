@@ -157,8 +157,7 @@ get_tbls <- function(raw) {
     participant_recruit = all_part %>%
       select(
         "record_id", "date_screening",
-        "num_seas_vac", "eligible_extra_bleed", "add_bleed",
-        "mobile_number", "email"
+        "num_seas_vac", "eligible_extra_bleed", "add_bleed"
       ),
     participant_baseline = all_part %>%
       select(
