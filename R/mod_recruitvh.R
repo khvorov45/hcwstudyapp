@@ -4,7 +4,7 @@ ui_recruitvh <- function(id = "recruitvh", label = "Recruitment") {
   ns <- NS(id)
   plotpanel(
     ns, label,
-    binfilt(ns("filteraddb"), "Consent to additional bleeds")
+    ui_binfilt(ns("binfilt"), "Consent to additional bleed", "add_bleed")
   )
 }
 
@@ -20,13 +20,12 @@ server_recruitvh <- function(input, output, session, dat, dark) {
   tbl <- reactive(inner_join(
     dat()$participant_recruit, dat()$participant_essential, "record_id"
   ))
+  tbl_filt <- callModule(server_binfilt, "binfilt", tbl, "add_bleed")
   plotpanel_fun(
-    input, output, session, tbl, dark,
+    input, output, session, tbl_filt, dark,
     plot_recruitvh,
     function(tbl) {
-      binfilt_fun(
-        tbl, reactive(input$filteraddb), "add_bleed"
-      )
+      tbl
     }
   )
 }
