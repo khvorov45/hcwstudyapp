@@ -27,12 +27,11 @@ plotpanel <- function(ns, label, ...) {
 #'
 #' @noRd
 plotpanel_fun <- function(input, output, session, tbl, dark, plot_fun,
-                          process_fun, plot_fun_args = list()) {
-  fullfilt <- process_fun(tbl)
+                          plot_fun_args = list()) {
   output$plot <- renderPlot({
     do.call(
       plot_fun,
-      c(list(fullfilt(), input$fontsize, dark()), plot_fun_args)
+      c(list(tbl(), input$fontsize, dark()), plot_fun_args)
     )
   })
 }

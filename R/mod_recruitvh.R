@@ -24,8 +24,5 @@ server_recruitvh <- function(input, output, session, dat, dark) {
   plotpanel_fun(
     input, output, session, tbl_filt, dark,
     plot_recruitvh,
-    function(tbl) {
-      tbl
-    }
   )
 }

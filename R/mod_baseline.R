@@ -38,9 +38,6 @@ server_baseline <- function(input, output, session, dat, dark) {
     plotpanel_fun(
       input, output, session, tbl, dark,
       plot_hist,
-      function(tbl) {
-        tbl
-      },
       list(
         var_lab = var_lab
       )
