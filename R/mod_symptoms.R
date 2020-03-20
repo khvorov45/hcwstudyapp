@@ -2,22 +2,24 @@
 #' @noRd
 ui_symptoms <- function(id = "symptoms", label = "Symptoms") {
   ns <- NS(id)
-  tablepanel(
-    ns, label,
-    dateRangeInput(
-      ns("dates"), "Date range", "2020-05-04", "2020-10-12"
-    ),
-    shinyWidgets::radioGroupButtons(
-      ns("subsetili"), "",
-      list(
-        "Completed surveys" = "all",
-        "All records for subjects with ARI" = "sub",
-        "All surveys with ARI" = "row"
+  ui_tablepanel(
+    ns("tablepanel"), label,
+    data_ui = list(
+      dateRangeInput(
+        ns("dates"), "Date range", "2020-05-04", "2020-10-12"
       ),
-      direction = "vertical",
-      justified = TRUE
-    ),
-    ui_binfilt(ns("binfilt"), "Swab collection", "swab_collection")
+      shinyWidgets::radioGroupButtons(
+        ns("subsetili"), "",
+        list(
+          "Completed surveys" = "all",
+          "All records for subjects with ARI" = "sub",
+          "All surveys with ARI" = "row"
+        ),
+        direction = "vertical",
+        justified = TRUE
+      ),
+      ui_binfilt(ns("binfilt"), "Swab collection", "swab_collection")
+    )
   )
 }
 
@@ -41,9 +43,6 @@ server_symptoms <- function(input, output, session, redcap_data) {
       ) %>%
       select("record_id", "pid", "site_name", everything())
   })
-
-  # Standard table panel
-  update_tablepanel_dyn(session, tbl)
 
   # Update dates to min/max
   observe({
@@ -86,10 +85,5 @@ server_symptoms <- function(input, output, session, redcap_data) {
     server_binfilt, "binfilt", tbl_fili, "swab_collection"
   )
 
-  # Render
-  tbl_new <- update_tbl_dyn(input, tbl_fswab)
-  render_tablepanel_table(output, tbl_new)
-
-  # Download
-  output$download <- download_data(output, "symptoms", tbl_new)
+  callModule(server_tablepanel, "tablepanel", tbl_fswab, "contact")
 }
