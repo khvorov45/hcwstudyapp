@@ -1,5 +1,11 @@
 # hcwstudyapp 0.1.0-dev
 
+## Additional functionality
+
+* Baseline tab
+
+  * Questionnaire completeness filter
+
 # hcwstudyapp 0.1.0
 
 ## Functionality
