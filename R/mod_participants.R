@@ -2,7 +2,7 @@
 #' @noRd
 ui_participants <- function(id = "participants", label = "Contact") {
   ns <- NS(id)
-  tablepanel(ns, label)
+  ui_tablepanel(ns("tablepanel"), label)
 }
 
 #' Server for participants
@@ -14,8 +14,5 @@ ui_participants <- function(id = "participants", label = "Contact") {
 #' @noRd
 server_participants <- function(input, output, session, dat) {
   tbl <- reactive(dat()$participant_essential)
-  update_tablepanel_dyn(session, tbl)
-  tbl_new <- update_tbl_dyn(input, tbl)
-  render_tablepanel_table(output, tbl_new)
-  output$download <- download_data(output, "contact", tbl_new)
+  callModule(server_tablepanel, "tablepanel", tbl, "contact")
 }
