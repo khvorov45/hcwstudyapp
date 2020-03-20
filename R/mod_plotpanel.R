@@ -13,8 +13,8 @@ ui_plotpanel <- function(id, label, data_ui = list(),
       sidebarPanel(
         data_ui,
         hr(),
-        sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
         plot_ui,
+        sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
         hr(),
         ui_varselect(ns("vars"), "Table variables"),
         shinyWidgets::pickerInput(
@@ -38,12 +38,16 @@ ui_plotpanel <- function(id, label, data_ui = list(),
 #'
 #' @noRd
 server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
-                             plot_fun_args = list(), data_name = "data") {
+                             plot_fun_args = reactiveValues(),
+                             data_name = "data") {
   vars <- callModule(server_varselect, "vars", tbl)
   output$plot <- renderPlot({
     do.call(
       plot_fun,
-      c(list(tbl(), input$fontsize, dark()), plot_fun_args)
+      c(
+        list(tbl(), input$fontsize, dark()),
+        reactiveValuesToList(plot_fun_args)
+      )
     )
   })
   observe({
