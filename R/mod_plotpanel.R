@@ -27,7 +27,7 @@ ui_plotpanel <- function(id, label, data_ui = list(),
         tabsetPanel(
           type = "tabs",
           tabPanel("Plot", plotOutput(ns("plot"))),
-          tabPanel("Table", DT::dataTableOutput(ns("table")))
+          tabPanel("Data", DT::dataTableOutput(ns("table")))
         )
       )
     )
