@@ -16,7 +16,7 @@ ui_plotpanel <- function(id, label, data_ui = list(),
         plot_ui,
         sliderInput(ns("fontsize"), "Plot font size", 10, 30, 20),
         hr(),
-        ui_varselect(ns("vars"), "Table variables"),
+        ui_varselect(ns("vars"), "Data table variables"),
         shinyWidgets::pickerInput(
           ns("nrow"), "Rows per page", list("All", "100", "50", "10")
         ),
@@ -27,7 +27,8 @@ ui_plotpanel <- function(id, label, data_ui = list(),
         tabsetPanel(
           type = "tabs",
           tabPanel("Plot", plotOutput(ns("plot"))),
-          tabPanel("Data", DT::dataTableOutput(ns("table")))
+          tabPanel("Table", tableOutput(ns("table"))),
+          tabPanel("Data", DT::dataTableOutput(ns("data")))
         )
       )
     )
@@ -37,7 +38,8 @@ ui_plotpanel <- function(id, label, data_ui = list(),
 #' Server for plotpanel
 #'
 #' @noRd
-server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
+server_plotpanel <- function(input, output, session, tbl, dark,
+                             plot_fun, table_html,
                              plot_fun_args = reactiveValues(),
                              data_name = "data") {
   vars <- callModule(server_varselect, "vars", tbl)
@@ -50,6 +52,7 @@ server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
       )
     )
   })
+  output$table <- function() table_html()
   observe({
     tbl <- tbl()
     vars <- vars()
@@ -58,7 +61,7 @@ server_plotpanel <- function(input, output, session, tbl, dark, plot_fun,
     } else {
       nrow <- as.numeric(input$nrow)
     }
-    output$table <- table_render(tbl, vars, nrow)
+    output$data <- table_render(tbl, vars, nrow)
   })
   output$download <- table_download(tbl, data_name)
 }

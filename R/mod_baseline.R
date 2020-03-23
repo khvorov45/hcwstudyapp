@@ -61,12 +61,13 @@ server_baseline <- function(input, output, session, dat, dark) {
   tbl_formatted <- reactive({
     mutate(tbl_qmiss(), age_screening = round(.data$age_screening, 1))
   })
+  tbl_html <- reactive(table_baseline(tbl()))
   observe({
     var_lab <- input$var_lab
     callModule(
       server_plotpanel, "plotpanel",
       tbl_formatted,
-      dark, plot_baseline,
+      dark, plot_baseline, tbl_html,
       reactiveValues(var_lab = var_lab),
       data_name = "baseline"
     )
@@ -88,4 +89,10 @@ plot_baseline <- function(dat, fontsize, dark, var_lab) {
       "Number recruited"
     )
   }
+}
+
+table_baseline <- function(dat) {
+  dat %>%
+    knitr::kable("html") %>%
+    kableExtra::kable_styling()
 }

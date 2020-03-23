@@ -1,6 +1,6 @@
 Package: hcwstudyapp
 Title: A Shiny App Build for the HCW Study
-Version: 0.1.0.9005
+Version: 0.1.0.9006
 Authors@R: 
   person(
     'Arseniy', 'Khvorov', email = 'khvorov45@gmail.com', role = c('cre', 'aut')
@@ -34,7 +34,9 @@ Imports:
   shinyjs,
   readr,
   forcats,
-  tidyr
+  tidyr,
+  knitr,
+  kableExtra
 Remotes:
   khvorov45/ggdark
 RoxygenNote: 7.1.0
