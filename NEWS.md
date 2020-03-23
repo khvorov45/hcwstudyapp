@@ -2,6 +2,10 @@
 
 ## Additional functionality
 
+* Baseline and recruitment tabs
+
+  * Table summaries in addition to plots
+
 * Baseline tab
 
   * Questionnaire completeness filter

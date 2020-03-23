@@ -57,8 +57,12 @@ table_recruitvh <- function(dat) {
       names_from = .data$num_seas_vac_fct, values_from = .data$n
     )
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
-  tbl_total <- tbl
+  tbl_total <- tbl %>%
+    mutate(site_name = "Total") %>%
+    group_by(.data$site_name) %>%
+    summarise_all(sum, na.rm = TRUE)
   tbl %>%
+    bind_rows(tbl_total) %>%
     select("Site" = "site_name", !!!col_sel) %>%
     knitr::kable(
       "html",
@@ -69,5 +73,8 @@ table_recruitvh <- function(dat) {
       full_width = FALSE,
       position = "left"
     ) %>%
-    kableExtra::add_header_above(c("", "Prior vaccinations" = length(col_sel)))
+    kableExtra::add_header_above(
+      c("", "Prior vaccinations" = length(col_sel))
+    ) %>%
+    kableExtra::add_indent(nrow(tbl_total) + nrow(tbl))
 }
