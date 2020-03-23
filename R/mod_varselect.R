@@ -12,20 +12,11 @@ ui_varselect <- function(id, label = "Table variables") {
 
 server_varselect <- function(input, output, session, tbl) {
   reactive({
-    old_choices <- input$vars
-    new_choices <- colnames(tbl())
-    new_selected <- if (all(old_choices %in% new_choices)) {
-      old_choices
-    } else {
-      new_choices
-    }
-    if (is.null(new_selected)) {
-      new_selected <- new_choices
-    }
+    data_choices <- colnames(tbl())
     shinyWidgets::updatePickerInput(
       session, "vars",
-      choices = as.list(new_choices), selected = as.list(new_selected)
+      choices = as.list(data_choices), selected = as.list(input$vars)
     )
-    new_selected
+    input$vars
   })
 }

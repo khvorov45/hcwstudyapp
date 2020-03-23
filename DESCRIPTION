@@ -1,6 +1,6 @@
 Package: hcwstudyapp
 Title: A Shiny App Build for the HCW Study
-Version: 0.1.0.9003
+Version: 0.1.0.9004
 Authors@R: 
   person(
     'Arseniy', 'Khvorov', email = 'khvorov45@gmail.com', role = c('cre', 'aut')
