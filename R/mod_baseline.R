@@ -61,9 +61,26 @@ server_baseline <- function(input, output, session, dat, dark) {
   observe({
     var_lab <- input$var_lab
     callModule(
-      server_plotpanel, "plotpanel", tbl_qmiss, dark, plot_hist,
+      server_plotpanel, "plotpanel", tbl_qmiss, dark, plot_baseline,
       reactiveValues(var_lab = var_lab),
       data_name = "baseline"
     )
   })
+}
+
+plot_baseline <- function(dat, fontsize, dark, var_lab) {
+  if (var_lab == "Gender") {
+    dat %>%
+      mutate(
+        gender_fct = factor(.data$a1_gender, c("Male", "Female")) %>%
+          forcats::fct_explicit_na()
+      ) %>%
+      count(.data$gender_fct) %>%
+      plot_col(fontsize, dark, "gender_fct", "n", "Gender", "Number recruited")
+  } else {
+    plot_hist(
+      dat, fontsize, dark, "age_screening", "Age at screening",
+      "Number recruited"
+    )
+  }
 }
