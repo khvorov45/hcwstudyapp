@@ -4,13 +4,15 @@ table_render <- function(tbl, vars = NULL, pagelength = 100) {
     tbl,
     style = "bootstrap4",
     rownames = FALSE,
+    extensions = "FixedHeader",
     options = list(
       dom = "pt",
       columnDefs = list(
         list(className = "dt-center", targets = 1:ncol(tbl) - 1)
       ),
       scrollX = TRUE,
-      pageLength = pagelength
+      pageLength = pagelength,
+      fixedHeader = TRUE
     )
   )
 }

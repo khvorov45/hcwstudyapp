@@ -135,3 +135,8 @@
 .datepicker table tr td span.focused, .datepicker table tr td span:hover {
 	background: #01238a;
 }
+
+/* FixedHeader */
+table.dataTable.fixedHeader-floating, table.dataTable.fixedHeader-locked {
+	background-color: #000 !important;
+}
