@@ -58,10 +58,15 @@ server_baseline <- function(input, output, session, dat, dark) {
       filter(tbl, !.data$record_id %in% complete_ids)
     }
   })
+  tbl_formatted <- reactive({
+    mutate(tbl_qmiss(), age_screening = round(.data$age_screening, 1))
+  })
   observe({
     var_lab <- input$var_lab
     callModule(
-      server_plotpanel, "plotpanel", tbl_qmiss, dark, plot_baseline,
+      server_plotpanel, "plotpanel",
+      tbl_formatted,
+      dark, plot_baseline,
       reactiveValues(var_lab = var_lab),
       data_name = "baseline"
     )
