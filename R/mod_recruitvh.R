@@ -60,14 +60,13 @@ table_recruitvh <- function(dat) {
   col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
   tbl_site <- table_recruitvh_gen(dat, col_ord, "site_name")
   tbl_sex <- table_recruitvh_gen(dat, col_ord, "a1_gender")
+  tbl_age <- table_recruitvh_num(dat, col_ord, "age_screening", "Age")
   tbl_agegrp <- table_recruitvh_gen(dat, col_ord, "age_group")
-  tbl_total <- tbl_site %>%
-    mutate(variable = "Total") %>%
-    group_by(.data$variable) %>%
-    summarise_all(sum, na.rm = TRUE)
+  tbl_total <- table_recruitvh_tot(dat, col_ord)
   tbl_total %>%
     bind_rows(tbl_site) %>%
     bind_rows(tbl_sex) %>%
+    bind_rows(tbl_age) %>%
     bind_rows(tbl_agegrp) %>%
     knitr::kable(
       "html",
@@ -90,6 +89,7 @@ table_recruitvh <- function(dat) {
         "",
         "Site" = nrow(tbl_site),
         "Sex" = nrow(tbl_sex),
+        "Age",
         "Age group" = nrow(tbl_agegrp)
       ),
       label_row_css = "border-color: #666"
@@ -104,9 +104,40 @@ table_recruitvh_gen <- function(tbl, col_ord, var_name) {
       )
     ) %>%
     count(!!rlang::sym(var_name), .data$num_seas_vac_fct) %>%
+    mutate(n = as.character(.data$n)) %>%
     tidyr::pivot_wider(
       names_from = .data$num_seas_vac_fct, values_from = .data$n
     )
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
   select(tbl, "variable" = !!rlang::sym(var_name), !!!col_sel)
+}
+
+#' @importFrom stats sd
+table_recruitvh_num <- function(tbl, col_ord, var_name, var_lab, digits = 1) {
+  tbl <- tbl %>%
+    group_by(.data$num_seas_vac_fct) %>%
+    summarise(
+      var_mean = mean(!!rlang::sym(var_name), na.rm = TRUE) %>% round(digits),
+      var_sd = sd(!!rlang::sym(var_name), na.rm = TRUE) %>% round(digits),
+      variable = glue::glue("{var_mean} \uC2 {var_sd}") %>% as.character()
+    ) %>%
+    select(-"var_mean", -"var_sd") %>%
+    tidyr::pivot_wider(
+      names_from = .data$num_seas_vac_fct, values_from = .data$variable
+    ) %>%
+    mutate(variable = glue::glue("Mean \uC2 sd") %>% as.character())
+  col_sel <- col_ord[col_ord %in% colnames(tbl)]
+  select(tbl, "variable", !!!col_sel)
+}
+
+table_recruitvh_tot <- function(tbl, col_ord) {
+  tbl <- tbl %>%
+    count(.data$num_seas_vac_fct) %>%
+    mutate(n = as.character(.data$n)) %>%
+    tidyr::pivot_wider(
+      names_from = .data$num_seas_vac_fct, values_from = .data$n
+    ) %>%
+    mutate(variable = "Total")
+  col_sel <- col_ord[col_ord %in% colnames(tbl)]
+  select(tbl, "variable", !!!col_sel)
 }
