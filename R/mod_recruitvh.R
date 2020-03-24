@@ -51,11 +51,16 @@ table_recruitvh <- function(dat) {
   dat <- mutate(
     dat,
     num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5) %>%
-      forcats::fct_explicit_na()
+      forcats::fct_explicit_na(),
+    age_group = as.character(cut(
+      .data$age_screening, c(-Inf, 35, 60, Inf),
+      right = FALSE
+    ))
   )
   col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
   tbl_site <- table_recruitvh_gen(dat, col_ord, "site_name")
   tbl_sex <- table_recruitvh_gen(dat, col_ord, "a1_gender")
+  tbl_agegrp <- table_recruitvh_gen(dat, col_ord, "age_group")
   tbl_total <- tbl_site %>%
     mutate(variable = "Total") %>%
     group_by(.data$variable) %>%
@@ -63,6 +68,7 @@ table_recruitvh <- function(dat) {
   tbl_total %>%
     bind_rows(tbl_site) %>%
     bind_rows(tbl_sex) %>%
+    bind_rows(tbl_agegrp) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -83,7 +89,8 @@ table_recruitvh <- function(dat) {
       index = c(
         "",
         "Site" = nrow(tbl_site),
-        "Sex" = nrow(tbl_sex)
+        "Sex" = nrow(tbl_sex),
+        "Age group" = nrow(tbl_agegrp)
       ),
       label_row_css = "border-color: #666"
     )
