@@ -46,8 +46,41 @@ plot_recruitvh <- function(dat, fontsize, dark) {
 }
 
 table_recruitvh <- function(dat) {
+  tbl_site <- table_recruitvh_site(dat)
+  tbl_total <- tbl_site %>%
+    mutate(variable = "Total") %>%
+    group_by(.data$variable) %>%
+    summarise_all(sum, na.rm = TRUE)
+  tbl_total %>%
+    bind_rows(tbl_site) %>%
+    knitr::kable(
+      "html",
+      align = paste0(
+        c("l", rep("c", length(colnames(tbl_total)[-1]), collapse = ""))
+      ),
+      col.names = c("", colnames(tbl_total)[-1])
+    ) %>%
+    kableExtra::kable_styling(
+      bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+      full_width = FALSE,
+      position = "left"
+    ) %>%
+    kableExtra::add_header_above(
+      c("", "Prior vaccinations" = length(colnames(tbl_total)[-1])),
+      line = FALSE
+    ) %>%
+    kableExtra::pack_rows(
+      index = c(
+        "",
+        "Site" = nrow(tbl_site)
+      ),
+      label_row_css = "border-color: #666"
+    )
+}
+
+table_recruitvh_site <- function(tbl) {
   col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
-  tbl <- dat %>%
+  tbl <- tbl %>%
     mutate(
       num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5) %>%
         forcats::fct_explicit_na()
@@ -57,29 +90,5 @@ table_recruitvh <- function(dat) {
       names_from = .data$num_seas_vac_fct, values_from = .data$n
     )
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
-  tbl_total <- tbl %>%
-    mutate(site_name = "Total") %>%
-    group_by(.data$site_name) %>%
-    summarise_all(sum, na.rm = TRUE)
-  tbl_total %>%
-    bind_rows(tbl) %>%
-    select("Site" = "site_name", !!!col_sel) %>%
-    knitr::kable(
-      "html",
-      align = paste0(c("l", rep("c", length(col_sel), collapse = ""))),
-      col.names = c("", col_sel)
-    ) %>%
-    kableExtra::kable_styling(
-      bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-      full_width = FALSE,
-      position = "left"
-    ) %>%
-    kableExtra::add_header_above(
-      c("", "Prior vaccinations" = length(col_sel)),
-      line = FALSE
-    ) %>%
-    kableExtra::pack_rows(
-      "Site", 2, 1 + nrow(tbl),
-      label_row_css = "border-color: #666"
-    )
+  select(tbl, "variable" = "site_name", !!!col_sel)
 }
