@@ -23,7 +23,9 @@ server_recruitvh <- function(input, output, session, dat, dark) {
     dat()$participant_essential, dat()$participant_recruit, "record_id"
   ))
   tbl_filt <- callModule(server_binfilt, "binfilt", tbl, "add_bleed")
-  table_html <- reactive(table_recruitvh(tbl_filt()))
+  table_html <- reactive(table_recruitvh(
+    inner_join(tbl_filt(), dat()$participant_baseline, "record_id")
+  ))
   callModule(
     server_plotpanel, "plotpanel", tbl_filt, dark, plot_recruitvh,
     table_html,
@@ -46,13 +48,21 @@ plot_recruitvh <- function(dat, fontsize, dark) {
 }
 
 table_recruitvh <- function(dat) {
-  tbl_site <- table_recruitvh_site(dat)
+  dat <- mutate(
+    dat,
+    num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5) %>%
+      forcats::fct_explicit_na()
+  )
+  col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
+  tbl_site <- table_recruitvh_gen(dat, col_ord, "site_name")
+  tbl_sex <- table_recruitvh_gen(dat, col_ord, "a1_gender")
   tbl_total <- tbl_site %>%
     mutate(variable = "Total") %>%
     group_by(.data$variable) %>%
     summarise_all(sum, na.rm = TRUE)
   tbl_total %>%
     bind_rows(tbl_site) %>%
+    bind_rows(tbl_sex) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -72,23 +82,24 @@ table_recruitvh <- function(dat) {
     kableExtra::pack_rows(
       index = c(
         "",
-        "Site" = nrow(tbl_site)
+        "Site" = nrow(tbl_site),
+        "Sex" = nrow(tbl_sex)
       ),
       label_row_css = "border-color: #666"
     )
 }
 
-table_recruitvh_site <- function(tbl) {
-  col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
+table_recruitvh_gen <- function(tbl, col_ord, var_name) {
   tbl <- tbl %>%
     mutate(
-      num_seas_vac_fct = factor(.data$num_seas_vac, levels = 0:5) %>%
-        forcats::fct_explicit_na()
+      !!rlang::sym(var_name) := if_else(
+        is.na(!!rlang::sym(var_name)), "(Missing)", !!rlang::sym(var_name)
+      )
     ) %>%
-    count(.data$site_name, .data$num_seas_vac_fct) %>%
+    count(!!rlang::sym(var_name), .data$num_seas_vac_fct) %>%
     tidyr::pivot_wider(
       names_from = .data$num_seas_vac_fct, values_from = .data$n
     )
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
-  select(tbl, "variable" = "site_name", !!!col_sel)
+  select(tbl, "variable" = !!rlang::sym(var_name), !!!col_sel)
 }
