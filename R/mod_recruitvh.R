@@ -75,7 +75,11 @@ table_recruitvh <- function(dat) {
       position = "left"
     ) %>%
     kableExtra::add_header_above(
-      c("", "Prior vaccinations" = length(col_sel))
+      c("", "Prior vaccinations" = length(col_sel)),
+      line = FALSE
     ) %>%
-    kableExtra::pack_rows("Site", 2, 1 + nrow(tbl))
+    kableExtra::pack_rows(
+      "Site", 2, 1 + nrow(tbl),
+      label_row_css = "border-color: #666"
+    )
 }
