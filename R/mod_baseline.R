@@ -94,5 +94,9 @@ plot_baseline <- function(dat, fontsize, dark, var_lab) {
 table_baseline <- function(dat) {
   dat %>%
     knitr::kable("html") %>%
-    kableExtra::kable_styling()
+    kableExtra::kable_styling(
+      bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+      full_width = FALSE,
+      position = "left"
+    )
 }

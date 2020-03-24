@@ -61,12 +61,13 @@ table_recruitvh <- function(dat) {
     mutate(site_name = "Total") %>%
     group_by(.data$site_name) %>%
     summarise_all(sum, na.rm = TRUE)
-  tbl %>%
-    bind_rows(tbl_total) %>%
+  tbl_total %>%
+    bind_rows(tbl) %>%
     select("Site" = "site_name", !!!col_sel) %>%
     knitr::kable(
       "html",
-      align = paste0(c("l", rep("c", length(col_sel), collapse = "")))
+      align = paste0(c("l", rep("c", length(col_sel), collapse = ""))),
+      col.names = c("", col_sel)
     ) %>%
     kableExtra::kable_styling(
       bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -76,5 +77,5 @@ table_recruitvh <- function(dat) {
     kableExtra::add_header_above(
       c("", "Prior vaccinations" = length(col_sel))
     ) %>%
-    kableExtra::add_indent(nrow(tbl_total) + nrow(tbl))
+    kableExtra::pack_rows("Site", 2, 1 + nrow(tbl))
 }
