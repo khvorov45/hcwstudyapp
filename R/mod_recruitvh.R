@@ -119,13 +119,13 @@ table_recruitvh_num <- function(tbl, col_ord, var_name, var_lab, digits = 1) {
     summarise(
       var_mean = mean(!!rlang::sym(var_name), na.rm = TRUE) %>% round(digits),
       var_sd = sd(!!rlang::sym(var_name), na.rm = TRUE) %>% round(digits),
-      variable = glue::glue("{var_mean} \uC2 {var_sd}") %>% as.character()
+      variable = glue::glue("{var_mean} \u00B1 {var_sd}") %>% as.character()
     ) %>%
     select(-"var_mean", -"var_sd") %>%
     tidyr::pivot_wider(
       names_from = .data$num_seas_vac_fct, values_from = .data$variable
     ) %>%
-    mutate(variable = glue::glue("Mean \uC2 sd") %>% as.character())
+    mutate(variable = glue::glue("Mean \u00B1 sd") %>% as.character())
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
   select(tbl, "variable", !!!col_sel)
 }
