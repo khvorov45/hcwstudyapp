@@ -55,6 +55,10 @@ table_recruitvh <- function(dat) {
     age_group = as.character(cut(
       .data$age_screening, c(-Inf, 35, 60, Inf),
       right = FALSE
+    )),
+    bmi_group = as.character(cut(
+      .data$bmi, c(-Inf, 25, 30, Inf),
+      right = FALSE
     ))
   )
   col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
@@ -64,6 +68,8 @@ table_recruitvh <- function(dat) {
   tbl_agegrp <- table_recruitvh_gen(dat, col_ord, "age_group")
   tbl_atsi <- table_recruitvh_gen(dat, col_ord, "a3_atsi")
   tbl_children <- table_recruitvh_gen(dat, col_ord, "a4_children")
+  tbl_bmi <- table_recruitvh_num(dat, col_ord, "bmi", "BMI")
+  tbl_bmi_group <- table_recruitvh_gen(dat, col_ord, "bmi_group")
   tbl_total <- table_recruitvh_tot(dat, col_ord)
   tbl_total %>%
     bind_rows(tbl_site) %>%
@@ -72,6 +78,8 @@ table_recruitvh <- function(dat) {
     bind_rows(tbl_agegrp) %>%
     bind_rows(tbl_atsi) %>%
     bind_rows(tbl_children) %>%
+    bind_rows(tbl_bmi) %>%
+    bind_rows(tbl_bmi_group) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -96,7 +104,9 @@ table_recruitvh <- function(dat) {
         "Age",
         "Age group" = nrow(tbl_agegrp),
         "Aboriginal and/or Torres Strait Islander" = nrow(tbl_atsi),
-        "Children living in the household" = nrow(tbl_children)
+        "Children living in the household" = nrow(tbl_children),
+        "BMI",
+        "BMI group" = nrow(tbl_bmi_group)
       ),
       label_row_css = "border-color: #666"
     )

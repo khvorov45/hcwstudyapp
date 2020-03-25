@@ -107,7 +107,8 @@ get_tbl_participant <- function(raw_consented) {
     select(!!!rlang::syms(needed_cols)) %>%
     mutate(
       age_screening = lubridate::interval(.data$a2_dob, .data$date_screening) /
-        lubridate::dyears(1)
+        lubridate::dyears(1),
+      bmi = .data$a6_weight / (.data$a5_height / 100)^2
     )
 }
 
@@ -167,7 +168,7 @@ get_tbls <- function(raw) {
         "b1_medicalhx",
         "c1_yrs_employed", "c2_emp_status", "c3_occupation",
         "c3_spec",
-        "c4_spec", "c5_clin_care", "d1_future_vacc", "age_screening"
+        "c4_spec", "c5_clin_care", "d1_future_vacc", "age_screening", "bmi"
       ),
     symptom = get_tbl_symptom(raw_consented),
     swab = get_tbl_swab(raw_consented)
