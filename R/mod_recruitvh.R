@@ -62,12 +62,16 @@ table_recruitvh <- function(dat) {
   tbl_sex <- table_recruitvh_gen(dat, col_ord, "a1_gender")
   tbl_age <- table_recruitvh_num(dat, col_ord, "age_screening", "Age")
   tbl_agegrp <- table_recruitvh_gen(dat, col_ord, "age_group")
+  tbl_atsi <- table_recruitvh_gen(dat, col_ord, "a3_atsi")
+  tbl_children <- table_recruitvh_gen(dat, col_ord, "a4_children")
   tbl_total <- table_recruitvh_tot(dat, col_ord)
   tbl_total %>%
     bind_rows(tbl_site) %>%
     bind_rows(tbl_sex) %>%
     bind_rows(tbl_age) %>%
     bind_rows(tbl_agegrp) %>%
+    bind_rows(tbl_atsi) %>%
+    bind_rows(tbl_children) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -90,7 +94,9 @@ table_recruitvh <- function(dat) {
         "Site" = nrow(tbl_site),
         "Sex" = nrow(tbl_sex),
         "Age",
-        "Age group" = nrow(tbl_agegrp)
+        "Age group" = nrow(tbl_agegrp),
+        "Aboriginal and/or Torres Strait Islander" = nrow(tbl_atsi),
+        "Children living in the household" = nrow(tbl_children)
       ),
       label_row_css = "border-color: #666"
     )
