@@ -75,7 +75,8 @@ table_recruitvh <- function(dat) {
     "Years employed" = "c1_yrs_employed",
     "Employment status" = "c2_emp_status",
     "Occupation type" = "c3_occupation",
-    "Work department" = "c4_workdept"
+    "Work department" = "c4_workdept",
+    "Direct clinical care" = "c5_clin_care"
   )
   all_tbls <- map(tbl_vars, ~ table_recruitvh_gen(dat, col_ord, .x))
   tbl_indeces <- map(all_tbls, nrow)
