@@ -1,3 +1,22 @@
+workdept_altnames <- c(
+  "1" = "Emergency Department",
+  "2" = "Critical Care or Intensive Care Unit",
+  "3" = "General Medicine and/or Medical Specialities",
+  "4" = "Paediatrics and/or Paediatric Specialities",
+  "5" = "Surgery and/or Surgical Specialties",
+  "6" = "Gynaecology and/or Obstetrics",
+  "7" = "Oncology and/or Haematology",
+  "8" = "Radiology",
+  "9" = "Outpatient clinic",
+  "10" = "Pharmacy",
+  "11" = "Laboratory",
+  "12" = "Nutrition",
+  "13" = "Social Work",
+  "14" = "Physiotherapy",
+  "15" = "Occupational therapy",
+  "16" = "Other"
+)
+
 #' Alternative variable names
 var_altnames <- c(
   "record_id" = "Record ID",

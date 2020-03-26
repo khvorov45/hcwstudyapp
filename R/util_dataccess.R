@@ -31,7 +31,8 @@ reformat_cols <- function(raw) {
       ari_definition = as.integer(.data$ari_definition),
       site_name = if_else(is.na(.data$site_name), "(Missing)", .data$site_name),
       b1_medicalhx = redcap_to_listcol("b1_medicalhx", medicalhx_altnames, raw),
-      swab_result = redcap_to_listcol("swab_result", swabres_altnames, raw)
+      swab_result = redcap_to_listcol("swab_result", swabres_altnames, raw),
+      c4_workdept = redcap_to_listcol("c4_workdept", workdept_altnames, raw)
     )
 }
 
@@ -99,7 +100,7 @@ get_tbl_participant <- function(raw_consented) {
     "a5_height", "a6_weight",
     "b1_medicalhx",
     "c1_yrs_employed", "c2_emp_status", "c3_occupation",
-    "c3_spec",
+    "c3_spec", "c4_workdept",
     "c4_spec", "c5_clin_care", "d1_future_vacc"
   )
   raw_consented %>%
@@ -167,7 +168,7 @@ get_tbls <- function(raw) {
         "a5_height", "a6_weight",
         "b1_medicalhx",
         "c1_yrs_employed", "c2_emp_status", "c3_occupation",
-        "c3_spec",
+        "c3_spec", "c4_workdept",
         "c4_spec", "c5_clin_care", "d1_future_vacc", "age_screening", "bmi"
       ),
     symptom = get_tbl_symptom(raw_consented),

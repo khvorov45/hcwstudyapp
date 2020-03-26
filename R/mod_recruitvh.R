@@ -72,7 +72,10 @@ table_recruitvh <- function(dat) {
     "BMI" = "bmi",
     "BMI group" = "bmi_group",
     "Medical history" = "b1_medicalhx",
-    "Years employed" = "c1_yrs_employed"
+    "Years employed" = "c1_yrs_employed",
+    "Employment status" = "c2_emp_status",
+    "Occupation type" = "c3_occupation",
+    "Work department" = "c4_workdept"
   )
   all_tbls <- map(tbl_vars, ~ table_recruitvh_gen(dat, col_ord, .x))
   tbl_indeces <- map(all_tbls, nrow)
