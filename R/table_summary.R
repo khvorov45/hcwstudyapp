@@ -25,7 +25,6 @@ table_summary <- function(dat, by_var, col_ord, by_var_lab) {
   )
 
   tbl_vars <- c(
-    "Site" = "site_name",
     "Gender" = "a1_gender",
     "Age" = "age_screening",
     "Age group" = "age_group",
@@ -40,6 +39,13 @@ table_summary <- function(dat, by_var, col_ord, by_var_lab) {
     "Work department" = "c4_workdept",
     "Direct clinical care" = "c5_clin_care"
   )
+
+  if (by_var == "site_name") {
+    tbl_vars <- c("Prior vaccinations" = "num_seas_vac", tbl_vars)
+  } else {
+    tbl_vars <- c("Site" = "site_name", tbl_vars)
+  }
+
   all_tbls <- map(tbl_vars, ~ table_recruitvh_gen(dat, col_ord, .x, by_var))
   tbl_indeces <- map(all_tbls, nrow)
   tbl_total <- table_recruitvh_tot(dat, col_ord, by_var)

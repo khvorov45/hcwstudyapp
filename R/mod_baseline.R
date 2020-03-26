@@ -61,7 +61,25 @@ server_baseline <- function(input, output, session, dat, dark) {
   tbl_formatted <- reactive({
     mutate(tbl_qmiss(), age_screening = round(.data$age_screening, 1))
   })
-  tbl_html <- reactive(table_baseline(tbl()))
+  header_names <- site_altnames
+  names(header_names) <- NULL
+  tbl_html <- reactive(table_summary(
+    inner_join(
+      tbl_qmiss(),
+      mutate(
+        dat()$participant_recruit,
+        num_seas_vac = if_else(
+          is.na(.data$num_seas_vac),
+          "(Missing)",
+          as.character(.data$num_seas_vac)
+        )
+      ),
+      "record_id"
+    ),
+    "site_name",
+    col_ord = header_names,
+    "Site"
+  ))
   observe({
     var_lab <- input$var_lab
     callModule(
