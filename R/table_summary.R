@@ -1,15 +1,18 @@
 #' Creates the summary table
 #'
 #' @param dat The full participant table. Non-reactive
+#' @param by_var Name of variable whose values will be the columns
+#' @param col_ord Order of columns of `by_var`
+#' @param by_var_lab Label to give to the `by_var` values collectively
 #'
 #' @noRd
-table_summary <- function(dat, var_name, col_ord) {
+table_summary <- function(dat, by_var, col_ord, by_var_lab) {
   dat <- mutate(
     dat,
-    !!rlang::sym(var_name) := if_else(
-      is.na(!!rlang::sym(var_name)),
+    !!rlang::sym(by_var) := if_else(
+      is.na(!!rlang::sym(by_var)),
       "(Missing)",
-      as.character(!!rlang::sym(var_name))
+      as.character(!!rlang::sym(by_var))
     ),
     age_group = as.character(cut(
       .data$age_screening, c(-Inf, 35, 60, Inf),
@@ -37,9 +40,11 @@ table_summary <- function(dat, var_name, col_ord) {
     "Work department" = "c4_workdept",
     "Direct clinical care" = "c5_clin_care"
   )
-  all_tbls <- map(tbl_vars, ~ table_recruitvh_gen(dat, col_ord, .x))
+  all_tbls <- map(tbl_vars, ~ table_recruitvh_gen(dat, col_ord, .x, by_var))
   tbl_indeces <- map(all_tbls, nrow)
-  tbl_total <- table_recruitvh_tot(dat, col_ord)
+  tbl_total <- table_recruitvh_tot(dat, col_ord, by_var)
+  high_head <- c("", length(colnames(tbl_total)[-1]))
+  names(high_head) <- c("", by_var_lab)
   tbl_total %>%
     bind_rows(all_tbls) %>%
     knitr::kable(
@@ -55,7 +60,7 @@ table_summary <- function(dat, var_name, col_ord) {
       position = "left"
     ) %>%
     kableExtra::add_header_above(
-      c("", "Prior vaccinations" = length(colnames(tbl_total)[-1])),
+      high_head,
       line = FALSE
     ) %>%
     kableExtra::pack_rows(
@@ -64,15 +69,15 @@ table_summary <- function(dat, var_name, col_ord) {
     )
 }
 
-table_recruitvh_gen <- function(tbl, col_ord, var_name) {
+table_recruitvh_gen <- function(tbl, col_ord, var_name, by_var) {
   if (is.numeric(tbl[[var_name]])) {
-    table_recruitvh_num(tbl, col_ord, var_name)
+    table_recruitvh_num(tbl, col_ord, var_name, by_var)
   } else {
-    table_recruitvh_cat(tbl, col_ord, var_name)
+    table_recruitvh_cat(tbl, col_ord, var_name, by_var)
   }
 }
 
-table_recruitvh_cat <- function(tbl, col_ord, var_name) {
+table_recruitvh_cat <- function(tbl, col_ord, var_name, by_var) {
   if (is.list(tbl[[var_name]])) {
     tbl <- tidyr::unnest(tbl, cols = !!rlang::sym(var_name))
   }
@@ -82,19 +87,19 @@ table_recruitvh_cat <- function(tbl, col_ord, var_name) {
         is.na(!!rlang::sym(var_name)), "(Missing)", !!rlang::sym(var_name)
       )
     ) %>%
-    count(!!rlang::sym(var_name), .data$num_seas_vac) %>%
+    count(!!rlang::sym(var_name), !!rlang::sym(by_var)) %>%
     mutate(n = as.character(.data$n)) %>%
     tidyr::pivot_wider(
-      names_from = .data$num_seas_vac, values_from = .data$n
+      names_from = !!rlang::sym(by_var), values_from = .data$n
     )
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
   select(tbl, "variable" = !!rlang::sym(var_name), !!!col_sel)
 }
 
 #' @importFrom stats sd
-table_recruitvh_num <- function(tbl, col_ord, var_name, digits = 1) {
+table_recruitvh_num <- function(tbl, col_ord, var_name, by_var, digits = 1) {
   tbl <- tbl %>%
-    group_by(.data$num_seas_vac) %>%
+    group_by(!!rlang::sym(by_var)) %>%
     summarise(
       var_mean = mean(!!rlang::sym(var_name), na.rm = TRUE) %>% round(digits),
       var_sd = sd(!!rlang::sym(var_name), na.rm = TRUE) %>% round(digits),
@@ -102,19 +107,19 @@ table_recruitvh_num <- function(tbl, col_ord, var_name, digits = 1) {
     ) %>%
     select(-"var_mean", -"var_sd") %>%
     tidyr::pivot_wider(
-      names_from = .data$num_seas_vac, values_from = .data$variable
+      names_from = !!rlang::sym(by_var), values_from = .data$variable
     ) %>%
     mutate(variable = glue::glue("Mean \u00B1 sd") %>% as.character())
   col_sel <- col_ord[col_ord %in% colnames(tbl)]
   select(tbl, "variable", !!!col_sel)
 }
 
-table_recruitvh_tot <- function(tbl, col_ord) {
+table_recruitvh_tot <- function(tbl, col_ord, by_var) {
   tbl <- tbl %>%
-    count(.data$num_seas_vac) %>%
+    count(!!rlang::sym(by_var)) %>%
     mutate(n = as.character(.data$n)) %>%
     tidyr::pivot_wider(
-      names_from = .data$num_seas_vac, values_from = .data$n
+      names_from = !!rlang::sym(by_var), values_from = .data$n
     ) %>%
     mutate(variable = "Total")
   col_sel <- col_ord[col_ord %in% colnames(tbl)]

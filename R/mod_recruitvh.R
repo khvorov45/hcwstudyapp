@@ -26,7 +26,8 @@ server_recruitvh <- function(input, output, session, dat, dark) {
   table_html <- reactive(table_summary(
     inner_join(tbl_filt(), dat()$participant_baseline, "record_id"),
     "num_seas_vac",
-    col_ord = c("0", "1", "2", "3", "4", "5", "(Missing)")
+    col_ord = c("0", "1", "2", "3", "4", "5", "(Missing)"),
+    "Prior vaccinations"
   ))
   callModule(
     server_plotpanel, "plotpanel", tbl_filt, dark, plot_recruitvh,
