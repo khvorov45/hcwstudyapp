@@ -62,26 +62,23 @@ table_recruitvh <- function(dat) {
     ))
   )
   col_ord <- c("0", "1", "2", "3", "4", "5", "(Missing)")
-  tbl_site <- table_recruitvh_gen(dat, col_ord, "site_name")
-  tbl_sex <- table_recruitvh_gen(dat, col_ord, "a1_gender")
-  tbl_age <- table_recruitvh_num(dat, col_ord, "age_screening", "Age")
-  tbl_agegrp <- table_recruitvh_gen(dat, col_ord, "age_group")
-  tbl_atsi <- table_recruitvh_gen(dat, col_ord, "a3_atsi")
-  tbl_children <- table_recruitvh_gen(dat, col_ord, "a4_children")
-  tbl_bmi <- table_recruitvh_num(dat, col_ord, "bmi", "BMI")
-  tbl_bmi_group <- table_recruitvh_gen(dat, col_ord, "bmi_group")
-  tbl_medicalhx <- table_recruitvh_gen(dat, col_ord, "b1_medicalhx")
+  tbl_vars <- c(
+    "Site" = "site_name",
+    "Gender" = "a1_gender",
+    "Age" = "age_screening",
+    "Age group" = "age_group",
+    "Aboriginal and/or Torres Strait Islander" = "a3_atsi",
+    "Children living in household" = "a4_children",
+    "BMI" = "bmi",
+    "BMI group" = "bmi_group",
+    "Medical history" = "b1_medicalhx",
+    "Years employed" = "c1_yrs_employed"
+  )
+  all_tbls <- map(tbl_vars, ~ table_recruitvh_gen(dat, col_ord, .x))
+  tbl_indeces <- map(all_tbls, nrow)
   tbl_total <- table_recruitvh_tot(dat, col_ord)
   tbl_total %>%
-    bind_rows(tbl_site) %>%
-    bind_rows(tbl_sex) %>%
-    bind_rows(tbl_age) %>%
-    bind_rows(tbl_agegrp) %>%
-    bind_rows(tbl_atsi) %>%
-    bind_rows(tbl_children) %>%
-    bind_rows(tbl_bmi) %>%
-    bind_rows(tbl_bmi_group) %>%
-    bind_rows(tbl_medicalhx) %>%
+    bind_rows(all_tbls) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -99,23 +96,20 @@ table_recruitvh <- function(dat) {
       line = FALSE
     ) %>%
     kableExtra::pack_rows(
-      index = c(
-        "",
-        "Site" = nrow(tbl_site),
-        "Sex" = nrow(tbl_sex),
-        "Age",
-        "Age group" = nrow(tbl_agegrp),
-        "Aboriginal and/or Torres Strait Islander" = nrow(tbl_atsi),
-        "Children living in the household" = nrow(tbl_children),
-        "BMI",
-        "BMI group" = nrow(tbl_bmi_group),
-        "Medical history" = nrow(tbl_medicalhx)
-      ),
+      index = c("", tbl_indeces),
       label_row_css = "border-color: #666"
     )
 }
 
 table_recruitvh_gen <- function(tbl, col_ord, var_name) {
+  if (is.numeric(tbl[[var_name]])) {
+    table_recruitvh_num(tbl, col_ord, var_name)
+  } else {
+    table_recruitvh_cat(tbl, col_ord, var_name)
+  }
+}
+
+table_recruitvh_cat <- function(tbl, col_ord, var_name) {
   if (is.list(tbl[[var_name]])) {
     tbl <- tidyr::unnest(tbl, cols = !!rlang::sym(var_name))
   }
@@ -135,7 +129,7 @@ table_recruitvh_gen <- function(tbl, col_ord, var_name) {
 }
 
 #' @importFrom stats sd
-table_recruitvh_num <- function(tbl, col_ord, var_name, var_lab, digits = 1) {
+table_recruitvh_num <- function(tbl, col_ord, var_name, digits = 1) {
   tbl <- tbl %>%
     group_by(.data$num_seas_vac_fct) %>%
     summarise(
