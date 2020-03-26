@@ -23,8 +23,10 @@ server_recruitvh <- function(input, output, session, dat, dark) {
     dat()$participant_essential, dat()$participant_recruit, "record_id"
   ))
   tbl_filt <- callModule(server_binfilt, "binfilt", tbl, "add_bleed")
-  table_html <- reactive(table_recruitvh(
-    inner_join(tbl_filt(), dat()$participant_baseline, "record_id")
+  table_html <- reactive(table_summary(
+    inner_join(tbl_filt(), dat()$participant_baseline, "record_id"),
+    "num_seas_vac",
+    col_ord = c("0", "1", "2", "3", "4", "5", "(Missing)")
   ))
   callModule(
     server_plotpanel, "plotpanel", tbl_filt, dark, plot_recruitvh,
