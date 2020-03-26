@@ -70,6 +70,7 @@ table_recruitvh <- function(dat) {
   tbl_children <- table_recruitvh_gen(dat, col_ord, "a4_children")
   tbl_bmi <- table_recruitvh_num(dat, col_ord, "bmi", "BMI")
   tbl_bmi_group <- table_recruitvh_gen(dat, col_ord, "bmi_group")
+  tbl_medicalhx <- table_recruitvh_gen(dat, col_ord, "b1_medicalhx")
   tbl_total <- table_recruitvh_tot(dat, col_ord)
   tbl_total %>%
     bind_rows(tbl_site) %>%
@@ -80,6 +81,7 @@ table_recruitvh <- function(dat) {
     bind_rows(tbl_children) %>%
     bind_rows(tbl_bmi) %>%
     bind_rows(tbl_bmi_group) %>%
+    bind_rows(tbl_medicalhx) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -106,13 +108,17 @@ table_recruitvh <- function(dat) {
         "Aboriginal and/or Torres Strait Islander" = nrow(tbl_atsi),
         "Children living in the household" = nrow(tbl_children),
         "BMI",
-        "BMI group" = nrow(tbl_bmi_group)
+        "BMI group" = nrow(tbl_bmi_group),
+        "Medical history" = nrow(tbl_medicalhx)
       ),
       label_row_css = "border-color: #666"
     )
 }
 
 table_recruitvh_gen <- function(tbl, col_ord, var_name) {
+  if (is.list(tbl[[var_name]])) {
+    tbl <- tidyr::unnest(tbl, cols = !!rlang::sym(var_name))
+  }
   tbl <- tbl %>%
     mutate(
       !!rlang::sym(var_name) := if_else(
