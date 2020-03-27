@@ -9,7 +9,6 @@ app_server <- function(input, output, session) {
   redcap_data_site <- callModule(server_siteselect, "siteselect", redcap_data)
   callModule(server_raw_tables, "raw-tables", redcap_data_site)
   callModule(server_recruitvh, "recruitvh", redcap_data_site, dark_theme)
-  callModule(server_participants, "participants", redcap_data_site)
   callModule(server_baseline, "baseline", redcap_data_site, dark_theme)
   callModule(server_symptoms, "symptoms", redcap_data_site)
   callModule(server_swabs, "swabs", redcap_data_site)

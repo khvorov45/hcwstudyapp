@@ -40,7 +40,6 @@ app_ui <- function() {
         ui_raw_tables(),
         ui_recruitvh(),
         ui_baseline(),
-        ui_participants(),
         ui_symptoms(),
         ui_swabs()
       ), # tabsetPanel
