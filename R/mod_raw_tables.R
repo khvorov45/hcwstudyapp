@@ -4,15 +4,23 @@ ui_raw_tables <- function(id = "raw-tables", label = "Raw tables") {
     label,
     tabsetPanel(
       type = "tabs",
-      ui_raw_table(ns("participant-raw-table"), "Participant")
+      ui_raw_table(ns("participant-raw-table"), "Participants"),
+      ui_raw_table(ns("symptom-raw-table"), "Symptom surveys"),
+      ui_raw_table(ns("swab-raw-table"), "Swabs")
     )
   )
 }
 
 
 server_raw_tables <- function(input, output, session, data) {
-  tbl_participant <- reactive(data()$participant)
   callModule(
-    server_raw_table, "participant-raw-table", tbl_participant, "participant"
+    server_raw_table, "participant-raw-table",
+    reactive(data()$participant), "participant"
+  )
+  callModule(
+    server_raw_table, "symptom-raw-table", reactive(data()$symptom), "symptom"
+  )
+  callModule(
+    server_raw_table, "swab-raw-table", reactive(data()$swab), "swab"
   )
 }
