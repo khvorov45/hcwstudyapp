@@ -1,4 +1,4 @@
-ui_raw_table <- function(id, label) {
+ui_raw_table <- function(id, label, ...) {
   ns <- NS(id)
   tabPanel(
     label,
@@ -10,6 +10,7 @@ ui_raw_table <- function(id, label) {
       )),
       column(3, downloadButton(ns("download"), "Download"))
     ),
+    ...,
     DT::dataTableOutput(ns("data"))
   )
 }
@@ -25,10 +26,6 @@ server_raw_table <- function(input, output, session, tbl, data_name) {
       nrow <- as.numeric(input$nrow)
     }
     output$data <- table_render(tbl, vars, nrow)
-  })
-  observe({
-    print(tbl())
-    print(data_name)
   })
   output$download <- table_download(tbl, data_name)
 }
