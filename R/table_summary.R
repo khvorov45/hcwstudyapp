@@ -6,7 +6,7 @@
 #' @param by_var_lab Label to give to the `by_var` values collectively
 #'
 #' @noRd
-table_summary <- function(dat, by_var, col_ord, by_var_lab) {
+table_summary <- function(dat, by_var, col_ord, by_var_lab, position = "left") {
   dat <- mutate(
     dat,
     !!rlang::sym(by_var) := if_else(
@@ -63,7 +63,7 @@ table_summary <- function(dat, by_var, col_ord, by_var_lab) {
     kableExtra::kable_styling(
       bootstrap_options = c("striped", "hover", "condensed", "responsive"),
       full_width = FALSE,
-      position = "left"
+      position = position
     ) %>%
     kableExtra::add_header_above(
       high_head,
