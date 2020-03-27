@@ -1,7 +1,7 @@
 ui_raw_participant <- function(id, label) {
   ns <- NS(id)
   ui_raw_table(
-    ns("participant-raw-table"), "Participants",
+    ns("participant-raw-table"), label,
     fluidRow(
       column(3, ui_binfilt(
         ns("binfilt-addb"), "Consent to additional bleed", "add_bleed"
