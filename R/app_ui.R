@@ -39,8 +39,7 @@ app_ui <- function() {
 
         ui_raw_tables(),
         ui_recruitvh(),
-        ui_baseline(),
-        ui_swabs()
+        ui_baseline()
       ), # tabsetPanel
     ), # fluidPage
 

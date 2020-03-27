@@ -1,30 +1,26 @@
-#' Table of swabs
-#' @noRd
-ui_swabs <- function(id = "swabs", label = "Swabs") {
+ui_raw_swab <- function(id, label) {
   ns <- NS(id)
-  ui_tablepanel(
-    ns("tablepanel"), label,
-    data_ui = list(
-      shinyWidgets::prettyCheckbox(ns("orphan"), "Orphan"),
-      HTML(
+  ui_raw_table(
+    ns("swab-raw-table"), label,
+    fluidRow(
+      column(3, shinyWidgets::prettyCheckbox(ns("orphan"), "Orphan")),
+      column(9, HTML(
         "Orphan swabs are swabs whose survey_week does not
         correspond to any date_symptom_survey
         <br/>"
-      )
+      ))
     )
   )
 }
 
-#' Server for swabs
-#'
-#' @inheritParams server_recruitvh
-#'
-#' @noRd
-server_swabs <- function(input, output, session, dat) {
+server_raw_swab <- function(input, output, session, dat) {
   tbl <- reactive({
     all_dat <- dat()
-    inner_join(all_dat$swab, all_dat$participant_essential, "record_id") %>%
-      select("record_id", "pid", "site_name", everything())
+    inner_join(
+      all_dat$participant_essential,
+      all_dat$swab,
+      "record_id"
+    )
   })
 
   tbl_orphan <- reactive({
@@ -43,5 +39,5 @@ server_swabs <- function(input, output, session, dat) {
     }
   })
 
-  callModule(server_tablepanel, "tablepanel", tbl_orphan, "swabs")
+  callModule(server_raw_table, "swab-raw-table", tbl_orphan, "swabs")
 }

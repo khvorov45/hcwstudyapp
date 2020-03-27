@@ -80,6 +80,6 @@ server_raw_symptom <- function(input, output, session, data) {
     server_binfilt, "binfilt", tbl_fili, "swab_collection"
   )
   callModule(
-    server_raw_table, "symptom-raw-table", tbl_fswab, "symptom"
+    server_raw_table, "symptom-raw-table", tbl_fswab, "symptoms"
   )
 }
