@@ -37,6 +37,7 @@ app_ui <- function() {
       tabsetPanel(
         type = "tabs",
 
+        ui_raw_tables(),
         ui_recruitvh(),
         ui_baseline(),
         ui_participants(),

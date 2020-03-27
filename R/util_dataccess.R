@@ -154,6 +154,7 @@ get_tbls <- function(raw) {
   raw_consented <- subset_consent(raw)
   all_part <- get_tbl_participant(raw_consented)
   list(
+    participant = all_part,
     participant_essential = all_part %>%
       select("record_id", "pid", "site_name", "mobile_number", "email"),
     participant_recruit = all_part %>%

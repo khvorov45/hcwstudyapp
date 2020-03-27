@@ -27,6 +27,7 @@ test_that("RedCap download and reformatting works", {
   expect_named(
     all_tbls,
     c(
+      "participant",
       "participant_essential", "participant_recruit", "participant_baseline",
       "symptom", "swab"
     )
