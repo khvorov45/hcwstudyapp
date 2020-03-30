@@ -5,8 +5,7 @@ ui_plots <- function(id = "plots", label = "Plots") {
     fluidRow(
       column(4, ui_binfilt(
         ns("binfilt-addb"), "Consent to additional bleed", "add_bleed"
-      )),
-      column(4, ui_bqcomp(ns("bqcomp")))
+      ))
     ),
     fluidRow(
       column(4, sliderInput(ns("fontsize"), "Font size", 10, 30, 20))
@@ -15,6 +14,10 @@ ui_plots <- function(id = "plots", label = "Plots") {
       column(
         6,
         plotOutput(ns("histvachx"))
+      ),
+      column(
+        6,
+        plotOutput(ns("agehist"))
       )
     )
   )
@@ -25,8 +28,13 @@ server_plots <- function(input, output, session, data, dark) {
   tbl_part_addb <- callModule(
     server_binfilt, "binfilt-addb", tbl_part, "add_bleed"
   )
-  tbl_part_bq <- callModule(server_bqcomp, "bqcomp", tbl_part)
   output$histvachx <- renderPlot(
     plot_vachx(tbl_part_addb(), input$fontsize, dark())
+  )
+  output$agehist <- renderPlot(
+    plot_hist(
+      tbl_part_addb(), input$fontsize, dark(), "age_screening",
+      "Age at screening", "Count"
+    )
   )
 }
