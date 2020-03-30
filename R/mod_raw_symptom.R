@@ -3,9 +3,15 @@ ui_raw_symptom <- function(id, label) {
   ui_raw_table(
     ns("symptom-raw-table"), label,
     fluidRow(
-      column(3, dateRangeInput(
-        ns("dates"), "Date range", "2020-05-04", "2020-10-12"
-      )),
+      column(
+        3,
+        dateRangeInput(
+          ns("dates"), "Date range", "2020-05-04", "2020-10-12"
+        ),
+        ui_binfilt(
+          ns("binfilt"), "Swab collection", "swab_collection"
+        )
+      ),
       column(4, shinyWidgets::radioGroupButtons(
         ns("subsetili"), "",
         list(
@@ -15,9 +21,6 @@ ui_raw_symptom <- function(id, label) {
         ),
         direction = "vertical",
         justified = TRUE
-      )),
-      column(3, ui_binfilt(
-        ns("binfilt"), "Swab collection", "swab_collection"
       ))
     )
   )
