@@ -10,5 +10,4 @@ app_server <- function(input, output, session) {
   callModule(server_raw_tables, "raw-tables", redcap_data_site)
   callModule(server_summary_tables, "summary-tables", redcap_data_site)
   callModule(server_plots, "plots", redcap_data_site, dark_theme)
-  callModule(server_baseline, "baseline", redcap_data_site, dark_theme)
 }

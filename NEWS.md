@@ -1,14 +1,18 @@
-# hcwstudyapp 0.1.0-dev
+# hcwstudyapp 0.2.0
 
-## Additional functionality
+## Redesign
 
-* Baseline and recruitment tabs
+* Raw tables tab - contains data tables (participant, symptoms and swabs). Has filters for variables, rows per page and a download button. Also carries table-specific filters:
 
-  * Table summaries in addition to plots
+  * Participants - consent to additional bleed (nested study) and baseline questionnaire completeness (any/complete/incomplete).
 
-* Baseline tab
+  * Symptoms - date range, swab collection and survey completion status.
 
-  * Questionnaire completeness filter
+  * Swabs - orphan status (cannot link to survey).
+
+* Summary tables tab - contains summary tables as per the statistical analysis plan.
+
+* Plots tab - contains plots (histograms of sex, age and vaccination history). Contatins font size slider and consent to additional bleed filter.
 
 # hcwstudyapp 0.1.0
 
