@@ -12,7 +12,7 @@
 
 * Summary tables tab - contains summary tables as per the statistical analysis plan.
 
-* Plots tab - contains plots (histograms of sex, age and vaccination history). Contatins font size slider and consent to additional bleed filter.
+* Plots tab - contains plots (histograms of sex, age and vaccination history). Contains font size slider and consent to additional bleed filter.
 
 # hcwstudyapp 0.1.0
 
