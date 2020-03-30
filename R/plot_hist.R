@@ -26,7 +26,8 @@ plot_col <- function(dat, fontsize = 16, dark = TRUE, x_name, y_name,
     geom_col(fill = barcol) +
     geom_text(
       aes(y = 0.1, label = !!rlang::sym(y_name)),
-      col = textcol, size = fontsize, vjust = 0
+      col = textcol, size = fontsize, angle = 90,
+      hjust = 0, vjust = 0.5
     ) +
     geom_text(
       aes(
