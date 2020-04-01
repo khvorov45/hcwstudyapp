@@ -2,6 +2,10 @@ skip_if_no_tok <- function(tok) {
   skip_if(tok == "", message = "REDAPITOK not set, skipping test")
 }
 
+skip_if_no_dat <- function(dat) {
+  skip_if(identical(dat, tibble()), "No data in REDCap")
+}
+
 tok <- Sys.getenv("REDAPITOK")
 uri <- "https://biredcap.mh.org.au/api/"
 
@@ -10,6 +14,8 @@ test_that("RedCap download and reformatting works", {
 
   dat <- get_redcap_data(tok, uri)
   expect_equal(class(dat), c("tbl_df", "tbl", "data.frame"))
+
+  skip_if_no_dat(dat)
 
   dat_ref <- reformat_cols(dat)
 
@@ -39,6 +45,7 @@ test_that("RedCap download and reformatting works", {
 test_that("Subsetting by access_group works", {
   skip_if_no_tok(tok)
   dat <- get_redcap_data(tok, uri)
+  skip_if_no_dat(dat)
   for (access_group in names(site_altnames)) {
     dat_lim <- redcap_subset(dat, access_group)
     if (nrow(dat_lim) == 0) next
@@ -71,6 +78,7 @@ test_that("access group fails when group isn't recognised", {
 test_that("Alternative variable names are variables", {
   skip_if_no_tok(tok)
   dat <- get_redcap_data(tok, uri)
+  skip_if_no_dat(dat)
   expect_true(all(names(var_altnames) %in% colnames(dat)))
 })
 

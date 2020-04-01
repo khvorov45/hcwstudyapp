@@ -36,7 +36,9 @@ server_updatedata <- function(input, output, session,
     if (access_group() == "none") {
       return()
     }
-    print_timestamp(output, client_tz_offset_sec())
+    print_timestamp(
+      output, client_tz_offset_sec(), identical(redcap_data(), tibble())
+    )
   })
 
   redcap_data
@@ -48,12 +50,13 @@ server_updatedata <- function(input, output, session,
 #' @param offset Time offset (from UTC) in seconds
 #'
 #' @noRd
-print_timestamp <- function(output, offset) {
+print_timestamp <- function(output, offset, empty) {
   curtime <- lubridate::as_datetime(Sys.time(), tz = "UTC") - offset
+  info <- ifelse(empty, "No data in REDCap:", "Last data update:")
   output$time <- renderUI({
     HTML(
       glue::glue(
-        "<p>Last data update:<br/>{as.character(curtime)}</p>"
+        "<p>{info}<br/>{as.character(curtime)}</p>"
       )
     )
   })

@@ -185,7 +185,11 @@ get_tbls <- function(raw) {
 #' @export
 down_trans_redcap <- function(token, uri = "https://biredcap.mh.org.au/api/",
                               access_group = "all") {
-  get_redcap_data(token, uri) %>%
+  dat <- get_redcap_data(token, uri)
+  if (identical(dat, tibble())) {
+    return(dat)
+  }
+  dat %>%
     reformat_cols() %>%
     redcap_subset(access_group) %>%
     get_tbls()
