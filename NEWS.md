@@ -1,4 +1,6 @@
-# hcwstudyapp 0.2.0-dev
+# hcwstudyapp 0.2.1
+
+* Made app tolerant to there being no data in REDCap. It crashed previously.
 
 # hcwstudyapp 0.2.0
 
