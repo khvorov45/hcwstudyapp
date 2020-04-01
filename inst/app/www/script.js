@@ -7,7 +7,7 @@ function get_client_time() {
 get_client_time()
 
 Shiny.addCustomMessageHandler(
-	"themeswitch", function(dark) {switch_theme(dark)}
+	"themeswitch", function (dark) { switch_theme(dark) }
 )
 
 function switch_theme(dark) {
