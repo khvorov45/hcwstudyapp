@@ -45,6 +45,9 @@ server_raw_symptom <- function(input, output, session, data) {
   # Update dates to min/max
   observe({
     sympt <- data()$symptom
+    if (all(is.na(sympt$date_symptom_survey))) {
+      return()
+    }
     updateDateRangeInput(
       session, "dates",
       start = min(sympt$date_symptom_survey, na.rm = TRUE),

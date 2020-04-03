@@ -19,7 +19,8 @@ server_binfilt <- function(input, output, session, tbl, var_name) {
     mutate(
       tbl(),
       temp_var_binfilt = if_else(
-        is.na(!!rlang::sym(var_name)), "Missing", !!rlang::sym(var_name)
+        is.na(!!rlang::sym(var_name)), "Missing",
+        as.character(!!rlang::sym(var_name))
       )
     ) %>%
       filter(.data$temp_var_binfilt %in% input[[var_name]]) %>%

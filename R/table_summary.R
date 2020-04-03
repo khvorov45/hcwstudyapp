@@ -6,7 +6,8 @@
 #' @param by_var_lab Label to give to the `by_var` values collectively
 #'
 #' @noRd
-table_summary <- function(dat, by_var, col_ord, by_var_lab, position = "left") {
+table_summary <- function(dat, by_var, col_ord, by_var_lab, 
+                          position = "center") {
   dat <- mutate(
     dat,
     !!rlang::sym(by_var) := if_else(
@@ -90,7 +91,8 @@ table_recruitvh_cat <- function(tbl, col_ord, var_name, by_var) {
   tbl <- tbl %>%
     mutate(
       !!rlang::sym(var_name) := if_else(
-        is.na(!!rlang::sym(var_name)), "(Missing)", !!rlang::sym(var_name)
+        is.na(!!rlang::sym(var_name)), "(Missing)", 
+        as.character(!!rlang::sym(var_name))
       )
     ) %>%
     count(!!rlang::sym(var_name), !!rlang::sym(by_var)) %>%
