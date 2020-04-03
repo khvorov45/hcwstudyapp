@@ -15,8 +15,14 @@ app_ui <- function() {
 
       # Title and contact details
       fluidRow(
-        column(6, h3("HCW Cohort Study")),
-        column(6, HTML(
+        column(5, h3("HCW flu study reports")),
+        column(3, HTML(
+          "<div id='homepage'>
+          <a id='linkhome' 
+          href='https://hcwflustudy.com/index.html'><h4>Homepage</h4></a>
+          </div>"
+        )),
+        column(4, HTML(
           "<div id='contact'>
           <a href='https://github.com/khvorov45/hcwstudyapp'>Source</a>
           <br/>
