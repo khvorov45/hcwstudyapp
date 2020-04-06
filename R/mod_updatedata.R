@@ -23,12 +23,15 @@ ui_updatedata <- function(id = "updatedata", label = "Update data") {
 server_updatedata <- function(input, output, session,
                               access_group, client_tz_offset_sec) {
   redcap_data <- reactive({
+    shinyjs::disable("update")
     input$update
-    down_trans_redcap(
+    dat <- down_trans_redcap(
       golem::get_golem_options("token"),
       golem::get_golem_options("uri"),
       access_group()
     )
+    shinyjs::enable("update")
+    dat
   })
 
   observe({
