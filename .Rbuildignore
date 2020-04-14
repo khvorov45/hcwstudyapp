@@ -11,3 +11,5 @@ $run_dev.*
 ^\.travis\.yml$
 ^todo\.md$
 ^.vscode$
+^instructions$
+^.*\.sh$
