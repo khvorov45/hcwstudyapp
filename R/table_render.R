@@ -8,7 +8,7 @@ table_render <- function(tbl, vars = NULL, pagelength = 100) {
     options = list(
       dom = "pt",
       columnDefs = list(
-        list(className = "dt-center", targets = 1:ncol(tbl) - 1)
+        list(className = "dt-center", targets = seq_len(ncol(tbl) - 1))
       ),
       scrollX = TRUE,
       pageLength = pagelength
