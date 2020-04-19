@@ -101,7 +101,9 @@ get_tbl_participant <- function(raw_consented) {
     "b1_medicalhx",
     "c1_yrs_employed", "c2_emp_status", "c3_occupation",
     "c3_spec", "c4_workdept",
-    "c4_spec", "c5_clin_care", "d1_future_vacc"
+    "c4_spec", "c5_clin_care", "d1_future_vacc",
+    "scheduled_date_v0", "scheduled_date_v7", "scheduled_date_v14",
+    "scheduled_date_v280"
   )
   raw_consented %>%
     filter(.data$redcap_event_name == "baseline") %>%

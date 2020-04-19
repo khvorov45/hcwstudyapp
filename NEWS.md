@@ -1,5 +1,7 @@
 # hcwstudyapp 0.2.1-dev
 
+* Added scheduled dates to the participant table
+
 # hcwstudyapp 0.2.1
 
 * Made app tolerant to there being no data in REDCap. It crashed previously.
