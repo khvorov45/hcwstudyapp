@@ -15,6 +15,15 @@ test_that("RedCap download and reformatting works", {
   dat <- get_redcap_data(tok, uri)
   expect_equal(class(dat), c("tbl_df", "tbl", "data.frame"))
 
+  nocons <- dat %>%
+    filter(redcap_event_name == "Baseline") %>%
+    select(
+      record_id, "consent", "consent_unvacc", "study_group_vacc"
+    ) %>%
+    filter(is.na(consent) | consent == "No") %>%
+    filter(is.na(consent_unvacc) | consent_unvacc == "No") %>%
+    filter(is.na(study_group_vacc))
+
   skip_if_no_dat(dat)
 
   dat_ref <- reformat_cols(dat)
