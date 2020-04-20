@@ -8,6 +8,7 @@ run_app(
   token = "token",
   key = "key",
   uri = "https://biredcap.mh.org.au/api/",
+  port = getOption("shiny.port"),
   ...
 )
 }
@@ -18,7 +19,9 @@ run_app(
 
 \item{uri}{REDCap API uri}
 
-\item{...}{Not used.}
+\item{port}{Port to host the app on}
+
+\item{...}{Additional golem options}
 }
 \description{
 Run the Shiny Application

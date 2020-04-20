@@ -6,7 +6,7 @@
         {
             "label": "Execute",
             "type": "shell",
-            "command": "Rscript -e 'devtools::load_all();run_app()'"
+            "command": "Rscript -e 'devtools::load_all();run_app(port = 6969)'"
         },
         {
             "label": "Run tests",

@@ -18,7 +18,7 @@ app_ui <- function() {
         column(5, h3("HCW flu study reports")),
         column(3, HTML(
           "<div id='homepage'>
-          <a id='linkhome' 
+          <a id='linkhome'
           href='https://hcwflustudy.com/index.html'><h4>Homepage</h4></a>
           </div>"
         )),
