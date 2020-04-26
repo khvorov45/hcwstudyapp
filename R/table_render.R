@@ -15,3 +15,15 @@ table_render <- function(tbl, vars = NULL, pagelength = 100) {
     )
   )
 }
+
+table_simple_html <- function(tbl) {
+  tbl %>%
+    knitr::kable(
+      "html",
+      align = "c"
+    ) %>%
+    kableExtra::kable_styling(
+      bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+      full_width = FALSE
+    )
+}

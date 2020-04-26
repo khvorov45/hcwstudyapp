@@ -12,7 +12,7 @@ ui_raw_table <- function(id, label, ...) {
         column(3, downloadButton(ns("download"), "Download"))
       ),
       ...,
-      DT::dataTableOutput(ns("data"))
+      tableOutput(ns("data"))
     )
   )
 }
@@ -27,7 +27,7 @@ server_raw_table <- function(input, output, session, tbl, data_name) {
     } else {
       nrow <- as.numeric(input$nrow)
     }
-    output$data <- table_render(tbl, vars, nrow)
+    output$data <- function() table_simple_html(tbl)
   })
   output$download <- table_download(tbl, data_name)
 }

@@ -9,10 +9,6 @@ ui_vargroup <- function(id, choices,
 }
 
 server_vargroup <- function(input, output, session, tbl) {
-  observe({
-    print(names(tbl()) %in% names(input$vargroup))
-    print(names(input$vargroup))
-  })
   reactive({
     dat <- tbl()
     if (input$vargroup == "all") {
