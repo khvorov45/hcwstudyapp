@@ -15,15 +15,8 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
     raw_or_label = "label",
     col_types = cols(
       ae_date = col_date(),
-      consent_unvacc = col_character(),
-      ae_desc = col_character(),
       date_ae_resolved = col_date(),
-      ae_action_taken = col_character(),
-      ae_outcome = col_character(),
-      ae_severity = col_character(),
-      sae = col_character(),
-      ae_report_hrec = col_character(),
-      adverse_events_complete = col_character()
+      .default = col_character()
     )
   )
   as_tibble(rcap$data)
