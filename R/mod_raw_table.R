@@ -6,9 +6,6 @@ ui_raw_table <- function(id, label, ...) {
     fluidPage(
       fluidRow(
         column(3, ui_varselect(ns("vars"), "Variables")),
-        column(3, shinyWidgets::pickerInput(
-          ns("nrow"), "Rows per page", list("All", "100", "50", "10")
-        )),
         column(3, downloadButton(ns("download"), "Download"))
       ),
       ...,
@@ -22,12 +19,7 @@ server_raw_table <- function(input, output, session, tbl, data_name) {
   observe({
     tbl <- tbl()
     vars <- vars()
-    if (input$nrow == "All") {
-      nrow <- nrow(tbl)
-    } else {
-      nrow <- as.numeric(input$nrow)
-    }
-    output$data <- function() table_simple_html(tbl)
+    output$data <- function() table_simple_html(tbl, vars)
   })
   output$download <- table_download(tbl, data_name)
 }

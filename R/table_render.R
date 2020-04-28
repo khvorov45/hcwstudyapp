@@ -16,7 +16,8 @@ table_render <- function(tbl, vars = NULL, pagelength = 100) {
   )
 }
 
-table_simple_html <- function(tbl) {
+table_simple_html <- function(tbl, vars) {
+  if (!is.null(vars)) tbl <- tbl[vars]
   tbl %>%
     knitr::kable(
       "html",
