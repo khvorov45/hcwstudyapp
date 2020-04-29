@@ -19,6 +19,7 @@ table_render <- function(tbl, vars = NULL, pagelength = 100) {
 table_simple_html <- function(tbl, vars) {
   if (!is.null(vars)) tbl <- tbl[vars]
   tbl %>%
+    mutate_if(lubridate::is.Date, as.character) %>%
     knitr::kable(
       "html",
       align = "c"
