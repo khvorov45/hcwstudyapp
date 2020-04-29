@@ -20,6 +20,7 @@ table_simple_html <- function(tbl, vars) {
   if (!is.null(vars)) tbl <- tbl[vars]
   tbl %>%
     mutate_if(lubridate::is.Date, as.character) %>%
+    mutate_if(is.numeric, function(vec) round(vec, 1)) %>%
     knitr::kable(
       "html",
       align = "c"
