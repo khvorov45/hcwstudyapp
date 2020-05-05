@@ -166,8 +166,10 @@ get_tbl_swab <- function(raw_consented) {
 #'
 #' @export
 get_tbls <- function(raw) {
-  raw_consented <- subset_consent(raw)
-  all_part <- get_tbl_participant(raw_consented)
+  # Consent is split across multiple forms that can conflict with each other,
+  # so let's not account for it for now
+  # raw_consented <- subset_consent(raw)
+  all_part <- get_tbl_participant(raw)
   list(
     participant = all_part,
     participant_essential = all_part %>%
@@ -187,8 +189,8 @@ get_tbls <- function(raw) {
         "c3_spec", "c4_workdept",
         "c4_spec", "c5_clin_care", "d1_future_vacc", "age_screening", "bmi"
       ),
-    symptom = get_tbl_symptom(raw_consented),
-    swab = get_tbl_swab(raw_consented)
+    symptom = get_tbl_symptom(raw),
+    swab = get_tbl_swab(raw)
   )
 }
 
