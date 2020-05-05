@@ -5,10 +5,14 @@ ui_raw_table <- function(id, label, ...) {
     br(),
     fluidPage(
       fluidRow(
-        column(3, ui_varselect(ns("vars"), "Variables")),
-        column(3, shinyWidgets::pickerInput(
-          ns("arrange_by"), "Arrange by", list()
-        )),
+        column(
+          3,
+          ui_varselect(ns("vars"), "Variables"),
+          shinyWidgets::pickerInput(
+            ns("arrange_by"), "Arrange by", list()
+          ),
+          shinyWidgets::prettyCheckbox(ns("desc"), "Desc")
+        ),
         column(3, downloadButton(ns("download"), "Download"))
       ),
       ...,
@@ -27,8 +31,13 @@ server_raw_table <- function(input, output, session, tbl, data_name) {
     tbl <- tbl()
     vars <- vars()
     if (!is.null(input$arrange_by)) {
-      if (input$arrange_by %in% colnames(tbl))
-        tbl <- arrange(tbl, !!rlang::sym(input$arrange_by))
+      if (input$arrange_by %in% colnames(tbl)) {
+        if (input$desc) {
+          tbl <- arrange(tbl, desc(!!rlang::sym(input$arrange_by)))
+        } else {
+          tbl <- arrange(tbl, !!rlang::sym(input$arrange_by))
+        }
+      }
     }
     if (!is.null(vars)) tbl <- tbl[vars]
     output$data <- function() table_simple_html(tbl)
