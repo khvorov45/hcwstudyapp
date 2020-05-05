@@ -23,7 +23,8 @@ server_vargroup <- function(input, output, session, tbl) {
         "b1_medicalhx",
         "c1_yrs_employed", "c2_emp_status", "c3_occupation",
         "c3_spec", "c4_workdept",
-        "c4_spec", "c5_clin_care", "d1_future_vacc", "email"
+        "c4_spec", "c5_clin_care", "d1_future_vacc", "email",
+        "age_screening"
       )
     } else if (input$vargroup == "schedule") {
       select(

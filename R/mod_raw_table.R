@@ -27,7 +27,8 @@ server_raw_table <- function(input, output, session, tbl, data_name) {
     tbl <- tbl()
     vars <- vars()
     if (!is.null(input$arrange_by)) {
-      tbl <- arrange(tbl, !!rlang::sym(input$arrange_by))
+      if (input$arrange_by %in% colnames(tbl))
+        tbl <- arrange(tbl, !!rlang::sym(input$arrange_by))
     }
     if (!is.null(vars)) tbl <- tbl[vars]
     output$data <- function() table_simple_html(tbl)
