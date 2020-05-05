@@ -16,8 +16,7 @@ table_render <- function(tbl, vars = NULL, pagelength = 100) {
   )
 }
 
-table_simple_html <- function(tbl, vars) {
-  if (!is.null(vars)) tbl <- tbl[vars]
+table_simple_html <- function(tbl) {
   tbl %>%
     mutate_if(lubridate::is.Date, as.character) %>%
     mutate_if(is.numeric, function(vec) round(vec, 1)) %>%
