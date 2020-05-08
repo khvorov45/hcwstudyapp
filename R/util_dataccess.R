@@ -23,7 +23,11 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
       ae_severity = col_character(),
       sae = col_character(),
       ae_report_hrec = col_character(),
-      adverse_events_complete = col_character()
+      adverse_events_complete = col_character(),
+      withdrawn = col_character(),
+      withdrawal_date = col_character(),
+      withdrawal_reason = col_character(),
+      withdrawal_complete = col_character()
     )
   )
   as_tibble(rcap$data)
