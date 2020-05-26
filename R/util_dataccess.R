@@ -27,7 +27,16 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
       withdrawn = col_character(),
       withdrawal_date = col_character(),
       withdrawal_reason = col_character(),
-      withdrawal_complete = col_character()
+      withdrawal_complete = col_character(),
+      age_contact31 = col_double(),
+      firstname_unvacc = col_character(),
+      surname_unvacc = col_character(),
+      econsent_date_unvacc = col_character(),
+      esignature_unvacc = col_skip(),
+      sitestaff_name_uv = col_character(),
+      sitestaff_signature_uv = col_skip(),
+      date_site_sign_uv = col_date(),
+      swab_other = col_character()
     )
   )
   as_tibble(rcap$data)
