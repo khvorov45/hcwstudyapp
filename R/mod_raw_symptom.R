@@ -35,12 +35,12 @@ server_raw_symptom <- function(input, output, session, data) {
       data()$participant_essential,
       "record_id"
     ) %>%
-      left_join(
-        rename(data()$swab, date_symptom_survey = .data$survey_week) %>%
-          # This field may be empty and therefore logical
-          mutate(date_symptom_survey = as.Date(.data$date_symptom_survey)),
-        c("record_id", "date_symptom_survey")
-      ) %>%
+      # left_join(
+      #   rename(data()$swab, date_symptom_survey = .data$survey_week) %>%
+      #     # This field may be empty and therefore logical
+      #     mutate(date_symptom_survey = as.Date(.data$date_symptom_survey)),
+      #   c("record_id", "date_symptom_survey")
+      # ) %>%
       select("record_id", "pid", "site_name", everything())
   })
 

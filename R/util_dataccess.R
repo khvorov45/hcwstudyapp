@@ -149,7 +149,8 @@ get_tbl_participant <- function(raw_consented) {
 #' @export
 get_tbl_symptom <- function(raw_consented) {
   needed_cols <- c(
-    "record_id", "date_symptom_survey", "ari_definition"
+    "record_id", "date_symptom_survey", "ari_definition", "swab_collection",
+    "site_rec_date", "site_test_date", "swab_result"
   )
   raw_consented %>%
     filter(
