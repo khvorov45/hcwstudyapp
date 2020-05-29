@@ -180,6 +180,20 @@ get_tbl_swab <- function(raw_consented) {
     select(!!!rlang::syms(needed_cols))
 }
 
+#' Extracts the withdrawal table
+#'
+#' @inheritParams reformat_cols
+#'
+#' @export
+get_tbl_withdrawal <- function(raw) {
+  needed_cols <- c(
+    "record_id", "withdrawn", "withdrawal_date", "withdrawal_reason"
+  )
+  raw %>%
+    filter(.data$redcap_event_name == "withdrawal") %>%
+    select(!!!rlang::syms(needed_cols))
+}
+
 #' Extracts all proper tables from the event tables
 #'
 #' @inheritParams reformat_cols
@@ -210,7 +224,8 @@ get_tbls <- function(raw) {
         "c4_spec", "c5_clin_care", "d1_future_vacc", "age_screening", "bmi"
       ),
     symptom = get_tbl_symptom(raw),
-    swab = get_tbl_swab(raw)
+    swab = get_tbl_swab(raw),
+    withdrawal = get_tbl_withdrawal(raw)
   )
 }
 

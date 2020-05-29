@@ -44,7 +44,7 @@ test_that("RedCap download and reformatting works", {
     c(
       "participant",
       "participant_essential", "participant_recruit", "participant_baseline",
-      "symptom", "swab"
+      "symptom", "swab", "withdrawal"
     )
   )
 

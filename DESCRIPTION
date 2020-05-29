@@ -30,7 +30,6 @@ Imports:
   lubridate,
   shinythemes,
   shinyWidgets,
-  DT,
   shinyjs,
   readr,
   forcats,
