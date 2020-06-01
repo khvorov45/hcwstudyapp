@@ -1,45 +1,50 @@
 /* Link outline */
+
 a {
 	outline: none;
 }
 
 /* Contact details */
+
 #contact {
 	padding-top: 15px;
 	text-align: right;
 }
 
 /* Password input */
-#apipass-update, #updatedata-update, #updatedata-time, .bootstrap-switch-id-themeswitch-themeswitch,
-#raw-tables-raw-participant-participant-raw-table-download,
-#raw-tables-raw-symptom-symptom-raw-table-download,
-#raw-tables-raw-swab-swab-raw-table-download,
-#homepage {
+
+#apipass-update, #updatedata-update, #updatedata-time, .bootstrap-switch-id-themeswitch-themeswitch, #raw-tables-raw-participant-participant-raw-table-download, #raw-tables-raw-symptom-symptom-raw-table-download, #raw-tables-raw-swab-swab-raw-table-download, #surveycomp-surveycomp-download, #homepage {
 	margin-top: 25px;
 }
+
 #apipass-check {
 	position: relative;
 	top: -65px;
 }
 
 /* Info message for data update */
+
 #updatedata-time {
 	font-size: small;
 	margin-left: 10px;
 }
 
 /* Tick and cross for password */
+
 .tick, .cross {
-  font-size: large;
+	font-size: large;
 }
+
 .tick {
 	color: green;
 }
+
 .cross {
 	color: red;
 }
 
 /* Slider */
+
 .irs-single, .irs-min, .irs-max, .irs-from, .irs-to {
 	display: none;
 }
