@@ -6,7 +6,7 @@
 #' @param by_var_lab Label to give to the `by_var` values collectively
 #'
 #' @noRd
-table_summary <- function(dat, by_var, col_ord, by_var_lab, 
+table_summary <- function(dat, by_var, col_ord, by_var_lab,
                           position = "center") {
   dat <- mutate(
     dat,
@@ -52,8 +52,7 @@ table_summary <- function(dat, by_var, col_ord, by_var_lab,
   tbl_total <- table_recruitvh_tot(dat, col_ord, by_var)
   high_head <- c("", length(colnames(tbl_total)[-1]))
   names(high_head) <- c("", by_var_lab)
-  tbl_total %>%
-    bind_rows(all_tbls) %>%
+  bind_rows(tbl_total, bind_rows(all_tbls)) %>%
     knitr::kable(
       "html",
       align = paste0(
@@ -91,7 +90,7 @@ table_recruitvh_cat <- function(tbl, col_ord, var_name, by_var) {
   tbl <- tbl %>%
     mutate(
       !!rlang::sym(var_name) := if_else(
-        is.na(!!rlang::sym(var_name)), "(Missing)", 
+        is.na(!!rlang::sym(var_name)), "(Missing)",
         as.character(!!rlang::sym(var_name))
       )
     ) %>%

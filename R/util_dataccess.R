@@ -36,7 +36,11 @@ get_redcap_data <- function(token, uri = "https://biredcap.mh.org.au/api/") {
       sitestaff_name_uv = col_character(),
       sitestaff_signature_uv = col_skip(),
       date_site_sign_uv = col_date(),
-      swab_other = col_character()
+      swab_other = col_character(),
+      age_contact21 = col_character(),
+      age_contact22 = col_character(),
+      age_contact23 = col_character(),
+      age_contact24 = col_character()
     )
   )
   as_tibble(rcap$data)
