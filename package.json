@@ -2,9 +2,11 @@
   "name": "hcwstudyapp",
   "version": "0.0.0",
   "description": "View summaries and reports from the HCW flu study",
+  "type": "module",
   "main": "main.js",
   "scripts": {
-    "test": "jest"
+    "start": "nodemon main.mjs",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=./jest.config.mjs"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,16 @@
   "bugs": {
     "url": "https://github.com/khvorov45/hcwstudyapp/issues"
   },
-  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme"
+  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
+  "devDependencies": {
+    "eslint": "^7.1.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^26.0.1"
+  },
+  "dependencies": {}
 }
