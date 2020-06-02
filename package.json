@@ -1,0 +1,19 @@
+{
+  "name": "hcwstudyapp",
+  "version": "0.0.0",
+  "description": "View summaries and reports from the HCW flu study",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khvorov45/hcwstudyapp.git"
+  },
+  "author": "Arseniy Khvorov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/khvorov45/hcwstudyapp/issues"
+  },
+  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme"
+}
