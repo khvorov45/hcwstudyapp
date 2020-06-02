@@ -2,8 +2,10 @@
   "name": "hcwstudyapp",
   "version": "0.0.0",
   "description": "View data summaries from the HCW flu study",
-  "main": "main.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/khvorov45/hcwstudyapp/issues"
   },
-  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme"
+  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
+  "dependencies": {
+    "next": "^9.4.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
 }
