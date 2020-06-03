@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
+    "gray-matter": "^4.0.2",
     "next": "^9.4.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
