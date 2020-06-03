@@ -10,10 +10,22 @@ export default function Layout ({
           <h1>Study reports</h1>
         </div>
         <div id="themeswitch">
-          <i className="material-icons">invert_colors</i>
+          <i onClick={changeTheme} className="material-icons">invert_colors</i>
         </div>
       </nav>
       <main>{children}</main>
     </>
   )
+}
+
+function changeTheme () {
+  let theme: string
+  if (document.documentElement.getAttribute('theme') === 'dark') {
+    theme = 'light'
+    localStorage.setItem('theme', 'light')
+  } else {
+    theme = 'dark'
+  }
+  localStorage.setItem('theme', theme)
+  document.documentElement.setAttribute('theme', theme)
 }

@@ -9,7 +9,9 @@ export default class MyDocument extends Document {
   render () {
     return (
       <Html lang="en">
-        <Head />
+        <Head>
+          <script src="js/themeswitch.js"></script>
+        </Head>
         <body>
           <Main />
           <NextScript />
