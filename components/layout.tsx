@@ -4,6 +4,16 @@ export default function Layout ({
   children: React.ReactNode
 }) {
   return (
-    <main>{children}</main>
+    <>
+      <nav>
+        <div id="title">
+          <h1>Study reports</h1>
+        </div>
+        <div id="themeswitch">
+          <i className="material-icons">invert_colors</i>
+        </div>
+      </nav>
+      <main>{children}</main>
+    </>
   )
 }
