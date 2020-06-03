@@ -1,0 +1,54 @@
+:root {
+    --font-color: #000000;
+    --bg-color: #fff;
+    --border: #777777;
+    --highlight: #ea00ff7c;
+    --text-highlight: #016f75;
+    --text-error: #ff0000;
+}
+
+[theme="dark"] {
+    --font-color: #ffffff;
+    --bg-color: #000000;
+    --text-highlight: #00e6e4;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--font-color);
+    display: flex;
+    flex-direction: column;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#themeswitch {
+    cursor: pointer;
+    user-select: none;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--font-color);
+}
+
+html, html * {
+    scrollbar-color: var(--border) var(--bg-color);
+    scrollbar-width: thin;
+}
