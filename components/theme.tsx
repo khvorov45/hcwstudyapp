@@ -18,7 +18,9 @@ export class ThemeSwitch extends React.Component {
         id="themeswitch"
         onClick={this.changeTheme}
         className="material-icons"
-      >invert_colors</i>
+      >
+          invert_colors
+      </i>
     )
   }
 }
