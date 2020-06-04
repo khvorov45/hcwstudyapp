@@ -1,9 +1,8 @@
 import Layout from '../components/layout'
 import InfoMessage from '../components/info'
-import { getPasswords } from '../lib/passwords'
+import { authorise } from '../lib/authorise'
 
 export default function Home (props: {authorised: boolean}) {
-  console.log(props)
   return (
     <Layout>
       {
@@ -18,7 +17,9 @@ export default function Home (props: {authorised: boolean}) {
 }
 
 export async function getServerSideProps (context) {
-  console.log(context.query)
-  console.log(getPasswords())
-  return { props: { authorised: false } }
+  return {
+    props: {
+      authorised: await authorise(context.query.site, context.query.token)
+    }
+  }
 }

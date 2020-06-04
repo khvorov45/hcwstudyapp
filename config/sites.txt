@@ -1,0 +1,6 @@
+adelaide
+brisbane
+melbourne
+newcastle
+perth
+sydney
