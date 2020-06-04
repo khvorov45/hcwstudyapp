@@ -1,13 +1,25 @@
 import path from 'path'
+import fs from 'fs'
 import sqlite from 'sqlite3'
-import cryptoRandomString from 'crypto-random-string'
-import bcrypt from 'bcrypt'
 import { getAllSites } from './sites'
 
 class Database {
+  dbDirPath = path.join(process.cwd(), 'db')
   db: sqlite.Database
-  constructor (sites: Promise<string[]>) {
-    const dbFilePath = path.join(process.cwd(), 'db', 'db.sqlite3')
+
+  constructor (name: string, initTablesSqlFilePath: string) {
+    if (this.createdb(path.join(this.dbDirPath, `${name}.sqlite3`))) {
+      this.initTables(path.join(this.dbDirPath, `${initTablesSqlFilePath}.sql`))
+    }
+    this.updateAccessGroup()
+  }
+
+  /** Creates a connection to `dbFilePath`.
+   * Returns `true` when the connection is to a newly created file and `false`
+   * otherwise */
+  createdb (dbFilePath: string): boolean {
+    let needToInit = true
+    if (fs.existsSync(dbFilePath)) needToInit = false
     this.db = new sqlite.Database(
       dbFilePath,
       (error: Error) => {
@@ -15,44 +27,82 @@ class Database {
         console.log('Database opened successfully')
       }
     )
-    this.writeSiteAccess(sites)
+    return needToInit
   }
 
-  async writeSiteAccess (sites: Promise<string[]>) {
-    this.db.exec(
-      `CREATE TABLE IF NOT EXISTS "Site" (
-        "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-        "name" TEXT NOT NULL UNIQUE,
-        "tokenhash" TEXT NOT NULL
-      );`
-    )
-    this.db.all(
-      'SELECT name FROM Site;', async (error, rows) => {
-        if (error) throw error
-        const currentSites = []
-        const neededSites = await sites
-        for (const name of rows) {
-          if (neededSites.includes(name.name)) {
-            currentSites.push(name.name)
-            continue
+  initTables (initTablesSqlFilePath: string) {
+    this.db.exec(fs.readFileSync(initTablesSqlFilePath, 'utf8'))
+  }
+
+  async updateAccessGroup () {
+    const currentAccessGroups = await this.getCurrentAccessGroups()
+    const neededAccessGroups = await getAllSites()
+    if (!neededAccessGroups.includes('admin')) {
+      neededAccessGroups.push('admin')
+    }
+    this.removeUnnededAccessGroups(neededAccessGroups, currentAccessGroups)
+    this.addAccessGroups(neededAccessGroups, currentAccessGroups)
+  }
+
+  getCurrentAccessGroups (): Promise<string[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT * FROM AccessGroup;', (err, data) => {
+          if (err) reject(err)
+          else {
+            const accessGroupNames: string[] = []
+            for (const row of data) {
+              accessGroupNames.push(row.name)
+            }
+            resolve(accessGroupNames)
           }
-          console.log(`will delete ${name.name}`)
-          this.db.exec(
-            `DELETE FROM Site WHERE name = "${name.name}"`
-          )
-        }
-        for (const site of neededSites) {
-          if (currentSites.includes(site)) continue
-          const siteToken = cryptoRandomString(
-            { length: 10, type: 'url-safe' }
-          )
-          const tokenHash = await bcrypt.hash(siteToken, 10)
-          console.log(`will write ${site} with hashed ${siteToken}`)
-          this.db.exec(
-            `INSERT INTO Site (name, tokenhash)
-            VALUES ("${site}", "${tokenHash}");`
-          )
-        }
+        })
+      }
+    )
+  }
+
+  async removeUnnededAccessGroups (
+    neededAccessGroups: string[], currentAccessGroups: string[]
+  ) {
+    for (const accessGroup of currentAccessGroups) {
+      if (neededAccessGroups.includes(accessGroup)) continue
+      await this.removeAccessGroup(accessGroup)
+    }
+  }
+
+  async removeAccessGroup (accessGroup: string) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `DELETE FROM AccessGroup WHERE name = "${accessGroup}"`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
+  }
+
+  async addAccessGroups (
+    neededAccessGroups: string[], currentAccessGroups: string[]
+  ) {
+    for (const accessGroup of neededAccessGroups) {
+      if (currentAccessGroups.includes(accessGroup)) continue
+      await this.addAccessGroup(accessGroup)
+    }
+  }
+
+  addAccessGroup (accessGroup: string) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `INSERT INTO AccessGroup (name) VALUES ("${accessGroup}")`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
       }
     )
   }
@@ -62,4 +112,4 @@ class Database {
   }
 }
 
-export default new Database(getAllSites())
+export default new Database('user', 'init-tables-user')
