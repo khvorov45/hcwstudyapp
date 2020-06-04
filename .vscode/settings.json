@@ -1,7 +1,8 @@
 {
-    "spellright.language": [],
+    "spellright.language": [
+        "en_AU"
+    ],
     "spellright.documentTypes": [
-        "latex",
-        "plaintext"
+        "latex"
     ]
 }
