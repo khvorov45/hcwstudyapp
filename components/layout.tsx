@@ -8,9 +8,7 @@ export default function Layout ({
   return (
     <>
       <nav>
-        <div id="title">
-          <h1>Study reports</h1>
-        </div>
+        <h1>Study reports</h1>
         <ThemeSwitch />
       </nav>
       <main>{children}</main>
