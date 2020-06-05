@@ -37,9 +37,10 @@ export default class EmailForm
   render () {
     return (
       <form className={styles.form} onSubmit={this.handleSubmit}>
-        <label>{this.props.message}</label>
+        <label htmlFor="email">{this.props.message}</label>
         <input
           className={`${inputStyles.input} ${inputStyles.text}`}
+          id="email"
           type="email"
           value={this.state.email}
           onChange={this.handleChange}
