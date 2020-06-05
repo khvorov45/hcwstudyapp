@@ -1,12 +1,9 @@
 -- Assumes that the database is empty
-CREATE TABLE "AccessGroup" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    "name" TEXT NOT NULL UNIQUE
-);
+CREATE TABLE "AccessGroup" ("name" TEXT NOT NULL UNIQUE);
 CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    "name" TEXT NOT NULL UNIQUE,
-    "accessGroupId" INTEGER NOT NULL,
+    "email" TEXT NOT NULL UNIQUE,
+    "accessGroup" TEXT NOT NULL,
     "tokenhash" TEXT,
-    FOREIGN KEY ("accessGroupId") REFERENCES "AccessGroup"("id")
+    FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup"("name")
 );
