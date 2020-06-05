@@ -5,5 +5,5 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL UNIQUE,
     "accessGroup" TEXT NOT NULL,
     "tokenhash" TEXT,
-    FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup"("name")
+    FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name") ON UPDATE CASCADE ON DELETE CASCADE
 );
