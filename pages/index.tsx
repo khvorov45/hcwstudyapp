@@ -1,25 +1,17 @@
 import Layout from '../components/layout'
 import InfoMessage from '../components/info'
-import { authorise } from '../lib/authorise'
+import EmailForm from '../components/emailform'
 
-export default function Home (props: {authorised: boolean}) {
+export default function Home () {
   return (
     <Layout>
-      {
-        props.authorised
-          ? <InfoMessage content="Supposed to show reports" />
-          : <InfoMessage
-            content="Please use the given link to access reports"
-          />
-      }
+      <InfoMessage
+        content="Please use the given link to access reports"
+      />
+      <EmailForm
+        message="If you don't have a link, enter your email below and a new one
+        will be sent to you"
+      />
     </Layout>
   )
-}
-
-export async function getServerSideProps (context) {
-  return {
-    props: {
-      authorised: await authorise(context.query.site, context.query.token)
-    }
-  }
 }

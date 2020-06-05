@@ -1,0 +1,23 @@
+.input {
+    background-color: inherit;
+    color: inherit;
+    font-size: 1.3rem;
+}
+
+.submitButton {
+    border: 2px solid var(--border);
+    border-radius: 1.5rem;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+    font-size: 1.3rem;
+}
+
+.text {
+    border: 0;
+    border-bottom: 2px solid var(--border);
+    padding: 5px;
+    width: 100%;
+    max-width: 20em;
+}
