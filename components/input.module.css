@@ -4,6 +4,10 @@
     font-size: 1.3rem;
 }
 
+.input::-moz-focus-inner {
+    border: 0;
+}
+
 .submitButton {
     border: 2px solid var(--border);
     border-radius: 1.5rem;
