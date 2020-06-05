@@ -1,10 +1,11 @@
 import path from 'path'
 import fs from 'fs'
 import sqlite from 'sqlite3'
-import { getAllSites } from './sites'
+import { readDelimited, readLines } from './readfile'
 
 class Database {
   dbDirPath = path.join(process.cwd(), 'db')
+  configDirPath = path.join(process.cwd(), 'config')
   db: sqlite.Database
   needFill: boolean
 
@@ -50,18 +51,49 @@ class UserDB extends Database {
     super('user', 'init-tables-user')
     if (this.needFill) {
       this.initFillAccessGroup()
+      this.initFillUser()
     }
   }
 
+  async initFillUser () {
+    const neededUsers = await readDelimited(
+      path.join(this.configDirPath, 'user.txt'), ' ', ['email', 'accessGroup']
+    )
+    this.addUsers(neededUsers)
+  }
+
+  async addUsers (users: {email: string, accessGroup: string}[]) {
+    for (const user of users) {
+      await this.addUser(user)
+    }
+  }
+
+  addUser (user: {email: string, accessGroup: string}) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `INSERT INTO User (email, accessGroup) VALUES
+          ("${user.email}", "${user.accessGroup}");`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
+  }
+
   async initFillAccessGroup () {
-    const neededAccessGroups = await getAllSites()
+    const neededAccessGroups = await readLines(
+      path.join(this.configDirPath, 'sites.txt')
+    )
     if (!neededAccessGroups.includes('admin')) {
       neededAccessGroups.push('admin')
     }
     this.addAccessGroups(neededAccessGroups)
   }
 
-  getCurrentAccessGroups (): Promise<string[]> {
+  getAccessGroups (): Promise<string[]> {
     return new Promise(
       (resolve, reject) => {
         this.db.all('SELECT * FROM AccessGroup;', (err, data) => {
@@ -88,7 +120,7 @@ class UserDB extends Database {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
-          `DELETE FROM AccessGroup WHERE name = "${accessGroup}"`,
+          `DELETE FROM AccessGroup WHERE name = "${accessGroup}";`,
           (error) => {
             if (error) reject(error)
             else resolve()
