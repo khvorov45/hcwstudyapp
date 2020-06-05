@@ -6,17 +6,24 @@ import { getAllSites } from './sites'
 class Database {
   dbDirPath = path.join(process.cwd(), 'db')
   db: sqlite.Database
+  needFill: boolean
 
+  /** Creates the connection to the database. If the database file does not
+   * exist, it will be created then initialised with tables specified by
+   * `initTablesSqlFilePath`
+   */
   constructor (name: string, initTablesSqlFilePath: string) {
+    this.needFill = false
     if (this.createdb(path.join(this.dbDirPath, `${name}.sqlite3`))) {
       this.initTables(path.join(this.dbDirPath, `${initTablesSqlFilePath}.sql`))
+      this.needFill = true
     }
-    this.updateAccessGroup()
   }
 
   /** Creates a connection to `dbFilePath`.
    * Returns `true` when the connection is to a newly created file and `false`
-   * otherwise */
+   * otherwise
+   */
   createdb (dbFilePath: string): boolean {
     let needToInit = true
     if (fs.existsSync(dbFilePath)) needToInit = false
@@ -30,18 +37,28 @@ class Database {
     return needToInit
   }
 
+  /** Executes the SQL file found at `initTablesSqlFilePath` that's supposed
+   * initialise the database tables and leave them empty
+   */
   initTables (initTablesSqlFilePath: string) {
     this.db.exec(fs.readFileSync(initTablesSqlFilePath, 'utf8'))
   }
+}
 
-  async updateAccessGroup () {
-    const currentAccessGroups = await this.getCurrentAccessGroups()
+class UserDB extends Database {
+  constructor () {
+    super('user', 'init-tables-user')
+    if (this.needFill) {
+      this.initFillAccessGroup()
+    }
+  }
+
+  async initFillAccessGroup () {
     const neededAccessGroups = await getAllSites()
     if (!neededAccessGroups.includes('admin')) {
       neededAccessGroups.push('admin')
     }
-    this.removeUnnededAccessGroups(neededAccessGroups, currentAccessGroups)
-    this.addAccessGroups(neededAccessGroups, currentAccessGroups)
+    this.addAccessGroups(neededAccessGroups)
   }
 
   getCurrentAccessGroups (): Promise<string[]> {
@@ -61,16 +78,13 @@ class Database {
     )
   }
 
-  async removeUnnededAccessGroups (
-    neededAccessGroups: string[], currentAccessGroups: string[]
-  ) {
-    for (const accessGroup of currentAccessGroups) {
-      if (neededAccessGroups.includes(accessGroup)) continue
+  async removeAccessGroups (AccessGroups: string[]) {
+    for (const accessGroup of AccessGroups) {
       await this.removeAccessGroup(accessGroup)
     }
   }
 
-  async removeAccessGroup (accessGroup: string) {
+  removeAccessGroup (accessGroup: string) {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -84,11 +98,8 @@ class Database {
     )
   }
 
-  async addAccessGroups (
-    neededAccessGroups: string[], currentAccessGroups: string[]
-  ) {
-    for (const accessGroup of neededAccessGroups) {
-      if (currentAccessGroups.includes(accessGroup)) continue
+  async addAccessGroups (AccessGroups: string[]) {
+    for (const accessGroup of AccessGroups) {
       await this.addAccessGroup(accessGroup)
     }
   }
@@ -112,4 +123,4 @@ class Database {
   }
 }
 
-export default new Database('user', 'init-tables-user')
+export default new UserDB()
