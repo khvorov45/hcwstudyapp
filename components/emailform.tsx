@@ -23,7 +23,7 @@ export default class EmailForm
         <label>{this.props.message}</label>
         <input
           className={`${inputStyles.input} ${inputStyles.text}`}
-          type="text"
+          type="email"
           value={this.state.value}
           onChange={this.handleChange}
           placeholder="name@example.org"

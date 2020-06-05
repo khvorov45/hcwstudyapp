@@ -21,3 +21,8 @@
     width: 100%;
     max-width: 20em;
 }
+
+.text:required, .text:invalid {
+    box-shadow: none;
+    border-color: var(--error);
+}
