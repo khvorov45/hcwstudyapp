@@ -12,13 +12,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       req.headers.origin, token, user.id.toString()
     )
     console.log(`Supposed to send ${link} to ${user.email}`)
+    const hash = await bcrypt.hash(token, 10)
+    console.log(`Supposed to store ${hash} in the database`)
     res.status(200).end()
     return
   }
   // TODO
   // Send the token
-  // Hash the token
-  // Store token in the database
+  // Store tokenhash in the database
   res.status(404).end()
 }
 
