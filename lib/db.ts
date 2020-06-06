@@ -83,6 +83,21 @@ class UserDB extends Database {
     )
   }
 
+  getUsers (): Promise<{
+    id: number, email: string, accessGroup: string, tokenHash?: string
+  }[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT * FROM User;', (err, data) => {
+          if (err) reject(err)
+          else {
+            resolve(data)
+          }
+        })
+      }
+    )
+  }
+
   async initFillAccessGroup () {
     const neededAccessGroups = await readLines(
       path.join(this.configDirPath, 'sites.txt')
@@ -155,4 +170,6 @@ class UserDB extends Database {
   }
 }
 
-export default new UserDB()
+export default {
+  user: new UserDB()
+}
