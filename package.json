@@ -19,9 +19,6 @@
   },
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
-    "@types/bcrypt": "^3.0.0",
-    "@types/nodemailer": "^6.4.0",
-    "@types/sqlite3": "^3.1.6",
     "bcrypt": "^4.0.1",
     "crypto-random-string": "^3.2.0",
     "next": "^9.4.4",
@@ -32,6 +29,9 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/nodemailer": "^6.4.0",
+    "@types/sqlite3": "^3.1.6",
     "@types/node": "^14.0.9",
     "@types/react": "^16.9.35",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
