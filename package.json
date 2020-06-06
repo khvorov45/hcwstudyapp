@@ -20,10 +20,12 @@
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
+    "@types/nodemailer": "^6.4.0",
     "@types/sqlite3": "^3.1.6",
     "bcrypt": "^4.0.1",
     "crypto-random-string": "^3.2.0",
     "next": "^9.4.4",
+    "nodemailer": "^6.4.8",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "sqlite3": "^4.2.0",

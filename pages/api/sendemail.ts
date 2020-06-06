@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import db from '../../lib/db'
 import cryptoRandomString from 'crypto-random-string'
 import bcrypt from 'bcrypt'
+import { sendEmail } from '../../lib/email'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const allUsers = await db.user.getUsers()
@@ -11,7 +12,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const link = generateLink(
       req.headers.origin, token, user.id.toString()
     )
-    console.log(`Supposed to send ${link} to ${user.email}`)
+    sendEmail(
+      user.email,
+      'HCW Study Reports link',
+      `Your link:\n\n${link}`,
+      `<a href=${link}>Reports link</a>`
+    )
     const hash = await bcrypt.hash(token, 10)
     console.log(`Supposed to store ${hash} in the database`)
     res.status(200).end()
