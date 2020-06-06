@@ -19,13 +19,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       `<a href=${link}>Reports link</a>`
     )
     const hash = await bcrypt.hash(token, 10)
-    console.log(`Supposed to store ${hash} in the database`)
+    await db.user.storeTokenHash(hash, user.id)
     res.status(200).end()
     return
   }
-  // TODO
-  // Send the token
-  // Store tokenhash in the database
   res.status(404).end()
 }
 

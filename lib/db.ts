@@ -84,7 +84,7 @@ class UserDB extends Database {
   }
 
   getUsers (): Promise<{
-    id: number, email: string, accessGroup: string, tokenHash?: string
+    id: number, email: string, accessGroup: string, tokenhash: string
   }[]> {
     return new Promise(
       (resolve, reject) => {
@@ -94,6 +94,20 @@ class UserDB extends Database {
             resolve(data)
           }
         })
+      }
+    )
+  }
+
+  storeTokenHash (hash: string, id: number) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `UPDATE User SET tokenhash = "${hash}" WHERE id = ${id}`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
       }
     )
   }
