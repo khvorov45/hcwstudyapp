@@ -100,7 +100,7 @@ find_monday <- function(dates) {
 
 gen_should_complete <- function(screening_week_index, weekly_survey_reference) {
   latest_week <- weekly_survey_reference %>%
-    filter(.data$date_monday < Sys.Date()) %>%
+    filter(.data$date_monday <= Sys.Date()) %>%
     pull(.data$week_index) %>%
     max() - 1
   map(
