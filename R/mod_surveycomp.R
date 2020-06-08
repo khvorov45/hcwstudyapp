@@ -105,6 +105,6 @@ gen_should_complete <- function(screening_week_index, weekly_survey_reference) {
     max() - 1
   map(
     screening_week_index,
-    function(i) if (i + 1 > latest_week) integer(0) else seq(i + 1, latest_week)
+    function(i) if (i > latest_week) integer(0) else seq(max(1, i), latest_week)
   )
 }
