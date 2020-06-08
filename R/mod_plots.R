@@ -5,7 +5,8 @@ ui_plots <- function(id = "plots", label = "Plots") {
     fluidRow(
       column(4, ui_binfilt(
         ns("binfilt-addb"), "Consent to additional bleed", "add_bleed"
-      ))
+      )),
+      column(4, ui_withdrawn(ns("withdrawn")))
     ),
     fluidRow(
       column(4, sliderInput(ns("fontsize"), "Font size", 10, 30, 20))
@@ -21,9 +22,11 @@ ui_plots <- function(id = "plots", label = "Plots") {
 }
 
 server_plots <- function(input, output, session, data, dark) {
-  tbl_part <- reactive(data()$participant)
+  tbl_part_withdrawn <- callModule(
+    server_withdrawn, "withdrawn", data, "participant"
+  )
   tbl_part_addb <- callModule(
-    server_binfilt, "binfilt-addb", tbl_part, "add_bleed"
+    server_binfilt, "binfilt-addb", tbl_part_withdrawn, "add_bleed"
   )
   output$histvachx <- renderPlot(
     plot_vachx(tbl_part_addb(), input$fontsize, dark())
