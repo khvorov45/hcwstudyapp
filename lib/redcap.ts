@@ -8,8 +8,12 @@ export async function getRedcapData () {
     {
       method: 'POST',
       headers: myHeaders,
-      body: `token=${config.redcapCredentials.token}\
-&content=record&format=json&type=flat`
+      body: new URLSearchParams({
+        token: config.redcapCredentials.token,
+        content: 'record',
+        format: 'json',
+        type: 'flat'
+      }).toString()
     }
   )
   console.log(redcapData)
