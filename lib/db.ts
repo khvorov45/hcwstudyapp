@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import sqlite from 'sqlite3'
 import { readDelimited, readLines } from './readfile'
+import { exportRecords } from './redcap'
 
 class Database {
   dbDirPath = path.join(process.cwd(), 'db')
@@ -178,10 +179,6 @@ class UserDB extends Database {
       }
     )
   }
-
-  temp () {
-    console.log('db method')
-  }
 }
 
 class StudyDB extends Database {
@@ -190,6 +187,14 @@ class StudyDB extends Database {
     if (this.needFill) {
       console.log('supposed to fill study db')
     }
+  }
+
+  async update () {
+    const participantData = await exportRecords(
+      ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
+    )
+    console.log(participantData)
+    console.log('supposed to update StudyDB with redcap data')
   }
 }
 

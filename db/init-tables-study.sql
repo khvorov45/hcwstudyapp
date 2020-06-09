@@ -1,4 +1,6 @@
 -- Assumes that the database is empty
 CREATE TABLE "Participant" (
-    "redcap_record_id" TEXT NOT NULL PRIMARY KEY UNIQUE
+    "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
+    "pid" TEXT NOT NULL UNIQUE,
+    "site" TEXT NOT NULL
 );

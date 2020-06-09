@@ -1,6 +1,15 @@
 import config from './config'
 
-export async function getRedcapData () {
+/** Export records
+ *
+ * @param fields Variable names
+ * @param events Event names
+ * @param type 'flat' (maybe lots of NA) or 'eav'
+ *  (can't export redcap_data_access_group)
+ */
+export async function exportRecords (
+  fields: string[], events: string[], type: string
+) {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
   myHeaders.append('Accept', 'application/json')
@@ -13,17 +22,11 @@ export async function getRedcapData () {
         token: config.redcapCredentials.token,
         content: 'record',
         format: 'json',
-        // With 'flat' - lots of NA
-        // With 'eav' - can't export redcap_data_access_group
-        type: 'eav',
+        type: type,
         exportDataAccessGroups: 'true',
         rawOrLabel: 'label',
-        fields: [
-          // 'record_id', 'redcap_data_access_group',
-          // 'redcap_repeat_instrument', 'redcap_repeat_instance',
-          // 'redcap_event_name', 'redcap_data_access_group',
-          'pid', 'site_name'
-        ].toString()
+        fields: fields.toString(),
+        events: events.toString()
       }).toString()
     }
   )
