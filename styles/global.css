@@ -25,13 +25,23 @@ body {
 }
 
 h1 {
-    font-size: 1.4em;
+    font-size: 1.3em;
+}
+
+h2 {
+    font-size: 1.1em;
 }
 
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+nav>a {
+    color: var(--font-color);
+    text-decoration: none;
+    outline: none;
 }
 
 #themeswitch {

@@ -2,16 +2,16 @@ import Layout from '../components/layout'
 import Head from 'next/head'
 import { authorise } from '../lib/authorise'
 
-export default function Home (
+export default function RawTables (
   props: {authorised: boolean, id: number, token: string}
 ) {
   return (
     <Layout id={props.id} token={props.token} authorised={props.authorised}>
       <Head>
-        <title>HCW flu study reports</title>
-        <meta name="Description" content="Reports for the HCW flu study" />
+        <title>HCW flu study tables</title>
+        <meta name="Description" content="HCW flu study raw tables" />
       </Head>
-      <p>Authorised</p>
+      <p>Supposed to show tables</p>
     </Layout>
   )
 }
