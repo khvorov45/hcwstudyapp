@@ -184,6 +184,16 @@ class UserDB extends Database {
   }
 }
 
+class StudyDB extends Database {
+  constructor () {
+    super('study', 'init-tables-study')
+    if (this.needFill) {
+      console.log('supposed to fill study db')
+    }
+  }
+}
+
 export default {
-  user: new UserDB()
+  user: new UserDB(),
+  study: new StudyDB()
 }

@@ -1,6 +1,7 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
 import { authorise } from '../lib/authorise'
+import { getRedcapData } from '../lib/redcap'
 
 export default function RawTables (
   props: {authorised: boolean, id: number, token: string}
@@ -17,6 +18,7 @@ export default function RawTables (
 }
 
 export async function getServerSideProps (context) {
+  getRedcapData()
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
