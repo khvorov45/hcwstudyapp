@@ -18,7 +18,7 @@ export default function RawTables (
 }
 
 export async function getServerSideProps (context) {
-  await db.study.update()
+  db.study.update()
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),

@@ -190,11 +190,37 @@ class StudyDB extends Database {
   }
 
   async update () {
-    const participantData = await exportRecords(
+    const participants = await exportRecords(
       ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
     )
-    console.log(participantData)
+    await this.addParticipants(participants)
+    console.log(participants)
     console.log('supposed to update StudyDB with redcap data')
+  }
+
+  async addParticipants (participants) {
+    for (const participant of participants) {
+      await this.addParticipant(participant)
+    }
+  }
+
+  addParticipant (participant) {
+    if (participant.pid === '') return
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `INSERT INTO Participant (redcapRecordId, pid, site) VALUES
+          (
+            "${participant.record_id}", "${participant.pid}",
+            "${participant.site_name}"
+          );`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
   }
 }
 
