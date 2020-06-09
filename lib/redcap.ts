@@ -3,7 +3,8 @@ import config from './config'
 export async function getRedcapData () {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
-  const redcapData = await fetch(
+  myHeaders.append('Accept', 'application/json')
+  const redcapres = await fetch(
     config.redcapCredentials.url,
     {
       method: 'POST',
@@ -16,5 +17,5 @@ export async function getRedcapData () {
       }).toString()
     }
   )
-  console.log(redcapData)
+  console.log(await redcapres.json())
 }
