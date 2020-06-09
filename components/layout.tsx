@@ -28,8 +28,12 @@ export default function Layout (
   if (props.id && props.token) {
     constQuery = `?id=${props.id}&token=${props.token}`
   }
+  var navBarExtra = <a
+    href={`/rawtables${constQuery}`}><h2>Raw tables</h2>
+  </a>
   var pageContent = props.children
   if (props.authorised === null) {
+    navBarExtra = <></>
     pageContent = <>
       <Head>
         <title>HCW flu study reports</title>
@@ -41,9 +45,8 @@ export default function Layout (
         will be sent to you"
       />
     </>
-  } else if (props.authorised) {
-    pageContent = props.children
-  } else {
+  } else if (!props.authorised) {
+    navBarExtra = <></>
     pageContent = <>
       <Head>
         <title>HCW flu study reports - unautorised</title>
@@ -65,7 +68,7 @@ export default function Layout (
         <a href={`/${constQuery}`}>
           <h1>Study reports</h1>
         </a>
-        <a href={`/rawtables${constQuery}`}><h2>Raw tables</h2></a>
+        {navBarExtra}
         <ThemeSwitch />
       </nav>
       <main>{pageContent}</main>
