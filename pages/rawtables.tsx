@@ -1,7 +1,7 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
 import { authorise } from '../lib/authorise'
-import db from '../lib/db'
+// import db from '../lib/db'
 
 export default function RawTables (
   props: {authorised: boolean, id: number, token: string}
@@ -18,7 +18,6 @@ export default function RawTables (
 }
 
 export async function getServerSideProps (context) {
-  db.study.update()
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),

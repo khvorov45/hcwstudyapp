@@ -32,3 +32,9 @@ export async function exportRecords (
   )
   return await redcapres.json()
 }
+
+export async function exportParticipants () {
+  return await exportRecords(
+    ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
+  )
+}

@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import sqlite from 'sqlite3'
 import { readDelimited, readLines } from './readfile'
-import { exportRecords } from './redcap'
+import { exportParticipants } from './redcap'
 
 class Database {
   dbDirPath = path.join(process.cwd(), 'db')
@@ -185,27 +185,54 @@ class StudyDB extends Database {
   constructor () {
     super('study', 'init-tables-study')
     if (this.needFill) {
-      console.log('supposed to fill study db')
+      this.initFillParticipant()
     }
   }
 
-  async update () {
-    const participants = await exportRecords(
-      ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
-    )
-    await this.addParticipants(participants)
-    console.log(participants)
-    console.log('supposed to update StudyDB with redcap data')
+  async initFillParticipant () {
+    return await this.addParticipants(await exportParticipants())
   }
 
-  async addParticipants (participants) {
+  async update () {
+    const participants = await exportParticipants()
+    this.updateParticipants(participants)
+  }
+
+  async updateParticipants (participants) {
+    const currentParticipantIds: string[] = await this.getParticipantIds()
+    console.log(currentParticipantIds)
     for (const participant of participants) {
+      if (currentParticipantIds.includes(participant.record_id)) continue
       await this.addParticipant(participant)
     }
   }
 
-  addParticipant (participant) {
-    if (participant.pid === '') return
+  async getParticipantIds (): Promise<string[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT redcapRecordId FROM Participant;', (err, data) => {
+          if (err) reject(err)
+          else {
+            const redcapRecordIds: string[] = []
+            for (const row of data) {
+              redcapRecordIds.push(row.redcapRecordId)
+            }
+            resolve(redcapRecordIds)
+          }
+        })
+      }
+    )
+  }
+
+  async addParticipants (participants): Promise<boolean[]> {
+    return Promise.all(participants.map((p) => { this.addParticipant(p) }))
+  }
+
+  async addParticipant (participant): Promise<boolean> {
+    // Not a participant
+    if (participant.pid === '') {
+      return false
+    }
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -216,7 +243,7 @@ class StudyDB extends Database {
           );`,
           (error) => {
             if (error) reject(error)
-            else resolve()
+            else resolve(true)
           }
         )
       }
