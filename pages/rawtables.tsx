@@ -18,7 +18,7 @@ export default function RawTables (
 }
 
 export async function getServerSideProps (context) {
-  getRedcapData()
+  console.log(await getRedcapData())
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
