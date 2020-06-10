@@ -14,7 +14,7 @@ export default function RawTables (
         <title>HCW flu study tables</title>
         <meta name="Description" content="HCW flu study raw tables" />
       </Head>
-      <Table rows = {props.participantTable} />
+      <Table jsonRows = {props.participantTable} />
     </Layout>
   )
 }
