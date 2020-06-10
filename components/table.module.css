@@ -1,7 +1,6 @@
 .table {
     align-self: center;
-    font-size: 0.9em;
-    padding: 5px;
+    font-size: 0.8em;
     border-spacing: 0;
     border: 1px solid var(--border);
 }
