@@ -4,7 +4,7 @@ import sqlite from 'sqlite3'
 import { readDelimited, readLines } from './readfile'
 import { exportParticipants } from './redcap'
 
-class Database {
+export class Database {
   dbDirPath = path.join(process.cwd(), 'db')
   configDirPath = path.join(process.cwd(), 'config')
   db: sqlite.Database
