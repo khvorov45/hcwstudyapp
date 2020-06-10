@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTable } from 'react-table'
+import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -30,7 +31,7 @@ export default function Table ({ jsonRows }) {
     rows,
     prepareRow
   } = useTable({ columns, data })
-  return <table {...getTableProps()}>
+  return <table {...getTableProps()} className={tableStyles.table}>
     <thead>
       {headerGroups.map(headerGroup => (
         <tr {...headerGroup.getHeaderGroupProps()}>

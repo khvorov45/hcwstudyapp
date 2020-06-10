@@ -1,0 +1,9 @@
+.table {
+    align-self: center;
+    font-size: 0.9em;
+    padding: 5px;
+}
+
+.table td {
+    text-align: center;
+}
