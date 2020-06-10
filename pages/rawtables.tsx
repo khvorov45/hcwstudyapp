@@ -1,10 +1,12 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
 import { authorise } from '../lib/authorise'
-// import db from '../lib/db'
+import db from '../lib/db'
+import Table from '../components/table'
 
 export default function RawTables (
-  props: {authorised: boolean, id: number, token: string}
+  props: {authorised: boolean, id: number, token: string,
+    participantTable: Object[]}
 ) {
   return (
     <Layout id={props.id} token={props.token} authorised={props.authorised}>
@@ -12,7 +14,7 @@ export default function RawTables (
         <title>HCW flu study tables</title>
         <meta name="Description" content="HCW flu study raw tables" />
       </Head>
-      <p>Supposed to show tables</p>
+      <Table rows = {props.participantTable} />
     </Layout>
   )
 }
@@ -22,7 +24,8 @@ export async function getServerSideProps (context) {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
       id: +context.query.id || null,
-      token: context.query.token || null
+      token: context.query.token || null,
+      participantTable: await db.study.getParticipants()
     }
   }
 }

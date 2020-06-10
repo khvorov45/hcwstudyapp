@@ -224,6 +224,17 @@ class StudyDB extends Database {
     )
   }
 
+  async getParticipants (): Promise<Object[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT * FROM Participant;', (err, data) => {
+          if (err) reject(err)
+          else resolve(data)
+        })
+      }
+    )
+  }
+
   async addParticipants (participants): Promise<boolean[]> {
     return Promise.all(participants.map((p) => { this.addParticipant(p) }))
   }
