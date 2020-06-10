@@ -2,8 +2,25 @@
     align-self: center;
     font-size: 0.9em;
     padding: 5px;
+    border-spacing: 0;
+    border: 1px solid var(--border);
 }
 
 .table td {
     text-align: center;
+}
+
+.table tr:last-child td {
+    border-bottom: 0;
+}
+
+.table th, .table td {
+    margin: 0;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}
+
+.table th:last-child, .table td:last-child {
+    border-right: 0;
 }
