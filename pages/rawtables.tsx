@@ -25,7 +25,7 @@ export async function getServerSideProps (context) {
       authorised: await authorise(+context.query.id, context.query.token),
       id: +context.query.id || null,
       token: context.query.token || null,
-      participantTable: await db.study.getParticipants()
+      participantTable: await (await db.study).getParticipants()
     }
   }
 }

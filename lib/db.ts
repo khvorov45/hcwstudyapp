@@ -7,6 +7,8 @@ import { exportParticipants } from './redcap'
 export class Database {
   dbDirPath = path.join(process.cwd(), 'db')
   configDirPath = path.join(process.cwd(), 'config')
+  dbFilePath: string
+  initTablesSqlFilePath: string
   db: sqlite.Database
   needFill: boolean
 
@@ -14,46 +16,66 @@ export class Database {
    * exist, it will be created then initialised with tables specified by
    * `initTablesSqlFilePath`
    */
-  constructor (name: string, initTablesSqlFilePath: string) {
-    this.needFill = false
-    if (this.createdb(path.join(this.dbDirPath, `${name}.sqlite3`))) {
-      this.initTables(path.join(this.dbDirPath, `${initTablesSqlFilePath}.sql`))
-      this.needFill = true
-    }
+  constructor (name: string, initTablesSqlFileName: string) {
+    this.dbFilePath = path.join(this.dbDirPath, `${name}.sqlite3`)
+    this.initTablesSqlFilePath = path.join(
+      this.dbDirPath, `${initTablesSqlFileName}.sql`
+    )
   }
 
-  /** Creates a connection to `dbFilePath`.
-   * Returns `true` when the connection is to a newly created file and `false`
-   * otherwise
-   */
-  createdb (dbFilePath: string): boolean {
-    let needToInit = true
-    if (fs.existsSync(dbFilePath)) needToInit = false
-    this.db = new sqlite.Database(
-      dbFilePath,
-      (error: Error) => {
-        if (error) throw error
-        console.log('Database opened successfully')
+  /** Creates the file and initialises tables if needed */
+  async init (): Promise<this> {
+    await this.connect()
+    if (this.needFill) {
+      await this.initTables()
+    }
+    return this
+  }
+
+  /** Creates a connection to the file */
+  async connect (): Promise<boolean> {
+    this.needFill = true
+    if (fs.existsSync(this.dbFilePath)) this.needFill = false
+    return new Promise(
+      (resolve, reject) => {
+        this.db = new sqlite.Database(
+          this.dbFilePath,
+          (error: Error) => {
+            if (error) reject(error)
+            else resolve(true)
+          }
+        )
       }
     )
-    return needToInit
   }
 
-  /** Executes the SQL file found at `initTablesSqlFilePath` that's supposed
-   * initialise the database tables and leave them empty
-   */
-  initTables (initTablesSqlFilePath: string) {
-    this.db.exec(fs.readFileSync(initTablesSqlFilePath, 'utf8'))
+  /** Executes the SQL file to initialise the tables */
+  async initTables (): Promise<boolean> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(fs.readFileSync(this.initTablesSqlFilePath, 'utf8'),
+          (error) => {
+            if (error) reject(error)
+            else resolve(true)
+          }
+        )
+      }
+    )
   }
 }
 
 class UserDB extends Database {
   constructor () {
     super('user', 'init-tables-user')
+  }
+
+  async init (): Promise<this> {
+    await super.init()
     if (this.needFill) {
-      this.initFillAccessGroup()
-      this.initFillUser()
+      await this.initFillAccessGroup()
+      await this.initFillUser()
     }
+    return this
   }
 
   async initFillUser () {
@@ -184,9 +206,14 @@ class UserDB extends Database {
 class StudyDB extends Database {
   constructor () {
     super('study', 'init-tables-study')
+  }
+
+  async init (): Promise<this> {
+    await super.init()
     if (this.needFill) {
-      this.initFillParticipant()
+      await this.initFillParticipant()
     }
+    return this
   }
 
   async initFillParticipant () {
@@ -263,6 +290,6 @@ class StudyDB extends Database {
 }
 
 export default {
-  user: new UserDB(),
-  study: new StudyDB()
+  user: new UserDB().init(),
+  study: new StudyDB().init()
 }
