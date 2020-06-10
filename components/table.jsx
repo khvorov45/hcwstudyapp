@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useTable } from 'react-table'
+import { useTable, useSortBy } from 'react-table'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
@@ -30,13 +30,36 @@ export default function Table ({ jsonRows }) {
     headerGroups,
     rows,
     prepareRow
-  } = useTable({ columns, data })
+  } = useTable(
+    {
+      columns,
+      data,
+      initialState: {
+        sortBy: [
+          {
+            id: 'pid',
+            desc: false
+          }
+        ]
+      }
+    },
+    useSortBy
+  )
   return <table {...getTableProps()} className={tableStyles.table}>
     <thead>
       {headerGroups.map(headerGroup => (
         <tr {...headerGroup.getHeaderGroupProps()}>
           {headerGroup.headers.map(column => (
-            <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+            <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+              {column.render('Header')}
+              <span>
+                {column.isSorted
+                  ? column.isSortedDesc
+                    ? ' ▼'
+                    : ' ▲'
+                  : ' ⇅'}
+              </span>
+            </th>
           ))}
         </tr>
       ))}
