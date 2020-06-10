@@ -5,23 +5,19 @@ import tableStyles from './table.module.css'
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function Table ({ jsonRows }) {
-  console.log(jsonRows)
   const data = useMemo(() => jsonRows, [])
   const columns = useMemo(
-    () => [
-      {
-        Header: 'REDCap ID',
-        accessor: 'redcapRecordId'
-      },
-      {
-        Header: 'PID',
-        accessor: 'pid'
-      },
-      {
-        Header: 'Site',
-        accessor: 'site'
+    () => {
+      const cols = []
+      const exampleRow = jsonRows[0]
+      for (const entry in exampleRow) {
+        cols.push({
+          Header: entry,
+          accessor: entry
+        })
       }
-    ],
+      return cols
+    },
     []
   )
   const {
