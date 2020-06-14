@@ -1,0 +1,23 @@
+.container {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    text-align: center;
+    padding: 0;
+    margin: auto auto 1em auto;
+}
+
+.element {
+    padding: 0 1em 0 0;
+    user-select: none;
+}
+
+.link {
+    color: var(--font-color);
+    text-decoration: none;
+    outline: none;
+}
+
+.active {
+    color: var(--text-highlight);
+}

@@ -6,7 +6,12 @@ export default function Home (
   props: {authorised: boolean, id: number, token: string}
 ) {
   return (
-    <Layout id={props.id} token={props.token} authorised={props.authorised}>
+    <Layout
+      id={props.id}
+      token={props.token}
+      authorised={props.authorised}
+      active="home"
+    >
       <Head>
         <title>HCW flu study reports</title>
         <meta name="Description" content="Reports for the HCW flu study" />

@@ -2,10 +2,11 @@
     --font-color: #000000;
     --bg-color: #fff;
     --border: #777777;
-    --highlight: #ea00ff7c;
+    --bg-highlight: #ea00ff7c;
     --text-highlight: #016f75;
     --error: #ff0000;
     --success: #00630d;
+    --menu-item-size: 3em;
 }
 
 [theme="dark"] {
@@ -17,36 +18,17 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 1.3em;
+    font-size: 16px;
     background-color: var(--bg-color);
     color: var(--font-color);
     display: flex;
     flex-direction: column;
 }
 
-h1 {
-    font-size: 1.3em;
-}
-
-h2 {
-    font-size: 1.1em;
-}
-
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-nav>a {
-    color: var(--font-color);
-    text-decoration: none;
-    outline: none;
-}
-
 #themeswitch {
     cursor: pointer;
     user-select: none;
+    margin-left: auto;
 }
 
 main {

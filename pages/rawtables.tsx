@@ -9,7 +9,12 @@ export default function RawTables (
     participantTable: Object[]}
 ) {
   return (
-    <Layout id={props.id} token={props.token} authorised={props.authorised}>
+    <Layout
+      id={props.id}
+      token={props.token}
+      authorised={props.authorised}
+      active="tables"
+    >
       <Head>
         <title>HCW flu study tables</title>
         <meta name="Description" content="HCW flu study raw tables" />
