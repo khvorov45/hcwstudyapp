@@ -82,9 +82,9 @@ class UserDB extends Database {
     const neededUsers = []
     for (const user of allUsers) {
       neededUsers.push({
-        email: user.email.toLowerCase(),
+        email: user.email,
         accessGroup: user.data_access_group === '' ? 'unrestricted'
-          : user.data_access_group.toLowerCase()
+          : user.data_access_group
       })
     }
     this.addUsers(neededUsers)
@@ -101,7 +101,8 @@ class UserDB extends Database {
       (resolve, reject) => {
         this.db.exec(
           `INSERT INTO User (email, accessGroup) VALUES
-          ("${user.email}", "${user.accessGroup}");`,
+          ("${user.email.toLowerCase()}",
+          "${user.accessGroup.toLowerCase()}");`,
           (error) => {
             if (error) reject(error)
             else resolve()
