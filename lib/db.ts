@@ -96,7 +96,7 @@ class UserDB extends Database {
     }
   }
 
-  addUser (user: {email: string, accessGroup: string}) {
+  async addUser (user: {email: string, accessGroup: string}) {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -112,7 +112,7 @@ class UserDB extends Database {
     )
   }
 
-  getUsers (): Promise<{
+  async getUsers (): Promise<{
     id: number, email: string, accessGroup: string, tokenhash: string
   }[]> {
     return new Promise(
@@ -127,7 +127,7 @@ class UserDB extends Database {
     )
   }
 
-  storeTokenHash (hash: string, id: number) {
+  async storeTokenHash (hash: string, id: number) {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -145,7 +145,7 @@ class UserDB extends Database {
     this.addAccessGroups(await config.accessGroups)
   }
 
-  getAccessGroups (): Promise<string[]> {
+  async getAccessGroups (): Promise<string[]> {
     return new Promise(
       (resolve, reject) => {
         this.db.all('SELECT * FROM AccessGroup;', (err, data) => {
@@ -168,7 +168,7 @@ class UserDB extends Database {
     }
   }
 
-  removeAccessGroup (accessGroup: string) {
+  async removeAccessGroup (accessGroup: string) {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -188,7 +188,7 @@ class UserDB extends Database {
     }
   }
 
-  addAccessGroup (accessGroup: string) {
+  async addAccessGroup (accessGroup: string) {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
