@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
-import SubmitButton from './submit'
-import styles from './form.module.css'
-import inputStyles from './input.module.css'
+import { TextLineLabelled, Form } from './input'
 
 export default function EmailForm (props: {message: string}) {
   const [email, setEmail] = useState('')
@@ -27,23 +25,22 @@ export default function EmailForm (props: {message: string}) {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <label htmlFor="email">{props.message}</label>
-      <input
-        className={`${inputStyles.input} ${inputStyles.text}`}
-        id="email"
-        type="email"
+    <Form
+      onSubmit={handleSubmit}
+      success={success}
+      errormsg={
+        'Email not found - make sure it\'s the email ' +
+      'associated with the REDCap account'
+      }
+    >
+      <TextLineLabelled
+        label={props.message}
         value={email}
         onChange={handleChange}
+        type="email"
         placeholder="name@example.org"
+        id="email"
       />
-      <SubmitButton
-        success={success}
-        errormsg={
-          'Email not found - make sure it\'s the email ' +
-          'associated with the REDCap account'
-        }
-      />
-    </form>
+    </Form>
   )
 }

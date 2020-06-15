@@ -2,13 +2,34 @@
     background-color: inherit;
     color: inherit;
     font-size: inherit;
+    margin: 5px;
 }
 
 .input::-moz-focus-inner {
     border: 0;
 }
 
-.text {
+.verticalContainerCenter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.horizontalContainerCenter {
+    display: flex;
+    align-items: center;
+}
+
+.button {
+    border: 2px solid var(--border);
+    border-radius: 1.5rem;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+}
+
+.textLine {
     border: 0;
     border-bottom: 2px solid var(--border);
     padding: 5px;
@@ -16,7 +37,15 @@
     max-width: 20em;
 }
 
-.text:required, .text:invalid {
+.textLine:required, .textLine:invalid {
     box-shadow: none;
     border-color: var(--error);
+}
+
+.linemsg {
+    margin: 5px;
+}
+
+.errormsg {
+    color: var(--error);
 }
