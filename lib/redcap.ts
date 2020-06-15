@@ -1,5 +1,27 @@
 import config from './config'
 
+/** Makes a REDCap API request
+ *
+ * @param body Object with request parameters except token
+ * (auto-attached from config) and format (json)
+ */
+export async function redcapApiReq (body) {
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
+  myHeaders.append('Accept', 'application/json')
+  body.token = config.redcapCredentials.token
+  body.format = 'json'
+  const redcapres = await fetch(
+    config.redcapCredentials.url,
+    {
+      method: 'POST',
+      headers: myHeaders,
+      body: new URLSearchParams(body).toString()
+    }
+  )
+  return await redcapres.json()
+}
+
 /** Export records
  *
  * @param fields Variable names
@@ -10,31 +32,22 @@ import config from './config'
 export async function exportRecords (
   fields: string[], events: string[], type: string
 ) {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
-  myHeaders.append('Accept', 'application/json')
-  const redcapres = await fetch(
-    config.redcapCredentials.url,
-    {
-      method: 'POST',
-      headers: myHeaders,
-      body: new URLSearchParams({
-        token: config.redcapCredentials.token,
-        content: 'record',
-        format: 'json',
-        type: type,
-        exportDataAccessGroups: 'true',
-        rawOrLabel: 'label',
-        fields: fields.toString(),
-        events: events.toString()
-      }).toString()
-    }
-  )
-  return await redcapres.json()
+  return await redcapApiReq({
+    content: 'record',
+    type: type,
+    exportDataAccessGroups: 'true',
+    rawOrLabel: 'label',
+    fields: fields.toString(),
+    events: events.toString()
+  })
 }
 
 export async function exportParticipants () {
   return await exportRecords(
     ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
   )
+}
+
+export async function exportUsers () {
+
 }
