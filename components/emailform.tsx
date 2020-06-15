@@ -3,9 +3,11 @@ import SubmitButton from './submit'
 import styles from './form.module.css'
 import inputStyles from './input.module.css'
 
-export default class EmailForm
-  extends React.Component<
-  {message: string}, {email: string, success?: boolean}> {
+// TODO: rewrite with hooks? May be useful for reusing stateful logic
+
+export default class EmailForm extends React.Component<
+  {message: string}, {email: string, success?: boolean}
+> {
   constructor (props: {message: string}) {
     super(props)
     this.state = { email: '' }
@@ -15,7 +17,6 @@ export default class EmailForm
 
   handleChange (event) { this.setState({ email: event.target.value }) }
   handleSubmit (event) {
-    console.log('An email was submitted: ' + this.state.email)
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
     fetch('/api/sendemail', {
@@ -25,10 +26,8 @@ export default class EmailForm
     }).then((res) => {
       if (res.status === 200) {
         this.setState({ success: true })
-        console.log('successfully sent email')
       } else {
         this.setState({ success: false })
-        console.log('email was not sent')
       }
     })
     event.preventDefault()
@@ -52,7 +51,6 @@ export default class EmailForm
             'Email not found - make sure it\'s the email ' +
             'associated with the REDCap account'
           }
-
         />
       </form>
     )
