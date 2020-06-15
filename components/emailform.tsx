@@ -1,58 +1,49 @@
-import React from 'react'
+import React, { useState } from 'react'
 import SubmitButton from './submit'
 import styles from './form.module.css'
 import inputStyles from './input.module.css'
 
-// TODO: rewrite with hooks? May be useful for reusing stateful logic
+export default function EmailForm (props: {message: string}) {
+  const [email, setEmail] = useState('')
+  const [success, setSuccess] = useState(undefined)
 
-export default class EmailForm extends React.Component<
-  {message: string}, {email: string, success?: boolean}
-> {
-  constructor (props: {message: string}) {
-    super(props)
-    this.state = { email: '' }
-    this.handleChange = this.handleChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
-  }
+  function handleChange (event) { setEmail(event.target.value) }
 
-  handleChange (event) { this.setState({ email: event.target.value }) }
-  handleSubmit (event) {
+  function handleSubmit (event) {
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
     fetch('/api/sendemail', {
       method: 'POST',
       headers: myHeaders,
-      body: JSON.stringify({ email: this.state.email })
+      body: JSON.stringify({ email: email })
     }).then((res) => {
       if (res.status === 200) {
-        this.setState({ success: true })
+        setSuccess(true)
       } else {
-        this.setState({ success: false })
+        setSuccess(false)
       }
     })
     event.preventDefault()
   }
 
-  render () {
-    return (
-      <form className={styles.form} onSubmit={this.handleSubmit}>
-        <label htmlFor="email">{this.props.message}</label>
-        <input
-          className={`${inputStyles.input} ${inputStyles.text}`}
-          id="email"
-          type="email"
-          value={this.state.email}
-          onChange={this.handleChange}
-          placeholder="name@example.org"
-        />
-        <SubmitButton
-          success={this.state.success}
-          errormsg={
-            'Email not found - make sure it\'s the email ' +
-            'associated with the REDCap account'
-          }
-        />
-      </form>
-    )
-  }
+  return (
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <label htmlFor="email">{props.message}</label>
+      <input
+        className={`${inputStyles.input} ${inputStyles.text}`}
+        id="email"
+        type="email"
+        value={email}
+        onChange={handleChange}
+        placeholder="name@example.org"
+      />
+      <SubmitButton
+        success={success}
+        errormsg={
+          'Email not found - make sure it\'s the email ' +
+          'associated with the REDCap account'
+        }
+      />
+    </form>
+  )
 }
