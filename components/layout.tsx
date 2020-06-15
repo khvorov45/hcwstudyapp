@@ -1,60 +1,7 @@
-import { ThemeSwitch } from './theme'
+import Head from 'next/head'
+import Navbar from './navbar'
 import InfoMessage from './info'
 import EmailForm from './emailform'
-import Head from 'next/head'
-import navstyle from './navbar.module.css'
-
-function Noquery (props: {info: string, message: string}) {
-  return (
-    <>
-      <InfoMessage
-        content={props.info}
-      />
-      <EmailForm
-        message={props.message}
-      />
-    </>
-  )
-}
-
-function Navelement (
-  { content, link, active }: {content: string, link: string, active: boolean}
-) {
-  return <li className={navstyle.element}>
-    <a
-      href={link}
-      className={
-        active ? `${navstyle.link} ${navstyle.active}` : navstyle.link}
-    >
-      {content}
-    </a>
-  </li>
-}
-
-function Navbar (
-  { authorised, constQuery, active }:
-  {authorised: boolean, constQuery: string, active: string}
-) {
-  var otherNavElements = <></>
-  if (authorised) {
-    otherNavElements = <>
-      <Navelement
-        content="Tables"
-        link={`/rawtables${constQuery}`}
-        active={active === 'tables'}
-      />
-    </>
-  }
-  return <nav className={navstyle.container}>
-    <Navelement
-      content="Help"
-      link={`/${constQuery}`}
-      active={active === 'home'}
-    />
-    {otherNavElements}
-    <ThemeSwitch />
-  </nav>
-}
 
 function EmptyCred () {
   return <>
@@ -62,10 +9,12 @@ function EmptyCred () {
       <title>HCW flu study reports</title>
       <meta name="Description" content="Reports for the HCW flu study" />
     </Head>
-    <Noquery
-      info="Please use the given link to access reports"
+    <InfoMessage
+      content="Please use the given link to access reports"
+    />
+    <EmailForm
       message="If you don't have a link, enter your email below and a new one
-    will be sent to you"
+        will be sent to you"
     />
   </>
 }
@@ -79,10 +28,12 @@ function Unauthorised () {
         content="Reports for the HCW flu study - unautorised access"
       />
     </Head>
-    <Noquery
-      info="Link is not valid"
+    <InfoMessage
+      content="Link is not valid"
+    />
+    <EmailForm
       message="Enter your email below and a new one
-  will be sent to you"
+      will be sent to you"
     />
   </>
 }
