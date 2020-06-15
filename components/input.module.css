@@ -8,33 +8,6 @@
     border: 0;
 }
 
-.submitButton {
-    border: 2px solid var(--border);
-    border-radius: 1.5rem;
-    background-color: transparent;
-    cursor: pointer;
-    line-height: 2;
-    outline: none;
-}
-
-.submitContainer {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.successIndicator {
-    color: var(--success);
-}
-
-.failureIndicator {
-    color: var(--error);
-}
-
-.invisibleIndicator {
-    visibility: hidden;
-}
-
 .text {
     border: 0;
     border-bottom: 2px solid var(--border);

@@ -46,7 +46,14 @@ export default class EmailForm
           onChange={this.handleChange}
           placeholder="name@example.org"
         />
-        <SubmitButton success={this.state.success}/>
+        <SubmitButton
+          success={this.state.success}
+          errormsg={
+            'Email not found - make sure it\'s the email ' +
+            'associated with the REDCap account'
+          }
+
+        />
       </form>
     )
   }

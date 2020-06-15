@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+    align-items: center;
+}
+
+.button {
+    border: 2px solid var(--border);
+    border-radius: 1.5rem;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+}
+
+.success {
+    color: var(--success);
+}
+
+.failure {
+    color: var(--error);
+}
+
+.invisible {
+    visibility: hidden;
+}

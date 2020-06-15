@@ -1,33 +1,15 @@
-import inputStyles from './input.module.css'
+import ButtonWithIndicator from './button'
+import styles from './submit.module.css'
 
-export function SubmitButton () {
-  return <input
-    className={`${inputStyles.input} ${inputStyles.submitButton}`}
-    type="submit"
-    value="Submit"
-  />
-}
-
-export default function SubmitContainer (props: {success?: boolean}) {
-  return <div className={inputStyles.submitContainer}>
-    <SubmitButton />
-    <SuccessIndicator success={props.success} />
-  </div>
-}
-
-export function SuccessIndicator (props: {success?: boolean}) {
-  if (props.success === undefined) {
-    return <i
-      className={`${inputStyles.invisibleIndicator} material-icons`}>
-  check_circle_outline
-    </i>
+export default function SubmitContainer (props: {
+  success?: boolean, errormsg: string
+}) {
+  let errormsg = <></>
+  if (props.success === false) {
+    errormsg = <p className={styles.errormsg}>{props.errormsg}</p>
   }
-  return props.success ? <i
-    className={`${inputStyles.successIndicator} material-icons`}>
-    check_circle_outline
-  </i>
-    : <i
-      className={`${inputStyles.failureIndicator} material-icons`}>
-  highlight_off
-    </i>
+  return <div className={styles.container}>
+    <ButtonWithIndicator success={props.success} type="submit" value="Submit" />
+    {errormsg}
+  </div>
 }
