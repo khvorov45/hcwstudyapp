@@ -1,12 +1,11 @@
 import path from 'path'
 import fs from 'fs'
 import sqlite from 'sqlite3'
-import { readDelimited, readLines } from './readfile'
+import config from './config'
 import { exportParticipants } from './redcap'
 
 export class Database {
   dbDirPath = path.join(process.cwd(), 'db')
-  configDirPath = path.join(process.cwd(), 'config')
   dbFilePath: string
   initTablesSqlFilePath: string
   db: sqlite.Database
@@ -79,9 +78,7 @@ class UserDB extends Database {
   }
 
   async initFillUser () {
-    const neededUsers = await readDelimited(
-      path.join(this.configDirPath, 'user.txt'), ' ', ['email', 'accessGroup']
-    )
+    const neededUsers = await config.users
     this.addUsers(neededUsers)
   }
 
@@ -136,9 +133,7 @@ class UserDB extends Database {
   }
 
   async initFillAccessGroup () {
-    const neededAccessGroups = await readLines(
-      path.join(this.configDirPath, 'sites.txt')
-    )
+    const neededAccessGroups = await config.sites
     if (!neededAccessGroups.includes('admin')) {
       neededAccessGroups.push('admin')
     }
