@@ -14,7 +14,7 @@ export class Database {
 
   /** Creates the connection to the database. If the database file does not
    * exist, it will be created then initialised with tables specified by
-   * `initTablesSqlFilePath`
+   * `initTablesSqlFileName`
    */
   constructor (name: string, initTablesSqlFileName: string) {
     this.dbFilePath = path.join(this.dbDirPath, `${name}.sqlite3`)
