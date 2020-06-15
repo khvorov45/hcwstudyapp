@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import sqlite from 'sqlite3'
 import config from './config'
-import { exportParticipants } from './redcap'
+import { exportParticipants, exportUsers } from './redcap'
 
 export class Database {
   dbDirPath = path.join(process.cwd(), 'db')
@@ -78,7 +78,15 @@ class UserDB extends Database {
   }
 
   async initFillUser () {
-    const neededUsers = await config.users
+    const allUsers = await exportUsers()
+    const neededUsers = []
+    for (const user of allUsers) {
+      neededUsers.push({
+        email: user.email.toLowerCase(),
+        accessGroup: user.data_access_group === '' ? 'unrestricted'
+          : user.data_access_group.toLowerCase()
+      })
+    }
     this.addUsers(neededUsers)
   }
 
@@ -133,11 +141,7 @@ class UserDB extends Database {
   }
 
   async initFillAccessGroup () {
-    const neededAccessGroups = await config.sites
-    if (!neededAccessGroups.includes('admin')) {
-      neededAccessGroups.push('admin')
-    }
-    this.addAccessGroups(neededAccessGroups)
+    this.addAccessGroups(await config.accessGroups)
   }
 
   getAccessGroups (): Promise<string[]> {

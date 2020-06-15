@@ -42,12 +42,14 @@ export async function exportRecords (
   })
 }
 
+export async function exportUsers () {
+  return await redcapApiReq({
+    content: 'user'
+  })
+}
+
 export async function exportParticipants () {
   return await exportRecords(
     ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
   )
-}
-
-export async function exportUsers () {
-
 }

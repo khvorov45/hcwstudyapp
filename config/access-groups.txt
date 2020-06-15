@@ -4,3 +4,4 @@ melbourne
 newcastle
 perth
 sydney
+unrestricted
