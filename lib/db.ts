@@ -12,10 +12,7 @@ export class Database {
   db: sqlite.Database
   needFill: boolean
 
-  /** Creates the connection to the database. If the database file does not
-   * exist, it will be created then initialised with tables specified by
-   * `initTablesSqlFileName`
-   */
+  /** Creates uninitialised database. Call `init()` to initialise. */
   constructor (name: string, initTablesSqlFileName: string) {
     this.dbFilePath = path.join(this.dbDirPath, `${name}.sqlite3`)
     this.initTablesSqlFilePath = path.join(
@@ -23,7 +20,10 @@ export class Database {
     )
   }
 
-  /** Creates the file and initialises tables if needed */
+  /** Creates the connection to the database. If the database file does not
+   * exist, it will be created then initialised with tables specified by
+   * `initTablesSqlFileName`
+   */
   async init (): Promise<this> {
     await this.connect()
     if (this.needFill) {
