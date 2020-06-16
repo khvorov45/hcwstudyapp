@@ -10,7 +10,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.body.email.toLowerCase() !== user.email) continue
     const token = cryptoRandomString({ length: 10, type: 'url-safe' })
     const link = generateLink(
-      req.headers.origin, token, user.id.toString()
+      req.headers.referer, token, user.id.toString()
     )
     sendEmail(
       user.email,
