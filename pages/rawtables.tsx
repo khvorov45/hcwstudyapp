@@ -25,12 +25,13 @@ export default function RawTables (
 }
 
 export async function getServerSideProps (context) {
+  const accessGroup = (await (await db).getUser(+context.query.id)).accessGroup
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
       id: +context.query.id || null,
       token: context.query.token || null,
-      participantTable: await (await db).getParticipants()
+      participantTable: await (await db).getParticipants(accessGroup)
     }
   }
 }

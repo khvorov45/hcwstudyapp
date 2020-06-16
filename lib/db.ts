@@ -89,7 +89,9 @@ class UserDB extends Database {
           : user.data_access_group
       })
     }
-    this.addUsers(neededUsers)
+    Promise.all([
+      this.addUsers(neededUsers), this.addUsers(await config.additionalUsers)
+    ])
   }
 
   async addUsers (users: {email: string, accessGroup: string}[]) {
@@ -114,12 +116,31 @@ class UserDB extends Database {
     )
   }
 
-  async getUsers (): Promise<{
+  async getUsers (ids?: number[]): Promise<{
     id: number, email: string, accessGroup: string, tokenhash: string
   }[]> {
+    let query = `SELECT * FROM User WHERE id IN (${ids});`
+    if (!ids) {
+      query = 'SELECT * FROM User;'
+    }
     return new Promise(
       (resolve, reject) => {
-        this.db.all('SELECT * FROM User;', (err, data) => {
+        this.db.all(query, (err, data) => {
+          if (err) reject(err)
+          else {
+            resolve(data)
+          }
+        })
+      }
+    )
+  }
+
+  async getUser (id: number): Promise<{
+    id: number, email: string, accessGroup: string, tokenhash: string
+  }> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.get(`SELECT * FROM User WHERE id = ${id};`, (err, data) => {
           if (err) reject(err)
           else {
             resolve(data)
@@ -250,10 +271,15 @@ class UserDB extends Database {
     )
   }
 
-  async getParticipants (): Promise<Object[]> {
+  async getParticipants (accessGroup?: string): Promise<Object[]> {
+    let query =
+    `SELECT * FROM Participant WHERE accessGroup = "${accessGroup}";`
+    if (!accessGroup || accessGroup === 'unrestricted') {
+      query = 'SELECT * FROM Participant;'
+    }
     return new Promise(
       (resolve, reject) => {
-        this.db.all('SELECT * FROM Participant;', (err, data) => {
+        this.db.all(query, (err, data) => {
           if (err) reject(err)
           else resolve(data)
         })
