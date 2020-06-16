@@ -21,14 +21,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       )
       const hashPromise = bcrypt.hash(token, 10)
       const [email, hash] = await Promise.all([emailPromise, hashPromise])
-      console.log('sent email!')
       console.log(email)
       await (await db).storeTokenHash(hash, user.id)
       res.status(200).end()
       return
     } catch (error) {
-      console.log('caught error!')
-      console.log(error)
+      console.error(error)
       res.status(500).end()
       return
     }
