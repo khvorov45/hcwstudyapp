@@ -11,10 +11,10 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-export function sendEmail (
+export async function sendEmail (
   to: string, subject: string, text: string, html: string
 ) {
-  transporter.sendMail({
+  return await transporter.sendMail({
     from: config.emailCredentials.user,
     to: to,
     subject: subject,

@@ -12,16 +12,26 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const link = generateLink(
       req.headers.origin, token, user.id.toString()
     )
-    sendEmail(
-      user.email,
-      'HCW Study Reports link',
-      `Your link:\n\n${link}`,
-      `<a href=${link}>Reports link</a>`
-    )
-    const hash = await bcrypt.hash(token, 10)
-    await (await db).storeTokenHash(hash, user.id)
-    res.status(200).end()
-    return
+    try {
+      const emailPromise = sendEmail(
+        user.email,
+        'HCW Study Reports link',
+        `Your link:\n\n${link}`,
+        `<a href=${link}>Reports link</a>`
+      )
+      const hashPromise = bcrypt.hash(token, 10)
+      const [email, hash] = await Promise.all([emailPromise, hashPromise])
+      console.log('sent email!')
+      console.log(email)
+      await (await db).storeTokenHash(hash, user.id)
+      res.status(200).end()
+      return
+    } catch (error) {
+      console.log('caught error!')
+      console.log(error)
+      res.status(500).end()
+      return
+    }
   }
   res.status(404).end()
 }

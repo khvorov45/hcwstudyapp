@@ -4,6 +4,7 @@ import { TextLineLabelled, Form } from './input'
 export default function EmailForm (props: {message: string}) {
   const [email, setEmail] = useState('')
   const [success, setSuccess] = useState(undefined)
+  const [errormsg, setErrormsg] = useState('')
 
   function handleChange (event) { setEmail(event.target.value) }
 
@@ -20,6 +21,18 @@ export default function EmailForm (props: {message: string}) {
       } else {
         setSuccess(false)
       }
+      if (res.status === 404) {
+        setErrormsg(
+          'Email not found - make sure it\'s the email ' +
+          'associated with the REDCap account'
+        )
+      } else if (res.status === 500) {
+        setErrormsg(
+          'Server error, try again later'
+        )
+      } else {
+        setErrormsg(`Unknown error, return status ${res.status}`)
+      }
     })
     event.preventDefault()
   }
@@ -28,10 +41,7 @@ export default function EmailForm (props: {message: string}) {
     <Form
       onSubmit={handleSubmit}
       success={success}
-      errormsg={
-        'Email not found - make sure it\'s the email ' +
-      'associated with the REDCap account'
-      }
+      errormsg={errormsg}
     >
       <TextLineLabelled
         label={props.message}
