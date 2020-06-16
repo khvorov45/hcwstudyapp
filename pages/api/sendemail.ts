@@ -20,8 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         `<a href=${link}>Reports link</a>`
       )
       const hashPromise = bcrypt.hash(token, 10)
-      const [email, hash] = await Promise.all([emailPromise, hashPromise])
-      console.log(email)
+      const [_, hash] = await Promise.all([emailPromise, hashPromise])
       await (await db).storeTokenHash(hash, user.id)
       res.status(200).end()
       return
