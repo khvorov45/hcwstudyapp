@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { trackPromise } from 'react-promise-tracker'
 import { TextLineLabelled, Form } from './input'
 
 export default function EmailForm (props: {message: string}) {
@@ -11,29 +12,31 @@ export default function EmailForm (props: {message: string}) {
   function handleSubmit (event) {
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
-    fetch('/api/sendemail', {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({ email: email })
-    }).then((res) => {
-      if (res.status === 200) {
-        setSuccess(true)
-      } else {
-        setSuccess(false)
-      }
-      if (res.status === 404) {
-        setErrormsg(
-          'Email not found - make sure it\'s the email ' +
-          'associated with the REDCap account'
-        )
-      } else if (res.status === 500) {
-        setErrormsg(
-          'Server error, try again later'
-        )
-      } else {
-        setErrormsg(`Unknown error, return status ${res.status}`)
-      }
-    })
+    trackPromise(
+      fetch('/api/sendemail', {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({ email: email })
+      }).then((res) => {
+        if (res.status === 200) {
+          setSuccess(true)
+        } else {
+          setSuccess(false)
+        }
+        if (res.status === 404) {
+          setErrormsg(
+            'Email not found - make sure it\'s the email ' +
+              'associated with the REDCap account'
+          )
+        } else if (res.status === 500) {
+          setErrormsg(
+            'Server error, try again later'
+          )
+        } else {
+          setErrormsg(`Unknown error, return status ${res.status}`)
+        }
+      })
+    )
     event.preventDefault()
   }
 

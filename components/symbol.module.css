@@ -9,3 +9,8 @@
 .invisible {
     visibility: hidden;
 }
+
+.success, .failure, .invisible {
+    width: var(--indicator-size);
+    height: var(--indicator-size);
+}

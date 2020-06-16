@@ -7,6 +7,7 @@
     --error: #ff0000;
     --success: #00630d;
     --menu-item-size: 3em;
+    --indicator-size: 25px;
 }
 
 [theme="dark"] {
