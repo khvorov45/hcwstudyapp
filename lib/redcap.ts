@@ -50,6 +50,7 @@ export async function exportUsers () {
 
 export async function exportParticipants () {
   return await exportRecords(
-    ['record_id', 'pid', 'site_name'], ['baseline_arm_1'], 'flat'
+    ['record_id', 'redcap_data_access_group', 'pid', 'site_name'],
+    ['baseline_arm_1'], 'flat'
   )
 }

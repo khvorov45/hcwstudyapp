@@ -72,10 +72,12 @@ class UserDB extends Database {
     await super.init()
     if (this.needFill) {
       await this.initFillAccessGroup()
-      await this.initFillUser()
+      await Promise.all([this.initFillUser(), this.initFillParticipant()])
     }
     return this
   }
+
+  // User table
 
   async initFillUser () {
     const allUsers = await exportUsers()
@@ -141,8 +143,31 @@ class UserDB extends Database {
     )
   }
 
+  // AccessGroup table
+
   async initFillAccessGroup () {
     this.addAccessGroups(await config.accessGroups)
+  }
+
+  async addAccessGroups (AccessGroups: string[]) {
+    for (const accessGroup of AccessGroups) {
+      await this.addAccessGroup(accessGroup)
+    }
+  }
+
+  async addAccessGroup (accessGroup: string) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `INSERT INTO AccessGroup (name)
+          VALUES ("${accessGroup.toLowerCase()}")`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
   }
 
   async getAccessGroups (): Promise<string[]> {
@@ -182,56 +207,58 @@ class UserDB extends Database {
     )
   }
 
-  async addAccessGroups (AccessGroups: string[]) {
-    for (const accessGroup of AccessGroups) {
-      await this.addAccessGroup(accessGroup)
-    }
-  }
-
-  async addAccessGroup (accessGroup: string) {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.exec(
-          `INSERT INTO AccessGroup (name) VALUES ("${accessGroup}")`,
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
-    )
-  }
-}
-
-class StudyDB extends Database {
-  constructor () {
-    super('study', 'init-tables-study')
-  }
-
-  async init (): Promise<this> {
-    await super.init()
-    if (this.needFill) {
-      await this.initFillParticipant()
-    }
-    return this
-  }
+  // Participant table
 
   async initFillParticipant () {
     return await this.addParticipants(await exportParticipants())
   }
 
-  async update () {
-    const participants = await exportParticipants()
-    this.updateParticipants(participants)
-  }
-
   async updateParticipants (participants) {
     const currentParticipantIds: string[] = await this.getParticipantIds()
-    console.log(currentParticipantIds)
+    const participnatsToAdd = []
     for (const participant of participants) {
       if (currentParticipantIds.includes(participant.record_id)) continue
-      await this.addParticipant(participant)
+      participnatsToAdd.push(participant)
     }
+    return await this.addParticipants(participnatsToAdd)
+  }
+
+  async addParticipants (participants): Promise<boolean[]> {
+    return Promise.all(participants.map((p) => { this.addParticipant(p) }))
+  }
+
+  async addParticipant (participant): Promise<boolean> {
+    // Not a participant
+    if (participant.pid === '') {
+      return false
+    }
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `INSERT INTO Participant (redcapRecordId, pid, accessGroup, site)
+          VALUES (
+            "${participant.record_id}", "${participant.pid}",
+            "${participant.redcap_data_access_group.toLowerCase()}",
+            "${participant.site_name}"
+          );`,
+          (error) => {
+            if (error) reject(error)
+            else resolve(true)
+          }
+        )
+      }
+    )
+  }
+
+  async getParticipants (): Promise<Object[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT * FROM Participant;', (err, data) => {
+          if (err) reject(err)
+          else resolve(data)
+        })
+      }
+    )
   }
 
   async getParticipantIds (): Promise<string[]> {
@@ -250,46 +277,6 @@ class StudyDB extends Database {
       }
     )
   }
-
-  async getParticipants (): Promise<Object[]> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all('SELECT * FROM Participant;', (err, data) => {
-          if (err) reject(err)
-          else resolve(data)
-        })
-      }
-    )
-  }
-
-  async addParticipants (participants): Promise<boolean[]> {
-    return Promise.all(participants.map((p) => { this.addParticipant(p) }))
-  }
-
-  async addParticipant (participant): Promise<boolean> {
-    // Not a participant
-    if (participant.pid === '') {
-      return false
-    }
-    return new Promise(
-      (resolve, reject) => {
-        this.db.exec(
-          `INSERT INTO Participant (redcapRecordId, pid, site) VALUES
-          (
-            "${participant.record_id}", "${participant.pid}",
-            "${participant.site_name}"
-          );`,
-          (error) => {
-            if (error) reject(error)
-            else resolve(true)
-          }
-        )
-      }
-    )
-  }
 }
 
-export default {
-  user: new UserDB().init(),
-  study: new StudyDB().init()
-}
+export default new UserDB().init()
