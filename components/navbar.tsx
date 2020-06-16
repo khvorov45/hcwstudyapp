@@ -13,6 +13,11 @@ export default function Navbar (
         link={`/rawtables${constQuery}`}
         active={active === 'tables'}
       />
+      <Navelement
+        content="Plots"
+        link={`/plots${constQuery}`}
+        active={active === 'plots'}
+      />
     </>
   }
   return <nav className={styles.container}>
