@@ -119,10 +119,11 @@ class UserDB extends Database {
   async getUsers (ids?: number[]): Promise<{
     id: number, email: string, accessGroup: string, tokenhash: string
   }[]> {
-    let query = `SELECT * FROM User WHERE id IN (${ids});`
-    if (!ids) {
-      query = 'SELECT * FROM User;'
+    let query = 'SELECT id, email, accessGroup, tokenhash FROM User'
+    if (ids) {
+      query = `${query} WHERE id IN (${ids})`
     }
+    query += ';'
     return new Promise(
       (resolve, reject) => {
         this.db.all(query, (err, data) => {
@@ -140,12 +141,16 @@ class UserDB extends Database {
   }> {
     return new Promise(
       (resolve, reject) => {
-        this.db.get(`SELECT * FROM User WHERE id = ${id};`, (err, data) => {
-          if (err) reject(err)
-          else {
-            resolve(data)
+        this.db.get(
+          `SELECT id, email, accessGroup, tokenhash
+          FROM User WHERE id = ${id};`,
+          (err, data) => {
+            if (err) reject(err)
+            else {
+              resolve(data)
+            }
           }
-        })
+        )
       }
     )
   }
@@ -181,7 +186,7 @@ class UserDB extends Database {
       (resolve, reject) => {
         this.db.exec(
           `INSERT INTO AccessGroup (name)
-          VALUES ("${accessGroup.toLowerCase()}")`,
+          VALUES ("${accessGroup.toLowerCase()}");`,
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -194,7 +199,7 @@ class UserDB extends Database {
   async getAccessGroups (): Promise<string[]> {
     return new Promise(
       (resolve, reject) => {
-        this.db.all('SELECT * FROM AccessGroup;', (err, data) => {
+        this.db.all('SELECT name FROM AccessGroup;', (err, data) => {
           if (err) reject(err)
           else {
             const accessGroupNames: string[] = []
@@ -271,12 +276,12 @@ class UserDB extends Database {
     )
   }
 
-  async getParticipants (accessGroup?: string): Promise<Object[]> {
-    let query =
-    `SELECT * FROM Participant WHERE accessGroup = "${accessGroup}";`
-    if (!accessGroup || accessGroup === 'unrestricted') {
-      query = 'SELECT * FROM Participant;'
+  async getParticipants (accessGroup?: string): Promise<any[]> {
+    let query = 'SELECT * FROM Participant'
+    if (accessGroup && accessGroup !== 'unrestricted') {
+      query = `${query} WHERE accessGroup = '${accessGroup}'`
     }
+    query += ';'
     return new Promise(
       (resolve, reject) => {
         this.db.all(query, (err, data) => {

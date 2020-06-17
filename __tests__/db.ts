@@ -1,4 +1,4 @@
-import { Database } from '../lib/db'
+import db, { Database } from '../lib/db'
 import fs from 'fs'
 import path from 'path'
 
@@ -32,4 +32,22 @@ test('Resolving promised DBs multiple times', async () => {
   dbTest.setNum(42)
   const dbTest2 = await dbTestPromise
   expect(dbTest2.num).toBe(42)
+})
+
+test('User export by id', async () => {
+  const neededIds = [1, 2]
+  const users = await (await db).getUsers(neededIds)
+  for (const user of users) {
+    expect(neededIds.includes(user.id)).toBe(true)
+  }
+  const user = await (await db).getUser(1)
+  expect(user.id).toBe(1)
+})
+
+test('Participant export by access group', async () => {
+  const accessGroup = 'melbourne'
+  const participants = await (await db).getParticipants(accessGroup)
+  for (const participant of participants) {
+    expect(participant.accessGroup === accessGroup).toBe(true)
+  }
 })
