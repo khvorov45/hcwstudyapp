@@ -4,9 +4,40 @@ import { authorise } from '../../lib/authorise'
 import Table from '../../components/table'
 import { SubnavbarTables } from '../../components/navbar'
 
+import useSWR from 'swr'
+
+async function fetchOwnApi (id, token, which) {
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
+  myHeaders.append('Accept', 'application/json')
+  const res = await fetch(
+    `/api/get${which}`,
+    {
+      method: 'POST',
+      headers: myHeaders,
+      body: new URLSearchParams({ id: id, token: token }).toString()
+    }
+  )
+  return await res.json()
+}
+
 export default function ParticipantTable (
   props: {authorised: boolean, id: number, token: string}
 ) {
+  const { data, error } = useSWR(
+    [props.id, props.token, 'participants'], fetchOwnApi
+  )
+  if (error) {
+    console.error(error)
+  }
+  let jsonrows
+  if (!props.authorised) {
+    jsonrows = []
+  } else if (!data) {
+    jsonrows = [{ placeholder: 'temporary' }]
+  } else {
+    jsonrows = data
+  }
   return (
     <Layout
       authorised={props.authorised}
@@ -25,10 +56,7 @@ export default function ParticipantTable (
         active = "participants"
       />
       <Table
-        authorised={props.authorised}
-        id={props.id}
-        token={props.token}
-        name="participants"
+        jsonrows={jsonrows}
       />
     </Layout>
   )
