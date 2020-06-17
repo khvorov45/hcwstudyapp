@@ -4,8 +4,12 @@ import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
-export default function Table ({ getter }) {
-  const data = useMemo(getter, [])
+export default function Table ({ authorised, id, token, name }) {
+  const data = useMemo(() => {
+    return [{
+      authorised: authorised.toString(), id: id, token: token, name: name
+    }]
+  }, [])
   const columns = useMemo(
     () => {
       const cols = []

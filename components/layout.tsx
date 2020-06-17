@@ -41,8 +41,9 @@ function Unauthorised () {
 export default function Layout (
   props: {
     children: React.ReactNode,
-    constQuery: string,
     authorised: boolean,
+    id: number,
+    token: string,
     active: string,
   }
 ) {
@@ -56,7 +57,8 @@ export default function Layout (
     <>
       <Navbar
         authorised={props.authorised}
-        constQuery={props.constQuery}
+        id={props.id}
+        token={props.token}
         active={props.active}
       />
       <main>{pageContent}</main>

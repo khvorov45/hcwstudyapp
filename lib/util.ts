@@ -1,7 +1,7 @@
-export function getConstQuery (query) {
+export function getConstQuery (id: number, token: string) {
   var constQuery = ''
-  if (query.id && query.token) {
-    constQuery = `?id=${query.id}&token=${query.token}`
+  if (id && token) {
+    constQuery = `?id=${id}&token=${token}`
   }
   return constQuery
 }

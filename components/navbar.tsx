@@ -1,22 +1,27 @@
 import { ReactNode } from 'react'
 import { ThemeSwitch } from './theme'
 import styles from './navbar.module.css'
+import { getConstQuery } from '../lib/util'
 
 export default function Navbar (
-  { authorised, constQuery, active }:
-  {authorised: boolean, constQuery: string, active: string}
+  { authorised, id, token, active }:
+  {authorised: boolean, id: number, token: string, active: string}
 ) {
   var otherNavElements = <></>
   if (authorised) {
     otherNavElements = <>
       <Navelement
         content="Tables"
-        link={`/tables/participants${constQuery}`}
+        link={'/tables/participants'}
+        id={id}
+        token={token}
         active={active === 'tables'}
       />
       <Navelement
         content="Plots"
-        link={`/plots${constQuery}`}
+        link={'/plots'}
+        id={id}
+        token={token}
         active={active === 'plots'}
       />
     </>
@@ -24,7 +29,9 @@ export default function Navbar (
   return <nav className={styles.container}>
     <Navelement
       content="Help"
-      link={`/${constQuery}`}
+      link={'/'}
+      id={id}
+      token={token}
       active={active === 'home'}
     />
     {otherNavElements}
@@ -33,11 +40,12 @@ export default function Navbar (
 }
 
 export function Navelement (
-  { content, link, active }: {content: string, link: string, active: boolean}
+  { content, link, id, token, active }:
+  {content: string, link: string, id: number, token: string, active: boolean}
 ) {
   return <li className={styles.element}>
     <a
-      href={link}
+      href={`${link}${getConstQuery(id, token)}`}
       className={
         active ? `${styles.link} ${styles.active}` : styles.link
       }
@@ -58,18 +66,22 @@ export function Subnavbar (
 }
 
 export function SubnavbarTables (
-  { authorised, constQuery, active }:
-  {authorised: boolean, constQuery: string, active: string}
+  { authorised, id, token, active }:
+  {authorised: boolean, id: number, token: string, active: string}
 ) {
   return <Subnavbar authorised={authorised}>
     <Navelement
       content="Participants"
-      link={`/tables/participants${constQuery}`}
+      link={'/tables/participants'}
+      id={id}
+      token={token}
       active={active === 'participants'}
     />
     <Navelement
       content="Appointments"
-      link={`/tables/appointments${constQuery}`}
+      link={'/tables/appointments'}
+      id={id}
+      token={token}
       active={active === 'appointments'}
     />
   </Subnavbar>
