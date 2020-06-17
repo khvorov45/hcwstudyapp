@@ -34,7 +34,7 @@ export default function ParticipantTable (
   if (!props.authorised) {
     jsonrows = []
   } else if (!data) {
-    jsonrows = [{ placeholder: 'temporary' }]
+    jsonrows = null
   } else {
     jsonrows = data
   }

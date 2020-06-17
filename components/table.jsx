@@ -1,12 +1,27 @@
 import { useMemo } from 'react'
 import { useTable, useSortBy } from 'react-table'
+import Loader from 'react-loader-spinner'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function Table ({ jsonrows }) {
-  console.log('table function got')
-  console.log(jsonrows)
+  if (jsonrows === null) {
+    return <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      <Loader
+        type="ThreeDots" color="var(--font-color)"
+        height="100" width="100"
+      />
+    </div>
+  }
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
     () => {
