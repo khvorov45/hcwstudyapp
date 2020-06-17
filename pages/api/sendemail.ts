@@ -8,7 +8,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const allUsers = await (await db).getUsers()
   for (const user of allUsers) {
     if (req.body.email.toLowerCase() !== user.email) continue
-    const token = cryptoRandomString({ length: 10, type: 'url-safe' })
+    const token = cryptoRandomString({ length: 32, type: 'url-safe' })
     const link = generateLink(
       req.headers.origin, token, user.id.toString()
     )
