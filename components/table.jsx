@@ -4,12 +4,12 @@ import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
-export default function Table ({ jsonRows }) {
-  const data = useMemo(() => jsonRows, [])
+export default function Table ({ getter }) {
+  const data = useMemo(getter, [])
   const columns = useMemo(
     () => {
       const cols = []
-      const exampleRow = jsonRows[0]
+      const exampleRow = data[0]
       for (const entry in exampleRow) {
         cols.push({
           Header: entry,

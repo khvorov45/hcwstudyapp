@@ -18,14 +18,14 @@ export default function ParticipantTable (
     >
       <Head>
         <title>Participants - HCW flu study</title>
-        <meta name="Description" content="HCW flu study raw tables" />
+        <meta name="Description" content="Participants - HCW flu study" />
       </Head>
       <SubnavbarTables
         authorised={props.authorised}
         constQuery={props.constQuery}
         active = "participants"
       />
-      <Table jsonRows = {props.participantTable} />
+      <Table getter = {() => props.participantTable} />
     </Layout>
   )
 }
