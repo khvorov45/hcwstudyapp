@@ -41,17 +41,11 @@ function Unauthorised () {
 export default function Layout (
   props: {
     children: React.ReactNode,
-    id: number,
-    token: string,
+    constQuery: string,
     authorised: boolean,
     active: string,
   }
 ) {
-  var constQuery = ''
-  if (props.id && props.token) {
-    constQuery = `?id=${props.id}&token=${props.token}`
-  }
-
   var pageContent = props.children
   if (props.authorised === null) {
     pageContent = EmptyCred()
@@ -62,7 +56,7 @@ export default function Layout (
     <>
       <Navbar
         authorised={props.authorised}
-        constQuery={constQuery}
+        constQuery={props.constQuery}
         active={props.active}
       />
       <main>{pageContent}</main>

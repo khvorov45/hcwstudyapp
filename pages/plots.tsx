@@ -2,9 +2,10 @@ import Head from 'next/head'
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from 'recharts'
 import Layout from '../components/layout'
 import { authorise } from '../lib/authorise'
+import { getConstQuery } from '../lib/util'
 
 export default function Plots (
-  props: {authorised: boolean, id: number, token: string}
+  props: {authorised: boolean, constQuery: string}
 ) {
   const data = [
     { name: 'Page A', uv: 400, pv: 2400, amt: 2400 },
@@ -12,8 +13,7 @@ export default function Plots (
   ]
   return (
     <Layout
-      id={props.id}
-      token={props.token}
+      constQuery={props.constQuery}
       authorised={props.authorised}
       active="plots"
     >
@@ -35,8 +35,7 @@ export async function getServerSideProps (context) {
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
-      id: +context.query.id || null,
-      token: context.query.token || null
+      constQuery: getConstQuery(context.query)
     }
   }
 }

@@ -1,14 +1,14 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
 import { authorise } from '../lib/authorise'
+import { getConstQuery } from '../lib/util'
 
 export default function Home (
-  props: {authorised: boolean, id: number, token: string}
+  props: {authorised: boolean, constQuery: string}
 ) {
   return (
     <Layout
-      id={props.id}
-      token={props.token}
+      constQuery={props.constQuery}
       authorised={props.authorised}
       active="home"
     >
@@ -25,8 +25,7 @@ export async function getServerSideProps (context) {
   return {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
-      id: +context.query.id || null,
-      token: context.query.token || null
+      constQuery: getConstQuery(context.query)
     }
   }
 }

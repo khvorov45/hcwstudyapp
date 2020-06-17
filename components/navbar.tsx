@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { ThemeSwitch } from './theme'
 import styles from './navbar.module.css'
 
@@ -10,7 +11,7 @@ export default function Navbar (
     otherNavElements = <>
       <Navelement
         content="Tables"
-        link={`/rawtables${constQuery}`}
+        link={`/tables/participants${constQuery}`}
         active={active === 'tables'}
       />
       <Navelement
@@ -31,16 +32,45 @@ export default function Navbar (
   </nav>
 }
 
-function Navelement (
+export function Navelement (
   { content, link, active }: {content: string, link: string, active: boolean}
 ) {
   return <li className={styles.element}>
     <a
       href={link}
       className={
-        active ? `${styles.link} ${styles.active}` : styles.link}
+        active ? `${styles.link} ${styles.active}` : styles.link
+      }
     >
       {content}
     </a>
   </li>
+}
+
+export function Subnavbar (
+  { children, authorised }:
+  {children: ReactNode, authorised: boolean}
+) {
+  if (!authorised) return <></>
+  return <nav className={styles.container}>
+    {children}
+  </nav>
+}
+
+export function SubnavbarTables (
+  { authorised, constQuery, active }:
+  {authorised: boolean, constQuery: string, active: string}
+) {
+  return <Subnavbar authorised={authorised}>
+    <Navelement
+      content="Participants"
+      link={`/tables/participants${constQuery}`}
+      active={active === 'participants'}
+    />
+    <Navelement
+      content="Appointments"
+      link={`/tables/appointments${constQuery}`}
+      active={active === 'appointments'}
+    />
+  </Subnavbar>
 }
