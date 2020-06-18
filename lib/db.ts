@@ -63,9 +63,13 @@ export class Database {
   }
 }
 
-class UserDB extends Database {
-  constructor () {
-    super('user', 'init-tables-user')
+export class UserDB extends Database {
+  getExtraUsers: () => Promise<any>
+
+  constructor (name: string, getExtraUsers?: () => Promise<any>) {
+    super(name, 'init-tables-user')
+    if (getExtraUsers) this.getExtraUsers = getExtraUsers
+    else this.getExtraUsers = config.getExtraUsers
   }
 
   async init (): Promise<this> {
@@ -79,34 +83,60 @@ class UserDB extends Database {
 
   // User table
 
-  async initFillUser () {
-    const allUsers = await exportUsers()
-    const neededUsers = []
-    for (const user of allUsers) {
-      neededUsers.push({
-        email: user.email,
-        accessGroup: user.data_access_group === '' ? 'unrestricted'
-          : user.data_access_group
-      })
-    }
-    Promise.all([
-      this.addUsers(neededUsers), this.addUsers(await config.additionalUsers)
+  async initFillUser (): Promise<[void[], void[]]> {
+    return Promise.all([
+      this.addUsers(await exportUsers()),
+      this.addUsers(await this.getExtraUsers())
     ])
   }
 
-  async addUsers (users: {email: string, accessGroup: string}[]) {
-    for (const user of users) {
-      await this.addUser(user)
+  async updateUsers (): Promise<[void[], void[]]> {
+    const redcapUsers = await exportUsers()
+    const extraUsers = await this.getExtraUsers()
+    const currentUserEmails = await this.getUserEmails()
+    const neededUsers = []
+    const neededEmails = []
+    for (const user of redcapUsers.concat(extraUsers)) {
+      neededEmails.push(user.email.toLowerCase())
+      if (currentUserEmails.includes(user.email.toLowerCase())) continue
+      neededUsers.push(user)
     }
+    const userAddition = this.addUsers(neededUsers)
+    const userRemoval = this.removeUsers(currentUserEmails.filter(
+      currentEmail => !neededEmails.includes(currentEmail))
+    )
+    return Promise.all([userAddition, userRemoval])
   }
 
-  async addUser (user: {email: string, accessGroup: string}) {
+  async addUsers (users: {email: string, accessGroup: string}[]) {
+    return Promise.all(users.map(user => this.addUser(user)))
+  }
+
+  async addUser (user: {email: string, accessGroup: string}): Promise<void> {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
           `INSERT INTO User (email, accessGroup) VALUES
           ("${user.email.toLowerCase()}",
           "${user.accessGroup.toLowerCase()}");`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
+  }
+
+  async removeUsers (emails: string[]): Promise<void[]> {
+    return Promise.all(emails.map(email => this.removeUser(email)))
+  }
+
+  async removeUser (email: string): Promise<void> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `DELETE FROM USER WHERE email = "${email}";`,
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -155,6 +185,21 @@ class UserDB extends Database {
     )
   }
 
+  async getUserEmails (): Promise<string[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT email FROM User;', (err, users) => {
+          if (err) reject(err)
+          else {
+            const emails = []
+            users.map(user => emails.push(user.email))
+            resolve(emails)
+          }
+        })
+      }
+    )
+  }
+
   async storeTokenHash (hash: string, id: number) {
     return new Promise(
       (resolve, reject) => {
@@ -172,13 +217,13 @@ class UserDB extends Database {
   // AccessGroup table
 
   async initFillAccessGroup () {
-    this.addAccessGroups(await config.accessGroups)
+    this.addAccessGroups(await config.getAccessGroups())
   }
 
-  async addAccessGroups (AccessGroups: string[]) {
-    for (const accessGroup of AccessGroups) {
-      await this.addAccessGroup(accessGroup)
-    }
+  async addAccessGroups (accessGroups: string[]) {
+    return Promise.all(
+      accessGroups.map(accessGroup => this.addAccessGroup(accessGroup))
+    )
   }
 
   async addAccessGroup (accessGroup: string) {
@@ -213,10 +258,10 @@ class UserDB extends Database {
     )
   }
 
-  async removeAccessGroups (AccessGroups: string[]) {
-    for (const accessGroup of AccessGroups) {
-      await this.removeAccessGroup(accessGroup)
-    }
+  async removeAccessGroups (accessGroups: string[]) {
+    return Promise.all(
+      accessGroups.map(accessGroup => this.removeAccessGroup(accessGroup))
+    )
   }
 
   async removeAccessGroup (accessGroup: string) {
@@ -250,7 +295,7 @@ class UserDB extends Database {
   }
 
   async addParticipants (participants): Promise<boolean[]> {
-    return Promise.all(participants.map((p) => { this.addParticipant(p) }))
+    return Promise.all(participants.map(p => this.addParticipant(p)))
   }
 
   async addParticipant (participant): Promise<boolean> {
@@ -310,4 +355,4 @@ class UserDB extends Database {
   }
 }
 
-export default new UserDB().init()
+export default new UserDB('user').init()

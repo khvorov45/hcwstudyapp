@@ -1,3 +1,4 @@
+import fetch from 'cross-fetch'
 import config from './config'
 
 /** Makes a REDCap API request
@@ -43,9 +44,16 @@ export async function exportRecords (
 }
 
 export async function exportUsers () {
-  return await redcapApiReq({
-    content: 'user'
-  })
+  const allUsers = await redcapApiReq({ content: 'user' })
+  const neededUsers = []
+  for (const user of allUsers) {
+    neededUsers.push({
+      email: user.email,
+      accessGroup: user.data_access_group === '' ? 'unrestricted'
+        : user.data_access_group
+    })
+  }
+  return neededUsers
 }
 
 export async function exportParticipants () {

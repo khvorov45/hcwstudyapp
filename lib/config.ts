@@ -6,10 +6,11 @@ import { readLines, readDelimited } from './readfile'
 const configDir = path.join(process.cwd(), 'config')
 
 export default {
-  additionalUsers: readDelimited(
-    path.join(configDir, 'additional-users.txt'), ' ', ['email', 'accessGroup']
+  getExtraUsers: async () => readDelimited(
+    path.join(configDir, 'extra-users.txt'), ' ', ['email', 'accessGroup']
   ),
-  accessGroups: readLines(path.join(configDir, 'access-groups.txt')),
+  getAccessGroups: async () =>
+    readLines(path.join(configDir, 'access-groups.txt')),
   emailCredentials: YAML.parse(
     fs.readFileSync(path.join(configDir, 'emailcred.yaml'), 'utf-8')
   ),

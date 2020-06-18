@@ -20,6 +20,7 @@
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
     "bcrypt": "^4.0.1",
+    "cross-fetch": "^3.0.5",
     "crypto-random-string": "^3.2.0",
     "next": "^9.4.4",
     "nodemailer": "^6.4.8",
