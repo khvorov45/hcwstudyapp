@@ -10,6 +10,7 @@ export class Database {
   initTablesSqlFilePath: string
   db: sqlite.Database
   needFill: boolean
+  lastUpdate: Date
 
   /** Creates uninitialised database. Call `init()` to initialise. */
   constructor (name: string, initTablesSqlFileName: string) {
@@ -24,11 +25,17 @@ export class Database {
    * `initTablesSqlFileName`
    */
   async init (): Promise<this> {
+    this.lastUpdate = new Date()
     await this.connect()
     if (this.needFill) {
       await this.initTables()
     }
     return this
+  }
+
+  /** Updates all tables */
+  async update (): Promise<void> {
+    this.lastUpdate = new Date()
   }
 
   /** Creates a connection to the file */
@@ -79,6 +86,11 @@ export class UserDB extends Database {
       await Promise.all([this.initFillUser(), this.initFillParticipant()])
     }
     return this
+  }
+
+  async update (): Promise<any> {
+    super.update()
+    return await this.updateUsers()
   }
 
   // User table

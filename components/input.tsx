@@ -1,5 +1,21 @@
 import { SuccessIndicator } from './symbol'
+import { Timestamp } from './util'
 import styles from './input.module.css'
+
+export function ButtonWithTimestamp (
+  { label, onClick }:
+  {label: string, onClick: () => void}
+) {
+  return <div>
+    <button
+      className={`${styles.input} ${styles.bigbutton}`}
+      onClick={onClick}
+    >
+      {label}
+      <Timestamp />
+    </button>
+  </div>
+}
 
 export function ButtonWithIndicator (props: {
   success: boolean, type: string, value: string, errormsg?: string

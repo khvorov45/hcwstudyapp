@@ -1,31 +1,17 @@
 import Head from 'next/head'
+import useSWR from 'swr'
 import Layout from '../../components/layout'
 import { authorise } from '../../lib/authorise'
 import Table from '../../components/table'
 import { SubnavbarTables } from '../../components/navbar'
-
-import useSWR from 'swr'
-
-async function fetchOwnApi (id, token, which) {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
-  myHeaders.append('Accept', 'application/json')
-  const res = await fetch(
-    `/api/get${which}`,
-    {
-      method: 'POST',
-      headers: myHeaders,
-      body: new URLSearchParams({ id: id, token: token }).toString()
-    }
-  )
-  return await res.json()
-}
+import { fetchOwnApi } from '../../lib/util'
+import Ribbon from '../../components/ribbon'
 
 export default function ParticipantTable (
   props: {authorised: boolean, id: number, token: string}
 ) {
   const { data, error } = useSWR(
-    [props.id, props.token, 'participants'], fetchOwnApi
+    [props.id, props.token, 'getparticipants'], fetchOwnApi
   )
   if (error) {
     console.error(error)
@@ -54,6 +40,10 @@ export default function ParticipantTable (
         id={props.id}
         token={props.token}
         active = "participants"
+      />
+      <Ribbon
+        id={props.id}
+        token={props.token}
       />
       <Table
         jsonrows={jsonrows}

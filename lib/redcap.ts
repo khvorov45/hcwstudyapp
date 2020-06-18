@@ -17,7 +17,7 @@ export async function redcapApiReq (body) {
     {
       method: 'POST',
       headers: myHeaders,
-      body: new URLSearchParams(body).toString()
+      body: new URLSearchParams(body)
     }
   )
   return await redcapres.json()

@@ -1,0 +1,13 @@
+.timestamp {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1em;
+    color: var(--font-color-muted)
+}
+
+.underlast {
+    width: 10ch;
+    height: 30px;
+}

@@ -29,6 +29,15 @@
     outline: none;
 }
 
+.bigbutton {
+    border: 1px solid var(--border);
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+    padding: 5px;
+}
+
 .textLine {
     border: 0;
     border-bottom: 2px solid var(--border);
