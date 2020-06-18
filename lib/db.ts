@@ -72,11 +72,17 @@ export class Database {
 
 export class UserDB extends Database {
   getExtraUsers: () => Promise<any>
+  getExtraAccessGroups: () => Promise<string[]>
 
-  constructor (name: string, getExtraUsers?: () => Promise<any>) {
+  constructor (
+    name: string,
+    getExtraUsers?: () => Promise<any>,
+    getExtraAccessGroups?: () => Promise<string[]>
+  ) {
     super(name, 'init-tables-user')
-    if (getExtraUsers) this.getExtraUsers = getExtraUsers
-    else this.getExtraUsers = config.getExtraUsers
+    this.getExtraUsers = getExtraUsers || config.getExtraUsers
+    this.getExtraAccessGroups = getExtraAccessGroups ||
+    config.getExtraAccessGroups
   }
 
   async init (): Promise<this> {
@@ -90,7 +96,88 @@ export class UserDB extends Database {
 
   async update (): Promise<any> {
     super.update()
+    await this.updateAccessGroup()
     return await this.updateUsers()
+  }
+
+  // AccessGroup table
+
+  async initFillAccessGroup () {
+    this.addAccessGroups(await this.getExtraAccessGroups())
+  }
+
+  async updateAccessGroup () {
+    const currentAccessGroups = await this.getAccessGroups()
+    const neededAccessGroups = await this.getExtraAccessGroups()
+    const groupAdd = this.addAccessGroups(
+      neededAccessGroups.filter(
+        accessGroup => !currentAccessGroups.includes(accessGroup)
+      )
+    )
+    const groupRemove = this.removeAccessGroups(
+      currentAccessGroups.filter(
+        accessGroup => !neededAccessGroups.includes(accessGroup)
+      )
+    )
+    return Promise.all([groupAdd, groupRemove])
+  }
+
+  async addAccessGroups (accessGroups: string[]) {
+    return Promise.all(
+      accessGroups.map(accessGroup => this.addAccessGroup(accessGroup))
+    )
+  }
+
+  async addAccessGroup (accessGroup: string) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `INSERT INTO AccessGroup (name)
+          VALUES ("${accessGroup.toLowerCase()}");`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
+  }
+
+  async getAccessGroups (): Promise<string[]> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.all('SELECT name FROM AccessGroup;', (err, data) => {
+          if (err) reject(err)
+          else {
+            const accessGroupNames: string[] = []
+            for (const row of data) {
+              accessGroupNames.push(row.name)
+            }
+            resolve(accessGroupNames)
+          }
+        })
+      }
+    )
+  }
+
+  async removeAccessGroups (accessGroups: string[]) {
+    return Promise.all(
+      accessGroups.map(accessGroup => this.removeAccessGroup(accessGroup))
+    )
+  }
+
+  async removeAccessGroup (accessGroup: string) {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `DELETE FROM AccessGroup WHERE name = "${accessGroup}";`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
   }
 
   // User table
@@ -217,70 +304,6 @@ export class UserDB extends Database {
       (resolve, reject) => {
         this.db.exec(
           `UPDATE User SET tokenhash = "${hash}" WHERE id = ${id}`,
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
-    )
-  }
-
-  // AccessGroup table
-
-  async initFillAccessGroup () {
-    this.addAccessGroups(await config.getAccessGroups())
-  }
-
-  async addAccessGroups (accessGroups: string[]) {
-    return Promise.all(
-      accessGroups.map(accessGroup => this.addAccessGroup(accessGroup))
-    )
-  }
-
-  async addAccessGroup (accessGroup: string) {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.exec(
-          `INSERT INTO AccessGroup (name)
-          VALUES ("${accessGroup.toLowerCase()}");`,
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
-    )
-  }
-
-  async getAccessGroups (): Promise<string[]> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all('SELECT name FROM AccessGroup;', (err, data) => {
-          if (err) reject(err)
-          else {
-            const accessGroupNames: string[] = []
-            for (const row of data) {
-              accessGroupNames.push(row.name)
-            }
-            resolve(accessGroupNames)
-          }
-        })
-      }
-    )
-  }
-
-  async removeAccessGroups (accessGroups: string[]) {
-    return Promise.all(
-      accessGroups.map(accessGroup => this.removeAccessGroup(accessGroup))
-    )
-  }
-
-  async removeAccessGroup (accessGroup: string) {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.exec(
-          `DELETE FROM AccessGroup WHERE name = "${accessGroup}";`,
           (error) => {
             if (error) reject(error)
             else resolve()

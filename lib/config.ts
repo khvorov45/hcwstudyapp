@@ -9,7 +9,7 @@ export default {
   getExtraUsers: async () => readDelimited(
     path.join(configDir, 'extra-users.txt'), ' ', ['email', 'accessGroup']
   ),
-  getAccessGroups: async () =>
+  getExtraAccessGroups: async () =>
     readLines(path.join(configDir, 'access-groups.txt')),
   emailCredentials: YAML.parse(
     fs.readFileSync(path.join(configDir, 'emailcred.yaml'), 'utf-8')

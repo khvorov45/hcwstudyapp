@@ -1,4 +1,5 @@
 import db, { Database, UserDB } from '../lib/db'
+import config from '../lib/config'
 import fs from 'fs'
 import path from 'path'
 
@@ -53,6 +54,25 @@ test('Participant export by access group', async () => {
   for (const participant of participants) {
     expect(participant.accessGroup === accessGroup).toBe(true)
   }
+})
+
+test('AccessGroup update', async () => {
+  if (fs.existsSync(userTestDbPath)) fs.unlinkSync(userTestDbPath)
+  let extraAccessGroups = ['test-access-group', 'temp-access-group']
+  const db = await new UserDB(
+    'user-test', undefined,
+    async () => (await config.getExtraAccessGroups())
+      .concat(extraAccessGroups)
+  ).init()
+  expect((await db.getAccessGroups()).includes('test-access-group')).toBe(true)
+  expect((await db.getAccessGroups()).includes('temp-access-group')).toBe(true)
+  extraAccessGroups = ['test-access-group', 'temp2-access-group']
+  await db.update()
+  expect((await db.getAccessGroups()).includes('test-access-group')).toBe(true)
+  expect((await db.getAccessGroups()).includes('temp-access-group')).toBe(false)
+  expect((await db.getAccessGroups())
+    .includes('temp2-access-group')).toBe(true)
+  fs.unlinkSync(userTestDbPath)
 })
 
 test('User update', async () => {
