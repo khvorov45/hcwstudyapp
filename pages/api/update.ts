@@ -9,5 +9,5 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     return
   }
   await (await db).update()
-  res.status(200).send(JSON.stringify(new Date()))
+  res.status(200).send((await db).lastUpdate)
 }

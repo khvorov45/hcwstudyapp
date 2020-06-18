@@ -3,8 +3,8 @@ import { Timestamp } from './util'
 import styles from './input.module.css'
 
 export function ButtonWithTimestamp (
-  { label, onClick }:
-  {label: string, onClick: () => void}
+  { label, onClick, timestamp }:
+  {label: string, onClick: () => void, timestamp?: Date}
 ) {
   return <div>
     <button
@@ -12,7 +12,7 @@ export function ButtonWithTimestamp (
       onClick={onClick}
     >
       {label}
-      <Timestamp />
+      <Timestamp timestamp={timestamp} />
     </button>
   </div>
 }

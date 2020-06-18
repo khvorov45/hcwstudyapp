@@ -5,13 +5,13 @@ import styles from './util.module.css'
 function myFormatDate (d: Date): {datePart: string, timePart: string} {
   return {
     datePart: d.toISOString().split('T')[0],
-    timePart: d.toTimeString().slice(0, 5)
+    timePart: d.toTimeString().slice(0, 8)
   }
 }
 
-export function Timestamp () {
+export function Timestamp ({ timestamp }: {timestamp?: Date}) {
   const { promiseInProgress } = usePromiseTracker({ area: 'updatedb' })
-  const timestring = myFormatDate(new Date())
+  const timestring = myFormatDate(timestamp || new Date())
   const underlast = promiseInProgress
     ? <div className={styles.underlast}>
       <Loader
