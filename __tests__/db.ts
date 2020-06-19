@@ -89,7 +89,8 @@ test('User update', async () => {
     .toBe('unrestricted')
   extraUsers = [
     { email: 'test2@test.test', accessGroup: 'unrestricted' },
-    { email: 'test-persist@test.test', accessGroup: 'admin' }
+    { email: 'test-persist@test.test', accessGroup: 'admin' },
+    { email: 'arseniy.khvorov@mh.org.au', accessGroup: 'unrestricted' }
   ]
   await db.updateUsers()
   const allEmailsAfter = await db.getUserEmails()
@@ -98,6 +99,14 @@ test('User update', async () => {
   expect(allEmailsAfter.includes('test-persist@test.test')).toBe(true)
   expect(allEmailsBefore.length).toBe(allEmailsAfter.length)
   expect((await db.getUser('email', 'test-persist@test.test')).accessGroup)
+    .toBe('admin')
+  expect((await db.getUser('email', 'arseniy.khvorov@mh.org.au')).accessGroup)
+    .toBe('unrestricted')
+  extraUsers = [
+    { email: 'arseniy.khvorov@mh.org.au', accessGroup: 'admin' }
+  ]
+  await db.updateUsers()
+  expect((await db.getUser('email', 'arseniy.khvorov@mh.org.au')).accessGroup)
     .toBe('admin')
   fs.unlinkSync(userTestDbPath)
 })

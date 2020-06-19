@@ -193,10 +193,14 @@ export class UserDB extends Database {
     const redcapUsers = await exportUsers()
     const extraUsers = await this.getExtraUsers()
     const currentUserEmails = await this.getUserEmails()
+    const allWantedUsers = extraUsers.concat(redcapUsers.filter(
+      redcapUser => !extraUsers.map(extraUser => extraUser.email.toLowerCase())
+        .includes(redcapUser.email.toLowerCase())
+    ))
     const usersToAdd = []
     const neededEmails = []
     const userChange: Promise<void>[] = []
-    for (const user of redcapUsers.concat(extraUsers)) {
+    for (const user of allWantedUsers) {
       neededEmails.push(user.email.toLowerCase())
       if (currentUserEmails.includes(user.email.toLowerCase())) {
         if (user.accessGroup !== (await this.getUser(
@@ -386,7 +390,7 @@ export class UserDB extends Database {
 
   async getParticipants (accessGroup?: string): Promise<any[]> {
     let query = 'SELECT * FROM Participant'
-    if (accessGroup && accessGroup !== 'unrestricted') {
+    if (accessGroup && !['unrestricted', 'admin'].includes(accessGroup)) {
       query = `${query} WHERE accessGroup = '${accessGroup}'`
     }
     query += ';'
