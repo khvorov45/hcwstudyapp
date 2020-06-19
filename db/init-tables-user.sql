@@ -12,5 +12,6 @@ CREATE TABLE "Participant" (
     "pid" TEXT NOT NULL UNIQUE,
     "accessGroup" TEXT NOT NULL,
     "site" TEXT NOT NULL,
+    "dob" TEXT,
     FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name") ON UPDATE CASCADE ON DELETE CASCADE
 );

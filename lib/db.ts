@@ -97,7 +97,7 @@ export class UserDB extends Database {
   async update (): Promise<any> {
     super.update()
     await this.updateAccessGroup()
-    return await this.updateUsers()
+    return Promise.all([this.updateUsers(), this.updateParticipants()])
   }
 
   // AccessGroup table
@@ -351,14 +351,9 @@ export class UserDB extends Database {
     return await this.addParticipants(await exportParticipants())
   }
 
-  async updateParticipants (participants) {
-    const currentParticipantIds: string[] = await this.getParticipantIds()
-    const participnatsToAdd = []
-    for (const participant of participants) {
-      if (currentParticipantIds.includes(participant.record_id)) continue
-      participnatsToAdd.push(participant)
-    }
-    return await this.addParticipants(participnatsToAdd)
+  async updateParticipants () {
+    await this.removeParticipants()
+    return await this.addParticipants(await exportParticipants())
   }
 
   async addParticipants (participants): Promise<boolean[]> {
@@ -373,11 +368,12 @@ export class UserDB extends Database {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
-          `INSERT INTO Participant (redcapRecordId, pid, accessGroup, site)
+          `INSERT INTO Participant
+          (redcapRecordId, pid, accessGroup, site, dob)
           VALUES (
             "${participant.record_id}", "${participant.pid}",
             "${participant.redcap_data_access_group.toLowerCase()}",
-            "${participant.site_name}"
+            "${participant.site_name}", "${participant.a2_dob}"
           );`,
           (error) => {
             if (error) reject(error)
@@ -415,6 +411,19 @@ export class UserDB extends Database {
               redcapRecordIds.push(row.redcapRecordId)
             }
             resolve(redcapRecordIds)
+          }
+        })
+      }
+    )
+  }
+
+  async removeParticipants (): Promise<void> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec('DELETE FROM Participant;', (err) => {
+          if (err) reject(err)
+          else {
+            resolve()
           }
         })
       }
