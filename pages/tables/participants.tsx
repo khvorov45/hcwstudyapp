@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import useSWR from 'swr'
+import { useState } from 'react'
 import Layout from '../../components/layout'
 import { authorise } from '../../lib/authorise'
 import Table from '../../components/table'
@@ -10,19 +10,9 @@ import Ribbon from '../../components/ribbon'
 export default function ParticipantTable (
   props: {authorised: boolean, id: number, token: string}
 ) {
-  const { data, error } = useSWR(
-    [props.id, props.token, 'getparticipants'], fetchOwnApi
-  )
-  if (error) {
-    console.error(error)
-  }
-  let jsonrows
-  if (!props.authorised) {
-    jsonrows = []
-  } else if (!data) {
-    jsonrows = null
-  } else {
-    jsonrows = data
+  const [jsonrows, setData] = useState([])
+  async function updateData () {
+    setData(await fetchOwnApi(props.id, props.token, 'getparticipants'))
   }
   return (
     <Layout
@@ -44,6 +34,7 @@ export default function ParticipantTable (
       <Ribbon
         id={props.id}
         token={props.token}
+        afterdbUpdate={updateData}
       />
       <Table
         jsonrows={jsonrows}
