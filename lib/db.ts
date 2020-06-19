@@ -189,22 +189,34 @@ export class UserDB extends Database {
     ])
   }
 
-  async updateUsers (): Promise<[void[], void[]]> {
+  async updateUsers (): Promise<[void[], void[], void[]]> {
     const redcapUsers = await exportUsers()
     const extraUsers = await this.getExtraUsers()
     const currentUserEmails = await this.getUserEmails()
-    const neededUsers = []
+    const usersToAdd = []
     const neededEmails = []
+    const userChange: Promise<void>[] = []
     for (const user of redcapUsers.concat(extraUsers)) {
       neededEmails.push(user.email.toLowerCase())
-      if (currentUserEmails.includes(user.email.toLowerCase())) continue
-      neededUsers.push(user)
+      if (currentUserEmails.includes(user.email.toLowerCase())) {
+        if (user.accessGroup !== (await this.getUser(
+          'email', user.email.toLowerCase()
+        )).accessGroup) {
+          userChange.push(
+            this.changeUserAccessGroup(
+              user.email.toLowerCase(), user.accessGroup
+            )
+          )
+        }
+        continue
+      }
+      usersToAdd.push(user)
     }
-    const userAddition = this.addUsers(neededUsers)
+    const userAddition = this.addUsers(usersToAdd)
     const userRemoval = this.removeUsers(currentUserEmails.filter(
       currentEmail => !neededEmails.includes(currentEmail))
     )
-    return Promise.all([userAddition, userRemoval])
+    return Promise.all([userAddition, userRemoval, Promise.all(userChange)])
   }
 
   async addUsers (users: {email: string, accessGroup: string}[]) {
@@ -265,14 +277,14 @@ export class UserDB extends Database {
     )
   }
 
-  async getUser (id: number): Promise<{
+  async getUser (by: string, val: string | number): Promise<{
     id: number, email: string, accessGroup: string, tokenhash: string
   }> {
     return new Promise(
       (resolve, reject) => {
         this.db.get(
           `SELECT id, email, accessGroup, tokenhash
-          FROM User WHERE id = ${id};`,
+          FROM User WHERE ${by} = "${val}";`,
           (err, data) => {
             if (err) reject(err)
             else {
@@ -304,6 +316,22 @@ export class UserDB extends Database {
       (resolve, reject) => {
         this.db.exec(
           `UPDATE User SET tokenhash = "${hash}" WHERE id = ${id}`,
+          (error) => {
+            if (error) reject(error)
+            else resolve()
+          }
+        )
+      }
+    )
+  }
+
+  async changeUserAccessGroup (email: string, newAccessGroup: string):
+  Promise<void> {
+    return new Promise(
+      (resolve, reject) => {
+        this.db.exec(
+          `UPDATE User SET accessGroup = "${newAccessGroup}"
+          WHERE email = "${email.toLowerCase()}"`,
           (error) => {
             if (error) reject(error)
             else resolve()

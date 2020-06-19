@@ -44,7 +44,7 @@ test('User export by id', async () => {
   for (const user of users) {
     expect(neededIds.includes(user.id)).toBe(true)
   }
-  const user = await (await db).getUser(1)
+  const user = await (await db).getUser('id', 1)
   expect(user.id).toBe(1)
 })
 
@@ -79,21 +79,25 @@ test('User update', async () => {
   if (fs.existsSync(userTestDbPath)) fs.unlinkSync(userTestDbPath)
   let extraUsers = [
     { email: 'test@test.test', accessGroup: 'unrestricted' },
-    { email: 'test-persisit@test.test', accessGroup: 'unrestricted' }
+    { email: 'test-persist@test.test', accessGroup: 'unrestricted' }
   ]
   const db = await new UserDB('user-test', async () => extraUsers).init()
   const allEmailsBefore = await db.getUserEmails()
   expect(allEmailsBefore.includes('test@test.test')).toBe(true)
-  expect(allEmailsBefore.includes('test-persisit@test.test')).toBe(true)
+  expect(allEmailsBefore.includes('test-persist@test.test')).toBe(true)
+  expect((await db.getUser('email', 'test-persist@test.test')).accessGroup)
+    .toBe('unrestricted')
   extraUsers = [
     { email: 'test2@test.test', accessGroup: 'unrestricted' },
-    { email: 'test-persisit@test.test', accessGroup: 'unrestricted' }
+    { email: 'test-persist@test.test', accessGroup: 'admin' }
   ]
   await db.updateUsers()
   const allEmailsAfter = await db.getUserEmails()
   expect(allEmailsAfter.includes('test@test.test')).toBe(false)
   expect(allEmailsAfter.includes('test2@test.test')).toBe(true)
-  expect(allEmailsAfter.includes('test-persisit@test.test')).toBe(true)
+  expect(allEmailsAfter.includes('test-persist@test.test')).toBe(true)
   expect(allEmailsBefore.length).toBe(allEmailsAfter.length)
+  expect((await db.getUser('email', 'test-persist@test.test')).accessGroup)
+    .toBe('admin')
   fs.unlinkSync(userTestDbPath)
 })

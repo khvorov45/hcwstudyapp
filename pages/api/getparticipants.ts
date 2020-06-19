@@ -8,6 +8,6 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     res.status(401).end()
     return
   }
-  const accessGroup = (await (await db).getUser(+req.body.id)).accessGroup
+  const accessGroup = (await (await db).getUser('id', +req.body.id)).accessGroup
   res.status(200).send(await (await db).getParticipants(accessGroup))
 }
