@@ -367,11 +367,12 @@ export class UserDB extends Database {
       (resolve, reject) => {
         this.db.exec(
           `INSERT INTO Participant
-          (redcapRecordId, pid, accessGroup, site, dob)
+          (redcapRecordId, pid, accessGroup, site, dob, dateScreening)
           VALUES (
             "${participant.record_id}", "${participant.pid}",
             "${participant.redcap_data_access_group.toLowerCase()}",
-            "${participant.site_name}", "${participant.a2_dob}"
+            "${participant.site_name}", "${participant.a2_dob}",
+            "${participant.date_screening}"
           );`,
           (error) => {
             if (error) reject(error)

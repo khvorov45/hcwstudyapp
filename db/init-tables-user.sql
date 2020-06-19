@@ -13,5 +13,6 @@ CREATE TABLE "Participant" (
     "accessGroup" TEXT NOT NULL,
     "site" TEXT NOT NULL,
     "dob" TEXT,
+    "dateScreening" TEXT,
     FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name") ON UPDATE CASCADE ON DELETE CASCADE
 );
