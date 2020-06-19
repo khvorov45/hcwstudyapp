@@ -17,6 +17,7 @@ export function UpdateDatabaseButton (
   { id, token, afterdbUpdate }:
   {id: number, token: string, afterdbUpdate: () => Promise<void>}
 ) {
+  // TODO: prevent 1970 flash
   async function updateDB () {
     const date = await trackPromise(
       fetchOwnApi(id, token, 'update'), 'updatedb'

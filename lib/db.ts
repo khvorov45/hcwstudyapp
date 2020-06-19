@@ -4,6 +4,8 @@ import sqlite from 'sqlite3'
 import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 
+// TODO: string escaping
+
 export class Database {
   dbFilePath: string
   initTablesSqlFilePath: string
