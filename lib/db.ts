@@ -5,7 +5,6 @@ import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 
 export class Database {
-  dbDirPath = path.join(process.cwd(), 'db')
   dbFilePath: string
   initTablesSqlFilePath: string
   db: sqlite.Database
@@ -13,11 +12,9 @@ export class Database {
   lastUpdate: Date
 
   /** Creates uninitialised database. Call `init()` to initialise. */
-  constructor (name: string, initTablesSqlFileName: string) {
-    this.dbFilePath = path.join(this.dbDirPath, `${name}.sqlite3`)
-    this.initTablesSqlFilePath = path.join(
-      this.dbDirPath, `${initTablesSqlFileName}.sql`
-    )
+  constructor (dbFilePath: string, initTablesSqlFilePath: string) {
+    this.dbFilePath = dbFilePath
+    this.initTablesSqlFilePath = initTablesSqlFilePath
   }
 
   /** Creates the connection to the database. If the database file does not
@@ -75,11 +72,16 @@ export class UserDB extends Database {
   getExtraAccessGroups: () => Promise<string[]>
 
   constructor (
-    name: string,
+    dbFilePath?: string,
+    initTablesSqlFilePath?: string,
     getExtraUsers?: () => Promise<any>,
     getExtraAccessGroups?: () => Promise<string[]>
   ) {
-    super(name, 'init-tables-user')
+    super(
+      dbFilePath || path.join(process.cwd(), 'db', 'user.sqlite3'),
+      initTablesSqlFilePath ||
+      path.join(process.cwd(), 'db', 'init-tables-user.sql')
+    )
     this.getExtraUsers = getExtraUsers || config.getExtraUsers
     this.getExtraAccessGroups = getExtraAccessGroups ||
     config.getExtraAccessGroups
@@ -106,7 +108,7 @@ export class UserDB extends Database {
     this.addAccessGroups(await this.getExtraAccessGroups())
   }
 
-  async updateAccessGroup () {
+  async updateAccessGroup (): Promise<[void[], void[]]> {
     const currentAccessGroups = await this.getAccessGroups()
     const neededAccessGroups = await this.getExtraAccessGroups()
     const groupAdd = this.addAccessGroups(
@@ -122,13 +124,13 @@ export class UserDB extends Database {
     return Promise.all([groupAdd, groupRemove])
   }
 
-  async addAccessGroups (accessGroups: string[]) {
+  async addAccessGroups (accessGroups: string[]): Promise<void[]> {
     return Promise.all(
       accessGroups.map(accessGroup => this.addAccessGroup(accessGroup))
     )
   }
 
-  async addAccessGroup (accessGroup: string) {
+  async addAccessGroup (accessGroup: string): Promise<void> {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -149,24 +151,20 @@ export class UserDB extends Database {
         this.db.all('SELECT name FROM AccessGroup;', (err, data) => {
           if (err) reject(err)
           else {
-            const accessGroupNames: string[] = []
-            for (const row of data) {
-              accessGroupNames.push(row.name)
-            }
-            resolve(accessGroupNames)
+            resolve(data.map(row => row.name))
           }
         })
       }
     )
   }
 
-  async removeAccessGroups (accessGroups: string[]) {
+  async removeAccessGroups (accessGroups: string[]): Promise<void[]> {
     return Promise.all(
       accessGroups.map(accessGroup => this.removeAccessGroup(accessGroup))
     )
   }
 
-  async removeAccessGroup (accessGroup: string) {
+  async removeAccessGroup (accessGroup: string): Promise<void> {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
@@ -431,4 +429,4 @@ export class UserDB extends Database {
   }
 }
 
-export default new UserDB('user').init()
+export default new UserDB().init()

@@ -3,13 +3,15 @@ import config from '../lib/config'
 import fs from 'fs'
 import path from 'path'
 
-const testDbPath = path.join(process.cwd(), 'db', 'test-db.sqlite3')
-const userTestDbPath = path.join(process.cwd(), 'db', 'user-test.sqlite3')
+const testsDir = path.join(process.cwd(), '__tests__')
+const testDbPath = path.join(testsDir, 'test-db.sqlite3')
+const userTestDbPath = path.join(testsDir, 'user-test.sqlite3')
+const userSql = path.join(process.cwd(), 'db', 'init-tables-user.sql')
 
 class DatabaseTest extends Database {
   num = 0
   constructor () {
-    super('test-db', 'init-tables-test')
+    super(testDbPath, userSql)
   }
 
   setNum (num: number) {
@@ -19,11 +21,11 @@ class DatabaseTest extends Database {
 
 test('Base database creation', async () => {
   if (fs.existsSync(testDbPath)) fs.unlinkSync(testDbPath)
-  let db = new Database('test-db', 'init-tables-test')
+  let db = new Database(testDbPath, userSql)
   expect(db.needFill).toBe(undefined)
   await db.init()
   expect(db.needFill).toBe(true)
-  db = await new Database('test-db', 'init-tables-test').init()
+  db = await new Database(testDbPath, userSql).init()
   expect(db.needFill).toBe(false)
   fs.unlinkSync(testDbPath)
 })
@@ -57,21 +59,22 @@ test('Participant export by access group', async () => {
 })
 
 test('AccessGroup update', async () => {
-  if (fs.existsSync(userTestDbPath)) fs.unlinkSync(userTestDbPath)
+  if (await fs.existsSync(userTestDbPath)) fs.unlinkSync(userTestDbPath)
   let extraAccessGroups = ['test-access-group', 'temp-access-group']
   const db = await new UserDB(
-    'user-test', undefined,
+    userTestDbPath, userSql, undefined,
     async () => (await config.getExtraAccessGroups())
       .concat(extraAccessGroups)
   ).init()
-  expect((await db.getAccessGroups()).includes('test-access-group')).toBe(true)
-  expect((await db.getAccessGroups()).includes('temp-access-group')).toBe(true)
+  const accesGroupsBefore = await db.getAccessGroups()
+  expect(accesGroupsBefore.includes('test-access-group')).toBe(true)
+  expect(accesGroupsBefore.includes('temp-access-group')).toBe(true)
   extraAccessGroups = ['test-access-group', 'temp2-access-group']
   await db.update()
-  expect((await db.getAccessGroups()).includes('test-access-group')).toBe(true)
-  expect((await db.getAccessGroups()).includes('temp-access-group')).toBe(false)
-  expect((await db.getAccessGroups())
-    .includes('temp2-access-group')).toBe(true)
+  const accessGroupsAfter = await db.getAccessGroups()
+  expect(accessGroupsAfter.includes('test-access-group')).toBe(true)
+  expect(accessGroupsAfter.includes('temp-access-group')).toBe(false)
+  expect(accessGroupsAfter.includes('temp2-access-group')).toBe(true)
   fs.unlinkSync(userTestDbPath)
 })
 
@@ -81,7 +84,9 @@ test('User update', async () => {
     { email: 'test@test.test', accessGroup: 'unrestricted' },
     { email: 'test-persist@test.test', accessGroup: 'unrestricted' }
   ]
-  const db = await new UserDB('user-test', async () => extraUsers).init()
+  const db = await new UserDB(
+    userTestDbPath, userSql, async () => extraUsers
+  ).init()
   const allEmailsBefore = await db.getUserEmails()
   expect(allEmailsBefore.includes('test@test.test')).toBe(true)
   expect(allEmailsBefore.includes('test-persist@test.test')).toBe(true)
