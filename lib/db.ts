@@ -264,7 +264,7 @@ export class UserDB extends Database {
   }[]> {
     let query = 'SELECT id, email, accessGroup, tokenhash FROM User'
     if (ids) {
-      query = `${query} WHERE id IN (${ids})`
+      query = `${query} WHERE id IN (${ids.toString()})`
     }
     query += ';'
     return new Promise(
@@ -284,6 +284,9 @@ export class UserDB extends Database {
   }> {
     return new Promise(
       (resolve, reject) => {
+        if (!['id', 'email'].includes(by)) {
+          reject(Error('disallowed by: ' + by))
+        }
         this.db.get(
           `SELECT id, email, accessGroup, tokenhash
           FROM User WHERE ${by} = "${val}";`,
