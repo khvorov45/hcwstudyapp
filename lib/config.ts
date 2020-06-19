@@ -11,6 +11,10 @@ export default {
   ),
   getExtraAccessGroups: async () =>
     readLines(path.join(configDir, 'access-groups.txt')),
+  variables: readDelimited(
+    path.join(configDir, 'variables.csv'), ',',
+    ['table', 'myName', 'redcapName', 'label']
+  ),
   emailCredentials: YAML.parse(
     fs.readFileSync(path.join(configDir, 'emailcred.yaml'), 'utf-8')
   ),

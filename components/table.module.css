@@ -22,3 +22,26 @@
 .table th:last-child, .table td:last-child {
     border-right: 0;
 }
+
+.columnRedcapName {
+    font-family: 'Courier New', Courier, monospace;
+    font-style: normal;
+    font-size: 0.9em;
+    color: var(--font-color-muted)
+}
+
+.columnHeader {
+    display: grid;
+    grid-template-areas: 'names controller';
+    align-items: center;
+    grid-template-columns: auto 2ch;
+}
+
+.columnNames {
+    grid-area: names;
+}
+
+.columnController {
+    grid-area: controller;
+    justify-self: end;
+}

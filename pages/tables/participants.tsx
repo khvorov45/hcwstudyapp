@@ -6,9 +6,10 @@ import Table from '../../components/table'
 import { SubnavbarTables } from '../../components/navbar'
 import { fetchOwnApi } from '../../lib/util'
 import Ribbon from '../../components/ribbon'
+import config from '../../lib/config'
 
 export default function ParticipantTable (
-  props: {authorised: boolean, id: number, token: string}
+  props: {authorised: boolean, id: number, token: string, variables: any}
 ) {
   const [jsonrows, setData] = useState([])
   async function updateData () {
@@ -38,6 +39,7 @@ export default function ParticipantTable (
       />
       <Table
         jsonrows={jsonrows}
+        variables={props.variables}
       />
     </Layout>
   )
@@ -48,7 +50,9 @@ export async function getServerSideProps (context) {
     props: {
       authorised: await authorise(+context.query.id, context.query.token),
       id: +context.query.id || null,
-      token: context.query.token || null
+      token: context.query.token || null,
+      variables: (await config.variables)
+        .filter(v => v.table === 'Participant')
     }
   }
 }

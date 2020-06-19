@@ -5,7 +5,14 @@ import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
-export default function Table ({ jsonrows }) {
+function ColumnNames ({ label, redcapName }) {
+  return <div className={tableStyles.columnNames}>
+    <div>{label}</div>
+    <div className={tableStyles.columnRedcapName}>{redcapName}</div>
+  </div>
+}
+
+export default function Table ({ jsonrows, variables }) {
   if (jsonrows === null) {
     return <div
       style={{
@@ -28,8 +35,12 @@ export default function Table ({ jsonrows }) {
       const cols = []
       const exampleRow = data[0]
       for (const entry in exampleRow) {
+        const varinfo = variables.filter(v => v.myName === entry)[0]
         cols.push({
-          Header: entry,
+          Header: <ColumnNames
+            label={varinfo.label}
+            redcapName={varinfo.redcapName}
+          />,
           accessor: entry
         })
       }
@@ -64,14 +75,16 @@ export default function Table ({ jsonrows }) {
         <tr {...headerGroup.getHeaderGroupProps()}>
           {headerGroup.headers.map(column => (
             <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-              {column.render('Header')}
-              <span>
-                {column.isSorted
-                  ? column.isSortedDesc
-                    ? ' ▼'
-                    : ' ▲'
-                  : ' ⇅'}
-              </span>
+              <div className={tableStyles.columnHeader}>
+                {column.render('Header')}
+                <span className={tableStyles.columnController}>
+                  {column.isSorted
+                    ? column.isSortedDesc
+                      ? ' ▼'
+                      : ' ▲'
+                    : ' ⇅'}
+                </span>
+              </div>
             </th>
           ))}
         </tr>
