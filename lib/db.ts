@@ -3,6 +3,7 @@ import fs from 'fs'
 import sqlite from 'sqlite3'
 import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
+import { readFile } from './readfile'
 
 export class Database {
   dbFilePath: string
@@ -54,9 +55,11 @@ export class Database {
 
   /** Executes the SQL file to initialise the tables */
   async initTables (): Promise<boolean> {
+    const sql = await readFile(this.initTablesSqlFilePath, 'utf8')
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(fs.readFileSync(this.initTablesSqlFilePath, 'utf8'),
+        this.db.exec(
+          sql,
           (error) => {
             if (error) reject(error)
             else resolve(true)
