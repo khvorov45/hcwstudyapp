@@ -5,6 +5,8 @@ import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
 
+// TODO: merge update and initFill
+
 /** Base class to interact with local databases */
 export class Database {
   dbFilePath: string
@@ -153,6 +155,7 @@ export class UserDB extends Database {
 
   async init (): Promise<this> {
     await super.init()
+    // this.update()
     if (this.needFill) {
       await this.initFillAccessGroup()
       await Promise.all([this.initFillUser(), this.initFillParticipant()])
