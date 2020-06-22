@@ -65,6 +65,31 @@ export class Database {
       }
     )
   }
+
+  async getAllRows<T> (sql: string, params?: any): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, params, (err, data: T[]) => {
+        if (err) reject(err)
+        else resolve(data)
+      })
+    })
+  }
+
+  async getColumn<T, C>
+  (sql: string, column: string, params?: any):
+  Promise<C[]> {
+    const rows = await this.getAllRows<T>(sql, params)
+    return rows.map(row => row[column])
+  }
+
+  async execute (sql: string, params?: any): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, params, (error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
 }
 
 export interface User {
@@ -138,30 +163,15 @@ export class UserDB extends Database {
   }
 
   async addAccessGroup (accessGroup: string): Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'INSERT INTO AccessGroup (name) VALUES ($name);',
-          { $name: accessGroup },
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
+    return await this.execute(
+      'INSERT INTO AccessGroup (name) VALUES ($name);',
+      { $name: accessGroup }
     )
   }
 
   async getAccessGroups (): Promise<string[]> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all('SELECT name FROM AccessGroup;', (err, data) => {
-          if (err) reject(err)
-          else {
-            resolve(data.map(row => row.name))
-          }
-        })
-      }
+    return await this.getColumn<{name: string}, string>(
+      'SELECT name FROM AccessGroup;', 'name'
     )
   }
 
@@ -172,17 +182,9 @@ export class UserDB extends Database {
   }
 
   async removeAccessGroup (accessGroup: string): Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'DELETE FROM AccessGroup WHERE name = $accessGroup;',
-          { $accessGroup: accessGroup },
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
+    return await this.execute(
+      'DELETE FROM AccessGroup WHERE name = $accessGroup;',
+      { $accessGroup: accessGroup }
     )
   }
 
@@ -235,19 +237,11 @@ export class UserDB extends Database {
   }
 
   async addUser (user: {email: string, accessGroup: string}): Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'INSERT INTO User (email, accessGroup) VALUES ($email, $accessGroup)',
-          {
-            $email: user.email.toLowerCase(),
-            $accessGroup: user.accessGroup.toLowerCase()
-          },
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
+    return await this.execute(
+      'INSERT INTO User (email, accessGroup) VALUES ($email, $accessGroup)',
+      {
+        $email: user.email.toLowerCase(),
+        $accessGroup: user.accessGroup.toLowerCase()
       }
     )
   }
@@ -257,17 +251,9 @@ export class UserDB extends Database {
   }
 
   async removeUser (email: string): Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'DELETE FROM USER WHERE email = $email;',
-          { $email: email },
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
+    return await this.execute(
+      'DELETE FROM USER WHERE email = $email;',
+      { $email: email }
     )
   }
 
@@ -277,16 +263,7 @@ export class UserDB extends Database {
       query += ' WHERE id IN ($ids)'
     }
     query += ';'
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all(query, { $ids: ids }, (err, data) => {
-          if (err) reject(err)
-          else {
-            resolve(data)
-          }
-        })
-      }
-    )
+    return await this.getAllRows<User>(query, { $ids: ids })
   }
 
   async getUser (by: string, val: string | number): Promise<User> {
@@ -311,89 +288,58 @@ export class UserDB extends Database {
   }
 
   async getUserEmails (): Promise<string[]> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all('SELECT email FROM User;', (err, users) => {
-          if (err) reject(err)
-          else {
-            resolve(users.map(user => user.email))
-          }
-        })
-      }
+    return await this.getColumn<{email: string}, string>(
+      'SELECT email FROM User;', 'email'
     )
   }
 
   async storeTokenHash (hash: string, id: number): Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'UPDATE User SET tokenhash = $hash WHERE id = $id',
-          { $hash: hash, $id: id },
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
+    return await this.execute(
+      'UPDATE User SET tokenhash = $hash WHERE id = $id',
+      { $hash: hash, $id: id }
     )
   }
 
   async changeUserAccessGroup (email: string, newAccessGroup: string):
   Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'UPDATE User SET accessGroup = $newAccessGroup WHERE email = $email',
-          { $newAccessGroup: newAccessGroup, $email: email.toLowerCase() },
-          (error) => {
-            if (error) reject(error)
-            else resolve()
-          }
-        )
-      }
+    return await this.execute(
+      'UPDATE User SET accessGroup = $newAccessGroup WHERE email = $email',
+      { $newAccessGroup: newAccessGroup, $email: email.toLowerCase() }
     )
   }
 
   // Participant table
 
-  async initFillParticipant () {
+  async initFillParticipant (): Promise<void[]> {
     return await this.addParticipants(await exportParticipants())
   }
 
-  async updateParticipants () {
+  async updateParticipants (): Promise<void[]> {
     await this.removeParticipants()
     return await this.addParticipants(await exportParticipants())
   }
 
-  async addParticipants (participants): Promise<boolean[]> {
+  async addParticipants (participants): Promise<void[]> {
     return Promise.all(participants.map(p => this.addParticipant(p)))
   }
 
-  async addParticipant (participant): Promise<boolean> {
+  async addParticipant (participant): Promise<void> {
     // Not a participant
     if (participant.pid === '') {
-      return false
+      return
     }
-    return new Promise(
-      (resolve, reject) => {
-        this.db.run(
-          'INSERT INTO Participant ' +
-          '(redcapRecordId, pid, accessGroup, site, dob, dateScreening) ' +
-          'VALUES ' +
-          '($redcapRecordId, $pid, $accessGroup, $site, $dob, $dateScreening);',
-          {
-            $redcapRecordId: participant.record_id,
-            $pid: participant.pid,
-            $accessGroup: participant.redcap_data_access_group.toLowerCase(),
-            $site: participant.site_name,
-            $dob: participant.a2_dob,
-            $dateScreening: participant.date_screening
-          },
-          (error) => {
-            if (error) reject(error)
-            else resolve(true)
-          }
-        )
+    return await this.execute(
+      'INSERT INTO Participant ' +
+      '(redcapRecordId, pid, accessGroup, site, dob, dateScreening) ' +
+      'VALUES ' +
+      '($redcapRecordId, $pid, $accessGroup, $site, $dob, $dateScreening);',
+      {
+        $redcapRecordId: participant.record_id,
+        $pid: participant.pid,
+        $accessGroup: participant.redcap_data_access_group.toLowerCase(),
+        $site: participant.site_name,
+        $dob: participant.a2_dob,
+        $dateScreening: participant.date_screening
       }
     )
   }
@@ -404,44 +350,17 @@ export class UserDB extends Database {
       query += ' WHERE accessGroup = $accessGroup'
     }
     query += ';'
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all(query, { $accessGroup: accessGroup }, (err, data) => {
-          if (err) reject(err)
-          else resolve(data)
-        })
-      }
-    )
+    return await this.getAllRows<any>(query, { $accessGroup: accessGroup })
   }
 
   async getParticipantIds (): Promise<string[]> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.all('SELECT redcapRecordId FROM Participant;', (err, data) => {
-          if (err) reject(err)
-          else {
-            const redcapRecordIds: string[] = []
-            for (const row of data) {
-              redcapRecordIds.push(row.redcapRecordId)
-            }
-            resolve(redcapRecordIds)
-          }
-        })
-      }
+    return await this.getColumn<{redcapRecordId: string}, string>(
+      'SELECT redcapRecordId FROM Participant;', 'redcapRecordId'
     )
   }
 
   async removeParticipants (): Promise<void> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.exec('DELETE FROM Participant;', (err) => {
-          if (err) reject(err)
-          else {
-            resolve()
-          }
-        })
-      }
-    )
+    return await this.execute('DELETE FROM Participant;')
   }
 }
 
