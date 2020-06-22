@@ -5,6 +5,7 @@ import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
 
+/** Base class to interact with local databases */
 export class Database {
   dbFilePath: string
   initTablesSqlFilePath: string
@@ -118,6 +119,7 @@ export interface User {
   tokenhash: string,
 }
 
+/** Actual database with users and participants */
 export class UserDB extends Database {
   getExtraUsers: () => Promise<any>
   getExtraAccessGroups: () => Promise<string[]>
