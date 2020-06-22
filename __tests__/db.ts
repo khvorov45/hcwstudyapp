@@ -43,6 +43,7 @@ test('Resolving promised DBs multiple times', async () => {
 test('User export', async () => {
   const neededIds = [1, 2]
   const users = await (await db).getUsers(neededIds)
+  expect(users.length).toBeGreaterThan(0)
   for (const user of users) {
     expect(neededIds.includes(user.id)).toBe(true)
   }

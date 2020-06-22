@@ -119,6 +119,17 @@ export interface User {
   tokenhash: string,
 }
 
+/** Need this to generate (?, ?, ?) type strings because the driver does not
+ * handle arrays properly
+ */
+function genQs (howmany: number) {
+  let qs = ''
+  for (let i = 1; i < howmany; i++) {
+    qs += '?, '
+  }
+  return qs + '?'
+}
+
 /** Actual database with users and participants */
 export class UserDB extends Database {
   getExtraUsers: () => Promise<any>
@@ -161,7 +172,7 @@ export class UserDB extends Database {
     this.addAccessGroups(await this.getExtraAccessGroups())
   }
 
-  async updateAccessGroup (): Promise<[void[], void[]]> {
+  async updateAccessGroup (): Promise<[void[], void]> {
     const currentAccessGroups = await this.getAccessGroups()
     const neededAccessGroups = await this.getExtraAccessGroups()
     const groupAdd = this.addAccessGroups(
@@ -196,10 +207,13 @@ export class UserDB extends Database {
     )
   }
 
-  async removeAccessGroups (accessGroups: string[]): Promise<void[]> {
-    return Promise.all(
-      accessGroups.map(accessGroup => this.removeAccessGroup(accessGroup))
-    )
+  async removeAccessGroups (accessGroups?: string[]): Promise<void> {
+    let query = 'DELETE FROM AccessGroup'
+    if (accessGroups) {
+      query += ` WHERE name IN (${genQs(accessGroups.length)})`
+    }
+    query += ';'
+    return await this.execute(query, accessGroups)
   }
 
   async removeAccessGroup (accessGroup: string): Promise<void> {
@@ -281,10 +295,10 @@ export class UserDB extends Database {
   async getUsers (ids?: number[]): Promise<User[]> {
     let query = 'SELECT id, email, accessGroup, tokenhash FROM User'
     if (ids) {
-      query += ' WHERE id IN ($ids)'
+      query += ` WHERE id IN (${genQs(ids.length)})`
     }
     query += ';'
-    return await this.getAllRows<User>(query, { $ids: ids })
+    return await this.getAllRows<User>(query, ids)
   }
 
   async getUser (by: string, val: string | number): Promise<User> {
