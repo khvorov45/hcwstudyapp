@@ -69,6 +69,11 @@ export class Database {
     )
   }
 
+  /** Returns  an array of all rows retruned by the query
+   *
+   * @param sql SQL to run
+   * @param params Parameters to pass to `sqlite3` `all` method
+   */
   async getAllRows<T> (sql: string, params?: any): Promise<T[]> {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, data: T[]) => {
@@ -78,6 +83,12 @@ export class Database {
     })
   }
 
+  /** Returns an array of values within one column retruned by the query
+   *
+   * @param sql SQL to run
+   * @param column Column name
+   * @param params Parameters to pass to `sqlite3` `all` method
+   */
   async getColumn<T, C>
   (sql: string, column: string, params?: any):
   Promise<C[]> {
@@ -85,6 +96,11 @@ export class Database {
     return rows.map(row => row[column])
   }
 
+  /** Execute a query
+   *
+   * @param sql SQL to run
+   * @param params Parameters to pass to `sqlite3` `run` method
+   */
   async execute (sql: string, params?: any): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.run(sql, params, (error) => {
