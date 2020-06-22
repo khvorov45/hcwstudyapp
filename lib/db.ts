@@ -142,9 +142,9 @@ export class UserDB extends Database {
   async addAccessGroup (accessGroup: string): Promise<void> {
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `INSERT INTO AccessGroup (name)
-          VALUES ("${accessGroup.toLowerCase()}");`,
+        this.db.run(
+          'INSERT INTO AccessGroup (name) VALUES ($name);',
+          { $name: accessGroup },
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -176,8 +176,9 @@ export class UserDB extends Database {
   async removeAccessGroup (accessGroup: string): Promise<void> {
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `DELETE FROM AccessGroup WHERE name = "${accessGroup}";`,
+        this.db.run(
+          'DELETE FROM AccessGroup WHERE name = $accessGroup;',
+          { $accessGroup: accessGroup },
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -238,10 +239,12 @@ export class UserDB extends Database {
   async addUser (user: {email: string, accessGroup: string}): Promise<void> {
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `INSERT INTO User (email, accessGroup) VALUES
-          ("${user.email.toLowerCase()}",
-          "${user.accessGroup.toLowerCase()}");`,
+        this.db.run(
+          'INSERT INTO User (email, accessGroup) VALUES ($email, $accessGroup)',
+          {
+            $email: user.email.toLowerCase(),
+            $accessGroup: user.accessGroup.toLowerCase()
+          },
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -258,8 +261,9 @@ export class UserDB extends Database {
   async removeUser (email: string): Promise<void> {
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `DELETE FROM USER WHERE email = "${email}";`,
+        this.db.run(
+          'DELETE FROM USER WHERE email = $email;',
+          { $email: email },
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -272,12 +276,12 @@ export class UserDB extends Database {
   async getUsers (ids?: number[]): Promise<User[]> {
     let query = 'SELECT id, email, accessGroup, tokenhash FROM User'
     if (ids) {
-      query = `${query} WHERE id IN (${ids.toString()})`
+      query += ' WHERE id IN ($ids)'
     }
     query += ';'
     return new Promise(
       (resolve, reject) => {
-        this.db.all(query, (err, data) => {
+        this.db.all(query, { $ids: ids }, (err, data) => {
           if (err) reject(err)
           else {
             resolve(data)
@@ -295,7 +299,8 @@ export class UserDB extends Database {
         }
         this.db.get(
           `SELECT id, email, accessGroup, tokenhash
-          FROM User WHERE ${by} = "${val}";`,
+          FROM User WHERE ${by} = $val;`,
+          { $val: val },
           (err, data) => {
             if (err) reject(err)
             else {
@@ -323,8 +328,9 @@ export class UserDB extends Database {
   async storeTokenHash (hash: string, id: number): Promise<void> {
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `UPDATE User SET tokenhash = "${hash}" WHERE id = ${id}`,
+        this.db.run(
+          'UPDATE User SET tokenhash = $hash WHERE id = $id',
+          { $hash: hash, $id: id },
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -338,9 +344,9 @@ export class UserDB extends Database {
   Promise<void> {
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `UPDATE User SET accessGroup = "${newAccessGroup}"
-          WHERE email = "${email.toLowerCase()}"`,
+        this.db.run(
+          'UPDATE User SET accessGroup = $newAccessGroup WHERE email = $email',
+          { $newAccessGroup: newAccessGroup, $email: email.toLowerCase() },
           (error) => {
             if (error) reject(error)
             else resolve()
@@ -372,15 +378,19 @@ export class UserDB extends Database {
     }
     return new Promise(
       (resolve, reject) => {
-        this.db.exec(
-          `INSERT INTO Participant
-          (redcapRecordId, pid, accessGroup, site, dob, dateScreening)
-          VALUES (
-            "${participant.record_id}", "${participant.pid}",
-            "${participant.redcap_data_access_group.toLowerCase()}",
-            "${participant.site_name}", "${participant.a2_dob}",
-            "${participant.date_screening}"
-          );`,
+        this.db.run(
+          'INSERT INTO Participant ' +
+          '(redcapRecordId, pid, accessGroup, site, dob, dateScreening) ' +
+          'VALUES ' +
+          '($redcapRecordId, $pid, $accessGroup, $site, $dob, $dateScreening);',
+          {
+            $redcapRecordId: participant.record_id,
+            $pid: participant.pid,
+            $accessGroup: participant.redcap_data_access_group.toLowerCase(),
+            $site: participant.site_name,
+            $dob: participant.a2_dob,
+            $dateScreening: participant.date_screening
+          },
           (error) => {
             if (error) reject(error)
             else resolve(true)
@@ -393,12 +403,12 @@ export class UserDB extends Database {
   async getParticipants (accessGroup?: string): Promise<any[]> {
     let query = 'SELECT * FROM Participant'
     if (accessGroup && !['unrestricted', 'admin'].includes(accessGroup)) {
-      query = `${query} WHERE accessGroup = '${accessGroup}'`
+      query += ' WHERE accessGroup = $accessGroup'
     }
     query += ';'
     return new Promise(
       (resolve, reject) => {
-        this.db.all(query, (err, data) => {
+        this.db.all(query, { $accessGroup: accessGroup }, (err, data) => {
           if (err) reject(err)
           else resolve(data)
         })

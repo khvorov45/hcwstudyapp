@@ -40,14 +40,19 @@ test('Resolving promised DBs multiple times', async () => {
   fs.unlinkSync(testDbPath)
 })
 
-test('User export by id', async () => {
+test('User export', async () => {
   const neededIds = [1, 2]
   const users = await (await db).getUsers(neededIds)
   for (const user of users) {
     expect(neededIds.includes(user.id)).toBe(true)
   }
-  const user = await (await db).getUser('id', 1)
+  let user = await (await db).getUser('id', 1)
   expect(user.id).toBe(1)
+  user = await (await db).getUser('email', 'khvorov45@gmail.com')
+  expect(user.email).toBe('khvorov45@gmail.com')
+  // I mostly need to know that this doesn't fail
+  const allUsers = await (await db).getUsers()
+  expect(allUsers.length > 1).toBe(true)
 })
 
 test('Participant export by access group', async () => {
