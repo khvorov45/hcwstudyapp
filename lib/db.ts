@@ -209,6 +209,9 @@ export class UserDB extends Database {
 
   async removeAccessGroups (accessGroups?: string[]): Promise<void> {
     let query = 'DELETE FROM AccessGroup'
+    // NOTE: if there are too many (hundreds) of access groups, this
+    // can throw 'too many SQL variables' error
+    // We should always have under 10 of these
     if (accessGroups) {
       query += ` WHERE name IN (${genQs(accessGroups.length)})`
     }
@@ -292,13 +295,9 @@ export class UserDB extends Database {
     )
   }
 
-  async getUsers (ids?: number[]): Promise<User[]> {
-    let query = 'SELECT id, email, accessGroup, tokenhash FROM User'
-    if (ids) {
-      query += ` WHERE id IN (${genQs(ids.length)})`
-    }
-    query += ';'
-    return await this.getAllRows<User>(query, ids)
+  async getUsers (): Promise<User[]> {
+    const query = 'SELECT id, email, accessGroup, tokenhash FROM User;'
+    return await this.getAllRows<User>(query)
   }
 
   async getUser (by: string, val: string | number): Promise<User> {
