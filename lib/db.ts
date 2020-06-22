@@ -69,6 +69,13 @@ export class Database {
   }
 }
 
+export interface User {
+  id: number,
+  email: string,
+  accessGroup: string,
+  tokenhash: string,
+}
+
 export class UserDB extends Database {
   getExtraUsers: () => Promise<any>
   getExtraAccessGroups: () => Promise<string[]>
@@ -106,7 +113,7 @@ export class UserDB extends Database {
 
   // AccessGroup table
 
-  async initFillAccessGroup () {
+  async initFillAccessGroup (): Promise<void> {
     this.addAccessGroups(await this.getExtraAccessGroups())
   }
 
@@ -223,7 +230,8 @@ export class UserDB extends Database {
     return Promise.all([userAddition, userRemoval, Promise.all(userChange)])
   }
 
-  async addUsers (users: {email: string, accessGroup: string}[]) {
+  async addUsers (users: {email: string, accessGroup: string}[]):
+  Promise<void[]> {
     return Promise.all(users.map(user => this.addUser(user)))
   }
 
@@ -261,9 +269,7 @@ export class UserDB extends Database {
     )
   }
 
-  async getUsers (ids?: number[]): Promise<{
-    id: number, email: string, accessGroup: string, tokenhash: string
-  }[]> {
+  async getUsers (ids?: number[]): Promise<User[]> {
     let query = 'SELECT id, email, accessGroup, tokenhash FROM User'
     if (ids) {
       query = `${query} WHERE id IN (${ids.toString()})`
@@ -281,9 +287,7 @@ export class UserDB extends Database {
     )
   }
 
-  async getUser (by: string, val: string | number): Promise<{
-    id: number, email: string, accessGroup: string, tokenhash: string
-  }> {
+  async getUser (by: string, val: string | number): Promise<User> {
     return new Promise(
       (resolve, reject) => {
         if (!['id', 'email'].includes(by)) {
@@ -309,16 +313,14 @@ export class UserDB extends Database {
         this.db.all('SELECT email FROM User;', (err, users) => {
           if (err) reject(err)
           else {
-            const emails = []
-            users.map(user => emails.push(user.email))
-            resolve(emails)
+            resolve(users.map(user => user.email))
           }
         })
       }
     )
   }
 
-  async storeTokenHash (hash: string, id: number) {
+  async storeTokenHash (hash: string, id: number): Promise<void> {
     return new Promise(
       (resolve, reject) => {
         this.db.exec(
