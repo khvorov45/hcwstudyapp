@@ -22,11 +22,11 @@ class DatabaseTest extends Database {
 test('Base database creation', async () => {
   if (fs.existsSync(testDbPath)) fs.unlinkSync(testDbPath)
   let db = new Database(testDbPath, userSql)
-  expect(db.needFill).toBe(undefined)
+  expect(db.newFile).toBe(undefined)
   await db.init()
-  expect(db.needFill).toBe(true)
+  expect(db.newFile).toBe(true)
   db = await new Database(testDbPath, userSql).init()
-  expect(db.needFill).toBe(false)
+  expect(db.newFile).toBe(false)
   fs.unlinkSync(testDbPath)
 })
 

@@ -12,7 +12,7 @@ export class Database {
   dbFilePath: string
   initTablesSqlFilePath: string
   db: sqlite.Database
-  needFill: boolean
+  newFile: boolean
   lastUpdate: Date
 
   /** Creates uninitialised database. Call `init()` to initialise. */
@@ -28,21 +28,38 @@ export class Database {
   async init (): Promise<this> {
     this.lastUpdate = new Date()
     await this.connect()
-    if (this.needFill) {
+    if (this.newFile) {
       await this.initTables()
+      await this.fill(false)
+    } else {
+      await this.update()
     }
     return this
   }
 
-  /** Updates all tables */
+  /** Updates all tables with backup */
   async update (): Promise<void> {
+    await this.wipe(true)
+    await this.fill(true)
     this.lastUpdate = new Date()
   }
 
+  /** Resets all tables, i.e. updates with no backup */
+  async reset (): Promise<void> {
+    await this.wipe(false)
+    await this.fill(false)
+  }
+
+  /** Supposed to wipe all tables */
+  async wipe (_backup: boolean): Promise<void> {}
+
+  /** Supposed to refill all tables */
+  async fill (_backup: boolean): Promise<void> {}
+
   /** Creates a connection to the file */
   async connect (): Promise<boolean> {
-    this.needFill = true
-    if (fs.existsSync(this.dbFilePath)) this.needFill = false
+    this.newFile = true
+    if (fs.existsSync(this.dbFilePath)) this.newFile = false
     return new Promise(
       (resolve, reject) => {
         this.db = new sqlite.Database(
@@ -157,26 +174,20 @@ export class UserDB extends Database {
     config.getExtraAccessGroups
   }
 
-  async init (): Promise<this> {
-    await super.init()
-    // this.update()
-    if (this.needFill) {
-      await this.initFillAccessGroup()
-      await Promise.all([this.initFillUser(), this.initFillParticipant()])
-    }
-    return this
+  async wipe (backup: boolean): Promise<void> {
+    await this.removeAccessGroups()
+    await Promise.all([this.removeUsers(backup), this.removeParticipants()])
   }
 
-  async update (): Promise<any> {
-    super.update()
-    await this.updateAccessGroup()
-    return Promise.all([this.updateUsers(), this.updateParticipants()])
+  async fill (backup: boolean): Promise<void> {
+    await this.fillAccessGroup()
+    await Promise.all([this.fillUser(backup), this.fillParticipant()])
   }
 
   // AccessGroup table
 
-  async initFillAccessGroup (): Promise<void> {
-    this.addAccessGroups(await this.getExtraAccessGroups())
+  async fillAccessGroup (): Promise<void> {
+    await this.addAccessGroups(await this.getExtraAccessGroups())
   }
 
   async updateAccessGroup (): Promise<[void[], void]> {
@@ -235,45 +246,18 @@ export class UserDB extends Database {
 
   // User table
 
-  async initFillUser (): Promise<[void[], void[]]> {
-    return Promise.all([
-      this.addUsers(await exportUsers()),
-      this.addUsers(await this.getExtraUsers())
-    ])
-  }
-
-  async updateUsers (): Promise<[void[], void[], void[]]> {
-    const redcapUsers = await exportUsers()
-    const extraUsers = await this.getExtraUsers()
-    const currentUserEmails = await this.getUserEmails()
-    const allWantedUsers = extraUsers.concat(redcapUsers.filter(
-      redcapUser => !extraUsers.map(extraUser => extraUser.email.toLowerCase())
-        .includes(redcapUser.email.toLowerCase())
-    ))
-    const usersToAdd = []
-    const neededEmails = []
-    const userChange: Promise<void>[] = []
-    for (const user of allWantedUsers) {
-      neededEmails.push(user.email.toLowerCase())
-      if (currentUserEmails.includes(user.email.toLowerCase())) {
-        if (user.accessGroup !== (await this.getUser(
-          'email', user.email.toLowerCase()
-        )).accessGroup) {
-          userChange.push(
-            this.changeUserAccessGroup(
-              user.email.toLowerCase(), user.accessGroup
-            )
-          )
-        }
-        continue
-      }
-      usersToAdd.push(user)
+  async fillUser (backup: boolean): Promise<void> {
+    if (backup) {
+      console.log('supposed to do a User fill with backup')
     }
-    const userAddition = this.addUsers(usersToAdd)
-    const userRemoval = this.removeUsers(currentUserEmails.filter(
-      currentEmail => !neededEmails.includes(currentEmail))
-    )
-    return Promise.all([userAddition, userRemoval, Promise.all(userChange)])
+    const extraUsers = await this.getExtraUsers()
+    const extraUserEmails = extraUsers.map(u => u.email.toLowerCase())
+    const exportedUsers = (await exportUsers())
+      .filter(u => !extraUserEmails.includes(u.email.toLowerCase()))
+    await Promise.all([
+      this.addUsers(extraUsers),
+      this.addUsers(exportedUsers)
+    ])
   }
 
   async addUsers (users: {email: string, accessGroup: string}[]):
@@ -291,8 +275,15 @@ export class UserDB extends Database {
     )
   }
 
-  async removeUsers (emails: string[]): Promise<void[]> {
-    return Promise.all(emails.map(email => this.removeUser(email)))
+  async removeUsers (backup: boolean): Promise<void> {
+    if (backup) {
+      console.log('supposed to do a user backup')
+    }
+    await this.execute(
+      'UPDATE sqlite_sequence SET seq = 0 WHERE name = $user',
+      { $user: 'User' }
+    )
+    await this.execute('DELETE FROM User;')
   }
 
   async removeUser (email: string): Promise<void> {
@@ -351,8 +342,8 @@ export class UserDB extends Database {
 
   // Participant table
 
-  async initFillParticipant (): Promise<void[]> {
-    return await this.addParticipants(await exportParticipants())
+  async fillParticipant (): Promise<void> {
+    await this.addParticipants(await exportParticipants())
   }
 
   async updateParticipants (): Promise<void[]> {
