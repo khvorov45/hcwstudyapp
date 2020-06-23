@@ -117,5 +117,12 @@ test('Update', async () => {
 
   expect((await db.getUser('email', 'arseniy.khvorov@mh.org.au')).accessGroup)
     .toBe('admin')
+
+  await db.storeTokenHash('123', 1)
+
+  await db.update()
+
+  expect((await db.getUser('id', 1)).tokenhash).toBe('123')
+
   fs.unlinkSync(userTestDbPath)
 }, 15000)

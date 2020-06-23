@@ -157,6 +157,7 @@ function genQs (howmany: number) {
 export class UserDB extends Database {
   getExtraUsers: () => Promise<any>
   getExtraAccessGroups: () => Promise<string[]>
+  userBackup: User[]
 
   constructor (
     dbFilePath?: string,
@@ -247,9 +248,6 @@ export class UserDB extends Database {
   // User table
 
   async fillUser (backup: boolean): Promise<void> {
-    if (backup) {
-      console.log('supposed to do a User fill with backup')
-    }
     const extraUsers = await this.getExtraUsers()
     const extraUserEmails = extraUsers.map(u => u.email.toLowerCase())
     const exportedUsers = (await exportUsers())
@@ -258,6 +256,11 @@ export class UserDB extends Database {
       this.addUsers(extraUsers),
       this.addUsers(exportedUsers)
     ])
+    if (backup) {
+      this.userBackup
+        .filter(u => u.tokenhash !== null)
+        .map(u => this.storeTokenHash(u.tokenhash, u.id))
+    }
   }
 
   async addUsers (users: {email: string, accessGroup: string}[]):
@@ -277,7 +280,7 @@ export class UserDB extends Database {
 
   async removeUsers (backup: boolean): Promise<void> {
     if (backup) {
-      console.log('supposed to do a user backup')
+      this.userBackup = await this.getUsers()
     }
     await this.execute(
       'UPDATE sqlite_sequence SET seq = 0 WHERE name = $user',
