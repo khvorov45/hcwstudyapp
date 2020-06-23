@@ -5,8 +5,6 @@ import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
 
-// TODO: merge update and initFill
-
 /** Base class to interact with local databases */
 export class Database {
   dbFilePath: string
