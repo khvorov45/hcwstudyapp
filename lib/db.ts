@@ -5,6 +5,8 @@ import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
 
+// TODO: single row get wrapper
+
 /** Base class to interact with local databases */
 export class Database {
   dbFilePath: string
@@ -134,7 +136,6 @@ export class Database {
 }
 
 export interface User {
-  id: number,
   email: string,
   accessGroup: string,
   tokenhash: string,
@@ -222,7 +223,7 @@ export class UserDB extends Database {
     if (backup) {
       this.userBackup
         .filter(u => u.tokenhash !== null)
-        .map(u => this.storeTokenHash(u.tokenhash, u.id))
+        .map(u => this.storeTokenHash(u.tokenhash, u.email))
     }
   }
 
@@ -245,35 +246,28 @@ export class UserDB extends Database {
     if (backup) {
       this.userBackup = await this.getUsers()
     }
-    await this.execute(
-      'UPDATE sqlite_sequence SET seq = 0 WHERE name = $user',
-      { $user: 'User' }
-    )
     await this.execute('DELETE FROM User;')
   }
 
   async removeUser (email: string): Promise<void> {
     return await this.execute(
       'DELETE FROM USER WHERE email = $email;',
-      { $email: email }
+      { $email: email.toLowerCase() }
     )
   }
 
   async getUsers (): Promise<User[]> {
-    const query = 'SELECT id, email, accessGroup, tokenhash FROM User;'
+    const query = 'SELECT email, accessGroup, tokenhash FROM User;'
     return await this.getAllRows<User>(query)
   }
 
-  async getUser (by: string, val: string | number): Promise<User> {
+  async getUser (email: string): Promise<User> {
     return new Promise(
       (resolve, reject) => {
-        if (!['id', 'email'].includes(by)) {
-          reject(Error('disallowed by: ' + by))
-        }
         this.db.get(
-          `SELECT id, email, accessGroup, tokenhash
-          FROM User WHERE ${by} = $val;`,
-          { $val: val },
+          'SELECT email, accessGroup, tokenhash ' +
+          'FROM User WHERE email = $email;',
+          { $email: email.toLowerCase() },
           (err, data) => {
             if (err) reject(err)
             else {
@@ -291,10 +285,10 @@ export class UserDB extends Database {
     )
   }
 
-  async storeTokenHash (hash: string, id: number): Promise<void> {
+  async storeTokenHash (hash: string, email: string): Promise<void> {
     return await this.execute(
-      'UPDATE User SET tokenhash = $hash WHERE id = $id',
-      { $hash: hash, $id: id }
+      'UPDATE User SET tokenhash = $hash WHERE email = $email',
+      { $hash: hash, $email: email.toLowerCase() }
     )
   }
 

@@ -29,7 +29,7 @@ function Unauthorised () {
       />
     </Head>
     <InfoMessage
-      content="Link is not valid"
+      content="Link is not valemail"
     />
     <EmailForm
       message="Enter your email below and a new one
@@ -42,7 +42,7 @@ export default function Layout (
   props: {
     children: React.ReactNode,
     authorised: boolean,
-    id: number,
+    email: string,
     token: string,
     active: string,
   }
@@ -57,7 +57,7 @@ export default function Layout (
     <>
       <Navbar
         authorised={props.authorised}
-        id={props.id}
+        email={props.email}
         token={props.token}
         active={props.active}
       />

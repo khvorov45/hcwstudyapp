@@ -4,8 +4,8 @@ import styles from './navbar.module.css'
 import { getConstQuery } from '../lib/util'
 
 export default function Navbar (
-  { authorised, id, token, active }:
-  {authorised: boolean, id: number, token: string, active: string}
+  { authorised, email, token, active }:
+  {authorised: boolean, email: string, token: string, active: string}
 ) {
   var otherNavElements = <></>
   if (authorised) {
@@ -13,14 +13,14 @@ export default function Navbar (
       <Navelement
         content="Tables"
         link={'/tables/participants'}
-        id={id}
+        email={email}
         token={token}
         active={active === 'tables'}
       />
       <Navelement
         content="Plots"
         link={'/plots'}
-        id={id}
+        email={email}
         token={token}
         active={active === 'plots'}
       />
@@ -30,7 +30,7 @@ export default function Navbar (
     <Navelement
       content="Help"
       link={'/'}
-      id={id}
+      email={email}
       token={token}
       active={active === 'home'}
     />
@@ -40,12 +40,12 @@ export default function Navbar (
 }
 
 export function Navelement (
-  { content, link, id, token, active }:
-  {content: string, link: string, id: number, token: string, active: boolean}
+  { content, link, email, token, active }:
+  {content: string, link: string, email: string, token: string, active: boolean}
 ) {
   return <li className={styles.element}>
     <a
-      href={`${link}${getConstQuery(id, token)}`}
+      href={`${link}${getConstQuery(email, token)}`}
       className={
         active ? `${styles.link} ${styles.active}` : styles.link
       }
@@ -66,21 +66,21 @@ export function Subnavbar (
 }
 
 export function SubnavbarTables (
-  { authorised, id, token, active }:
-  {authorised: boolean, id: number, token: string, active: string}
+  { authorised, email, token, active }:
+  {authorised: boolean, email: string, token: string, active: string}
 ) {
   return <Subnavbar authorised={authorised}>
     <Navelement
       content="Participants"
       link={'/tables/participants'}
-      id={id}
+      email={email}
       token={token}
       active={active === 'participants'}
     />
     <Navelement
       content="Appointments"
       link={'/tables/appointments'}
-      id={id}
+      email={email}
       token={token}
       active={active === 'appointments'}
     />

@@ -3,12 +3,12 @@ import Head from 'next/head'
 import { authorise } from '../lib/authorise'
 
 export default function Home (
-  props: {authorised: boolean, id: number, token: string}
+  props: {authorised: boolean, email: string, token: string}
 ) {
   return (
     <Layout
       authorised={props.authorised}
-      id={props.id}
+      email={props.email}
       token={props.token}
       active="home"
     >
@@ -24,8 +24,8 @@ export default function Home (
 export async function getServerSideProps (context) {
   return {
     props: {
-      authorised: await authorise(+context.query.id, context.query.token),
-      id: +context.query.id || null,
+      authorised: await authorise(context.query.email, context.query.token),
+      email: context.query.email || null,
       token: context.query.token || null
     }
   }

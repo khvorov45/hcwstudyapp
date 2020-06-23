@@ -1,14 +1,16 @@
 import fetch from 'cross-fetch'
 
-export function getConstQuery (id: number, token: string) {
+export function getConstQuery (email: string, token: string) {
   var constQuery = ''
-  if (id && token) {
-    constQuery = `?id=${id}&token=${token}`
+  if (email && token) {
+    constQuery = `?email=${email}&token=${token}`
   }
   return constQuery
 }
 
-export async function fetchOwnApi (id: number, token: string, which: string) {
+export async function fetchOwnApi (
+  email: string, token: string, which: string
+) {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
   myHeaders.append('Accept', 'application/json')
@@ -17,7 +19,7 @@ export async function fetchOwnApi (id: number, token: string, which: string) {
     {
       method: 'POST',
       headers: myHeaders,
-      body: new URLSearchParams({ id: id.toString(), token: token })
+      body: new URLSearchParams({ email: email, token: token })
     }
   )
   return await res.json()

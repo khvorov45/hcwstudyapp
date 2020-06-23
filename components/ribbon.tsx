@@ -5,21 +5,23 @@ import { fetchOwnApi } from '../lib/util'
 import styles from './ribbon.module.css'
 
 export default function Ribbon (
-  { id, token, afterdbUpdate }:
-  {id: number, token: string, afterdbUpdate: () => Promise<void>}
+  { email, token, afterdbUpdate }:
+  {email: string, token: string, afterdbUpdate: () => Promise<void>}
 ) {
   return <div className={styles.ribbon}>
-    <UpdateDatabaseButton id={id} token={token} afterdbUpdate={afterdbUpdate} />
+    <UpdateDatabaseButton
+      email={email} token={token} afterdbUpdate={afterdbUpdate}
+    />
   </div>
 }
 
 export function UpdateDatabaseButton (
-  { id, token, afterdbUpdate }:
-  {id: number, token: string, afterdbUpdate: () => Promise<void>}
+  { email, token, afterdbUpdate }:
+  {email: string, token: string, afterdbUpdate: () => Promise<void>}
 ) {
   async function updateDB () {
     async function updateAndAfter () {
-      const date = await fetchOwnApi(id, token, 'update')
+      const date = await fetchOwnApi(email, token, 'update')
       await afterdbUpdate()
       setLastUpdate(new Date(date))
     }

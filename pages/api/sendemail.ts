@@ -10,7 +10,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.body.email.toLowerCase() !== user.email) continue
     const token = cryptoRandomString({ length: 32, type: 'url-safe' })
     const link = generateLink(
-      req.headers.origin, token, user.id.toString()
+      req.headers.origin, token, user.email
     )
     try {
       const emailPromise = sendEmail(
@@ -21,7 +21,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       )
       const hashPromise = bcrypt.hash(token, 10)
       const [_, hash] = await Promise.all([emailPromise, hashPromise])
-      await (await db).storeTokenHash(hash, user.id)
+      await (await db).storeTokenHash(hash, user.email)
       res.status(200).end()
       return
     } catch (error) {
@@ -34,7 +34,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 function generateLink (
-  origin: string | string[], token: string, id: string
+  origin: string | string[], token: string, email: string
 ): string {
-  return `${origin}/?id=${id}&token=${token}`
+  return `${origin}/?email=${email}&token=${token}`
 }

@@ -9,16 +9,16 @@ import Ribbon from '../../components/ribbon'
 import config from '../../lib/config'
 
 export default function ParticipantTable (
-  props: {authorised: boolean, id: number, token: string, variables: any}
+  props: {authorised: boolean, email: string, token: string, variables: any}
 ) {
   const [jsonrows, setData] = useState([])
   async function updateData () {
-    setData(await fetchOwnApi(props.id, props.token, 'getparticipants'))
+    setData(await fetchOwnApi(props.email, props.token, 'getparticipants'))
   }
   return (
     <Layout
       authorised={props.authorised}
-      id={props.id}
+      email={props.email}
       token={props.token}
       active="tables"
     >
@@ -28,12 +28,12 @@ export default function ParticipantTable (
       </Head>
       <SubnavbarTables
         authorised={props.authorised}
-        id={props.id}
+        email={props.email}
         token={props.token}
         active = "participants"
       />
       <Ribbon
-        id={props.id}
+        email={props.email}
         token={props.token}
         afterdbUpdate={updateData}
       />
@@ -48,8 +48,8 @@ export default function ParticipantTable (
 export async function getServerSideProps (context) {
   return {
     props: {
-      authorised: await authorise(+context.query.id, context.query.token),
-      id: +context.query.id || null,
+      authorised: await authorise(context.query.email, context.query.token),
+      email: context.query.email || null,
       token: context.query.token || null,
       variables: (await config.variables)
         .filter(v => v.table === 'Participant')

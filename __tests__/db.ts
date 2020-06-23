@@ -41,9 +41,7 @@ test('Resolving promised DBs multiple times', async () => {
 })
 
 test('User export', async () => {
-  let user = await (await db).getUser('id', 1)
-  expect(user.id).toBe(1)
-  user = await (await db).getUser('email', 'khvorov45@gmail.com')
+  const user = await (await db).getUser('khvorov45@gmail.com')
   expect(user.email).toBe('khvorov45@gmail.com')
   // I mostly need to know that this doesn't fail
   const allUsers = await (await db).getUsers()
@@ -83,7 +81,7 @@ test('Update', async () => {
   const allEmailsBefore = await db.getUserEmails()
   expect(allEmailsBefore.includes('test@test.test')).toBe(true)
   expect(allEmailsBefore.includes('test-persist@test.test')).toBe(true)
-  expect((await db.getUser('email', 'test-persist@test.test')).accessGroup)
+  expect((await db.getUser('test-persist@test.test')).accessGroup)
     .toBe('unrestricted')
 
   extraAccessGroups = ['test-access-group', 'temp2-access-group']
@@ -104,29 +102,30 @@ test('Update', async () => {
   expect(allEmailsAfter.includes('test2@test.test')).toBe(true)
   expect(allEmailsAfter.includes('test-persist@test.test')).toBe(true)
   expect(allEmailsBefore.length).toBe(allEmailsAfter.length)
-  expect((await db.getUser('email', 'test-persist@test.test')).accessGroup)
+  expect((await db.getUser('test-persist@test.test')).accessGroup)
     .toBe('admin')
-  expect((await db.getUser('email', 'arseniy.khvorov@mh.org.au')).accessGroup)
+  expect((await db.getUser('arseniy.khvorov@mh.org.au')).accessGroup)
     .toBe('unrestricted')
 
+  // Check that local overwrites redcap
   extraUsers = [
-    { email: 'arseniy.khvorov@mh.org.au', accessGroup: 'admin' }
+    { email: 'Arseniy.Khvorov@mh.org.au', accessGroup: 'admin' }
   ]
 
   await db.update()
 
-  expect((await db.getUser('email', 'arseniy.khvorov@mh.org.au')).accessGroup)
+  expect((await db.getUser('aRseniy.kHvorov@mh.org.au')).accessGroup)
     .toBe('admin')
 
-  await db.storeTokenHash('123', 1)
+  await db.storeTokenHash('123', 'arSeniy.khVorov@mh.org.au')
 
   await db.update()
 
-  expect((await db.getUser('id', 1)).tokenhash).toBe('123')
+  expect((await db.getUser('arseNiy.khvOrov@mh.org.au')).tokenhash).toBe('123')
 
   await db.reset()
 
-  expect((await db.getUser('id', 1)).tokenhash).toBe(null)
+  expect((await db.getUser('arsenIy.khvoRov@mh.org.au')).tokenhash).toBe(null)
 
   fs.unlinkSync(userTestDbPath)
-}, 15000)
+}, 20000)

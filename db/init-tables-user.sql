@@ -1,8 +1,7 @@
 -- Assumes that the database is empty
 CREATE TABLE "AccessGroup" ("name" TEXT NOT NULL PRIMARY KEY UNIQUE);
 CREATE TABLE "User" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    "email" TEXT NOT NULL UNIQUE,
+    "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
     "accessGroup" TEXT NOT NULL,
     "tokenhash" TEXT,
     FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name") ON UPDATE CASCADE ON DELETE CASCADE
