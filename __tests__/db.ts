@@ -50,12 +50,15 @@ test('User export', async () => {
   expect(allUsers.length > 1).toBe(true)
 })
 
-test('Participant export by access group', async () => {
+test('Participant export', async () => {
   const accessGroup = 'melbourne'
   const participants = await (await db).getParticipants(accessGroup)
+  expect(participants.length).toBeGreaterThan(0)
   for (const participant of participants) {
     expect(participant.accessGroup === accessGroup).toBe(true)
   }
+  const allParticipants = await (await db).getParticipants()
+  expect(allParticipants.length).toBeGreaterThan(0)
 })
 
 test('Update', async () => {

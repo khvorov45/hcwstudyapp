@@ -382,12 +382,17 @@ export class UserDB extends Database {
   }
 
   async getParticipants (accessGroup?: string): Promise<any[]> {
-    let query = 'SELECT * FROM Participant'
+    let query =
+    `SELECT redcapRecordId, pid, accessGroup, site,
+    dob, dateScreening
+    FROM Participant`
+    let params = {}
     if (accessGroup && !['unrestricted', 'admin'].includes(accessGroup)) {
       query += ' WHERE accessGroup = $accessGroup'
+      params = { $accessGroup: accessGroup }
     }
     query += ';'
-    return await this.getAllRows<any>(query, { $accessGroup: accessGroup })
+    return await this.getAllRows<any>(query, params)
   }
 
   async getParticipantIds (): Promise<string[]> {
