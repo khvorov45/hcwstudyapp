@@ -140,17 +140,6 @@ export interface User {
   tokenhash: string,
 }
 
-/** Need this to generate (?, ?, ?) type strings because the driver does not
- * handle arrays properly
- */
-function genQs (howmany: number) {
-  let qs = ''
-  for (let i = 1; i < howmany; i++) {
-    qs += '?, '
-  }
-  return qs + '?'
-}
-
 /** Actual database with users and participants */
 export class UserDB extends Database {
   getExtraUsers: () => Promise<any>
@@ -189,22 +178,6 @@ export class UserDB extends Database {
     await this.addAccessGroups(await this.getExtraAccessGroups())
   }
 
-  async updateAccessGroup (): Promise<[void[], void]> {
-    const currentAccessGroups = await this.getAccessGroups()
-    const neededAccessGroups = await this.getExtraAccessGroups()
-    const groupAdd = this.addAccessGroups(
-      neededAccessGroups.filter(
-        accessGroup => !currentAccessGroups.includes(accessGroup)
-      )
-    )
-    const groupRemove = this.removeAccessGroups(
-      currentAccessGroups.filter(
-        accessGroup => !neededAccessGroups.includes(accessGroup)
-      )
-    )
-    return Promise.all([groupAdd, groupRemove])
-  }
-
   async addAccessGroups (accessGroups: string[]): Promise<void[]> {
     return Promise.all(
       accessGroups.map(accessGroup => this.addAccessGroup(accessGroup))
@@ -224,16 +197,8 @@ export class UserDB extends Database {
     )
   }
 
-  async removeAccessGroups (accessGroups?: string[]): Promise<void> {
-    let query = 'DELETE FROM AccessGroup'
-    // NOTE: if there are too many (hundreds) of access groups, this
-    // can throw 'too many SQL variables' error
-    // We should always have under 10 of these
-    if (accessGroups) {
-      query += ` WHERE name IN (${genQs(accessGroups.length)})`
-    }
-    query += ';'
-    return await this.execute(query, accessGroups)
+  async removeAccessGroups (): Promise<void> {
+    return await this.execute('DELETE FROM AccessGroup')
   }
 
   async removeAccessGroup (accessGroup: string): Promise<void> {
@@ -345,11 +310,6 @@ export class UserDB extends Database {
 
   async fillParticipant (): Promise<void> {
     await this.addParticipants(await exportParticipants())
-  }
-
-  async updateParticipants (): Promise<void[]> {
-    await this.removeParticipants()
-    return await this.addParticipants(await exportParticipants())
   }
 
   async addParticipants (participants): Promise<void[]> {
