@@ -9,8 +9,11 @@ function myFormatDate (d: Date): {datePart: string, timePart: string} {
   }
 }
 
-export function Timestamp ({ timestamp }: {timestamp?: Date}) {
-  const { promiseInProgress } = usePromiseTracker({ area: 'updatedb' })
+export function Timestamp (
+  { promiseArea, timestamp }:
+  {promiseArea: string, timestamp?: Date}
+) {
+  const { promiseInProgress } = usePromiseTracker({ area: promiseArea })
   const timestring = myFormatDate(timestamp || new Date())
   const underlast = promiseInProgress
     ? <div className={styles.underlast}>

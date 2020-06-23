@@ -17,13 +17,13 @@ export function UpdateDatabaseButton (
   { id, token, afterdbUpdate }:
   {id: number, token: string, afterdbUpdate: () => Promise<void>}
 ) {
-  // TODO: prevent 1970 flash
   async function updateDB () {
-    const date = await trackPromise(
-      fetchOwnApi(id, token, 'update'), 'updatedb'
-    )
-    await afterdbUpdate()
-    setLastUpdate(new Date(date))
+    async function updateAndAfter () {
+      const date = await fetchOwnApi(id, token, 'update')
+      await afterdbUpdate()
+      setLastUpdate(new Date(date))
+    }
+    await trackPromise(updateAndAfter(), 'updatedb')
   }
   useEffect(() => { updateDB() }, [])
   const [lastUpdate, setLastUpdate] = useState(new Date(0))
@@ -31,5 +31,6 @@ export function UpdateDatabaseButton (
     label="Update"
     timestamp={lastUpdate}
     onClick={updateDB}
+    promiseArea='updatedb'
   />
 }
