@@ -57,19 +57,9 @@ export class Database {
   }
 
   /** Executes the SQL file to initialise the tables */
-  async initTables (): Promise<boolean> {
+  async initTables (): Promise<void> {
     const sql = await readFile(this.initTablesSqlFilePath, 'utf8')
-    return new Promise(
-      (resolve, reject) => {
-        this.db.exec(
-          sql,
-          (error) => {
-            if (error) reject(error)
-            else resolve(true)
-          }
-        )
-      }
-    )
+    return await this.executeAll(sql)
   }
 
   /** Returns  an array of all rows retruned by the query
@@ -107,6 +97,20 @@ export class Database {
   async execute (sql: string, params?: any): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.run(sql, params, (error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
+
+  /** Execute all queries in a string
+   *
+   * @param sql SQL to run
+   * @param params Parameters to pass to `sqlite3` `exec` method
+   */
+  async executeAll (sql: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.exec(sql, (error) => {
         if (error) reject(error)
         else resolve()
       })
