@@ -124,5 +124,9 @@ test('Update', async () => {
 
   expect((await db.getUser('id', 1)).tokenhash).toBe('123')
 
+  await db.reset()
+
+  expect((await db.getUser('id', 1)).tokenhash).toBe(null)
+
   fs.unlinkSync(userTestDbPath)
 }, 15000)
