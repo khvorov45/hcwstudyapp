@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
 import { ButtonWithTimestamp } from './input'
-import { fetchOwnApi } from '../lib/util'
+import { fetchOwnApi, accessAPI } from '../lib/util'
 import styles from './ribbon.module.css'
 
 export default function Ribbon (
@@ -27,7 +27,17 @@ export function UpdateDatabaseButton (
     }
     await trackPromise(updateAndAfter(), 'updatedb')
   }
-  useEffect(() => { updateDB() }, [])
+  // Don't want to update the database on every mount, just fetch when
+  // it was last updated
+  async function dontUpdateDB () {
+    async function dontUpdateAndAfter () {
+      const date = await accessAPI('update', 'GET')
+      await afterdbUpdate()
+      setLastUpdate(new Date(date))
+    }
+    await trackPromise(dontUpdateAndAfter(), 'updatedb')
+  }
+  useEffect(() => { dontUpdateDB() }, [])
   const [lastUpdate, setLastUpdate] = useState(new Date(0))
   return <ButtonWithTimestamp
     label="Update"

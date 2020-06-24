@@ -24,3 +24,20 @@ export async function fetchOwnApi (
   )
   return await res.json()
 }
+
+export async function accessAPI (
+  location: string, method: string, body?: any
+) {
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
+  myHeaders.append('Accept', 'application/json')
+  const res = await fetch(
+    `/api/${location}`,
+    {
+      method: method,
+      headers: myHeaders,
+      body: body ? new URLSearchParams(body) : null
+    }
+  )
+  return await res.json()
+}

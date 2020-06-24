@@ -31,8 +31,7 @@ export class Database {
     if (this.newFile) {
       await this.initTables()
       await this.fill(false)
-    } else {
-      await this.update()
+      this.lastUpdate = new Date()
     }
     return this
   }
@@ -48,6 +47,7 @@ export class Database {
   async reset (): Promise<void> {
     await this.wipe(false)
     await this.fill(false)
+    this.lastUpdate = new Date()
   }
 
   /** Supposed to wipe all tables */
