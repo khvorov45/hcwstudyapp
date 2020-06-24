@@ -5,15 +5,12 @@ import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
 
-// TODO: single row get wrapper
-
 /** Base class to interact with local databases */
 export class Database {
   dbFilePath: string
   initTablesSqlFilePath: string
   db: sqlite.Database
   newFile: boolean
-  lastUpdate: Date
 
   /** Creates uninitialised database. Call `init()` to initialise. */
   constructor (dbFilePath: string, initTablesSqlFilePath: string) {
@@ -26,12 +23,11 @@ export class Database {
    * `initTablesSqlFileName`
    */
   async init (): Promise<this> {
-    this.lastUpdate = new Date()
     await this.connect()
     if (this.newFile) {
       await this.initTables()
       await this.fill(false)
-      this.lastUpdate = new Date()
+      this.setLastUpdate(new Date())
     }
     return this
   }
@@ -40,14 +36,14 @@ export class Database {
   async update (): Promise<void> {
     await this.wipe(true)
     await this.fill(true)
-    this.lastUpdate = new Date()
+    this.setLastUpdate(new Date())
   }
 
   /** Resets all tables, i.e. updates with no backup */
   async reset (): Promise<void> {
     await this.wipe(false)
     await this.fill(false)
-    this.lastUpdate = new Date()
+    this.setLastUpdate(new Date())
   }
 
   /** Supposed to wipe all tables */
@@ -76,7 +72,38 @@ export class Database {
   /** Executes the SQL file to initialise the tables */
   async initTables (): Promise<void> {
     const sql = await readFile(this.initTablesSqlFilePath, 'utf8')
-    return await this.executeAll(sql)
+    await this.executeAll(sql)
+    await this.executeAll(
+      `CREATE TABLE "Meta" (
+        "key" TEXT NOT NULL PRIMARY KEY UNIQUE,
+        "value" TEXT NOT NULL
+      );
+      INSERT INTO Meta (key, value)
+      VALUES ('lastUpdate', '${new Date().toString()}')`
+    )
+  }
+
+  async setLastUpdate (date: Date): Promise<void> {
+    await this.execute(
+      'UPDATE Meta SET value = $date WHERE key = \'lastUpdate\'',
+      { $date: date.toString() }
+    )
+  }
+
+  async getLastUpdate (): Promise<Date> {
+    const dateString = await this.getRow<{value: string}>(
+      'SELECT value FROM Meta WHERE key = \'lastUpdate\''
+    )
+    return new Date(dateString.value)
+  }
+
+  async getRow<T> (sql: string, params?: any): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.db.get(sql, params, (err, data: T) => {
+        if (err) reject(err)
+        else resolve(data)
+      })
+    })
   }
 
   /** Returns  an array of all rows retruned by the query
@@ -262,20 +289,10 @@ export class UserDB extends Database {
   }
 
   async getUser (email: string): Promise<User> {
-    return new Promise(
-      (resolve, reject) => {
-        this.db.get(
-          'SELECT email, accessGroup, tokenhash ' +
-          'FROM User WHERE email = $email;',
-          { $email: email.toLowerCase() },
-          (err, data) => {
-            if (err) reject(err)
-            else {
-              resolve(data)
-            }
-          }
-        )
-      }
+    return await this.getRow(
+      'SELECT email, accessGroup, tokenhash ' +
+      'FROM User WHERE email = $email;',
+      { $email: email.toLowerCase() }
     )
   }
 

@@ -29,7 +29,7 @@ function Unauthorised () {
       />
     </Head>
     <InfoMessage
-      content="Link is not valemail"
+      content="Link is not valid"
     />
     <EmailForm
       message="Enter your email below and a new one
