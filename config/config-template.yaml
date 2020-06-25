@@ -1,0 +1,48 @@
+db:
+  accessGroups:
+    - adelaide
+    - brisbane
+    - melbourne
+    - newcastle
+    - perth
+    - sydney
+    - unrestricted
+    - admin
+  extraUsers:
+    - email: khvorov45@gmail.com
+      accessGroup: admin
+  postgres:
+    user: postgres
+    host: localhost
+    database: hcwstudyapp-dev
+    password:
+    port: 3001
+    tableResetSqlPath: db/table-reset-postgres.sql
+  redcap:
+    url: https://biredcap.mh.org.au/api/
+    token:
+  variables:
+    Participant:
+      - my: redcapRecordId
+        redcap: record_id
+        label: Record ID
+      - my: pid
+        redcap: pid
+        label: PID
+      - my: accessGroup
+        redcap: redcap_data_access_group
+        label: Access Group
+      - my: site
+        redcap: site_name
+        label: Site
+      - my: dob
+        redcap: a2_dob
+        label: Date of Birth
+      - my: dateScreening
+        redcap: date_screening
+        label: Date of Screening
+email:
+  user: sen.khvorov@unimelb.edu.au
+  password:
+  host: smtp.office365.com
+  port: 587

@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import YAML from 'yaml'
-import { readLines, readDelimited } from './readfile'
+import { readLines, readDelimited, readFile } from './readfile'
 
 const configDir = path.join(process.cwd(), 'config')
 
@@ -24,4 +24,12 @@ export default {
   postgres: YAML.parse(
     fs.readFileSync(path.join(configDir, 'postgrescred.yaml'), 'utf-8')
   )
+}
+
+export async function getConfig () {
+  const configContents = await readFile(
+    path.join(process.cwd(), 'config', 'config.yaml'),
+    'utf-8'
+  )
+  return YAML.parse(configContents)
 }
