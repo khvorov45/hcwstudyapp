@@ -21,7 +21,7 @@ export default {
   redcapCredentials: YAML.parse(
     fs.readFileSync(path.join(configDir, 'redcapcred.yaml'), 'utf-8')
   ),
-  postgresCredentials: YAML.parse(
+  postgres: YAML.parse(
     fs.readFileSync(path.join(configDir, 'postgrescred.yaml'), 'utf-8')
   )
 }

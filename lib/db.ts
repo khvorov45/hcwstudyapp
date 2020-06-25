@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { Pool, PoolConfig } from 'pg'
+import { Pool, PoolConfig, QueryResult } from 'pg'
 import sqlite from 'sqlite3'
 import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
@@ -376,15 +376,29 @@ export class UserDB extends Database {
 
 export default new UserDB().init()
 
+interface MyPostgresConfig extends PoolConfig {
+  tableResetSqlPath: string
+}
+
 export class DatabasePostgres {
   pool: Pool
+  tableResetSqlPath: string
 
-  constructor (con?: PoolConfig) {
-    this.pool = new Pool(con || config.postgresCredentials)
+  constructor (con?: MyPostgresConfig) {
+    this.pool = new Pool(con || config.postgres)
+    this.tableResetSqlPath = path.join(
+      process.cwd(),
+      con ? con.tableResetSqlPath : config.postgres.tableResetSqlPath
+    )
   }
 
   async end (): Promise<void> {
     return await this.pool.end()
+  }
+
+  async reset (): Promise<QueryResult<any>> {
+    const sql = await readFile(this.tableResetSqlPath, 'utf8')
+    return await this.pool.query(sql)
   }
 
   async placeholder (): Promise<number> {

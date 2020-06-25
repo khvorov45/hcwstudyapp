@@ -133,5 +133,6 @@ test('Update', async () => {
 test('postgres', async () => {
   const db = new DatabasePostgres()
   expect(await db.placeholder()).toBe(1)
+  console.log(await db.reset())
   await db.end()
 })
