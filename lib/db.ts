@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from 'fs'
+import { Pool, PoolConfig } from 'pg'
 import sqlite from 'sqlite3'
 import config from './config'
 import { exportParticipants, exportUsers } from './redcap'
@@ -374,3 +375,20 @@ export class UserDB extends Database {
 }
 
 export default new UserDB().init()
+
+export class DatabasePostgres {
+  pool: Pool
+
+  constructor (con?: PoolConfig) {
+    this.pool = new Pool(con || config.postgresCredentials)
+  }
+
+  async end (): Promise<void> {
+    return await this.pool.end()
+  }
+
+  async placeholder (): Promise<number> {
+    console.log(await this.pool.query('SELECT NOW();'))
+    return 1
+  }
+}

@@ -1,4 +1,4 @@
-import db, { Database, UserDB } from '../lib/db'
+import db, { Database, UserDB, DatabasePostgres } from '../lib/db'
 import config from '../lib/config'
 import fs from 'fs'
 import path from 'path'
@@ -129,3 +129,9 @@ test('Update', async () => {
 
   fs.unlinkSync(userTestDbPath)
 }, 20000)
+
+test('postgres', async () => {
+  const db = new DatabasePostgres()
+  expect(await db.placeholder()).toBe(1)
+  await db.end()
+})
