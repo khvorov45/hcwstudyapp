@@ -147,6 +147,8 @@ test('postgres', async () => {
   expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
   await db.update(false)
   expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
+
+  // Update time is correctly stored
   expect((await db.getLastFill()).getTime())
     .toBeGreaterThan(firstFillTimestamp.getTime())
   await db.end()
