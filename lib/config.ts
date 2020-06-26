@@ -1,7 +1,7 @@
-import fs from 'fs'
+import fs, { readFileSync } from 'fs'
 import path from 'path'
 import YAML from 'yaml'
-import { readLines, readDelimited, readFile } from './readfile'
+import { readLines, readDelimited } from './readfile'
 
 const configDir = path.join(process.cwd(), 'config')
 
@@ -26,10 +26,7 @@ export default {
   )
 }
 
-export async function getConfig () {
-  const configContents = await readFile(
-    path.join(process.cwd(), 'config', 'config.yaml'),
-    'utf-8'
-  )
-  return YAML.parse(configContents)
-}
+export const newconfig = YAML.parse(readFileSync(
+  path.join(process.cwd(), 'config', 'config.yaml'),
+  'utf-8'
+))

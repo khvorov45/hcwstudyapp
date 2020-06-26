@@ -1,5 +1,5 @@
 import db, { Database, UserDB, DatabasePostgres } from '../lib/db'
-import config, { getConfig } from '../lib/config'
+import config from '../lib/config'
 import fs from 'fs'
 import path from 'path'
 
@@ -133,7 +133,5 @@ test('Update', async () => {
 test('postgres', async () => {
   const db = new DatabasePostgres()
   expect(await db.placeholder()).toBe(1)
-  const newconfig = await getConfig()
-  console.log(newconfig)
   await db.end()
 })

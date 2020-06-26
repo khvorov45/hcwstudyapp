@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { Pool, PoolConfig, QueryResult } from 'pg'
 import sqlite from 'sqlite3'
-import config from './config'
+import config, { newconfig } from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
 
@@ -385,10 +385,10 @@ export class DatabasePostgres {
   tableResetSqlPath: string
 
   constructor (con?: MyPostgresConfig) {
-    this.pool = new Pool(con || config.postgres)
+    const thisConfig = con || newconfig.db.postgres
+    this.pool = new Pool(thisConfig)
     this.tableResetSqlPath = path.join(
-      process.cwd(),
-      con ? con.tableResetSqlPath : config.postgres.tableResetSqlPath
+      process.cwd(), thisConfig.tableResetSqlPath
     )
   }
 
