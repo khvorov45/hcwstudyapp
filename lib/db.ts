@@ -383,8 +383,10 @@ interface MyPostgresConfig extends PoolConfig {
 export class DatabasePostgres {
   pool: Pool
   tableResetSqlPath: string
+  backup: any
 
   constructor (con?: MyPostgresConfig) {
+    this.backup = {}
     const thisConfig = con || newconfig.db.postgres
     this.pool = new Pool(thisConfig)
     this.tableResetSqlPath = path.join(
@@ -396,13 +398,108 @@ export class DatabasePostgres {
     return await this.pool.end()
   }
 
-  async reset (): Promise<QueryResult<any>> {
-    const sql = await readFile(this.tableResetSqlPath, 'utf8')
-    return await this.pool.query(sql)
+  async init (): Promise<this> {
+    if (await this.isEmpty()) {
+      await this.update(true)
+    }
+    return this
   }
 
+  async getColumn<T> (sql: string): Promise<T[]> {
+    const query = {
+      text: sql,
+      rowMode: 'array'
+    }
+    const queryResult = await this.pool.query(query)
+    return queryResult.rows.flat()
+  }
+
+  async execute<T> (sql: string, values?: T[]): Promise<void> {
+    await this.pool.query(sql, values)
+  }
+
+  async isEmpty (): Promise<boolean> {
+    const tables = await this.getColumn<string>(
+      'SELECT tablename FROM pg_catalog.pg_tables ' +
+      'WHERE schemaname != \'pg_catalog\'' +
+      'AND schemaname != \'information_schema\';'
+    )
+    return tables.length === 0
+  }
+
+  async update (hard: boolean): Promise<void> {
+    hard ? await this.reset() : await this.wipe()
+    await this.fill()
+    await this.setLastUpdate(new Date())
+  }
+
+  async reset (): Promise<void> {
+    this.backup = {}
+    await this.removeTables()
+    await this.addTables()
+  }
+
+  async removeTables (): Promise<void> {
+    await this.execute(`
+      DROP TABLE IF EXISTS "Meta";
+      DROP TABLE IF EXISTS "Participant";
+      DROP TABLE IF EXISTS "User";
+      DROP TABLE IF EXISTS "AccessGroup";
+    `)
+  }
+
+  async addTables (): Promise<void> {
+    await this.execute(`
+      CREATE TABLE "AccessGroup" ("name" TEXT NOT NULL PRIMARY KEY UNIQUE);
+      CREATE TABLE "User" (
+          "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
+          "accessGroup" TEXT NOT NULL,
+          "tokenhash" TEXT,
+          FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+      CREATE TABLE "Participant" (
+          "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
+          "pid" TEXT NOT NULL UNIQUE,
+          "accessGroup" TEXT NOT NULL,
+          "site" TEXT NOT NULL,
+          "dob" TEXT,
+          "dateScreening" TEXT,
+          FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+      CREATE TABLE "Meta" (
+        "key" TEXT NOT NULL PRIMARY KEY UNIQUE,
+        "value" TEXT
+      );
+      INSERT INTO "Meta" (key) VALUES ('lastUpdate');
+    `)
+  }
+
+  async wipe (): Promise<void> {
+
+  }
+
+  async fill (): Promise<void> {
+
+  }
+
+  async setLastUpdate (date: Date): Promise<void> {
+    await this.execute(
+      'UPDATE "Meta" SET value = $1 WHERE key = \'lastUpdate\'',
+      [date.toString()]
+    )
+  }
+  /*
+  async getLastUpdate (): Promise<Date> {
+    const dateString = await this.getRow<{value: string}>(
+      'SELECT value FROM Meta WHERE key = \'lastUpdate\''
+    )
+    return new Date(dateString.value)
+  } */
+
   async placeholder (): Promise<number> {
-    console.log(await this.pool.query('SELECT NOW();'))
+    console.log('placeholder call')
     return 1
   }
 }

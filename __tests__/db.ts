@@ -1,5 +1,5 @@
 import db, { Database, UserDB, DatabasePostgres } from '../lib/db'
-import config from '../lib/config'
+import config, { newconfig } from '../lib/config'
 import fs from 'fs'
 import path from 'path'
 
@@ -131,7 +131,12 @@ test('Update', async () => {
 }, 20000)
 
 test('postgres', async () => {
-  const db = new DatabasePostgres()
-  expect(await db.placeholder()).toBe(1)
+  const conf = newconfig.db.postgres
+  conf.database = 'hcwstudy-test'
+  const db = new DatabasePostgres(conf)
+  await db.removeTables()
+  expect(await db.isEmpty()).toBe(true)
+  await db.init()
+  expect(await db.isEmpty()).toBe(false)
   await db.end()
 })
