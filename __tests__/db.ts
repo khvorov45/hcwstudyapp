@@ -131,12 +131,36 @@ test('Update', async () => {
 }, 20000)
 
 test('postgres', async () => {
+  // Basic initialisation
   const conf = newconfig.db.postgres
+  conf.users = newconfig.db.users
   conf.database = 'hcwstudy-test'
-  const db = new DatabasePostgres(conf)
+  let db = new DatabasePostgres(conf)
   await db.removeTables()
   expect(await db.isEmpty()).toBe(true)
   await db.init()
   expect(await db.isEmpty()).toBe(false)
+
+  // Tokenhash is persistent across soft updates
+  await db.storeTokenHash('khvorov45@gmail.com', '123')
+  expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
+  await db.update(false)
+  expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
   await db.end()
-})
+
+  // Local users override redcap
+  conf.users.push(
+    { email: 'ARSENIY.KHVOROV@MH.ORG.AU', accessGroup: 'MELBOURNE' }
+  )
+  db = new DatabasePostgres(conf)
+  await db.update(false)
+  expect(await db.getAccessGroup('arseniy.khvorov@mh.org.au')).toBe('melbourne')
+  await db.end()
+
+  // Default initialisation
+  db = new DatabasePostgres()
+  await db.update(false)
+  expect(await db.getAccessGroup('khvorov45@gmail.com')).toBe('admin')
+
+  await db.end()
+}, 10000)

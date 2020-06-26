@@ -25,6 +25,7 @@
     "next": "^9.4.4",
     "nodemailer": "^6.4.10",
     "pg": "^8.2.1",
+    "pg-promise": "^10.5.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-loader-spinner": "^3.1.14",

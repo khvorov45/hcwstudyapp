@@ -48,20 +48,35 @@ export async function exportUsers () {
   const neededUsers = []
   for (const user of allUsers) {
     neededUsers.push({
-      email: user.email,
+      email: user.email.toLowerCase(),
       accessGroup: user.data_access_group === '' ? 'unrestricted'
-        : user.data_access_group
+        : user.data_access_group.toLowerCase()
     })
   }
   return neededUsers
 }
 
-export async function exportParticipants () {
-  return await exportRecords(
+export async function exportParticipants (rename?: boolean) {
+  const records = await exportRecords(
     [
       'record_id', 'redcap_data_access_group', 'pid', 'site_name', 'a2_dob',
       'date_screening'
     ],
     ['baseline_arm_1'], 'flat'
   )
+  // Filter out all non-participants
+  const recordsFiltered = records.filter(r => r.pid !== '')
+  if (!rename) {
+    return recordsFiltered
+  }
+  return recordsFiltered.map(r => {
+    return {
+      redcapRecordId: r.record_id,
+      pid: r.pid,
+      accessGroup: r.redcap_data_access_group.toLowerCase(),
+      site: r.site_name,
+      dob: r.a2_dob,
+      dateScreening: r.date_screening
+    }
+  })
 }

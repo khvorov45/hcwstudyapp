@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
-import { Pool, PoolConfig, QueryResult } from 'pg'
+import { Pool, PoolConfig } from 'pg'
+import pgp from 'pg-promise'
 import sqlite from 'sqlite3'
 import config, { newconfig } from './config'
 import { exportParticipants, exportUsers } from './redcap'
@@ -377,21 +378,24 @@ export class UserDB extends Database {
 export default new UserDB().init()
 
 interface MyPostgresConfig extends PoolConfig {
-  tableResetSqlPath: string
+  users?: {email: string, accessGroup: string}[]
 }
 
 export class DatabasePostgres {
   pool: Pool
-  tableResetSqlPath: string
+  users: {email: string, accessGroup: string}[]
   backup: any
 
   constructor (con?: MyPostgresConfig) {
     this.backup = {}
     const thisConfig = con || newconfig.db.postgres
     this.pool = new Pool(thisConfig)
-    this.tableResetSqlPath = path.join(
-      process.cwd(), thisConfig.tableResetSqlPath
-    )
+    this.users = con ? con.users || newconfig.db.users : newconfig.db.users
+    this.users = this.users.map(u => {
+      u.email = u.email.toLowerCase()
+      u.accessGroup = u.accessGroup.toLowerCase()
+      return u
+    })
   }
 
   async end (): Promise<void> {
@@ -405,13 +409,29 @@ export class DatabasePostgres {
     return this
   }
 
-  async getColumn<T> (sql: string): Promise<T[]> {
+  async getColumn<T> (sql: string, values?: Array<any>): Promise<T[]> {
     const query = {
       text: sql,
+      values: values,
       rowMode: 'array'
     }
     const queryResult = await this.pool.query(query)
     return queryResult.rows.flat()
+  }
+
+  async getValue<T> (sql: string, values?: Array<any>): Promise<T> {
+    const col = await this.getColumn<T>(sql, values)
+    return col[0]
+  }
+
+  async getRows<T> (sql: string, values?: Array<any>): Promise<T[]> {
+    const queryResult = await this.pool.query(sql, values)
+    return queryResult.rows
+  }
+
+  async getRow<T> (sql: string, values?: Array<any>): Promise<T> {
+    const rows = await this.getRows<T>(sql, values)
+    return rows[0]
   }
 
   async execute<T> (sql: string, values?: T[]): Promise<void> {
@@ -430,7 +450,6 @@ export class DatabasePostgres {
   async update (hard: boolean): Promise<void> {
     hard ? await this.reset() : await this.wipe()
     await this.fill()
-    await this.setLastUpdate(new Date())
   }
 
   async reset (): Promise<void> {
@@ -450,6 +469,10 @@ export class DatabasePostgres {
 
   async addTables (): Promise<void> {
     await this.execute(`
+      CREATE TABLE "Meta" (
+        "key" TEXT NOT NULL PRIMARY KEY UNIQUE,
+        "value" TEXT
+      );
       CREATE TABLE "AccessGroup" ("name" TEXT NOT NULL PRIMARY KEY UNIQUE);
       CREATE TABLE "User" (
           "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
@@ -468,28 +491,90 @@ export class DatabasePostgres {
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
-      CREATE TABLE "Meta" (
-        "key" TEXT NOT NULL PRIMARY KEY UNIQUE,
-        "value" TEXT
-      );
-      INSERT INTO "Meta" (key) VALUES ('lastUpdate');
     `)
   }
 
   async wipe (): Promise<void> {
-
+    this.backup.user = await this.getRows(
+      'SELECT "email", "accessGroup", "tokenhash" FROM "User" ' +
+      'WHERE tokenhash IS NOT NULL'
+    )
+    await this.execute(`
+      DELETE FROM "Meta";
+      DELETE FROM "Participant";
+      DELETE FROM "User";
+      DELETE FROM "AccessGroup";
+    `)
   }
 
   async fill (): Promise<void> {
-
-  }
-
-  async setLastUpdate (date: Date): Promise<void> {
+    await this.fillAccessGroup()
+    await this.fillUser()
+    await this.fillParticipant()
     await this.execute(
-      'UPDATE "Meta" SET value = $1 WHERE key = \'lastUpdate\'',
-      [date.toString()]
+      `INSERT INTO "Meta" ("key", "value")
+      VALUES ('lastFill', '${new Date().toString()}');`
     )
   }
+
+  async fillAccessGroup (): Promise<void> {
+    await this.execute(pgp().helpers.insert(
+      newconfig.db.accessGroups.map(ag => {
+        return { name: ag.toLowerCase() }
+      }),
+      ['name'], 'AccessGroup'
+    ))
+  }
+
+  async fillUser (): Promise<void> {
+    const redcapUsers = await exportUsers()
+    const backupUsers = this.backup.user
+    const configUserEmails = this.users.map(usr => usr.email)
+    let allUsers = redcapUsers
+      .filter(usr => !configUserEmails.includes(usr.email))
+      .concat(this.users)
+      .map(usr => { usr.tokenhash = null; return usr })
+    if (backupUsers) {
+      const backupUserEmails = backupUsers.map(usr => usr.email)
+      allUsers = allUsers
+        .filter(usr => !backupUserEmails.includes(usr.email))
+        .concat(backupUsers)
+    }
+    await this.execute(pgp().helpers.insert(
+      allUsers, ['email', 'accessGroup', 'tokenhash'], 'User')
+    )
+  }
+
+  async fillParticipant (): Promise<void> {
+    const participants = await exportParticipants(true)
+    await this.execute(pgp().helpers.insert(
+      participants,
+      ['redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening'],
+      'Participant'
+    ))
+  }
+
+  async storeTokenHash (email: string, tokenhash: string): Promise<void> {
+    await this.execute(
+      'UPDATE "User" SET "tokenhash" = $1 WHERE "email" = $2',
+      [tokenhash, email]
+    )
+  }
+
+  async getTokenHash (email: string): Promise<string> {
+    return await this.getValue(
+      'SELECT "tokenhash" FROM "User" WHERE "email" = $1',
+      [email]
+    )
+  }
+
+  async getAccessGroup (email: string): Promise<string> {
+    return await this.getValue(
+      'SELECT "accessGroup" FROM "User" WHERE "email" = $1',
+      [email]
+    )
+  }
+
   /*
   async getLastUpdate (): Promise<Date> {
     const dateString = await this.getRow<{value: string}>(
