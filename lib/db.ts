@@ -575,16 +575,10 @@ export class DatabasePostgres {
     )
   }
 
-  /*
-  async getLastUpdate (): Promise<Date> {
-    const dateString = await this.getRow<{value: string}>(
-      'SELECT value FROM Meta WHERE key = \'lastUpdate\''
+  async getLastFill (): Promise<Date> {
+    const dateString = await this.getValue<string>(
+      'SELECT "value" FROM "Meta" WHERE key = \'lastFill\''
     )
-    return new Date(dateString.value)
-  } */
-
-  async placeholder (): Promise<number> {
-    console.log('placeholder call')
-    return 1
+    return new Date(dateString)
   }
 }

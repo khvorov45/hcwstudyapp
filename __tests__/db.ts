@@ -140,12 +140,15 @@ test('postgres', async () => {
   expect(await db.isEmpty()).toBe(true)
   await db.init()
   expect(await db.isEmpty()).toBe(false)
+  const firstFillTimestamp = await db.getLastFill()
 
   // Tokenhash is persistent across soft updates
   await db.storeTokenHash('khvorov45@gmail.com', '123')
   expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
   await db.update(false)
   expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
+  expect((await db.getLastFill()).getTime())
+    .toBeGreaterThan(firstFillTimestamp.getTime())
   await db.end()
 
   // Local users override redcap
