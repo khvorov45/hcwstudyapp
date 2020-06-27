@@ -147,10 +147,6 @@ test('postgres', async () => {
   expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
   await db.update(false)
   expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
-
-  // Update time is correctly stored
-  expect((await db.getLastFill()).getTime())
-    .toBeGreaterThan(firstFillTimestamp.getTime())
   await db.end()
 
   // Local users override redcap
@@ -166,6 +162,10 @@ test('postgres', async () => {
   db = new DatabasePostgres()
   await db.update(false)
   expect(await db.getAccessGroup('khvorov45@gmail.com')).toBe('admin')
+
+  // Update time is correctly stored
+  expect((await db.getLastFill()).getTime())
+    .toBeGreaterThan(firstFillTimestamp.getTime())
 
   await db.end()
 }, 10000)

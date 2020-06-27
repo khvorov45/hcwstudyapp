@@ -8,7 +8,7 @@ db:
     - sydney
     - unrestricted
     - admin
-  extraUsers:
+  users:
     - email: khvorov45@gmail.com
       accessGroup: admin
   postgres:
