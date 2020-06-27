@@ -7,6 +7,10 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     res.status(405).end()
     return
   }
+  if (!req.query.email || !req.query.token) {
+    res.status(401).end()
+    return
+  }
   const email = req.query.email.toString().toLowerCase()
   const token = req.query.token.toString()
   if (!await db.authoriseUser(email, token)) {
