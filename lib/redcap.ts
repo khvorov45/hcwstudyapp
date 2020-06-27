@@ -1,5 +1,5 @@
 import fetch from 'cross-fetch'
-import config from './config'
+import { newconfig } from './config'
 
 /** Makes a REDCap API request
  *
@@ -10,10 +10,10 @@ export async function redcapApiReq (body) {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
   myHeaders.append('Accept', 'application/json')
-  body.token = config.redcapCredentials.token
+  body.token = newconfig.db.redcap.token
   body.format = 'json'
   const redcapres = await fetch(
-    config.redcapCredentials.url,
+    newconfig.db.redcap.url,
     {
       method: 'POST',
       headers: myHeaders,

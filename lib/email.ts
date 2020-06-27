@@ -1,13 +1,13 @@
 import nodemailer from 'nodemailer'
-import config from './config'
+import { newconfig } from './config'
 
 const transporter = nodemailer.createTransport({
-  host: config.emailCredentials.host,
-  port: config.emailCredentials.port,
+  host: newconfig.email.host,
+  port: newconfig.email.port,
   secure: false, // upgrade later with STARTTLS
   auth: {
-    user: config.emailCredentials.user,
-    pass: config.emailCredentials.password
+    user: newconfig.email.user,
+    pass: newconfig.email.password
   }
 })
 
@@ -15,7 +15,7 @@ export async function sendEmail (
   to: string, subject: string, text: string, html: string
 ): Promise<any> {
   return await transporter.sendMail({
-    from: config.emailCredentials.user,
+    from: newconfig.email.user,
     to: to,
     subject: subject,
     text: text,

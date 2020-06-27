@@ -1,8 +1,0 @@
-adelaide
-brisbane
-melbourne
-newcastle
-perth
-sydney
-unrestricted
-admin

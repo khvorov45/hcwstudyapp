@@ -1,6 +1,0 @@
-Participant,redcapRecordId,record_id,Record ID
-Participant,pid,pid,PID
-Participant,accessGroup,redcap_data_access_group,Access Group
-Participant,site,site_name,Site
-Participant,dob,a2_dob,Date of Birth
-Participant,dateScreening,date_screening,Date of Screening
