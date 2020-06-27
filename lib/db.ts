@@ -527,6 +527,39 @@ export class DatabasePostgres {
     ))
   }
 
+  async getLastFill (): Promise<Date> {
+    const dateString = await this.getValue<string>(
+      'SELECT "value" FROM "Meta" WHERE key = \'lastFill\''
+    )
+    return new Date(dateString)
+  }
+
+  // Participant table interactions -------------------------------------------
+
+  async fillParticipant (): Promise<void> {
+    const participants = await exportParticipants(true)
+    await this.execute(pgp().helpers.insert(
+      participants,
+      ['redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening'],
+      'Participant'
+    ))
+  }
+
+  async getParticipants (accessGroup?: string): Promise<any[]> {
+    let query =
+    `SELECT "redcapRecordId", "pid", "accessGroup", "site",
+    "dob", "dateScreening" FROM "Participant"`
+    let params = []
+    if (accessGroup && !['unrestricted', 'admin'].includes(accessGroup)) {
+      query += ' WHERE "accessGroup" = $1'
+      params = [accessGroup.toLowerCase()]
+    }
+    query += ';'
+    return await this.getRows<any>(query, params)
+  }
+
+  // User table interactions --------------------------------------------------
+
   async fillUser (): Promise<void> {
     const redcapUsers = await exportUsers()
     const backupUsers = this.backup.user
@@ -544,15 +577,6 @@ export class DatabasePostgres {
     await this.execute(pgp().helpers.insert(
       allUsers, ['email', 'accessGroup', 'tokenhash'], 'User')
     )
-  }
-
-  async fillParticipant (): Promise<void> {
-    const participants = await exportParticipants(true)
-    await this.execute(pgp().helpers.insert(
-      participants,
-      ['redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening'],
-      'Participant'
-    ))
   }
 
   async authoriseUser (email: string, token: string): Promise<boolean> {
@@ -581,12 +605,5 @@ export class DatabasePostgres {
       'SELECT "accessGroup" FROM "User" WHERE "email" = $1',
       [email]
     )
-  }
-
-  async getLastFill (): Promise<Date> {
-    const dateString = await this.getValue<string>(
-      'SELECT "value" FROM "Meta" WHERE key = \'lastFill\''
-    )
-    return new Date(dateString)
   }
 }

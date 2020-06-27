@@ -177,6 +177,16 @@ test('postgres', async () => {
   expect(await db.getUserAccessGroup('khvorov45@gmail.com'))
     .toBe('admin')
 
+  // Participant export
+  let part = await db.getParticipants()
+  let partAccessGroups = part.map(p => p.accessGroup)
+  expect(partAccessGroups.includes('melbourne')).toBe(true)
+  expect(partAccessGroups.includes('adelaide')).toBe(true)
+  part = await db.getParticipants('melbourne')
+  partAccessGroups = part.map(p => p.accessGroup)
+  expect(partAccessGroups.includes('melbourne')).toBe(true)
+  expect(partAccessGroups.includes('adelaide')).toBe(false)
+
   // Update time is correctly stored
   expect((await db.getLastFill()).getTime())
     .toBeGreaterThan(firstFillTimestamp.getTime())
