@@ -9,7 +9,7 @@ interface MyPostgresConfig extends PoolConfig {
   accessGroups?: string[]
 }
 
-export class DatabasePostgres {
+export class Postgres {
   pool: Pool
   users: {email: string, accessGroup: string}[]
   accessGroups: {name: string}[]

@@ -1,4 +1,4 @@
-import { DatabasePostgres } from '../lib/db'
+import { Postgres } from '../lib/db'
 import { newconfig } from '../lib/config'
 import bcrypt from 'bcrypt'
 
@@ -7,7 +7,7 @@ test('postgres', async () => {
   const conf = newconfig.db.postgres
   conf.users = newconfig.db.users
   conf.database = 'hcwstudy-test'
-  let db = new DatabasePostgres(conf)
+  let db = new Postgres(conf)
 
   // Simulate connection to an empty database
   await db.removeTables()
@@ -36,7 +36,7 @@ test('postgres', async () => {
   conf.users.push(
     { email: 'ARSENIY.KHVOROV@MH.ORG.AU', accessGroup: 'MELBOURNE' }
   )
-  db = new DatabasePostgres(conf)
+  db = new Postgres(conf)
   await db.update(false)
   expect(await db.getUserAccessGroup('arseniy.khvorov@mh.org.au'))
     .toBe('melbourne')
@@ -56,7 +56,7 @@ test('postgres', async () => {
   await db.end()
 
   // Default initialisation (check that it doesn't fail but don't modify)
-  db = await new DatabasePostgres().init()
+  db = await new Postgres().init()
 
   // Participant export
   let part = await db.getParticipants()
