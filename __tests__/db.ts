@@ -1,5 +1,6 @@
 import db, { Database, UserDB, DatabasePostgres } from '../lib/db'
 import config, { newconfig } from '../lib/config'
+import bcrypt from 'bcrypt'
 import fs from 'fs'
 import path from 'path'
 
@@ -143,10 +144,11 @@ test('postgres', async () => {
   const firstFillTimestamp = await db.getLastFill()
 
   // Tokenhash is persistent across soft updates
-  await db.storeTokenHash('khvorov45@gmail.com', '123')
-  expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
+  await db.storeToken('khvorov45@gmail.com', '123')
+  const storedHash = await db.getTokenHash('khvorov45@gmail.com')
+  expect(await bcrypt.compare('123', storedHash)).toBe(true)
   await db.update(false)
-  expect(await db.getTokenHash('khvorov45@gmail.com')).toBe('123')
+  expect(await bcrypt.compare('123', storedHash)).toBe(true)
   await db.end()
 
   // Local users override redcap

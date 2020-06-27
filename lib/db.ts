@@ -3,6 +3,7 @@ import fs from 'fs'
 import { Pool, PoolConfig } from 'pg'
 import pgp from 'pg-promise'
 import sqlite from 'sqlite3'
+import bcrypt from 'bcrypt'
 import config, { newconfig } from './config'
 import { exportParticipants, exportUsers } from './redcap'
 import { readFile } from './readfile'
@@ -554,10 +555,10 @@ export class DatabasePostgres {
     ))
   }
 
-  async storeTokenHash (email: string, tokenhash: string): Promise<void> {
+  async storeToken (email: string, token: string): Promise<void> {
     await this.execute(
       'UPDATE "User" SET "tokenhash" = $1 WHERE "email" = $2',
-      [tokenhash, email]
+      [await bcrypt.hash(token, 10), email]
     )
   }
 
