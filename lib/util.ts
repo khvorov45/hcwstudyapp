@@ -31,6 +31,10 @@ export async function accessAPI (
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
   myHeaders.append('Accept', 'application/json')
+  if (method === 'GET') {
+    location += '?' + new URLSearchParams(body).toString()
+    body = null
+  }
   const res = await fetch(
     `/api/${location}`,
     {

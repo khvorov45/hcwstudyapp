@@ -18,6 +18,5 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     return
   }
   const accessGroup = await db.getUserAccessGroup(email)
-  console.log(accessGroup)
   res.status(200).send(await db.getParticipants(accessGroup))
 }
