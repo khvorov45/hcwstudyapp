@@ -557,26 +557,26 @@ export class DatabasePostgres {
 
   async authoriseUser (email: string, token: string): Promise<boolean> {
     if (!email || !token) return null
-    const tokenhash = await this.getTokenHash(email)
+    const tokenhash = await this.getUserTokenHash(email)
     if (!tokenhash) return false
     return await bcrypt.compare(token, tokenhash)
   }
 
-  async storeToken (email: string, token: string): Promise<void> {
+  async storeUserToken (email: string, token: string): Promise<void> {
     await this.execute(
       'UPDATE "User" SET "tokenhash" = $1 WHERE "email" = $2',
       [await bcrypt.hash(token, 10), email]
     )
   }
 
-  async getTokenHash (email: string): Promise<string> {
+  async getUserTokenHash (email: string): Promise<string> {
     return await this.getValue(
       'SELECT "tokenhash" FROM "User" WHERE "email" = $1',
       [email]
     )
   }
 
-  async getAccessGroup (email: string): Promise<string> {
+  async getUserAccessGroup (email: string): Promise<string> {
     return await this.getValue(
       'SELECT "accessGroup" FROM "User" WHERE "email" = $1',
       [email]

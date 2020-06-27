@@ -146,19 +146,19 @@ test('postgres', async () => {
   const firstFillTimestamp = await db.getLastFill()
 
   // Tokenhash is persistent across soft updates
-  await db.storeToken('khvorov45@gmail.com', '123')
-  let storedHash = await db.getTokenHash('khvorov45@gmail.com')
+  await db.storeUserToken('khvorov45@gmail.com', '123')
+  let storedHash = await db.getUserTokenHash('khvorov45@gmail.com')
   expect(await bcrypt.compare('123', storedHash)).toBe(true)
   expect(await db.authoriseUser('khvorov45@gmail.com', '123')).toBe(true)
   expect(await db.authoriseUser('khvorov45@gmail.com', '1234')).toBe(false)
   expect(await db.authoriseUser('arseniy.khvorov@mh.org.au', '123')).toBe(false)
   expect(await db.authoriseUser('khvorov45@gmail.com', null)).toBe(null)
   await db.update(false)
-  storedHash = await db.getTokenHash('khvorov45@gmail.com')
+  storedHash = await db.getUserTokenHash('khvorov45@gmail.com')
   expect(await bcrypt.compare('123', storedHash)).toBe(true)
   // But not across hard updates
   await db.update(true)
-  expect(await db.getTokenHash('khvorov45@gmail.com')).toBe(null)
+  expect(await db.getUserTokenHash('khvorov45@gmail.com')).toBe(null)
   await db.end()
 
   // Local users override redcap
@@ -167,13 +167,15 @@ test('postgres', async () => {
   )
   db = new DatabasePostgres(conf)
   await db.update(false)
-  expect(await db.getAccessGroup('arseniy.khvorov@mh.org.au')).toBe('melbourne')
+  expect(await db.getUserAccessGroup('arseniy.khvorov@mh.org.au'))
+    .toBe('melbourne')
   await db.end()
 
   // Default initialisation
   db = new DatabasePostgres()
   await db.update(false)
-  expect(await db.getAccessGroup('khvorov45@gmail.com')).toBe('admin')
+  expect(await db.getUserAccessGroup('khvorov45@gmail.com'))
+    .toBe('admin')
 
   // Update time is correctly stored
   expect((await db.getLastFill()).getTime())
