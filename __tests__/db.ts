@@ -173,13 +173,19 @@ test('postgres', async () => {
     .toBe(true)
   expect(await db.userExists('nonexistent'))
     .toBe(false)
-  await db.end()
 
-  // Default initialisation
-  db = new DatabasePostgres()
   await db.update(false)
   expect(await db.getUserAccessGroup('khvorov45@gmail.com'))
     .toBe('admin')
+
+  // Update time is correctly stored
+  expect((await db.getLastFill()).getTime())
+    .toBeGreaterThan(firstFillTimestamp.getTime())
+
+  await db.end()
+
+  // Default initialisation (check that it doesn't fail but don't modify)
+  db = await new DatabasePostgres().init()
 
   // Participant export
   let part = await db.getParticipants()
@@ -190,10 +196,6 @@ test('postgres', async () => {
   partAccessGroups = part.map(p => p.accessGroup)
   expect(partAccessGroups.includes('melbourne')).toBe(true)
   expect(partAccessGroups.includes('adelaide')).toBe(false)
-
-  // Update time is correctly stored
-  expect((await db.getLastFill()).getTime())
-    .toBeGreaterThan(firstFillTimestamp.getTime())
 
   await db.end()
 }, 10000)
