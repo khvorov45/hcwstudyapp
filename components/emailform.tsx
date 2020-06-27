@@ -13,7 +13,7 @@ export default function EmailForm (props: {message: string}) {
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
     trackPromise(
-      fetch('/api/sendemail', {
+      fetch('/api/sendaccesslink', {
         method: 'POST',
         headers: myHeaders,
         body: JSON.stringify({ email: email })
