@@ -16,8 +16,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const email = req.body.email.toLowerCase()
     if (!await db.userExists(email)) {
-      res.setHeader('WWW-Authenticate', 'Basic realm=dbaccess')
-      res.status(401).end()
+      res.status(404).end()
       return
     }
     const token = cryptoRandomString({ length: 32, type: 'url-safe' })
