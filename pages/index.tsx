@@ -1,6 +1,6 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
-import { authorise } from '../lib/authorise'
+import db from '../lib/db'
 
 export default function Home (
   props: {authorised: boolean, email: string, token: string}
@@ -24,7 +24,9 @@ export default function Home (
 export async function getServerSideProps (context) {
   return {
     props: {
-      authorised: await authorise(context.query.email, context.query.token),
+      authorised: await db.authoriseUser(
+        context.query.email, context.query.token
+      ),
       email: context.query.email || null,
       token: context.query.token || null
     }

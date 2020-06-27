@@ -220,21 +220,21 @@ export class Postgres {
   async storeUserToken (email: string, token: string): Promise<void> {
     await this.execute(
       'UPDATE "User" SET "tokenhash" = $1 WHERE "email" = $2',
-      [await bcrypt.hash(token, 10), email]
+      [await bcrypt.hash(token, 10), email.toLowerCase()]
     )
   }
 
   async getUserTokenHash (email: string): Promise<string> {
     return await this.getValue(
       'SELECT "tokenhash" FROM "User" WHERE "email" = $1',
-      [email]
+      [email.toLowerCase()]
     )
   }
 
   async getUserAccessGroup (email: string): Promise<string> {
     return await this.getValue(
       'SELECT "accessGroup" FROM "User" WHERE "email" = $1',
-      [email]
+      [email.toLowerCase()]
     )
   }
 }
