@@ -579,6 +579,14 @@ export class DatabasePostgres {
     )
   }
 
+  async userExists (email: string): Promise<boolean> {
+    const user = await this.getRow(
+      'SELECT "email" FROM "User" WHERE "email" = $1',
+      [email.toLowerCase()]
+    )
+    return !!user
+  }
+
   async authoriseUser (email: string, token: string): Promise<boolean> {
     if (!email || !token) return null
     const tokenhash = await this.getUserTokenHash(email)

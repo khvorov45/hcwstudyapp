@@ -169,6 +169,10 @@ test('postgres', async () => {
   await db.update(false)
   expect(await db.getUserAccessGroup('arseniy.khvorov@mh.org.au'))
     .toBe('melbourne')
+  expect(await db.userExists('arseniy.khvorov@mh.org.au'))
+    .toBe(true)
+  expect(await db.userExists('nonexistent'))
+    .toBe(false)
   await db.end()
 
   // Default initialisation
