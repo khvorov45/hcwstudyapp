@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 export async function sendEmail (
   to: string, subject: string, text: string, html: string
-) {
+): Promise<any> {
   return await transporter.sendMail({
     from: config.emailCredentials.user,
     to: to,
@@ -21,4 +21,16 @@ export async function sendEmail (
     text: text,
     html: html
   })
+}
+
+export async function sendAccessLink (
+  origin: string, email: string, token: string
+): Promise<any> {
+  const link = `${origin}/?email=${email}&token=${token}`
+  return await sendEmail(
+    email,
+    'HCW Study Reports link',
+    `Your link:\n\n${link}`,
+    `<a href=${link}>Reports link</a>`
+  )
 }
