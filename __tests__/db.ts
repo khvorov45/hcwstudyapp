@@ -137,6 +137,8 @@ test('postgres', async () => {
   conf.users = newconfig.db.users
   conf.database = 'hcwstudy-test'
   let db = new DatabasePostgres(conf)
+
+  // Simulate connection to an empty database
   await db.removeTables()
   expect(await db.isEmpty()).toBe(true)
   await db.init()
@@ -145,10 +147,14 @@ test('postgres', async () => {
 
   // Tokenhash is persistent across soft updates
   await db.storeToken('khvorov45@gmail.com', '123')
-  const storedHash = await db.getTokenHash('khvorov45@gmail.com')
+  let storedHash = await db.getTokenHash('khvorov45@gmail.com')
   expect(await bcrypt.compare('123', storedHash)).toBe(true)
   await db.update(false)
+  storedHash = await db.getTokenHash('khvorov45@gmail.com')
   expect(await bcrypt.compare('123', storedHash)).toBe(true)
+  // But not across hard updates
+  await db.update(true)
+  expect(await db.getTokenHash('khvorov45@gmail.com')).toBe(null)
   await db.end()
 
   // Local users override redcap
