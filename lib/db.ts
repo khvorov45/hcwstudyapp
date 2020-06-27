@@ -6,23 +6,30 @@ import { exportParticipants, exportUsers } from './redcap'
 
 interface MyPostgresConfig extends PoolConfig {
   users?: {email: string, accessGroup: string}[]
+  accessGroups?: string[]
 }
 
 export class DatabasePostgres {
   pool: Pool
   users: {email: string, accessGroup: string}[]
+  accessGroups: {name: string}[]
   backup: any
 
   constructor (con?: MyPostgresConfig) {
     this.backup = {}
     const thisConfig = con || newconfig.db.postgres
     this.pool = new Pool(thisConfig)
-    this.users = con ? con.users || newconfig.db.users : newconfig.db.users
-    this.users = this.users.map(u => {
+    const users = con ? con.users || newconfig.db.users : newconfig.db.users
+    this.users = users.map(u => {
       u.email = u.email.toLowerCase()
       u.accessGroup = u.accessGroup.toLowerCase()
       return u
     })
+    const accessGroups = con ? con.accessGroups || newconfig.db.accessGroups
+      : newconfig.db.accessGroups
+    this.accessGroups = accessGroups.map(
+      ag => { return { name: ag.toLowerCase() } }
+    )
   }
 
   async end (): Promise<void> {
@@ -146,10 +153,7 @@ export class DatabasePostgres {
 
   async fillAccessGroup (): Promise<void> {
     await this.execute(pgp().helpers.insert(
-      newconfig.db.accessGroups.map(ag => {
-        return { name: ag.toLowerCase() }
-      }),
-      ['name'], 'AccessGroup'
+      this.accessGroups, ['name'], 'AccessGroup'
     ))
   }
 
@@ -241,5 +245,3 @@ export class DatabasePostgres {
     )
   }
 }
-
-export default new DatabasePostgres()
