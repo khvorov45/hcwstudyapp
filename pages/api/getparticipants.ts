@@ -1,13 +1,19 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import db from '../../lib/db'
-import { authorise } from '../../lib/authorise'
 
 export default async function (req: NextApiRequest, res: NextApiResponse) {
-  const authorised = await authorise(req.body.email, req.body.token)
-  if (!authorised) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET')
+    res.status(405).end()
+    return
+  }
+  const email = req.query.email.toString().toLowerCase()
+  const token = req.query.token.toString()
+  if (!await db.authoriseUser(email, token)) {
     res.status(401).end()
     return
   }
-  const accessGroup = (await (await db).getUser(req.body.email)).accessGroup
-  res.status(200).send(await (await db).getParticipants(accessGroup))
+  const accessGroup = await db.getUserAccessGroup(email)
+  console.log(accessGroup)
+  res.status(200).send(await db.getParticipants(accessGroup))
 }
