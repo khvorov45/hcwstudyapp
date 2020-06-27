@@ -555,6 +555,13 @@ export class DatabasePostgres {
     ))
   }
 
+  async authoriseUser (email: string, token: string): Promise<boolean> {
+    if (!email || !token) return null
+    const tokenhash = await this.getTokenHash(email)
+    if (!tokenhash) return false
+    return await bcrypt.compare(token, tokenhash)
+  }
+
   async storeToken (email: string, token: string): Promise<void> {
     await this.execute(
       'UPDATE "User" SET "tokenhash" = $1 WHERE "email" = $2',
