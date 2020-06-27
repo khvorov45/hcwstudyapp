@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { Postgres } from '../../lib/db'
+import db from '../../lib/db'
 import cryptoRandomString from 'crypto-random-string'
 import { sendAccessLink } from '../../lib/email'
 
@@ -15,7 +15,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
   try {
     const email = req.body.email.toLowerCase()
-    const db = await new Postgres().init()
     if (!await db.userExists(email)) {
       res.setHeader('WWW-Authenticate', 'Basic realm=dbaccess')
       res.status(401).end()
@@ -23,8 +22,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const token = cryptoRandomString({ length: 32, type: 'url-safe' })
     await db.storeUserToken(email, token)
-    await sendAccessLink(req.headers.origin, email, token)
-    await db.end()
+    await sendAccessLink(req.headers.host, email, token)
     res.status(200).end()
   } catch (error) {
     console.error(error)

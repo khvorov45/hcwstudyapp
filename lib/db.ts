@@ -238,3 +238,5 @@ export class Postgres {
     )
   }
 }
+
+export default new Postgres()

@@ -26,11 +26,11 @@ export async function sendEmail (
 export async function sendAccessLink (
   origin: string, email: string, token: string
 ): Promise<any> {
-  const link = `${origin}/?email=${email}&token=${token}`
+  const link = `http://${origin}/?email=${email}&token=${token}`
   return await sendEmail(
     email,
     'HCW Study Reports link',
     `Your link:\n\n${link}`,
-    `<a href=${link}>Reports link</a>`
+    `<a href=${link}>Reports link:</a><br/><br/>${link}`
   )
 }
