@@ -36,13 +36,6 @@ export class Postgres {
     return await this.pool.end()
   }
 
-  async init (): Promise<this> {
-    if (await this.isEmpty()) {
-      await this.update(true)
-    }
-    return this
-  }
-
   async getColumn<T> (sql: string, values?: Array<any>): Promise<T[]> {
     const query = {
       text: sql,

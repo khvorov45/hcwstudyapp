@@ -16,7 +16,7 @@ test('postgres', async () => {
   // Simulate connection to an empty database
   await db.removeTables()
   expect(await db.isEmpty()).toBe(true)
-  await db.init()
+  await db.update(true)
   expect(await db.isEmpty()).toBe(false)
   const firstFillTimestamp = await db.getLastFill()
 
@@ -64,10 +64,3 @@ test('postgres', async () => {
 
   await db.end()
 }, 15000)
-
-test('init-default-db', async () => {
-  // Default initialisation (check that it doesn't fail but don't modify)
-  const db = await new Postgres().init()
-  expect(await db.isEmpty()).toBe(false)
-  await db.end()
-})

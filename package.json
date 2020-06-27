@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "View data summaries from the HCW flu study",
   "scripts": {
-    "init-default-db": "jest -t init-default-db",
     "reset-default-db": "jest --test-regex reset-default-db",
     "dev": "next dev",
     "build": "next build",
