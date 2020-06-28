@@ -69,14 +69,17 @@ export async function exportParticipants (rename?: boolean) {
   if (!rename) {
     return recordsFiltered
   }
+  function processDate (date) {
+    return date === '' ? null : new Date(date)
+  }
   return recordsFiltered.map(r => {
     return {
       redcapRecordId: r.record_id,
       pid: r.pid,
       accessGroup: r.redcap_data_access_group.toLowerCase(),
       site: r.site_name,
-      dob: r.a2_dob === '' ? null : new Date(r.a2_dob),
-      dateScreening: r.date_screening
+      dob: processDate(r.a2_dob),
+      dateScreening: processDate(r.date_screening)
     }
   })
 }

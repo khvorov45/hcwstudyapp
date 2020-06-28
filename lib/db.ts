@@ -169,8 +169,8 @@ export class Postgres {
           "pid" TEXT NOT NULL UNIQUE,
           "accessGroup" TEXT NOT NULL,
           "site" TEXT NOT NULL,
-          "dob" DATE,
-          "dateScreening" TEXT,
+          "dob" TIMESTAMPTZ,
+          "dateScreening" TIMESTAMPTZ,
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
