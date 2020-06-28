@@ -48,18 +48,11 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
   return <div className={tableStyles.container}>
     <table {...getTableProps()} className={tableStyles.table}>
       <Thead headerGroups={headerGroups}/>
-      <tbody {...getTableBodyProps()}>
-        {rows.map(row => {
-          prepareRow(row)
-          return (
-            <tr {...row.getRowProps()}>
-              {row.cells.map(cell => {
-                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-              })}
-            </tr>
-          )
-        })}
-      </tbody>
+      <Tbody
+        rows={rows}
+        prepareRow={prepareRow}
+        getTableBodyProps={getTableBodyProps}
+      />
     </table>
   </div>
 }
@@ -123,4 +116,19 @@ function Thead ({ headerGroups }) {
       </tr>
     ))}
   </thead>
+}
+
+function Tbody ({ rows, prepareRow, getTableBodyProps }) {
+  return <tbody {...getTableBodyProps()}>
+    {rows.map(row => {
+      prepareRow(row)
+      return (
+        <tr {...row.getRowProps()}>
+          {row.cells.map(cell => {
+            return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+          })}
+        </tr>
+      )
+    })}
+  </tbody>
 }
