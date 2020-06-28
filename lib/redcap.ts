@@ -75,7 +75,7 @@ export async function exportParticipants (rename?: boolean) {
       pid: r.pid,
       accessGroup: r.redcap_data_access_group.toLowerCase(),
       site: r.site_name,
-      dob: r.a2_dob,
+      dob: r.a2_dob === '' ? null : new Date(r.a2_dob),
       dateScreening: r.date_screening
     }
   })
