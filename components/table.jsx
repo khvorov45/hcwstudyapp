@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTable, useSortBy } from 'react-table'
 import Loader from 'react-loader-spinner'
+import { isDateISOString } from '../lib/util'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
@@ -41,7 +42,13 @@ export default function Table ({ jsonrows, variables }) {
             label={varinfo.label}
             redcapName={varinfo.redcap}
           />,
-          accessor: fieldname
+          id: fieldname,
+          accessor: (row) => {
+            if (isDateISOString(row[fieldname])) {
+              return row[fieldname].split('T')[0]
+            }
+            return row[fieldname]
+          }
         })
       }
       return cols

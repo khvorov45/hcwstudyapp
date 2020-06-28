@@ -8,21 +8,13 @@ export function getConstQuery (email: string, token: string) {
   return constQuery
 }
 
-export async function fetchOwnApi (
-  email: string, token: string, which: string
-) {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
-  myHeaders.append('Accept', 'application/json')
-  const res = await fetch(
-    `/api/${which}`,
-    {
-      method: 'POST',
-      headers: myHeaders,
-      body: new URLSearchParams({ email: email, token: token })
-    }
+export function isDateISOString (datestring: string) {
+  const reISO = new RegExp(
+    /^(\d{4})-(\d{2})-(\d{2})/.source +
+    /T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/.source
   )
-  return await res.json()
+  if (!reISO.exec(datestring)) return datestring
+  return new Date(datestring)
 }
 
 export async function accessAPI (

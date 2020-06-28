@@ -13,12 +13,10 @@ export default function ParticipantTable (
 ) {
   const [jsonrows, setData] = useState([])
   async function updateData () {
-    setData(
-      await accessAPI(
-        'getparticipants', 'GET',
-        { email: props.email, token: props.token }
-      )
-    )
+    setData(await accessAPI(
+      'getparticipants', 'GET',
+      { email: props.email, token: props.token }
+    ))
   }
   return (
     <Layout
