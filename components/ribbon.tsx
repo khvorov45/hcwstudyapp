@@ -5,19 +5,26 @@ import { accessAPI } from '../lib/util'
 import styles from './ribbon.module.css'
 
 export default function Ribbon (
-  { email, token, afterdbUpdate }:
-  {email: string, token: string, afterdbUpdate: () => Promise<void>}
+  { email, token, updateDBPromiseArea, afterdbUpdate }:
+  {
+    email: string, token: string, updateDBPromiseArea: string,
+    afterdbUpdate: () => Promise<void>
+  }
 ) {
   return <div className={styles.ribbon}>
     <UpdateDatabaseButton
-      email={email} token={token} afterdbUpdate={afterdbUpdate}
+      email={email} token={token} promiseArea={updateDBPromiseArea}
+      afterdbUpdate={afterdbUpdate}
     />
   </div>
 }
 
 export function UpdateDatabaseButton (
-  { email, token, afterdbUpdate }:
-  {email: string, token: string, afterdbUpdate: () => Promise<void>}
+  { email, token, promiseArea, afterdbUpdate }:
+  {
+    email: string, token: string, promiseArea: string,
+    afterdbUpdate: () => Promise<void>
+  }
 ) {
   async function updateDB (actuallyThough: boolean) {
     async function updateAndAfter () {
@@ -32,7 +39,7 @@ export function UpdateDatabaseButton (
       await afterdbUpdate()
       setLastUpdate(new Date(date))
     }
-    await trackPromise(updateAndAfter(), 'updatedb')
+    await trackPromise(updateAndAfter(), promiseArea)
   }
   useEffect(() => { updateDB(false) }, [])
   const [lastUpdate, setLastUpdate] = useState(new Date(0))
@@ -40,6 +47,6 @@ export function UpdateDatabaseButton (
     label="Update"
     timestamp={lastUpdate}
     onClick={() => updateDB(true)}
-    promiseArea='updatedb'
+    promiseArea={promiseArea}
   />
 }

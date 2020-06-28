@@ -38,6 +38,7 @@ export default function ParticipantTable (
       <Ribbon
         email={props.email}
         token={props.token}
+        updateDBPromiseArea="updatedb"
         afterdbUpdate={updateData}
       />
       <Table
