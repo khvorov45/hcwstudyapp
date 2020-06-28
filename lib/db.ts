@@ -9,6 +9,12 @@ interface MyPostgresConfig extends PoolConfig {
   accessGroups?: string[]
 }
 
+interface User {
+  email: string,
+  accessGroup: string,
+  tokenhash: string,
+}
+
 export class Postgres {
   pool: Pool
   users: {email: string, accessGroup: string}[]
@@ -199,6 +205,14 @@ export class Postgres {
     }
     await this.execute(pgp().helpers.insert(
       allUsers, ['email', 'accessGroup', 'tokenhash'], 'User')
+    )
+  }
+
+  async getUser (email: string): Promise<User> {
+    return await this.getRow<User>(
+      'SELECT "email", "accessGroup", "tokenhash" ' +
+      'FROM "User" WHERE "email" = $1',
+      [email.toLowerCase()]
     )
   }
 

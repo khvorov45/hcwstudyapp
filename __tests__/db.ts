@@ -25,18 +25,21 @@ test('postgres', async () => {
     .toBe('admin')
   expect(await db.getUserAccessGroup('arseniy.khvorov@mh.org.au'))
     .toBe('melbourne')
-  expect(await db.userExists('arseniy.khvorov@mh.org.au'))
-    .toBe(true)
-  expect(await db.userExists('nonexistent'))
-    .toBe(false)
+  expect(await db.userExists('ARSENIY.khvorov@mh.org.au')).toBe(true)
+  expect(await db.userExists('nonexistent')).toBe(false)
+  let user = await db.getUser('KHVOROV45@gmail.com')
+  expect(user.accessGroup)
+    .toBe(await db.getUserAccessGroup('khvorov45@GMAIL.com'))
 
   // Tokenhash should be persistent across soft updates
   await db.storeUserToken('khvorov45@gmail.com', '123')
   let storedHash = await db.getUserTokenHash('khvorov45@gmail.com')
   expect(await bcrypt.compare('123', storedHash)).toBe(true)
   await db.update(false)
-  storedHash = await db.getUserTokenHash('khvorov45@gmail.com')
+  user = await db.getUser('KHVOrov45@gmail.COM')
+  storedHash = await db.getUserTokenHash('khvorov45@Gmail.com')
   expect(await bcrypt.compare('123', storedHash)).toBe(true)
+  expect(user.tokenhash).toBe(storedHash)
 
   // Check authorisation
   expect(await db.authoriseUser('khvorov45@gmail.com', '123')).toBe(true)
