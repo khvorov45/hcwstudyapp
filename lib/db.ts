@@ -94,10 +94,10 @@ export class Postgres {
   async removeTables (): Promise<void> {
     await this.execute(`
       DROP TABLE IF EXISTS "Meta";
-      DROP TABLE IF EXISTS "Participant";
       DROP TABLE IF EXISTS "User";
-      DROP TABLE IF EXISTS "AccessGroup";
     `)
+    await this.removeParticipant()
+    await this.execute('DROP TABLE IF EXISTS "AccessGroup"')
   }
 
   async addTables (): Promise<void> {
@@ -114,17 +114,8 @@ export class Postgres {
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
-      CREATE TABLE "Participant" (
-          "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
-          "pid" TEXT NOT NULL UNIQUE,
-          "accessGroup" TEXT NOT NULL,
-          "site" TEXT NOT NULL,
-          "dob" TEXT,
-          "dateScreening" TEXT,
-          FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
-          ON UPDATE CASCADE ON DELETE CASCADE
-      );
     `)
+    await this.createParticipant()
   }
 
   async wipe (): Promise<void> {
@@ -164,6 +155,31 @@ export class Postgres {
   }
 
   // Participant table interactions -------------------------------------------
+
+  async resetParticipant (): Promise<void> {
+    await this.removeParticipant()
+    await this.createParticipant()
+    await this.fillParticipant()
+  }
+
+  async createParticipant (): Promise<void> {
+    await this.execute(`
+      CREATE TABLE "Participant" (
+          "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
+          "pid" TEXT NOT NULL UNIQUE,
+          "accessGroup" TEXT NOT NULL,
+          "site" TEXT NOT NULL,
+          "dob" TEXT,
+          "dateScreening" TEXT,
+          FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+    `)
+  }
+
+  async removeParticipant (): Promise<void> {
+    await this.execute('DROP TABLE IF EXISTS "Participant"')
+  }
 
   async fillParticipant (): Promise<void> {
     const participants = await exportParticipants(true)
