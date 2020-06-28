@@ -43,6 +43,7 @@ export default function ParticipantTable (
       <Table
         jsonrows={jsonrows}
         variables={props.variables}
+        promiseArea="updatedb"
       />
     </Layout>
   )

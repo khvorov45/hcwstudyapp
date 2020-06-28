@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTable, useSortBy } from 'react-table'
 import Loader from 'react-loader-spinner'
+import { usePromiseTracker } from 'react-promise-tracker'
 import { isDateISOString } from '../lib/util'
 import tableStyles from './table.module.css'
 
@@ -13,23 +14,8 @@ function ColumnNames ({ label, redcapName }) {
   </div>
 }
 
-export default function Table ({ jsonrows, variables }) {
-  if (jsonrows === null) {
-    return <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}
-    >
-      <Loader
-        type="ThreeDots" color="var(--font-color)"
-        height="100" width="100"
-      />
-    </div>
-  }
+export default function Table ({ jsonrows, variables, promiseArea }) {
+  const { promiseInProgress } = usePromiseTracker({ area: promiseArea })
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
     () => {
@@ -76,6 +62,9 @@ export default function Table ({ jsonrows, variables }) {
     },
     useSortBy
   )
+  if (promiseInProgress) {
+    return <TableLoader/>
+  }
   return <div className={tableStyles.container}>
     <table {...getTableProps()} className={tableStyles.table}>
       <Thead headerGroups={headerGroups}/>
@@ -92,6 +81,23 @@ export default function Table ({ jsonrows, variables }) {
         })}
       </tbody>
     </table>
+  </div>
+}
+
+function TableLoader () {
+  return <div
+    style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}
+  >
+    <Loader
+      type="ThreeDots" color="var(--font-color)"
+      height="100" width="100"
+    />
   </div>
 }
 
