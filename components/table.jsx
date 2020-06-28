@@ -18,27 +18,7 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
   const { promiseInProgress } = usePromiseTracker({ area: promiseArea })
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
-    () => {
-      const cols = []
-      const exampleRow = data[0]
-      for (const fieldname in exampleRow) {
-        const varinfo = variables.filter(v => v.my === fieldname)[0]
-        cols.push({
-          Header: <ColumnNames
-            label={varinfo.label}
-            redcapName={varinfo.redcap}
-          />,
-          id: fieldname,
-          accessor: (row) => {
-            if (isDateISOString(row[fieldname])) {
-              return row[fieldname].split('T')[0]
-            }
-            return row[fieldname]
-          }
-        })
-      }
-      return cols
-    },
+    () => generateColumns(data[0], variables),
     [jsonrows]
   )
   const {
@@ -82,6 +62,27 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
       </tbody>
     </table>
   </div>
+}
+
+function generateColumns (exampleRow, variables) {
+  const cols = []
+  for (const fieldname in exampleRow) {
+    const varinfo = variables.filter(v => v.my === fieldname)[0]
+    cols.push({
+      Header: <ColumnNames
+        label={varinfo.label}
+        redcapName={varinfo.redcap}
+      />,
+      id: fieldname,
+      accessor: (row) => {
+        if (isDateISOString(row[fieldname])) {
+          return row[fieldname].split('T')[0]
+        }
+        return row[fieldname]
+      }
+    })
+  }
+  return cols
 }
 
 function TableLoader () {
