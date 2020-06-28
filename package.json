@@ -4,6 +4,7 @@
   "description": "View data summaries from the HCW flu study",
   "scripts": {
     "reset-default-db": "jest --test-regex reset-default-db",
+    "reset-participants": "jest --test-regex reset-participants",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
