@@ -78,26 +78,7 @@ export default function Table ({ jsonrows, variables }) {
   )
   return <div className={tableStyles.container}>
     <table {...getTableProps()} className={tableStyles.table}>
-      <thead>
-        {headerGroups.map(headerGroup => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map(column => (
-              <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                <div className={tableStyles.columnHeader}>
-                  {column.render('Header')}
-                  <span className={tableStyles.columnController}>
-                    {column.isSorted
-                      ? column.isSortedDesc
-                        ? ' ▼'
-                        : ' ▲'
-                      : ' ⇅'}
-                  </span>
-                </div>
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
+      <Thead headerGroups={headerGroups}/>
       <tbody {...getTableBodyProps()}>
         {rows.map(row => {
           prepareRow(row)
@@ -112,4 +93,27 @@ export default function Table ({ jsonrows, variables }) {
       </tbody>
     </table>
   </div>
+}
+
+function Thead ({ headerGroups }) {
+  return <thead>
+    {headerGroups.map(headerGroup => (
+      <tr {...headerGroup.getHeaderGroupProps()}>
+        {headerGroup.headers.map(column => (
+          <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+            <div className={tableStyles.columnHeader}>
+              {column.render('Header')}
+              <span className={tableStyles.columnController}>
+                {column.isSorted
+                  ? column.isSortedDesc
+                    ? ' ▼'
+                    : ' ▲'
+                  : ' ⇅'}
+              </span>
+            </div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
 }
