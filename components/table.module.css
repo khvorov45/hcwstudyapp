@@ -4,7 +4,8 @@
 }
 
 .table {
-    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
     border-spacing: 0;
     border: 1px solid var(--border);
 }
