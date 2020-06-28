@@ -56,7 +56,7 @@ test('postgres', async () => {
     .toBeGreaterThan(firstFillTimestamp.getTime())
 
   // Participant export
-  let part = await db.getParticipants()
+  let part = await db.getParticipants('unrestricted')
   let partAccessGroups = part.map(p => p.accessGroup)
   expect(partAccessGroups.includes('melbourne')).toBe(true)
   expect(partAccessGroups.includes('adelaide')).toBe(true)

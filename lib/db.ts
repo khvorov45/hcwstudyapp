@@ -174,12 +174,12 @@ export class Postgres {
     ))
   }
 
-  async getParticipants (accessGroup?: string): Promise<any[]> {
+  async getParticipants (accessGroup: string): Promise<any[]> {
     let query =
     `SELECT "redcapRecordId", "pid", "accessGroup", "site",
     "dob", "dateScreening" FROM "Participant"`
     let params = []
-    if (accessGroup && !['unrestricted', 'admin'].includes(accessGroup)) {
+    if (!['unrestricted', 'admin'].includes(accessGroup)) {
       query += ' WHERE "accessGroup" = $1'
       params = [accessGroup.toLowerCase()]
     }
