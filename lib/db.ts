@@ -96,7 +96,7 @@ export class Postgres {
       DROP TABLE IF EXISTS "Meta";
       DROP TABLE IF EXISTS "User";
     `)
-    await this.removeParticipant()
+    await this.removeParticipantTable()
     await this.execute('DROP TABLE IF EXISTS "AccessGroup"')
   }
 
@@ -115,7 +115,7 @@ export class Postgres {
           ON UPDATE CASCADE ON DELETE CASCADE
       );
     `)
-    await this.createParticipant()
+    await this.createParticipantTable()
   }
 
   async wipe (): Promise<void> {
@@ -156,13 +156,13 @@ export class Postgres {
 
   // Participant table interactions -------------------------------------------
 
-  async resetParticipant (): Promise<void> {
-    await this.removeParticipant()
-    await this.createParticipant()
+  async resetParticipantTable (): Promise<void> {
+    await this.removeParticipantTable()
+    await this.createParticipantTable()
     await this.fillParticipant()
   }
 
-  async createParticipant (): Promise<void> {
+  async createParticipantTable (): Promise<void> {
     await this.execute(`
       CREATE TABLE "Participant" (
           "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
@@ -177,7 +177,7 @@ export class Postgres {
     `)
   }
 
-  async removeParticipant (): Promise<void> {
+  async removeParticipantTable (): Promise<void> {
     await this.execute('DROP TABLE IF EXISTS "Participant"')
   }
 
