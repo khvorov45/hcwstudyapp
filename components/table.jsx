@@ -32,6 +32,7 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
       columns,
       data,
       initialState: {
+        hiddenColumns: ['accessGroup', 'site', 'dateScreening'],
         sortBy: [
           {
             id: 'pid',
