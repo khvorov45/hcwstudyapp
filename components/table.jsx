@@ -34,14 +34,14 @@ export default function Table ({ jsonrows, variables }) {
     () => {
       const cols = []
       const exampleRow = data[0]
-      for (const entry in exampleRow) {
-        const varinfo = variables.filter(v => v.my === entry)[0]
+      for (const fieldname in exampleRow) {
+        const varinfo = variables.filter(v => v.my === fieldname)[0]
         cols.push({
           Header: <ColumnNames
             label={varinfo.label}
             redcapName={varinfo.redcap}
           />,
-          accessor: entry
+          accessor: fieldname
         })
       }
       return cols
