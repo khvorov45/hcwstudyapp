@@ -71,18 +71,18 @@ export function SubnavbarTables (
 ) {
   return <Subnavbar authorised={authorised}>
     <Navelement
-      content="Participants"
-      link={'/tables/participants'}
+      content="Contact"
+      link={'/tables/contact'}
       email={email}
       token={token}
-      active={active === 'participants'}
+      active={active === 'contact'}
     />
     <Navelement
-      content="Appointments"
-      link={'/tables/appointments'}
+      content="Baseline"
+      link={'/tables/baseline'}
       email={email}
       token={token}
-      active={active === 'appointments'}
+      active={active === 'baseline'}
     />
   </Subnavbar>
 }

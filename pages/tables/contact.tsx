@@ -27,13 +27,13 @@ export default function ParticipantTable (
     >
       <Head>
         <title>Participants - HCW flu study</title>
-        <meta name="Description" content="Participants - HCW flu study" />
+        <meta name="Description" content="Contact - HCW flu study" />
       </Head>
       <SubnavbarTables
         authorised={props.authorised}
         email={props.email}
         token={props.token}
-        active = "participants"
+        active = "contact"
       />
       <Ribbon
         email={props.email}
