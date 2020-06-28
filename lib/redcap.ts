@@ -59,8 +59,8 @@ export async function exportUsers () {
 export async function exportParticipants (rename?: boolean) {
   const records = await exportRecords(
     [
-      'record_id', 'redcap_data_access_group', 'pid', 'site_name', 'a2_dob',
-      'date_screening'
+      'record_id', 'redcap_data_access_group', 'pid', 'site_name',
+      'date_screening', 'email', 'mobile_number', 'a2_dob'
     ],
     ['baseline_arm_1'], 'flat'
   )
@@ -69,7 +69,7 @@ export async function exportParticipants (rename?: boolean) {
   if (!rename) {
     return recordsFiltered
   }
-  function processDate (date) {
+  function processDate (date: string) {
     return date === '' ? null : new Date(date)
   }
   return recordsFiltered.map(r => {
@@ -78,8 +78,10 @@ export async function exportParticipants (rename?: boolean) {
       pid: r.pid,
       accessGroup: r.redcap_data_access_group.toLowerCase(),
       site: r.site_name,
-      dob: processDate(r.a2_dob),
-      dateScreening: processDate(r.date_screening)
+      dateScreening: processDate(r.date_screening),
+      email: r.email.toLowerCase(),
+      mobile: r.mobile_number,
+      dob: processDate(r.a2_dob)
     }
   })
 }

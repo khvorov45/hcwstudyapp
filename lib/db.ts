@@ -169,8 +169,10 @@ export class Postgres {
           "pid" TEXT NOT NULL UNIQUE,
           "accessGroup" TEXT NOT NULL,
           "site" TEXT NOT NULL,
-          "dob" TIMESTAMPTZ,
           "dateScreening" TIMESTAMPTZ,
+          "email" TEXT,
+          "mobile" TEXT,
+          "dob" TIMESTAMPTZ,
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
@@ -185,7 +187,10 @@ export class Postgres {
     const participants = await exportParticipants(true)
     await this.execute(pgp().helpers.insert(
       participants,
-      ['redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening'],
+      [
+        'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
+        'mobile', 'email'
+      ],
       'Participant'
     ))
   }
@@ -193,7 +198,7 @@ export class Postgres {
   async getParticipants (accessGroup: string): Promise<any[]> {
     let query =
     `SELECT "redcapRecordId", "pid", "accessGroup", "site",
-    "dob", "dateScreening" FROM "Participant"`
+    "dateScreening", "email", "mobile" FROM "Participant"`
     let params = []
     if (!['unrestricted', 'admin'].includes(accessGroup)) {
       query += ' WHERE "accessGroup" = $1'
