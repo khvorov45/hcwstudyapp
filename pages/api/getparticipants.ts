@@ -18,5 +18,14 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     return
   }
   const accessGroup = await db.getUserAccessGroup(email)
-  res.status(200).send(await db.getParticipants(accessGroup))
+  let data: any
+  if (!req.query.subset) {
+    data = await db.getParticipants(accessGroup)
+  } else if (req.query.subset === 'contact') {
+    data = await db.getParticipantsContact(accessGroup)
+  } else {
+    res.status(404).end()
+    return
+  }
+  res.status(200).send(data)
 }

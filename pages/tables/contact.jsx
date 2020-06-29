@@ -14,7 +14,7 @@ export default function ParticipantTable (
   async function getData () {
     return await accessAPI(
       'getparticipants', 'GET',
-      { email: email, token: token }
+      { email: email, token: token, subset: 'contact' }
     )
   }
   return <Layout

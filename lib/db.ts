@@ -195,10 +195,10 @@ export class Postgres {
     ))
   }
 
-  async getParticipants (accessGroup: string): Promise<any[]> {
-    let query =
-    `SELECT "redcapRecordId", "pid", "accessGroup", "site",
-    "dateScreening", "email", "mobile" FROM "Participant"`
+  async getParticipants (
+    accessGroup: string, prequery?: string
+  ): Promise<any[]> {
+    let query = prequery || 'SELECT * FROM "Participant"'
     let params = []
     if (!['unrestricted', 'admin'].includes(accessGroup)) {
       query += ' WHERE "accessGroup" = $1'
@@ -206,6 +206,13 @@ export class Postgres {
     }
     query += ';'
     return await this.getRows<any>(query, params)
+  }
+
+  async getParticipantsContact (accessGroup: string): Promise<any[]> {
+    const query =
+    `SELECT "redcapRecordId", "pid", "accessGroup", "site",
+    "dateScreening", "email", "mobile" FROM "Participant"`
+    return await this.getParticipants(accessGroup, query)
   }
 
   // User table interactions --------------------------------------------------
