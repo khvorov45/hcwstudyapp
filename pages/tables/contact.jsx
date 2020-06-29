@@ -73,6 +73,7 @@ export default function ParticipantTable (
         updateDBPromiseArea="updatedb"
         afterdbUpdate={updateData}
         columns={allColumns}
+        variables={variables}
       />
       <Table
         getTableProps={getTableProps}

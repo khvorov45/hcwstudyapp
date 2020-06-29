@@ -6,10 +6,10 @@ import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
 
 export default function Ribbon (
-  { email, token, updateDBPromiseArea, afterdbUpdate, columns }:
+  { email, token, updateDBPromiseArea, afterdbUpdate, columns, variables }:
   {
     email: string, token: string, updateDBPromiseArea: string,
-    afterdbUpdate: () => Promise<void>, columns: any
+    afterdbUpdate: () => Promise<void>, columns: any, variables: any
   }
 ) {
   return <div className={styles.ribbon}>
@@ -17,7 +17,9 @@ export default function Ribbon (
       email={email} token={token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
-    <ColumnSelect promiseArea={updateDBPromiseArea} columns={columns}/>
+    <ColumnSelect
+      promiseArea={updateDBPromiseArea} columns={columns} variables={variables}
+    />
   </div>
 }
 
@@ -54,15 +56,18 @@ export function UpdateDatabaseButton (
 }
 
 export function ColumnSelect (
-  { promiseArea, columns }:
-  {promiseArea: string, columns: any}
+  { promiseArea, columns, variables }:
+  {promiseArea: string, columns: any, variables: any}
 ) {
   console.log('supposed to react to ' + promiseArea)
+  console.log(variables)
   return <div
     className={`${inputStyles.input} ${inputStyles.multipleSelect}`}
   >
     {columns.map(column => (
-      <Checkbox label={column.id} key={column.id}
+      <Checkbox
+        label={variables.filter(v => v.my === column.id)[0].label}
+        key={column.id}
         checkboxProps={column.getToggleHiddenProps()}
       />
     ))}
