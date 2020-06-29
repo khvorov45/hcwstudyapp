@@ -8,7 +8,6 @@
     margin-left: auto;
     margin-right: auto;
     border-spacing: 0;
-    /*border: 1px solid var(--border);*/
 }
 
 .table thead {
@@ -21,19 +20,21 @@
     text-align: center;
 }
 
-.table th {
-    border-top: 1px solid var(--border);
+.table th:last-child {
+    border-right: 0;
 }
 
 .table th, .table td {
     margin: 0;
     padding: 0.5rem;
-    border-bottom: 1px solid var(--border);
-    border-right: 1px solid var(--border);
 }
 
-.table th:first-child, .table td:first-child {
-    border-left: 1px solid var(--border);
+.table th:nth-child(even) {
+    background: var(--bg-color-alt);
+}
+
+.table tr:nth-child(even) {
+    background: var(--bg-color-alt);
 }
 
 .columnRedcapName {

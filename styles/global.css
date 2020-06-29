@@ -2,6 +2,7 @@
     --font-color: #000000;
     --font-color-muted: #4b4b4b;
     --bg-color: #fff;
+    --bg-color-alt: rgb(230, 230, 230);
     --border: #777777;
     --bg-highlight: #ea00ff7c;
     --text-highlight: #016f75;
@@ -15,6 +16,7 @@
     --font-color: #ffffff;
     --font-color-muted: #bebebe;
     --bg-color: #000000;
+    --bg-color-alt: rgb(35, 35, 35);
     --text-highlight: #00e6e4;
     --success: #00ff22;
 }
