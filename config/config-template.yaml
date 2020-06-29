@@ -41,6 +41,12 @@ db:
       - my: dateScreening
         redcap: date_screening
         label: Date of Screening
+      - my: email
+        redcap: email
+        label: Email
+      - my: mobile
+        redcap: mobile_number
+        label: Mobile
 email:
   user: sen.khvorov@unimelb.edu.au
   password:
