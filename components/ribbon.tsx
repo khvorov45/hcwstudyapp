@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { ButtonWithTimestamp, MultipleSelect } from './input'
+import { ButtonWithTimestamp } from './input'
 import { accessAPI } from '../lib/util'
 import styles from './ribbon.module.css'
+import inputStyles from './input.module.css'
 
 export default function Ribbon (
   { email, token, updateDBPromiseArea, afterdbUpdate, columns }:
@@ -16,7 +17,7 @@ export default function Ribbon (
       email={email} token={token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
-    <ColumnSelect columns={columns}/>
+    <ColumnSelect promiseArea={updateDBPromiseArea} columns={columns}/>
   </div>
 }
 
@@ -52,8 +53,21 @@ export function UpdateDatabaseButton (
   />
 }
 
-function ColumnSelect ({ columns }: {columns: any}) {
-  return <MultipleSelect
-    name="Columns" promiseArea="updatedb" columns={columns}
-  />
+export function ColumnSelect (
+  { promiseArea, columns }:
+  {promiseArea: string, columns: any}
+) {
+  console.log('supposed to react to ' + promiseArea)
+  return <div
+    className={`${inputStyles.input} ${inputStyles.multipleSelect}`}
+  >
+    {columns.map(column => (
+      <div key={column.id}>
+        <label>
+          <input type="checkbox" {...column.getToggleHiddenProps()} />{' '}
+          {column.id}
+        </label>
+      </div>
+    ))}
+  </div>
 }

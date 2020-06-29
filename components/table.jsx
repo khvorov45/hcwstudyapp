@@ -1,48 +1,17 @@
-import { useMemo } from 'react'
-import { useTable, useSortBy } from 'react-table'
 import Loader from 'react-loader-spinner'
 import { usePromiseTracker } from 'react-promise-tracker'
-import { isDateISOString } from '../lib/util'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function Table ({
-  jsonrows, variables, promiseArea, setColumns
+  getTableProps, headerGroups, rows, prepareRow, getTableBodyProps,
+  promiseArea
 }) {
   const { promiseInProgress } = usePromiseTracker({ area: promiseArea })
-  const data = useMemo(() => jsonrows, [jsonrows])
-  const columns = useMemo(
-    () => generateColumns(data[0], variables),
-    [jsonrows]
-  )
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    allColumns
-  } = useTable(
-    {
-      columns,
-      data,
-      initialState: {
-        hiddenColumns: ['accessGroup', 'site', 'dateScreening'],
-        sortBy: [
-          {
-            id: 'pid',
-            desc: false
-          }
-        ]
-      }
-    },
-    useSortBy
-  )
   if (promiseInProgress) {
     return <TableLoader/>
   }
-  setColumns(allColumns)
   return <div className={tableStyles.container}>
     <table {...getTableProps()} className={tableStyles.table}>
       <Thead headerGroups={headerGroups}/>
@@ -53,34 +22,6 @@ export default function Table ({
       />
     </table>
   </div>
-}
-
-function ColumnNames ({ label, redcapName }) {
-  return <div className={tableStyles.columnNames}>
-    <div>{label}</div>
-    <div className={tableStyles.columnRedcapName}>{redcapName}</div>
-  </div>
-}
-
-function generateColumns (exampleRow, variables) {
-  const cols = []
-  for (const fieldname in exampleRow) {
-    const varinfo = variables.filter(v => v.my === fieldname)[0]
-    cols.push({
-      Header: <ColumnNames
-        label={varinfo.label}
-        redcapName={varinfo.redcap}
-      />,
-      id: fieldname,
-      accessor: (row) => {
-        if (isDateISOString(row[fieldname])) {
-          return row[fieldname].split('T')[0]
-        }
-        return row[fieldname]
-      }
-    })
-  }
-  return cols
 }
 
 function TableLoader () {

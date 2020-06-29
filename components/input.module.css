@@ -2,7 +2,6 @@
     background-color: inherit;
     color: inherit;
     font-size: inherit;
-    margin: 5px;
 }
 
 .input::-moz-focus-inner {
@@ -61,4 +60,9 @@
 
 .multipleSelect {
     border: 1px solid var(--border);
+    overflow: scroll;
+}
+
+.multipleSelect * {
+    margin: 0px;
 }

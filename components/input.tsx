@@ -6,15 +6,13 @@ export function ButtonWithTimestamp (
   { label, onClick, promiseArea, timestamp }:
   {label: string, onClick: () => void, promiseArea: string, timestamp?: Date}
 ) {
-  return <div>
-    <button
-      className={`${styles.input} ${styles.bigbutton}`}
-      onClick={onClick}
-    >
-      {label}
-      <Timestamp promiseArea={promiseArea} timestamp={timestamp} />
-    </button>
-  </div>
+  return <button
+    className={`${styles.input} ${styles.bigbutton}`}
+    onClick={onClick}
+  >
+    {label}
+    <Timestamp promiseArea={promiseArea} timestamp={timestamp} />
+  </button>
 }
 
 export function ButtonWithIndicator (props: {
@@ -89,21 +87,4 @@ export function Form (props: {
       />
     </form>
   )
-}
-
-export function MultipleSelect (
-  { name, promiseArea, columns }:
-  {name: string, promiseArea: string, columns: any}
-) {
-  console.log('supposed to react to ' + promiseArea)
-  return <select
-    className={`${styles.input} ${styles.multipleSelect}`}
-    name={name}
-    id={name}
-    multiple
-  >
-    {columns.map(column => (
-      <option key={column.id} value={column.id}>{column.id}</option>
-    ))}
-  </select>
 }
