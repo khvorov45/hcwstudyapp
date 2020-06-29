@@ -18,7 +18,7 @@ export default function Ribbon (
       afterdbUpdate={afterdbUpdate}
     />
     <ColumnSelect
-      promiseArea={updateDBPromiseArea} columns={columns} variables={variables}
+      columns={columns} variables={variables}
     />
   </div>
 }
@@ -56,11 +56,9 @@ export function UpdateDatabaseButton (
 }
 
 export function ColumnSelect (
-  { promiseArea, columns, variables }:
-  {promiseArea: string, columns: any, variables: any}
+  { columns, variables }:
+  {columns: any, variables: any}
 ) {
-  console.log('supposed to react to ' + promiseArea)
-  console.log(variables)
   return <div
     className={`${inputStyles.input} ${inputStyles.multipleSelect}`}
   >

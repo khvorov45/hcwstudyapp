@@ -5,16 +5,23 @@ import db from '../../lib/db'
 import TablePage from '../../components/tablePage'
 import Layout from '../../components/layout'
 import { SubnavbarTables } from '../../components/navbar'
+import { useRouter } from 'next/router'
 
 /* eslint-disable react/prop-types, react/jsx-key */
+
+function toTitleCase (str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
 
 export default function ParticipantTable (
   { authorised, email, token, variables }
 ) {
+  const router = useRouter()
+  const { table } = router.query
   async function getData () {
     return await accessAPI(
       'getparticipants', 'GET',
-      { email: email, token: token, subset: 'contact' }
+      { email: email, token: token, subset: table }
     )
   }
   return <Layout
@@ -24,22 +31,29 @@ export default function ParticipantTable (
     active="tables"
   >
     <Head>
-      <title>Participants - HCW flu study</title>
-      <meta name="Description" content="Contact - HCW flu study" />
+      <title>{toTitleCase(table)} - HCW flu study</title>
+      <meta
+        name="Description"
+        content={`${toTitleCase(table)} - HCW flu study`}
+      />
     </Head>
     <SubnavbarTables
       authorised={authorised}
       email={email}
       token={token}
-      active = "contact"
+      active={table}
     />
-    <TablePage
-      getData = {getData}
-      authorised = {authorised}
-      email = {email}
-      token = {token}
-      variables = {variables}
-    />
+    {
+      ['contact'].includes(table)
+        ? <TablePage
+          getData = {getData}
+          authorised = {authorised}
+          email = {email}
+          token = {token}
+          variables = {variables}
+        />
+        : <p>No such table</p>
+    }
   </Layout>
 }
 
