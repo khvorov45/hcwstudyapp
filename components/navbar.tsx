@@ -43,12 +43,14 @@ export function Navelement (
   { content, link, email, token, active }:
   {content: string, link: string, email: string, token: string, active: boolean}
 ) {
-  return <li className={styles.element}>
+  return <li
+    className={
+      active ? `${styles.element} ${styles.active}` : styles.element
+    }
+  >
     <a
       href={`${link}${getConstQuery(email, token)}`}
-      className={
-        active ? `${styles.link} ${styles.active}` : styles.link
-      }
+      className={styles.link}
     >
       {content}
     </a>
