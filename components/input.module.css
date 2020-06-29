@@ -61,7 +61,7 @@
 
 .multipleSelect {
     border: 1px solid var(--border);
-    overflow: scroll;
+    overflow-y: scroll;
     width: 150px;
 }
 

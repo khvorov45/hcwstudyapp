@@ -44,7 +44,7 @@ main {
     width: 7px;
 }
 
-::-webkit-scrollbar-track {
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
     background: var(--bg-color);
 }
 
