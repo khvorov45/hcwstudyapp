@@ -12,7 +12,7 @@ export default function Navbar (
     otherNavElements = <>
       <Navelement
         content="Tables"
-        link={'/tables/participants'}
+        link={'/tables/contact'}
         email={email}
         token={token}
         active={active === 'tables'}
