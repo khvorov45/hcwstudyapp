@@ -58,3 +58,7 @@
 .errormsg {
     color: var(--error);
 }
+
+.multipleSelect {
+    border: 1px solid var(--border);
+}

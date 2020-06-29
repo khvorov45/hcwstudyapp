@@ -90,3 +90,20 @@ export function Form (props: {
     </form>
   )
 }
+
+export function MultipleSelect (
+  { name, promiseArea, columns }:
+  {name: string, promiseArea: string, columns: any}
+) {
+  console.log('supposed to react to ' + promiseArea)
+  return <select
+    className={`${styles.input} ${styles.multipleSelect}`}
+    name={name}
+    id={name}
+    multiple
+  >
+    {columns.map(column => (
+      <option key={column.id} value={column.id}>{column.id}</option>
+    ))}
+  </select>
+}

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { ButtonWithTimestamp } from './input'
+import { ButtonWithTimestamp, MultipleSelect } from './input'
 import { accessAPI } from '../lib/util'
 import styles from './ribbon.module.css'
 
 export default function Ribbon (
-  { email, token, updateDBPromiseArea, afterdbUpdate }:
+  { email, token, updateDBPromiseArea, afterdbUpdate, columns }:
   {
     email: string, token: string, updateDBPromiseArea: string,
-    afterdbUpdate: () => Promise<void>
+    afterdbUpdate: () => Promise<void>, columns: any
   }
 ) {
   return <div className={styles.ribbon}>
@@ -16,6 +16,7 @@ export default function Ribbon (
       email={email} token={token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
+    <ColumnSelect columns={columns}/>
   </div>
 }
 
@@ -48,5 +49,11 @@ export function UpdateDatabaseButton (
     timestamp={lastUpdate}
     onClick={() => updateDB(true)}
     promiseArea={promiseArea}
+  />
+}
+
+function ColumnSelect ({ columns }: {columns: any}) {
+  return <MultipleSelect
+    name="Columns" promiseArea="updatedb" columns={columns}
   />
 }

@@ -18,6 +18,7 @@ export default function ParticipantTable (
       { email: props.email, token: props.token }
     ))
   }
+  const [columns, setColumns] = useState([])
   return (
     <Layout
       authorised={props.authorised}
@@ -40,11 +41,13 @@ export default function ParticipantTable (
         token={props.token}
         updateDBPromiseArea="updatedb"
         afterdbUpdate={updateData}
+        columns={columns}
       />
       <Table
         jsonrows={jsonrows}
         variables={props.variables}
         promiseArea="updatedb"
+        setColumns={setColumns}
       />
     </Layout>
   )

@@ -7,14 +7,9 @@ import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
-function ColumnNames ({ label, redcapName }) {
-  return <div className={tableStyles.columnNames}>
-    <div>{label}</div>
-    <div className={tableStyles.columnRedcapName}>{redcapName}</div>
-  </div>
-}
-
-export default function Table ({ jsonrows, variables, promiseArea }) {
+export default function Table ({
+  jsonrows, variables, promiseArea, setColumns
+}) {
   const { promiseInProgress } = usePromiseTracker({ area: promiseArea })
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
@@ -26,7 +21,8 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
     getTableBodyProps,
     headerGroups,
     rows,
-    prepareRow
+    prepareRow,
+    allColumns
   } = useTable(
     {
       columns,
@@ -46,6 +42,7 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
   if (promiseInProgress) {
     return <TableLoader/>
   }
+  setColumns(allColumns)
   return <div className={tableStyles.container}>
     <table {...getTableProps()} className={tableStyles.table}>
       <Thead headerGroups={headerGroups}/>
@@ -55,6 +52,13 @@ export default function Table ({ jsonrows, variables, promiseArea }) {
         getTableBodyProps={getTableBodyProps}
       />
     </table>
+  </div>
+}
+
+function ColumnNames ({ label, redcapName }) {
+  return <div className={tableStyles.columnNames}>
+    <div>{label}</div>
+    <div className={tableStyles.columnRedcapName}>{redcapName}</div>
   </div>
 }
 
