@@ -24,6 +24,13 @@ export default function ParticipantTable (
       { email: email, token: token, subset: table }
     )
   }
+  const hidden = {
+    contact: ['accessGroup', 'site', 'dateScreening'],
+    baseline: [
+      'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
+      'site'
+    ]
+  }
   return <Layout
     authorised={authorised}
     email={email}
@@ -44,13 +51,14 @@ export default function ParticipantTable (
       active={table}
     />
     {
-      ['contact'].includes(table)
+      ['contact', 'baseline'].includes(table)
         ? <TablePage
           getData = {getData}
           authorised = {authorised}
           email = {email}
           token = {token}
           variables = {variables}
+          hidden = {hidden[table]}
         />
         : <p>No such table</p>
     }

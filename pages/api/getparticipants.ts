@@ -23,6 +23,8 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     data = await db.getParticipants(accessGroup)
   } else if (req.query.subset === 'contact') {
     data = await db.getParticipantsContact(accessGroup)
+  } else if (req.query.subset === 'baseline') {
+    data = await db.getParticipantsBaseline(accessGroup)
   } else {
     res.status(404).end()
     return

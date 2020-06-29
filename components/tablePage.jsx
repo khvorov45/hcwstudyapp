@@ -8,7 +8,7 @@ import tableStyles from './table.module.css'
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function TablePage (
-  { getData, email, token, variables }
+  { getData, email, token, variables, hidden }
 ) {
   const [jsonrows, setData] = useState([])
   async function updateData () {
@@ -31,7 +31,7 @@ export default function TablePage (
       columns,
       data,
       initialState: {
-        hiddenColumns: ['accessGroup', 'site', 'dateScreening'],
+        hiddenColumns: hidden,
         sortBy: [
           {
             id: 'pid',
