@@ -47,6 +47,9 @@ db:
       - my: mobile
         redcap: mobile_number
         label: Mobile
+      - my: age
+        redcap:
+        label: Age
 email:
   user: sen.khvorov@unimelb.edu.au
   password:

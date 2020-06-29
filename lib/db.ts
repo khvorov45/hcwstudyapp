@@ -218,7 +218,12 @@ export class Postgres {
 
   async getParticipantsBaseline (accessGroup: string): Promise<any[]> {
     const query =
-    `SELECT "pid", "dob", "dateScreening",
+    `SELECT "pid", "dob",
+    ROUND((
+      EXTRACT(EPOCH FROM AGE("dob")) /
+      EXTRACT(EPOCH FROM INTERVAL '1 year')
+    )::numeric, 1) as age,
+    "dateScreening",
     "email", "mobile", "redcapRecordId",
     "accessGroup", "site"  FROM "Participant"`
     return await this.getParticipants(accessGroup, query)
