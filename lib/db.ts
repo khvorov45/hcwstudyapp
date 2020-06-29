@@ -210,8 +210,17 @@ export class Postgres {
 
   async getParticipantsContact (accessGroup: string): Promise<any[]> {
     const query =
-    `SELECT "redcapRecordId", "pid", "accessGroup", "site",
-    "dateScreening", "email", "mobile" FROM "Participant"`
+    `SELECT "redcapRecordId", "pid", "email", "mobile",
+    "dateScreening",
+    "accessGroup", "site" FROM "Participant"`
+    return await this.getParticipants(accessGroup, query)
+  }
+
+  async getParticipantsBaseline (accessGroup: string): Promise<any[]> {
+    const query =
+    `SELECT "pid", "dob", "dateScreening",
+    "email", "mobile", "redcapRecordId",
+    "accessGroup", "site"  FROM "Participant"`
     return await this.getParticipants(accessGroup, query)
   }
 
