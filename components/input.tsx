@@ -88,3 +88,14 @@ export function Form (props: {
     </form>
   )
 }
+
+export function Checkbox (
+  { label, key, checkboxProps }:
+  {label: string, key?: string, checkboxProps?: any}
+) {
+  return <label className={styles.checkbox} key={key}>
+    <input type="checkbox" {...checkboxProps} />
+    <span className={styles.actualCheckbox}></span>
+    {label}
+  </label>
+}

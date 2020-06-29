@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { ButtonWithTimestamp } from './input'
+import { ButtonWithTimestamp, Checkbox } from './input'
 import { accessAPI } from '../lib/util'
 import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
@@ -62,12 +62,9 @@ export function ColumnSelect (
     className={`${inputStyles.input} ${inputStyles.multipleSelect}`}
   >
     {columns.map(column => (
-      <div key={column.id}>
-        <label>
-          <input type="checkbox" {...column.getToggleHiddenProps()} />{' '}
-          {column.id}
-        </label>
-      </div>
+      <Checkbox label={column.id} key={column.id}
+        checkboxProps={column.getToggleHiddenProps()}
+      />
     ))}
   </div>
 }
