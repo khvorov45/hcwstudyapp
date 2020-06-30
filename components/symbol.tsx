@@ -5,9 +5,11 @@ import Loader from 'react-loader-spinner'
 export function SuccessIndicator (props: {success?: boolean}) {
   const { promiseInProgress } = usePromiseTracker()
   if (promiseInProgress) {
+    // @PROBLEM
+    // CSS variables for height and weight do not work on chrome here
     return <Loader
       type="TailSpin" color="var(--font-color)"
-      height="var(--indicator-size)" width="var(--indicator-size)"
+      height="25px" width="25px"
     />
   }
   if (props.success === undefined) {

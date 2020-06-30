@@ -108,3 +108,14 @@
 .checkbox input:checked+.actualCheckbox::before {
     transform: scale(.6);
 }
+
+/* Chrome's BS
+@PROBLEM
+Cant remove chrome's border
+*/
+
+.input:-webkit-autofill {
+    box-shadow: 0 0 0 30px var(--bg-color) inset;
+    -webkit-box-shadow: 0 0 0 30px var(--bg-color) inset;
+    -webkit-text-fill-color: var(--font-color);
+}
