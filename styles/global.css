@@ -29,12 +29,6 @@ body {
     flex-direction: column;
 }
 
-#themeswitch {
-    cursor: pointer;
-    user-select: none;
-    margin-left: auto;
-}
-
 main {
     display: flex;
     flex-direction: column;

@@ -1,5 +1,4 @@
 import { ReactNode } from 'react'
-import { ThemeSwitch } from './theme'
 import styles from './navbar.module.css'
 import { getConstQuery, User } from '../lib/util'
 
@@ -90,8 +89,30 @@ export function SubnavbarTables (
   </Subnavbar>
 }
 
+function ThemeSwitch () {
+  function changeTheme () {
+    let theme: string
+    if (document.documentElement.getAttribute('theme') === 'dark') {
+      theme = 'light'
+    } else {
+      theme = 'dark'
+    }
+    localStorage.setItem('theme', theme)
+    document.documentElement.setAttribute('theme', theme)
+  }
+  return (
+    <i
+      className={`${styles.themeswitch} material-icons`}
+      onClick={changeTheme}
+    >
+      invert_colors
+    </i>
+  )
+}
+
 export function Siteswitch ({ accessGroup }: {accessGroup: string}) {
-  return <div>
-    {(['unrestricted', 'admin'].includes(accessGroup)) ? 'Siteswitch' : <></>}
+  const theswitch = <div className={styles.siteswitch}>
+    Siteswitch
   </div>
+  return (['unrestricted', 'admin'].includes(accessGroup)) ? theswitch : <></>
 }
