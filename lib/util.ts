@@ -34,5 +34,9 @@ export async function accessAPI (
       body: body ? new URLSearchParams(body) : null
     }
   )
-  return await res.json()
+  try {
+    return await res.json()
+  } catch (e) {
+    return res.status
+  }
 }
