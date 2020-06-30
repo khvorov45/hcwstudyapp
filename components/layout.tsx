@@ -55,9 +55,7 @@ export default function Layout (
   return (
     <>
       <Navbar
-        authorised={user.authorised}
-        email={user.email}
-        token={user.token}
+        user={user}
         active={active}
       />
       <main>{pageContent}</main>

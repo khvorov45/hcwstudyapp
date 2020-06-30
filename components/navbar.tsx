@@ -1,27 +1,27 @@
 import { ReactNode, useState, useEffect } from 'react'
 import { ThemeSwitch } from './theme'
 import styles from './navbar.module.css'
-import { getConstQuery, accessAPI } from '../lib/util'
+import { getConstQuery, accessAPI, User } from '../lib/util'
 
 export default function Navbar (
-  { authorised, email, token, active }:
-  {authorised: boolean, email: string, token: string, active: string}
+  { user, active }:
+  {user: User, active: string}
 ) {
   var otherNavElements = <></>
-  if (authorised) {
+  if (user.authorised) {
     otherNavElements = <>
       <Navelement
         content="Tables"
         link={'/tables/contact'}
-        email={email}
-        token={token}
+        email={user.email}
+        token={user.token}
         active={active === 'tables'}
       />
       <Navelement
         content="Plots"
         link={'/plots'}
-        email={email}
-        token={token}
+        email={user.email}
+        token={user.token}
         active={active === 'plots'}
       />
     </>
@@ -30,12 +30,12 @@ export default function Navbar (
     <Navelement
       content="Help"
       link={'/'}
-      email={email}
-      token={token}
+      email={user.email}
+      token={user.token}
       active={active === 'home'}
     />
     {otherNavElements}
-    <Siteswitch email={email} token={token} />
+    <Siteswitch email={user.email} token={user.token} />
     <ThemeSwitch />
   </nav>
 }
