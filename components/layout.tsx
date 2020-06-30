@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Navbar from './navbar'
 import InfoMessage from './info'
 import EmailForm from './emailform'
+import { User } from '../lib/util'
 
 function EmptyCred () {
   return <>
@@ -39,27 +40,25 @@ function Unauthorised () {
 }
 
 export default function Layout (
-  props: {
+  { children, user, active }: {
     children: React.ReactNode,
-    authorised: boolean,
-    email: string,
-    token: string,
+    user: User,
     active: string,
   }
 ) {
-  var pageContent = props.children
-  if (props.authorised === null) {
+  var pageContent = children
+  if (user.authorised === null) {
     pageContent = EmptyCred()
-  } else if (!props.authorised) {
+  } else if (!user.authorised) {
     pageContent = Unauthorised()
   }
   return (
     <>
       <Navbar
-        authorised={props.authorised}
-        email={props.email}
-        token={props.token}
-        active={props.active}
+        authorised={user.authorised}
+        email={user.email}
+        token={user.token}
+        active={active}
       />
       <main>{pageContent}</main>
     </>

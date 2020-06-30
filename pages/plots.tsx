@@ -19,9 +19,7 @@ export default function Plots (
   }
   return (
     <Layout
-      authorised={user.authorised}
-      email={user.email}
-      token={user.token}
+      user={user}
       active="plots"
     >
       <Head>
