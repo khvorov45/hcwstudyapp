@@ -7,29 +7,33 @@ export default function Navbar (
   {user: User, active: string}
 ) {
   return <nav className={styles.container}>
-    <Navelement
-      content="Help"
-      link={'/'}
-      user={user}
-      authorisedOnly={false}
-      active={active === 'home'}
-    />
-    <Navelement
-      content="Tables"
-      link={'/tables/contact'}
-      user={user}
-      authorisedOnly={true}
-      active={active === 'tables'}
-    />
-    <Navelement
-      content="Plots"
-      link={'/plots'}
-      user={user}
-      authorisedOnly={true}
-      active={active === 'plots'}
-    />
-    <Siteswitch accessGroup={user.accessGroup} />
-    <ThemeSwitch />
+    <div className={styles.leftside}>
+      <Navelement
+        content="Help"
+        link={'/'}
+        user={user}
+        authorisedOnly={false}
+        active={active === 'home'}
+      />
+      <Navelement
+        content="Tables"
+        link={'/tables/contact'}
+        user={user}
+        authorisedOnly={true}
+        active={active === 'tables'}
+      />
+      <Navelement
+        content="Plots"
+        link={'/plots'}
+        user={user}
+        authorisedOnly={true}
+        active={active === 'plots'}
+      />
+    </div>
+    <div className={styles.rightside}>
+      <Siteswitch accessGroup={user.accessGroup} />
+      <ThemeSwitch />
+    </div>
   </nav>
 }
 
@@ -61,8 +65,10 @@ export function Subnavbar (
   { children }:
   {children: ReactNode}
 ) {
-  return <nav className={styles.container}>
-    {children}
+  return <nav className={`${styles.container} ${styles.subcontainer}`}>
+    <div className={styles.leftside}>
+      {children}
+    </div>
   </nav>
 }
 
