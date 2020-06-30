@@ -6,10 +6,11 @@ import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
 
 export default function Ribbon (
-  { email, token, updateDBPromiseArea, afterdbUpdate, columns, variables }:
+  { email, token, updateDBPromiseArea, afterdbUpdate, elements }:
   {
     email: string, token: string, updateDBPromiseArea: string,
-    afterdbUpdate: () => Promise<void>, columns: any, variables: any
+    afterdbUpdate: () => Promise<void>,
+    elements: {varselect?: {columns: any, variables: any}}
   }
 ) {
   return <div className={styles.ribbon}>
@@ -17,9 +18,13 @@ export default function Ribbon (
       email={email} token={token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
-    <ColumnSelect
-      columns={columns} variables={variables}
-    />
+    {
+      elements.varselect &&
+      <ColumnSelect
+        columns={elements.varselect.columns}
+        variables={elements.varselect.variables}
+      />
+    }
   </div>
 }
 

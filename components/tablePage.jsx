@@ -48,8 +48,9 @@ export default function TablePage (
       token={token}
       updateDBPromiseArea="updatedb"
       afterdbUpdate={updateData}
-      columns={allColumns}
-      variables={variables}
+      elements={{
+        varselect: { columns: allColumns, variables: variables }
+      }}
     />
     <Table
       getTableProps={getTableProps}
