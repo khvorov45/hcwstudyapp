@@ -118,7 +118,12 @@ function ThemeSwitch () {
 export function Siteswitch ({ accessGroup }: {accessGroup: string}) {
   if (['unrestricted', 'admin'].includes(accessGroup)) {
     return <div className={styles.siteswitch}>
-      Siteswitch
+      <select name="cars" id="cars">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="mercedes">Mercedes</option>
+        <option value="audi">Audi</option>
+      </select>
     </div>
   }
   return <></>
