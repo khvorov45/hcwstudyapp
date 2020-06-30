@@ -10,7 +10,7 @@
     border-spacing: 0;
 }
 
-.table thead {
+.table th {
     position: sticky;
     top: 0px;
     background: var(--bg-color);
