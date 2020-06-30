@@ -14,14 +14,14 @@ function toTitleCase (str) {
 }
 
 export default function ParticipantTable (
-  { authorised, email, token, variables }
+  { authorised, user, variables }
 ) {
   const router = useRouter()
   const { table } = router.query
   async function getData () {
     return await accessAPI(
       'getparticipants', 'GET',
-      { email: email, token: token, subset: table }
+      { email: user.email, token: user.token, subset: table }
     )
   }
   const hidden = {
@@ -33,8 +33,8 @@ export default function ParticipantTable (
   }
   return <Layout
     authorised={authorised}
-    email={email}
-    token={token}
+    email={user.email}
+    token={user.token}
     active="tables"
   >
     <Head>
@@ -46,8 +46,8 @@ export default function ParticipantTable (
     </Head>
     <SubnavbarTables
       authorised={authorised}
-      email={email}
-      token={token}
+      email={user.email}
+      token={user.token}
       active={table}
     />
     {
@@ -55,8 +55,8 @@ export default function ParticipantTable (
         ? <TablePage
           getData = {getData}
           authorised = {authorised}
-          email = {email}
-          token = {token}
+          email = {user.email}
+          token = {user.token}
           variables = {variables}
           hidden = {hidden[table]}
         />
@@ -71,8 +71,10 @@ export async function getServerSideProps (context) {
       authorised: await db.authoriseUser(
         context.query.email, context.query.token
       ),
-      email: context.query.email || null,
-      token: context.query.token || null,
+      user: {
+        email: context.query.email || null,
+        token: context.query.token || null
+      },
       variables: newconfig.db.variables.Participant
     }
   }

@@ -1,15 +1,17 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
 import db from '../lib/db'
+import { User } from '../lib/util'
 
 export default function Home (
-  props: {authorised: boolean, email: string, token: string}
+  props: {authorised: boolean, user: User}
 ) {
+  console.log(props)
   return (
     <Layout
       authorised={props.authorised}
-      email={props.email}
-      token={props.token}
+      email={props.user.email}
+      token={props.user.token}
       active="home"
     >
       <Head>
@@ -27,8 +29,10 @@ export async function getServerSideProps (context) {
       authorised: await db.authoriseUser(
         context.query.email, context.query.token
       ),
-      email: context.query.email || null,
-      token: context.query.token || null
+      user: {
+        email: context.query.email || null,
+        token: context.query.token || null
+      }
     }
   }
 }

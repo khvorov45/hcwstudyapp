@@ -40,3 +40,8 @@ export async function accessAPI (
     return res.status
   }
 }
+
+export interface User {
+  email: string,
+  token: string
+}

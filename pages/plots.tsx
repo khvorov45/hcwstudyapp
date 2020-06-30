@@ -2,26 +2,26 @@ import { useState } from 'react'
 import Head from 'next/head'
 import Layout from '../components/layout'
 import db from '../lib/db'
-import { accessAPI } from '../lib/util'
+import { accessAPI, User } from '../lib/util'
 import Ribbon from '../components/ribbon'
 import Plotlist, { Histogram } from '../components/plot'
 
 export default function Plots (
-  { authorised, email, token } :
-  {authorised: boolean, email: string, token: string}
+  { authorised, user } :
+  {authorised: boolean, user: User}
 ) {
   const [data, setData] = useState([])
   async function updateData () {
     setData(await accessAPI(
       'getparticipants', 'GET',
-      { email: email, token: token, subset: 'baseline' }
+      { email: user.email, token: user.token, subset: 'baseline' }
     ))
   }
   return (
     <Layout
       authorised={authorised}
-      email={email}
-      token={token}
+      email={user.email}
+      token={user.token}
       active="plots"
     >
       <Head>
@@ -29,8 +29,8 @@ export default function Plots (
         <meta name="Description" content="Plots - HCW flu study" />
       </Head>
       <Ribbon
-        email={email}
-        token={token}
+        email={user.email}
+        token={user.token}
         updateDBPromiseArea="updatedb"
         afterdbUpdate={updateData}
         elements={{}}
@@ -48,8 +48,10 @@ export async function getServerSideProps (context) {
       authorised: await db.authoriseUser(
         context.query.email, context.query.token
       ),
-      email: context.query.email || null,
-      token: context.query.token || null
+      user: {
+        email: context.query.email || null,
+        token: context.query.token || null
+      }
     }
   }
 }
