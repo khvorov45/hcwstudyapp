@@ -12,15 +12,13 @@ export default function Navbar (
       <Navelement
         content="Tables"
         link={'/tables/contact'}
-        email={user.email}
-        token={user.token}
+        user={user}
         active={active === 'tables'}
       />
       <Navelement
         content="Plots"
         link={'/plots'}
-        email={user.email}
-        token={user.token}
+        user={user}
         active={active === 'plots'}
       />
     </>
@@ -29,8 +27,7 @@ export default function Navbar (
     <Navelement
       content="Help"
       link={'/'}
-      email={user.email}
-      token={user.token}
+      user={user}
       active={active === 'home'}
     />
     {otherNavElements}
@@ -40,12 +37,12 @@ export default function Navbar (
 }
 
 export function Navelement (
-  { content, link, email, token, active }:
-  {content: string, link: string, email: string, token: string, active: boolean}
+  { content, link, user, active }:
+  {content: string, link: string, user: User, active: boolean}
 ) {
   return <li>
     <a
-      href={`${link}${getConstQuery(email, token)}`}
+      href={`${link}${getConstQuery(user.email, user.token)}`}
       className={styles.link}
     >
       <div className={
@@ -68,22 +65,20 @@ export function Subnavbar (
 }
 
 export function SubnavbarTables (
-  { authorised, email, token, active }:
-  {authorised: boolean, email: string, token: string, active: string}
+  { user, active }:
+  {user: User, active: string}
 ) {
-  return <Subnavbar authorised={authorised}>
+  return <Subnavbar authorised={user.authorised}>
     <Navelement
       content="Contact"
       link={'/tables/contact'}
-      email={email}
-      token={token}
+      user={user}
       active={active === 'contact'}
     />
     <Navelement
       content="Baseline"
       link={'/tables/baseline'}
-      email={email}
-      token={token}
+      user={user}
       active={active === 'baseline'}
     />
   </Subnavbar>

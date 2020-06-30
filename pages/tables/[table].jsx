@@ -43,9 +43,7 @@ export default function ParticipantTable (
       />
     </Head>
     <SubnavbarTables
-      authorised={user.authorised}
-      email={user.email}
-      token={user.token}
+      user={user}
       active={table}
     />
     {
