@@ -44,5 +44,6 @@ export async function accessAPI (
 export interface User {
   authorised: boolean,
   email: string,
-  token: string
+  token: string,
+  accessGroup: string
 }

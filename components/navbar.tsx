@@ -1,7 +1,7 @@
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { ThemeSwitch } from './theme'
 import styles from './navbar.module.css'
-import { getConstQuery, accessAPI, User } from '../lib/util'
+import { getConstQuery, User } from '../lib/util'
 
 export default function Navbar (
   { user, active }:
@@ -35,7 +35,7 @@ export default function Navbar (
       active={active === 'home'}
     />
     {otherNavElements}
-    <Siteswitch email={user.email} token={user.token} />
+    <Siteswitch accessGroup={user.accessGroup} />
     <ThemeSwitch />
   </nav>
 }
@@ -90,18 +90,7 @@ export function SubnavbarTables (
   </Subnavbar>
 }
 
-export function Siteswitch ({ email, token }: {email: string, token: string}) {
-  console.log(email, token)
-  const [accessGroup, setAccessGroup] = useState('')
-  async function fetchAccessGroup (email, token) {
-    setAccessGroup(await accessAPI(
-      'getuseraccessgroup', 'GET', { email: email, token: token }
-    ))
-  }
-  useEffect(() => {
-    fetchAccessGroup(email, token)
-  }, [])
-  console.log(accessGroup)
+export function Siteswitch ({ accessGroup }: {accessGroup: string}) {
   return <div>
     {(['unrestricted', 'admin'].includes(accessGroup)) ? 'Siteswitch' : <></>}
   </div>

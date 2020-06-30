@@ -71,7 +71,8 @@ export async function getServerSideProps (context) {
           context.query.email, context.query.token
         ),
         email: context.query.email || null,
-        token: context.query.token || null
+        token: context.query.token || null,
+        accessGroup: await db.getUserAccessGroup(context.query.email)
       },
       variables: newconfig.db.variables.Participant
     }
