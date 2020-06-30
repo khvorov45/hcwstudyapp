@@ -13,8 +13,7 @@ export function isDateISOString (datestring: string) {
     /^(\d{4})-(\d{2})-(\d{2})/.source +
     /T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/.source
   )
-  if (!reISO.exec(datestring)) return datestring
-  return new Date(datestring)
+  return reISO.exec(datestring)
 }
 
 export async function accessAPI (
