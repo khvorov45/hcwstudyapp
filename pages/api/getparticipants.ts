@@ -17,7 +17,19 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     res.status(401).end()
     return
   }
-  const accessGroup = await db.getUserAccessGroup(email)
+  let accessGroup: string
+  const actualAccessGroup = await db.getUserAccessGroup(email)
+  if (!req.query.accessGroup) {
+    accessGroup = actualAccessGroup
+  } else if (
+    ['unrestricted', 'admin'].includes(actualAccessGroup) ||
+      actualAccessGroup === req.query.accessGroup.toString()
+  ) {
+    accessGroup = req.query.accessGroup.toString()
+  } else {
+    res.status(401).end()
+    return
+  }
   let data: any
   if (!req.query.subset) {
     data = await db.getParticipants(accessGroup)
