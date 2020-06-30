@@ -222,10 +222,10 @@ export class Postgres {
     ROUND((
       EXTRACT(EPOCH FROM AGE("dob")) /
       EXTRACT(EPOCH FROM INTERVAL '1 year')
-    )::numeric, 1) as age,
+    )::numeric, 1)::double precision as age,
     "dateScreening",
     "email", "mobile", "redcapRecordId",
-    "accessGroup", "site"  FROM "Participant"`
+    "accessGroup", "site" FROM "Participant"`
     return await this.getParticipants(accessGroup, query)
   }
 

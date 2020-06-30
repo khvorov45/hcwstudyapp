@@ -65,5 +65,9 @@ test('postgres', async () => {
   expect(partAccessGroups.includes('melbourne')).toBe(true)
   expect(partAccessGroups.includes('adelaide')).toBe(false)
 
+  // Baseline export
+  const baseline = await db.getParticipantsBaseline('unrestricted')
+  expect(typeof baseline[0].age).toBe('number')
+
   await db.end()
 }, 15000)
