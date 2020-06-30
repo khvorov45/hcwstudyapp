@@ -14,7 +14,7 @@ function toTitleCase (str) {
 }
 
 export default function ParticipantTable (
-  { authorised, user, variables }
+  { user, variables }
 ) {
   const router = useRouter()
   const { table } = router.query
@@ -32,7 +32,7 @@ export default function ParticipantTable (
     ]
   }
   return <Layout
-    authorised={authorised}
+    authorised={user.authorised}
     email={user.email}
     token={user.token}
     active="tables"
@@ -45,7 +45,7 @@ export default function ParticipantTable (
       />
     </Head>
     <SubnavbarTables
-      authorised={authorised}
+      authorised={user.authorised}
       email={user.email}
       token={user.token}
       active={table}
@@ -54,7 +54,7 @@ export default function ParticipantTable (
       ['contact', 'baseline'].includes(table)
         ? <TablePage
           getData = {getData}
-          authorised = {authorised}
+          authorised = {user.authorised}
           email = {user.email}
           token = {user.token}
           variables = {variables}
@@ -68,10 +68,10 @@ export default function ParticipantTable (
 export async function getServerSideProps (context) {
   return {
     props: {
-      authorised: await db.authoriseUser(
-        context.query.email, context.query.token
-      ),
       user: {
+        authorised: await db.authoriseUser(
+          context.query.email, context.query.token
+        ),
         email: context.query.email || null,
         token: context.query.token || null
       },

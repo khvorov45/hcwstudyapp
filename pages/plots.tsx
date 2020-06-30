@@ -7,8 +7,8 @@ import Ribbon from '../components/ribbon'
 import Plotlist, { Histogram } from '../components/plot'
 
 export default function Plots (
-  { authorised, user } :
-  {authorised: boolean, user: User}
+  { user } :
+  {user: User}
 ) {
   const [data, setData] = useState([])
   async function updateData () {
@@ -19,7 +19,7 @@ export default function Plots (
   }
   return (
     <Layout
-      authorised={authorised}
+      authorised={user.authorised}
       email={user.email}
       token={user.token}
       active="plots"
@@ -45,10 +45,10 @@ export default function Plots (
 export async function getServerSideProps (context) {
   return {
     props: {
-      authorised: await db.authoriseUser(
-        context.query.email, context.query.token
-      ),
       user: {
+        authorised: await db.authoriseUser(
+          context.query.email, context.query.token
+        ),
         email: context.query.email || null,
         token: context.query.token || null
       }
