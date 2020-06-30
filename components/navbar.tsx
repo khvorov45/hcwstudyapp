@@ -6,40 +6,43 @@ export default function Navbar (
   { user, active }:
   {user: User, active: string}
 ) {
-  var otherNavElements = <></>
-  if (user.authorised) {
-    otherNavElements = <>
-      <Navelement
-        content="Tables"
-        link={'/tables/contact'}
-        user={user}
-        active={active === 'tables'}
-      />
-      <Navelement
-        content="Plots"
-        link={'/plots'}
-        user={user}
-        active={active === 'plots'}
-      />
-    </>
-  }
   return <nav className={styles.container}>
     <Navelement
       content="Help"
       link={'/'}
       user={user}
+      authorisedOnly={false}
       active={active === 'home'}
     />
-    {otherNavElements}
+    <Navelement
+      content="Tables"
+      link={'/tables/contact'}
+      user={user}
+      authorisedOnly={true}
+      active={active === 'tables'}
+    />
+    <Navelement
+      content="Plots"
+      link={'/plots'}
+      user={user}
+      authorisedOnly={true}
+      active={active === 'plots'}
+    />
     <Siteswitch accessGroup={user.accessGroup} />
     <ThemeSwitch />
   </nav>
 }
 
 export function Navelement (
-  { content, link, user, active }:
-  {content: string, link: string, user: User, active: boolean}
+  { content, link, user, active, authorisedOnly }:
+  {
+    content: string, link: string, user: User,
+    active: boolean, authorisedOnly: boolean
+  }
 ) {
+  if (authorisedOnly && user.authorised !== true) {
+    return <></>
+  }
   return <li>
     <a
       href={`${link}${getConstQuery(user.email, user.token)}`}
@@ -55,10 +58,9 @@ export function Navelement (
 }
 
 export function Subnavbar (
-  { children, authorised }:
-  {children: ReactNode, authorised: boolean}
+  { children }:
+  {children: ReactNode}
 ) {
-  if (!authorised) return <></>
   return <nav className={styles.container}>
     {children}
   </nav>
@@ -68,17 +70,19 @@ export function SubnavbarTables (
   { user, active }:
   {user: User, active: string}
 ) {
-  return <Subnavbar authorised={user.authorised}>
+  return <Subnavbar>
     <Navelement
       content="Contact"
       link={'/tables/contact'}
       user={user}
+      authorisedOnly={true}
       active={active === 'contact'}
     />
     <Navelement
       content="Baseline"
       link={'/tables/baseline'}
       user={user}
+      authorisedOnly={true}
       active={active === 'baseline'}
     />
   </Subnavbar>
@@ -106,8 +110,10 @@ function ThemeSwitch () {
 }
 
 export function Siteswitch ({ accessGroup }: {accessGroup: string}) {
-  const theswitch = <div className={styles.siteswitch}>
-    Siteswitch
-  </div>
-  return (['unrestricted', 'admin'].includes(accessGroup)) ? theswitch : <></>
+  if (['unrestricted', 'admin'].includes(accessGroup)) {
+    return <div className={styles.siteswitch}>
+      Siteswitch
+    </div>
+  }
+  return <></>
 }

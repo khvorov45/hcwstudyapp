@@ -288,6 +288,7 @@ export class Postgres {
   }
 
   async getUserAccessGroup (email: string): Promise<string> {
+    if (!email) return null
     return await this.getValue(
       'SELECT "accessGroup" FROM "User" WHERE "email" = $1',
       [email.toLowerCase()]
