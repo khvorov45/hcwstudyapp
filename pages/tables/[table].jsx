@@ -35,17 +35,9 @@ export default function ParticipantTable (
       'site'
     ]
   }
-  // @PROBLEM
-  // Data race? `updateData` is passed on to other components and thus
-  // may be called before the current `accessGroup`
-  // state changes thus resulting in an update with previous state
   return <Layout
     user={user}
     active="tables"
-    onSiteChange={(event) => {
-      setAccessGroup(event.target.value)
-      updateData(event.target.value)
-    }}
   >
     <Head>
       <title>{toTitleCase(table)} - HCW flu study</title>
@@ -62,7 +54,7 @@ export default function ParticipantTable (
       ['contact', 'baseline'].includes(table)
         ? <TablePage
           jsonrows = {jsonrows}
-          updateData = {updateData}
+          afterdbUpdate = {updateData}
           authorised = {user.authorised}
           email = {user.email}
           token = {user.token}

@@ -8,7 +8,7 @@ import tableStyles from './table.module.css'
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function TablePage (
-  { jsonrows, updateData, email, token, variables, hidden }
+  { jsonrows, afterdbUpdate, email, token, variables, hidden }
 ) {
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
@@ -43,7 +43,7 @@ export default function TablePage (
       email={email}
       token={token}
       updateDBPromiseArea="updatedb"
-      afterdbUpdate={updateData}
+      afterdbUpdate={afterdbUpdate}
       elements={{
         varselect: { columns: allColumns, variables: variables }
       }}

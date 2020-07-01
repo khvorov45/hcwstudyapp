@@ -1,11 +1,10 @@
 import { ReactNode } from 'react'
 import styles from './navbar.module.css'
 import { getConstQuery, User } from '../lib/util'
-import { Select } from './input'
 
 export default function Navbar (
-  { user, active, onSiteChange }:
-  {user: User, active: string, onSiteChange: (event) => void}
+  { user, active }:
+  {user: User, active: string}
 ) {
   return <nav className={styles.container}>
     <div className={styles.leftside}>
@@ -32,7 +31,6 @@ export default function Navbar (
       />
     </div>
     <div className={styles.rightside}>
-      <Siteswitch accessGroup={user.accessGroup} onChange={onSiteChange} />
       <ThemeSwitch />
     </div>
   </nav>
@@ -114,21 +112,4 @@ function ThemeSwitch () {
       invert_colors
     </i>
   )
-}
-
-export function Siteswitch (
-  { accessGroup, onChange }: {accessGroup: string, onChange: (event) => void}
-) {
-  if (!['unrestricted', 'admin'].includes(accessGroup)) {
-    return <></>
-  }
-  return <form className={styles.siteswitch}>
-    <Select
-      options={[
-        'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
-        'perth', 'sydney'
-      ]}
-      onChange={onChange}
-    />
-  </form>
 }
