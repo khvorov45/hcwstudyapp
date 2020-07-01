@@ -99,15 +99,3 @@ export function Checkbox (
     {label}
   </label>
 }
-
-export function MySelect (
-  { children, name, onChange }:
-  {children: React.ReactNode, name: string, onChange: (event) => void}
-) {
-  return <select
-    className={`${styles.input} ${styles.select}`}
-    name={name} onChange={onChange}
-  >
-    {children}
-  </select>
-}

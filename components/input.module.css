@@ -109,10 +109,6 @@
     transform: scale(.6);
 }
 
-.select {
-    display: none;
-}
-
 /* Chrome's BS
 @PROBLEM
 Cant remove chrome's border

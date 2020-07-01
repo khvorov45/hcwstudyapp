@@ -44,7 +44,7 @@ export default function Layout (
     children: React.ReactNode,
     user: User,
     active: string,
-    onSiteChange: (value, action) => void,
+    onSiteChange: (event) => void,
   }
 ) {
   var pageContent = children
