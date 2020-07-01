@@ -34,14 +34,7 @@
     background-color: var(--bg-highlight);
 }
 
-/*
-.siteswitch {
-    margin-left: auto;
-}
-*/
-
 .themeswitch {
     cursor: pointer;
     user-select: none;
-    /*margin-left: auto;*/
 }

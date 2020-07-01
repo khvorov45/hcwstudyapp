@@ -42,9 +42,9 @@ export default function ParticipantTable (
   return <Layout
     user={user}
     active="tables"
-    onSiteChange={(event) => {
-      setAccessGroup(event.target.value)
-      updateData(event.target.value)
+    onSiteChange={(value, _action) => {
+      setAccessGroup(value.value)
+      updateData(value.value)
     }}
   >
     <Head>
