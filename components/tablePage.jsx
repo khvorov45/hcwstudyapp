@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useTable, useSortBy } from 'react-table'
 import Table from './table'
 import { isDateISOString } from '../lib/util'
@@ -8,12 +8,8 @@ import tableStyles from './table.module.css'
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function TablePage (
-  { getData, email, token, variables, hidden }
+  { jsonrows, updateData, email, token, variables, hidden }
 ) {
-  const [jsonrows, setData] = useState([])
-  async function updateData () {
-    setData(await getData())
-  }
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
     () => generateColumns(data[0], variables),

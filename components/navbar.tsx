@@ -3,8 +3,8 @@ import styles from './navbar.module.css'
 import { getConstQuery, User } from '../lib/util'
 
 export default function Navbar (
-  { user, active }:
-  {user: User, active: string}
+  { user, active, onSiteChange }:
+  {user: User, active: string, onSiteChange: (event) => void}
 ) {
   return <nav className={styles.container}>
     <div className={styles.leftside}>
@@ -31,7 +31,7 @@ export default function Navbar (
       />
     </div>
     <div className={styles.rightside}>
-      <Siteswitch accessGroup={user.accessGroup} />
+      <Siteswitch accessGroup={user.accessGroup} onChange={onSiteChange} />
       <ThemeSwitch />
     </div>
   </nav>
@@ -115,16 +115,18 @@ function ThemeSwitch () {
   )
 }
 
-export function Siteswitch ({ accessGroup }: {accessGroup: string}) {
+export function Siteswitch (
+  { accessGroup, onChange }: {accessGroup: string, onChange: (event) => void}
+) {
   if (['unrestricted', 'admin'].includes(accessGroup)) {
-    return <div className={styles.siteswitch}>
-      <select name="cars" id="cars">
-        <option value="volvo">Volvo</option>
-        <option value="saab">Saab</option>
+    return <form className={styles.siteswitch}>
+      <select name="sites" onChange={onChange}>
+        <option value="melbourne">Melbourne</option>
+        <option value="adelaide">Adelaide</option>
         <option value="mercedes">Mercedes</option>
         <option value="audi">Audi</option>
       </select>
-    </div>
+    </form>
   }
   return <></>
 }

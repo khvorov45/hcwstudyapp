@@ -40,10 +40,11 @@ function Unauthorised () {
 }
 
 export default function Layout (
-  { children, user, active }: {
+  { children, user, active, onSiteChange }: {
     children: React.ReactNode,
     user: User,
     active: string,
+    onSiteChange: (event) => void,
   }
 ) {
   var pageContent = children
@@ -57,6 +58,7 @@ export default function Layout (
       <Navbar
         user={user}
         active={active}
+        onSiteChange={onSiteChange}
       />
       <main>{pageContent}</main>
     </>
