@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import styles from './navbar.module.css'
-import { getConstQuery, User } from '../lib/util'
+import { getConstQuery, User, toTitleCase } from '../lib/util'
 
 export default function Navbar (
   { user, active, onSiteChange }:
@@ -120,11 +120,21 @@ export function Siteswitch (
 ) {
   if (['unrestricted', 'admin'].includes(accessGroup)) {
     return <form className={styles.siteswitch}>
-      <select name="sites" onChange={onChange}>
-        <option value="melbourne">Melbourne</option>
-        <option value="adelaide">Adelaide</option>
-        <option value="mercedes">Mercedes</option>
-        <option value="audi">Audi</option>
+      <select name="accessGroup" onChange={onChange}>
+        {
+          // @REVIEW
+          // Need to pass this from config but can't import config because
+          // this will run in browser
+          [
+            'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
+            'perth', 'sydney'
+          ].map(
+            (accessGroup) => <option
+              key={accessGroup} value={accessGroup}>
+              {toTitleCase(accessGroup)}
+            </option>
+          )
+        }
       </select>
     </form>
   }

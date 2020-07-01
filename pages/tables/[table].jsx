@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useState } from 'react'
-import { accessAPI } from '../../lib/util'
+import { accessAPI, toTitleCase } from '../../lib/util'
 import { newconfig } from '../../lib/config'
 import db from '../../lib/db'
 import TablePage from '../../components/tablePage'
@@ -9,10 +9,6 @@ import { SubnavbarTables } from '../../components/navbar'
 import { useRouter } from 'next/router'
 
 /* eslint-disable react/prop-types, react/jsx-key */
-
-function toTitleCase (str) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
 
 export default function ParticipantTable (
   { user, variables }
