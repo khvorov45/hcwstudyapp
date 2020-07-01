@@ -101,6 +101,34 @@ export function Checkbox (
   </label>
 }
 
+export function Radio (
+  { label, value, name }:
+  {label: string, value: string, name: string}
+) {
+  return <label className={styles.radio}>
+    <input type="radio" value={value} name={name} />
+    <span className={styles.actualRadio}></span>
+    {label}
+  </label>
+}
+
+export function RadioGroup (
+  { options, name }: {options: {label: string, value: string}[], name: string}
+) {
+  return <div
+    className={`${styles.input} ${styles.radioGroup}`}
+  >
+    {options.map(opt => (
+      <Radio
+        name={name}
+        label={opt.label}
+        key={opt.value}
+        value={opt.value}
+      />
+    ))}
+  </div>
+}
+
 export function Select (
   { options, onChange }: {options: string[], onChange: (event) => void}
 ) {

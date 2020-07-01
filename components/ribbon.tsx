@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { ButtonWithTimestamp, Checkbox } from './input'
-import { accessAPI } from '../lib/util'
+import { ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
+import { accessAPI, toTitleCase } from '../lib/util'
 import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
 
@@ -25,6 +25,7 @@ export default function Ribbon (
         variables={elements.varselect.variables}
       />
     }
+    <SiteSelect sites={['site1', 'site2']} />
   </div>
 }
 
@@ -64,6 +65,8 @@ export function ColumnSelect (
   { columns, variables }:
   {columns: any, variables: any}
 ) {
+  // @REVIEW
+  // Put this div into its own class
   return <div
     className={`${inputStyles.input} ${inputStyles.multipleSelect}`}
   >
@@ -75,4 +78,11 @@ export function ColumnSelect (
       />
     ))}
   </div>
+}
+
+export function SiteSelect ({ sites }: {sites: string[]}) {
+  return <RadioGroup
+    name={'sites'}
+    options={sites.map(s => ({ value: s, label: toTitleCase(s) }))}
+  />
 }
