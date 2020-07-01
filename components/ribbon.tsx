@@ -18,6 +18,7 @@ export default function Ribbon (
       email={email} token={token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
+    <SiteSelect sites={['site1', 'site2']} />
     {
       elements.varselect &&
       <ColumnSelect
@@ -25,7 +26,6 @@ export default function Ribbon (
         variables={elements.varselect.variables}
       />
     }
-    <SiteSelect sites={['site1', 'site2']} />
   </div>
 }
 

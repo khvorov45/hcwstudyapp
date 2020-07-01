@@ -116,7 +116,9 @@ export function RadioGroup (
   { options, name }: {options: {label: string, value: string}[], name: string}
 ) {
   return <div
-    className={`${styles.input} ${styles.radioGroup}`}
+    className={
+      `${styles.input} ${styles.radioGroup} ${styles.multipleSelect}`
+    }
   >
     {options.map(opt => (
       <Radio
