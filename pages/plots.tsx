@@ -11,16 +11,28 @@ export default function Plots (
   {user: User}
 ) {
   const [data, setData] = useState([])
-  async function updateData () {
+  const [accessGroup, setAccessGroup] = useState(user.accessGroup)
+  async function updateData (newAccessGroup) {
     setData(await accessAPI(
       'getparticipants', 'GET',
-      { email: user.email, token: user.token, subset: 'baseline' }
+      {
+        email: user.email,
+        token: user.token,
+        subset: 'baseline',
+        accessGroup: newAccessGroup || accessGroup
+      }
     ))
   }
+  // @REVIEW
+  // Repeating a lot of code from [table]
   return (
     <Layout
       user={user}
       active="plots"
+      onSiteChange={(event) => {
+        setAccessGroup(event.target.value)
+        updateData(event.target.value)
+      }}
     >
       <Head>
         <title>Plots - HCW flu study</title>
@@ -30,7 +42,7 @@ export default function Plots (
         email={user.email}
         token={user.token}
         updateDBPromiseArea="updatedb"
-        afterdbUpdate={updateData}
+        afterdbUpdate={() => updateData(accessGroup)}
         elements={{}}
       />
       <Plotlist>

@@ -12,6 +12,7 @@ export default function Plotlist ({ children }: {children: ReactNode}) {
 }
 
 export function Histogram ({ data, x }: {data: any, x: string}) {
+  console.log(data)
   const xvec = data.map(row => row[x])
   const histData = bin()(xvec).reduce(
     (acc, el) => {
@@ -20,6 +21,7 @@ export function Histogram ({ data, x }: {data: any, x: string}) {
     },
     []
   )
+  console.log(histData)
   return <BarChart
     width={500} height={250} data={histData}
     margin={{ top: 20, right: 80, bottom: 20, left: 5 }}
