@@ -104,7 +104,10 @@ export function Checkbox (
 export function Select (
   { options, onChange }: {options: string[], onChange: (event) => void}
 ) {
-  return <select name="accessGroup" onChange={onChange}>
+  return <select
+    className={`${styles.input} ${styles.select}`}
+    onChange={onChange}
+  >
     {
       options.map(
         (opt) => <option
