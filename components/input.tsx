@@ -1,5 +1,6 @@
 import { SuccessIndicator } from './symbol'
 import { Timestamp } from './util'
+import { toTitleCase } from '../lib/util'
 import styles from './input.module.css'
 
 export function ButtonWithTimestamp (
@@ -98,4 +99,19 @@ export function Checkbox (
     <span className={styles.actualCheckbox}></span>
     {label}
   </label>
+}
+
+export function Select (
+  { options, onChange }: {options: string[], onChange: (event) => void}
+) {
+  return <select name="accessGroup" onChange={onChange}>
+    {
+      options.map(
+        (opt) => <option
+          key={opt} value={opt}>
+          {toTitleCase(opt)}
+        </option>
+      )
+    }
+  </select>
 }

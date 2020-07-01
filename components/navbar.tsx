@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import styles from './navbar.module.css'
-import { getConstQuery, User, toTitleCase } from '../lib/util'
+import { getConstQuery, User } from '../lib/util'
+import { Select } from './input'
 
 export default function Navbar (
   { user, active, onSiteChange }:
@@ -118,25 +119,16 @@ function ThemeSwitch () {
 export function Siteswitch (
   { accessGroup, onChange }: {accessGroup: string, onChange: (event) => void}
 ) {
-  if (['unrestricted', 'admin'].includes(accessGroup)) {
-    return <form className={styles.siteswitch}>
-      <select name="accessGroup" onChange={onChange}>
-        {
-          // @REVIEW
-          // Need to pass this from config but can't import config because
-          // this will run in browser
-          [
-            'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
-            'perth', 'sydney'
-          ].map(
-            (accessGroup) => <option
-              key={accessGroup} value={accessGroup}>
-              {toTitleCase(accessGroup)}
-            </option>
-          )
-        }
-      </select>
-    </form>
+  if (!['unrestricted', 'admin'].includes(accessGroup)) {
+    return <></>
   }
-  return <></>
+  return <form className={styles.siteswitch}>
+    <Select
+      options={[
+        'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
+        'perth', 'sydney'
+      ]}
+      onChange={onChange}
+    />
+  </form>
 }
