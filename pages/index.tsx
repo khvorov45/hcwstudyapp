@@ -6,10 +6,13 @@ import { User } from '../lib/util'
 export default function Home (
   { user }: { user: User}
 ) {
+  // @REVIEW
+  // Remove sitechanging from index?
   return (
     <Layout
       user={user}
       active="home"
+      onSiteChange={() => {}}
     >
       <Head>
         <title>HCW flu study reports</title>
