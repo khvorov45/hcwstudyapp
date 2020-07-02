@@ -184,7 +184,7 @@ export class Postgres {
   }
 
   async fillParticipant (): Promise<void> {
-    const participants = await exportParticipants(true)
+    const participants = await exportParticipants()
     await this.execute(pgp().helpers.insert(
       participants,
       [
