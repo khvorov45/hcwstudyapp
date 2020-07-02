@@ -1,23 +1,11 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useTable, useSortBy } from 'react-table'
 import Table from './table'
-import { isDateISOString, accessAPI } from '../lib/util'
+import { isDateISOString, fetchParticipantData } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
-
-async function fetchData (user, tableName, accessGroup) {
-  return await accessAPI(
-    'getparticipants', 'GET',
-    {
-      email: user.email,
-      token: user.token,
-      subset: tableName,
-      accessGroup: accessGroup
-    }
-  )
-}
 
 export default function TablePage (
   { user, tableName, variables, hidden }
@@ -29,7 +17,7 @@ export default function TablePage (
   const [jsonrows, setData] = useState([])
   // Data updating
   async function updateData () {
-    setData(await fetchData(user, tableName, accessGroup))
+    setData(await fetchParticipantData(user, tableName, accessGroup))
   }
   useEffect(() => { updateData() }, [accessGroup])
   // Table generation

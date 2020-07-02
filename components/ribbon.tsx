@@ -65,7 +65,8 @@ export function UpdateDatabaseButton (
     await trackPromise(updateAndAfter(), promiseArea)
   }
   useEffect(() => {
-    accessAPI('update', 'GET').then((d) => setLastUpdate(new Date(d)))
+    trackPromise(accessAPI('update', 'GET'), promiseArea)
+      .then((d) => setLastUpdate(new Date(d)))
   }, [])
   const [lastUpdate, setLastUpdate] = useState(new Date(0))
   return <ButtonWithTimestamp

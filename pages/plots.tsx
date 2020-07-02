@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Layout from '../components/layout'
 import db from '../lib/db'
-import { accessAPI, User } from '../lib/util'
+import { fetchParticipantData, User } from '../lib/util'
 import Ribbon from '../components/ribbon'
 import Plotlist, { Histogram } from '../components/plot'
 
@@ -12,37 +12,24 @@ export default function Plots (
 ) {
   const [data, setData] = useState([])
   const [accessGroup, setAccessGroup] = useState(user.accessGroup)
-  async function updateData (newAccessGroup) {
-    setData(await accessAPI(
-      'getparticipants', 'GET',
-      {
-        email: user.email,
-        token: user.token,
-        subset: 'baseline',
-        accessGroup: newAccessGroup || accessGroup
-      }
-    ))
+  async function updateData () {
+    setData(await fetchParticipantData(user, 'baseline', accessGroup))
   }
-  // @REVIEW
-  // Repeating a lot of code from [table]
+  useEffect(() => { updateData() }, [accessGroup])
   return (
     <Layout
       user={user}
       active="plots"
-      onSiteChange={(event) => {
-        setAccessGroup(event.target.value)
-        updateData(event.target.value)
-      }}
     >
       <Head>
         <title>Plots - HCW flu study</title>
         <meta name="Description" content="Plots - HCW flu study" />
       </Head>
       <Ribbon
-        email={user.email}
-        token={user.token}
+        user={user}
         updateDBPromiseArea="updatedb"
-        afterdbUpdate={() => updateData(accessGroup)}
+        afterdbUpdate={updateData}
+        onAccessGroupChange={(value) => { setAccessGroup(value) }}
         elements={{}}
       />
       <Plotlist>

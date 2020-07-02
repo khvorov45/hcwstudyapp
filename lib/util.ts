@@ -51,3 +51,17 @@ export interface User {
 export function toTitleCase (str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+export async function fetchParticipantData (
+  user: User, tableName: string, accessGroup: string
+) {
+  return await accessAPI(
+    'getparticipants', 'GET',
+    {
+      email: user.email,
+      token: user.token,
+      subset: tableName,
+      accessGroup: accessGroup
+    }
+  )
+}
