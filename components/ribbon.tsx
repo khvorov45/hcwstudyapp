@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { trackPromise } from 'react-promise-tracker'
 import { ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
 import { accessAPI, toTitleCase } from '../lib/util'
@@ -6,10 +6,14 @@ import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
 
 export default function Ribbon (
-  { email, token, updateDBPromiseArea, afterdbUpdate, elements }:
+  {
+    email, token, updateDBPromiseArea, afterdbUpdate,
+    onAccessGroupChange, elements
+  }:
   {
     email: string, token: string, updateDBPromiseArea: string,
     afterdbUpdate: () => Promise<void>,
+    onAccessGroupChange: (value: string) => void,
     elements: {varselect?: {columns: any, variables: any}}
   }
 ) {
@@ -18,7 +22,15 @@ export default function Ribbon (
       email={email} token={token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
-    <SiteSelect sites={['site1', 'site2']} />
+    <SiteSelect
+    // @REVIEW
+    // Pull this array from config
+      sites={[
+        'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
+        'perth', 'sydney'
+      ]}
+      onChange={onAccessGroupChange}
+    />
     {
       elements.varselect &&
       <ColumnSelect
@@ -36,27 +48,21 @@ export function UpdateDatabaseButton (
     afterdbUpdate: () => Promise<void>
   }
 ) {
-  async function updateDB (actuallyThough: boolean) {
+  async function updateDB () {
     async function updateAndAfter () {
-      let date: Date
-      if (actuallyThough) {
-        date = await accessAPI(
-          'update', 'POST', { email: email, token: token }
-        )
-      } else {
-        date = await accessAPI('update', 'GET')
-      }
+      const date = await accessAPI(
+        'update', 'POST', { email: email, token: token }
+      )
       await afterdbUpdate()
       setLastUpdate(new Date(date))
     }
     await trackPromise(updateAndAfter(), promiseArea)
   }
-  useEffect(() => { updateDB(false) }, [])
   const [lastUpdate, setLastUpdate] = useState(new Date(0))
   return <ButtonWithTimestamp
     label="Update"
     timestamp={lastUpdate}
-    onClick={() => updateDB(true)}
+    onClick={() => updateDB()}
     promiseArea={promiseArea}
   />
 }
@@ -80,9 +86,12 @@ export function ColumnSelect (
   </div>
 }
 
-export function SiteSelect ({ sites }: {sites: string[]}) {
+export function SiteSelect (
+  { sites, onChange }: {sites: string[], onChange: (value: string) => void}
+) {
   return <RadioGroup
     name={'sites'}
+    onChange={onChange}
     options={sites.map(s => ({ value: s, label: toTitleCase(s) }))}
   />
 }

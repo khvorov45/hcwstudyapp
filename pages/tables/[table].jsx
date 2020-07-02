@@ -1,6 +1,5 @@
 import Head from 'next/head'
-import { useState } from 'react'
-import { accessAPI, toTitleCase } from '../../lib/util'
+import { toTitleCase } from '../../lib/util'
 import { newconfig } from '../../lib/config'
 import db from '../../lib/db'
 import TablePage from '../../components/tablePage'
@@ -15,19 +14,6 @@ export default function ParticipantTable (
 ) {
   const router = useRouter()
   const { table } = router.query
-  const [accessGroup, setAccessGroup] = useState(user.accessGroup)
-  const [jsonrows, setData] = useState([])
-  async function updateData (newAccessGroup) {
-    setData(await accessAPI(
-      'getparticipants', 'GET',
-      {
-        email: user.email,
-        token: user.token,
-        subset: table,
-        accessGroup: newAccessGroup || accessGroup
-      }
-    ))
-  }
   const hidden = {
     contact: ['accessGroup', 'site', 'dateScreening'],
     baseline: [
@@ -53,11 +39,8 @@ export default function ParticipantTable (
     {
       ['contact', 'baseline'].includes(table)
         ? <TablePage
-          jsonrows = {jsonrows}
-          afterdbUpdate = {updateData}
-          authorised = {user.authorised}
-          email = {user.email}
-          token = {user.token}
+          user = {user}
+          tableName = {table}
           variables = {variables}
           hidden = {hidden[table]}
         />

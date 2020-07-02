@@ -1,15 +1,51 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useTable, useSortBy } from 'react-table'
 import Table from './table'
-import { isDateISOString } from '../lib/util'
+import { isDateISOString, accessAPI } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
+async function fetchData (user, tableName, accessGroup) {
+  return await accessAPI(
+    'getparticipants', 'GET',
+    {
+      email: user.email,
+      token: user.token,
+      subset: tableName,
+      accessGroup: accessGroup
+    }
+  )
+}
+
 export default function TablePage (
-  { jsonrows, afterdbUpdate, email, token, variables, hidden }
+  { user, tableName, variables, hidden }
 ) {
+  // Handle access group change
+  const [accessGroup, setAccessGroup] = useState(
+    user.accessGroup === 'admin' ? 'unrestricted' : user.accessGroup
+  )
+  function onAccessGroupChange (value) {
+    console.log('set access group to ' + value)
+    setAccessGroup(value)
+  }
+  // Initial data
+  const [jsonrows, setData] = useState([])
+  /* useEffect(() => {
+    fetchData(user, tableName, user.accessGroup).then(d => setData(d))
+  }, []) */
+  // Data updating
+  async function updateData () {
+    console.log(
+      'called updatedata in tablepage with access group ' + accessGroup
+    )
+    setData(await fetchData(user, tableName, accessGroup))
+  }
+  useEffect(() => {
+    updateData()
+  }, [accessGroup])
+  // Table generation
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
     () => generateColumns(data[0], variables),
@@ -40,10 +76,11 @@ export default function TablePage (
   )
   return <>
     <Ribbon
-      email={email}
-      token={token}
+      email={user.email}
+      token={user.token}
       updateDBPromiseArea="updatedb"
-      afterdbUpdate={afterdbUpdate}
+      afterdbUpdate={updateData}
+      onAccessGroupChange={onAccessGroupChange}
       elements={{
         varselect: { columns: allColumns, variables: variables }
       }}

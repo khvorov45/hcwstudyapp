@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { SuccessIndicator } from './symbol'
 import { Timestamp } from './util'
 import { toTitleCase } from '../lib/util'
@@ -102,19 +103,32 @@ export function Checkbox (
 }
 
 export function Radio (
-  { label, value, name }:
-  {label: string, value: string, name: string}
+  { label, value, name, checked, onChange }:
+  {
+    label: string, value: string, name: string, checked: boolean
+    onChange: (event) => void
+  }
 ) {
   return <label className={styles.radio}>
-    <input type="radio" value={value} name={name} />
+    <input
+      type="radio" value={value} name={name}
+      onChange={onChange} checked={checked}
+    />
     <span className={styles.actualRadio}></span>
     {label}
   </label>
 }
 
 export function RadioGroup (
-  { options, name }: {options: {label: string, value: string}[], name: string}
+  { options, name, onChange }:
+  {
+    options: {label: string, value: string}[],
+    name: string,
+    onChange: (value: string) => void
+  }
 ) {
+  const [value, setValue] = useState(options[0].value)
+  useEffect(() => { onChange(value) }, [value])
   return <div
     className={
       `${styles.input} ${styles.radioGroup} ${styles.multipleSelect}`
@@ -126,6 +140,8 @@ export function RadioGroup (
         label={opt.label}
         key={opt.value}
         value={opt.value}
+        checked={value === opt.value}
+        onChange={(event) => { setValue(event.target.value) }}
       />
     ))}
   </div>
