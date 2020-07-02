@@ -78,6 +78,7 @@ export async function exportParticipants () {
       dateScreening: processDate(r.date_screening),
       email: r.email.toLowerCase(),
       mobile: r.mobile_number,
+      gender: r.a1_gender,
       dob: processDate(r.a2_dob)
     }
   })

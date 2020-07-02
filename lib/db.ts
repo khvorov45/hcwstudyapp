@@ -173,6 +173,7 @@ export class Postgres {
           "email" TEXT,
           "mobile" TEXT,
           "dob" TIMESTAMPTZ,
+          "gender" TEXT,
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
@@ -189,7 +190,7 @@ export class Postgres {
       participants,
       [
         'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
-        'mobile', 'email'
+        'mobile', 'email', 'gender'
       ],
       'Participant'
     ))
@@ -218,7 +219,7 @@ export class Postgres {
 
   async getParticipantsBaseline (accessGroup: string): Promise<any[]> {
     const query =
-    `SELECT "pid", "dob",
+    `SELECT "pid", "gender", "dob",
     ROUND((
       EXTRACT(EPOCH FROM AGE("dob")) /
       EXTRACT(EPOCH FROM INTERVAL '1 year')

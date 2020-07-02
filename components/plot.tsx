@@ -12,7 +12,6 @@ export default function Plotlist ({ children }: {children: ReactNode}) {
 }
 
 export function Histogram ({ data, x }: {data: any, x: string}) {
-  console.log(data)
   const histData = bin()
     .value(row => row[x])
     .thresholds([18, 30, 40, 50, 66])(data)

@@ -26,3 +26,6 @@ Participant:
   - my: age
     redcap:
     label: Age
+  - my: gender
+    redcap: a1_gender
+    label: Gender
