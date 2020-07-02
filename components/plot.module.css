@@ -1,4 +1,7 @@
 .plotlist {
     display: flex;
     margin-top: 20px;
+    flex-wrap: wrap;
+    max-height: 75vh;
+    overflow-y: scroll;
 }

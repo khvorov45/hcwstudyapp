@@ -11,25 +11,13 @@ export default function Plotlist ({ children }: {children: ReactNode}) {
   </div>
 }
 
-export function Histogram ({ data, x }: {data: any, x: string}) {
-  const histData = bin()
-    .value(row => row[x])
-    .thresholds([18, 30, 40, 50, 66])(data)
-    .reduce(
-      (acc, el) => {
-        acc.push({
-          x: el.x0 < 18 ? `<${el.x1}`
-            : el.x1 > 66 ? `>=${el.x0}`
-              : `${el.x0}-${el.x1 - 1}`,
-          y: el.length
-        })
-        return acc
-      },
-      []
-    )
+export function GenericBar (
+  { data, xlab }:
+  {data: any, xlab: string}
+) {
   return <BarChart
-    width={500} height={250} data={histData}
-    margin={{ top: 20, right: 80, bottom: 20, left: 5 }}
+    width={500} height={250} data={data}
+    margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
   >
     <XAxis
       dataKey="x" tick={{
@@ -37,7 +25,7 @@ export function Histogram ({ data, x }: {data: any, x: string}) {
       }}
     >
       <Label
-        value='Age'
+        value={xlab}
         position='bottom'
         style={{ textAnchor: 'middle', fill: 'var(--font-color)' }}
       />
@@ -65,4 +53,40 @@ export function Histogram ({ data, x }: {data: any, x: string}) {
       dataKey="y" fill="#8884d8" isAnimationActive={false}
     />
   </BarChart>
+}
+
+export function GenderBar ({ data }: {data: any}) {
+  const processedData = {}
+  data.map(row => {
+    Object.keys(processedData).includes(row.gender)
+      ? ++processedData[row.gender]
+      : processedData[row.gender] = 1
+  })
+  const barData = []
+  for (const genderName in processedData) {
+    barData.push({
+      x: genderName === '' ? '(Missing)' : genderName,
+      y: processedData[genderName]
+    })
+  }
+  return <GenericBar data={barData} xlab='Gender' />
+}
+
+export function AgeHistogram ({ data }: {data: any}) {
+  const histData = bin()
+    .value(row => row.age)
+    .thresholds([18, 30, 40, 50, 66])(data)
+    .reduce(
+      (acc, el) => {
+        acc.push({
+          x: el.x0 < 18 ? `<${el.x1}`
+            : el.x1 > 66 ? `>=${el.x0}`
+              : `${el.x0}-${el.x1 - 1}`,
+          y: el.length
+        })
+        return acc
+      },
+      []
+    )
+  return <GenericBar data={histData} xlab='Age' />
 }
