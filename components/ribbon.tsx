@@ -22,18 +22,21 @@ export default function Ribbon (
       email={user.email} token={user.token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
-    <SiteSelect
-    // @REVIEW
-    // Pull this array from config
-      sites={[
-        'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
-        'perth', 'sydney'
-      ]}
-      defaultSite={
-        user.accessGroup === 'admin' ? 'unrestricted' : user.accessGroup
-      }
-      onChange={onAccessGroupChange}
-    />
+    {
+      ['admin', 'unrestricted'].includes(user.accessGroup) && <SiteSelect
+        // @REVIEW
+        // Pull this array from config
+        sites={[
+          'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
+          'perth', 'sydney'
+        ]}
+        defaultSite={
+          user.accessGroup === 'admin' ? 'unrestricted' : user.accessGroup
+        }
+        onChange={onAccessGroupChange}
+      />
+    }
+
     {
       elements.varselect &&
       <ColumnSelect
