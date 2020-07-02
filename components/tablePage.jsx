@@ -30,11 +30,8 @@ export default function TablePage (
     console.log('set access group to ' + value)
     setAccessGroup(value)
   }
-  // Initial data
+  // Initial data can be empty
   const [jsonrows, setData] = useState([])
-  /* useEffect(() => {
-    fetchData(user, tableName, user.accessGroup).then(d => setData(d))
-  }, []) */
   // Data updating
   async function updateData () {
     console.log(
