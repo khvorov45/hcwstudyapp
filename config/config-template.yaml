@@ -21,35 +21,6 @@ db:
   redcap:
     url: https://biredcap.mh.org.au/api/
     token:
-  variables:
-    Participant:
-      - my: redcapRecordId
-        redcap: record_id
-        label: Record ID
-      - my: pid
-        redcap: pid
-        label: PID
-      - my: accessGroup
-        redcap: redcap_data_access_group
-        label: Access Group
-      - my: site
-        redcap: site_name
-        label: Site
-      - my: dob
-        redcap: a2_dob
-        label: Date of Birth
-      - my: dateScreening
-        redcap: date_screening
-        label: Date of Screening
-      - my: email
-        redcap: email
-        label: Email
-      - my: mobile
-        redcap: mobile_number
-        label: Mobile
-      - my: age
-        redcap:
-        label: Age
 email:
   user: sen.khvorov@unimelb.edu.au
   password:
