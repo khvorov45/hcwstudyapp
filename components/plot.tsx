@@ -13,21 +13,31 @@ export default function Plotlist ({ children }: {children: ReactNode}) {
 
 export function Histogram ({ data, x }: {data: any, x: string}) {
   console.log(data)
-  const xvec = data.map(row => row[x])
-  const histData = bin()(xvec).reduce(
-    (acc, el) => {
-      acc.push({ x: (el.x0 + el.x1) / 2, y: el.length })
-      return acc
-    },
-    []
-  )
+  const histData = bin()
+    .value(row => row[x])
+    .thresholds([18, 30, 40, 50, 66])(data)
+    .reduce(
+      (acc, el) => {
+        acc.push({
+          x: el.x0 < 18 ? `<${el.x1}`
+            : el.x1 > 66 ? `>=${el.x0}`
+              : `${el.x0}-${el.x1 - 1}`,
+          y: el.length
+        })
+        return acc
+      },
+      []
+    )
+  console.log(bin().thresholds([0, 10])([0, 5, 10, 15]))
   console.log(histData)
   return <BarChart
     width={500} height={250} data={histData}
     margin={{ top: 20, right: 80, bottom: 20, left: 5 }}
   >
     <XAxis
-      dataKey="x" tick={{ fill: 'var(--font-color-muted)' }}
+      dataKey="x" tick={{
+        fill: 'var(--font-color-muted)'
+      }}
     >
       <Label
         value='Age'
