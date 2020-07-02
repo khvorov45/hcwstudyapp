@@ -22,26 +22,16 @@ async function fetchData (user, tableName, accessGroup) {
 export default function TablePage (
   { user, tableName, variables, hidden }
 ) {
-  // Handle access group change
+  // This state
   const [accessGroup, setAccessGroup] = useState(
     user.accessGroup === 'admin' ? 'unrestricted' : user.accessGroup
   )
-  function onAccessGroupChange (value) {
-    console.log('set access group to ' + value)
-    setAccessGroup(value)
-  }
-  // Initial data can be empty
   const [jsonrows, setData] = useState([])
   // Data updating
   async function updateData () {
-    console.log(
-      'called updatedata in tablepage with access group ' + accessGroup
-    )
     setData(await fetchData(user, tableName, accessGroup))
   }
-  useEffect(() => {
-    updateData()
-  }, [accessGroup])
+  useEffect(() => { updateData() }, [accessGroup])
   // Table generation
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
@@ -76,7 +66,7 @@ export default function TablePage (
       user={user}
       updateDBPromiseArea="updatedb"
       afterdbUpdate={updateData}
-      onAccessGroupChange={onAccessGroupChange}
+      onAccessGroupChange={(value) => { setAccessGroup(value) }}
       elements={{
         varselect: { columns: allColumns, variables: variables }
       }}

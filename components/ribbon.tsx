@@ -29,7 +29,9 @@ export default function Ribbon (
         'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
         'perth', 'sydney'
       ]}
-      defaultSite={user.accessGroup}
+      defaultSite={
+        user.accessGroup === 'admin' ? 'unrestricted' : user.accessGroup
+      }
       onChange={onAccessGroupChange}
     />
     {
