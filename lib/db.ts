@@ -2,7 +2,9 @@ import { Pool, PoolConfig } from 'pg'
 import pgp from 'pg-promise'
 import bcrypt from 'bcrypt'
 import { newconfig } from './config'
-import { exportParticipants, exportUsers } from './redcap'
+import {
+  exportParticipants, exportUsers, exportVaccinationHistory
+} from './redcap'
 
 interface MyPostgresConfig extends PoolConfig {
   users?: {email: string, accessGroup: string}[]
@@ -154,13 +156,18 @@ export class Postgres {
     return new Date(dateString)
   }
 
-  // Participant table interactions -------------------------------------------
+  // All participant-related tables interactions ------------------------------
 
-  async resetParticipantTable (): Promise<void> {
+  async resetAllParticipantTables (): Promise<void> {
+    await this.removeVachisTable()
     await this.removeParticipantTable()
     await this.createParticipantTable()
     await this.fillParticipant()
+    await this.createVachisTable()
+    await this.fillVachis()
   }
+
+  // Participant table interactions -------------------------------------------
 
   async createParticipantTable (): Promise<void> {
     await this.execute(`
@@ -230,6 +237,46 @@ export class Postgres {
     return await this.getParticipants(accessGroup, query)
   }
 
+  // Vaccination history table interactions -----------------------------------
+  async createVachisTable (): Promise<void> {
+    await this.execute(`
+      CREATE TABLE "VaccinationHistory" (
+          "redcapRecordId" TEXT NOT NULL,
+          "year" INTEGER NOT NULL,
+          "status" BOOLEAN,
+          PRIMARY KEY ("redcapRecordId", "year"),
+          FOREIGN KEY ("redcapRecordId")
+          REFERENCES "Participant" ("redcapRecordId")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+    `)
+  }
+
+  async removeVachisTable (): Promise<void> {
+    await this.execute('DROP TABLE IF EXISTS "VaccinationHistory"')
+  }
+
+  async fillVachis (): Promise<void> {
+    const vachis = await exportVaccinationHistory()
+    console.log(vachis)
+    await this.execute(pgp().helpers.insert(
+      vachis,
+      ['redcapRecordId', 'year', 'status'],
+      'VaccinationHistory'
+    ))
+  }
+
+  async getVachis (accessGroup: string): Promise<any[]> {
+    let query = 'SELECT * FROM "VaccinationHistory"'
+    let params = []
+    if (!['unrestricted', 'admin'].includes(accessGroup)) {
+      query += ' WHERE "redcapRecordId IN ' +
+        '(SELECT redcapRecordId FROM Participant WHERE "accessGroup" = $1)'
+      params = [accessGroup.toLowerCase()]
+    }
+    query += ';'
+    return await this.getRows<any>(query, params)
+  }
   // User table interactions --------------------------------------------------
 
   async fillUser (): Promise<void> {
