@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { trackPromise } from 'react-promise-tracker'
 import { ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
-import { accessAPI, toTitleCase } from '../lib/util'
+import { accessAPI, toTitleCase, User } from '../lib/util'
 import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
 
 export default function Ribbon (
   {
-    email, token, updateDBPromiseArea, afterdbUpdate,
+    user, updateDBPromiseArea, afterdbUpdate,
     onAccessGroupChange, elements
   }:
   {
-    email: string, token: string, updateDBPromiseArea: string,
+    user: User, updateDBPromiseArea: string,
     afterdbUpdate: () => Promise<void>,
     onAccessGroupChange: (value: string) => void,
     elements: {varselect?: {columns: any, variables: any}}
@@ -19,7 +19,7 @@ export default function Ribbon (
 ) {
   return <div className={styles.ribbon}>
     <UpdateDatabaseButton
-      email={email} token={token} promiseArea={updateDBPromiseArea}
+      email={user.email} token={user.token} promiseArea={updateDBPromiseArea}
       afterdbUpdate={afterdbUpdate}
     />
     <SiteSelect
@@ -29,6 +29,7 @@ export default function Ribbon (
         'unrestricted', 'adelaide', 'brisbane', 'melbourne', 'newcastle',
         'perth', 'sydney'
       ]}
+      defaultSite={user.accessGroup}
       onChange={onAccessGroupChange}
     />
     {
@@ -87,11 +88,16 @@ export function ColumnSelect (
 }
 
 export function SiteSelect (
-  { sites, onChange }: {sites: string[], onChange: (value: string) => void}
+  { sites, defaultSite, onChange }:
+  {sites: string[], defaultSite: string, onChange: (value: string) => void}
 ) {
   return <RadioGroup
     name={'sites'}
     onChange={onChange}
-    options={sites.map(s => ({ value: s, label: toTitleCase(s) }))}
+    options={
+      sites.map(
+        s => ({ value: s, label: toTitleCase(s), default: s === defaultSite })
+      )
+    }
   />
 }

@@ -76,8 +76,7 @@ export default function TablePage (
   )
   return <>
     <Ribbon
-      email={user.email}
-      token={user.token}
+      user={user}
       updateDBPromiseArea="updatedb"
       afterdbUpdate={updateData}
       onAccessGroupChange={onAccessGroupChange}

@@ -122,12 +122,14 @@ export function Radio (
 export function RadioGroup (
   { options, name, onChange }:
   {
-    options: {label: string, value: string}[],
+    options: {label: string, value: string, default: boolean}[],
     name: string,
     onChange: (value: string) => void
   }
 ) {
-  const [value, setValue] = useState(options[0].value)
+  const [value, setValue] = useState(
+    options.filter(opt => opt.default)[0].value
+  )
   useEffect(() => { onChange(value) }, [value])
   return <div
     className={
