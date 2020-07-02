@@ -28,8 +28,6 @@ export function Histogram ({ data, x }: {data: any, x: string}) {
       },
       []
     )
-  console.log(bin().thresholds([0, 10])([0, 5, 10, 15]))
-  console.log(histData)
   return <BarChart
     width={500} height={250} data={histData}
     margin={{ top: 20, right: 80, bottom: 20, left: 5 }}
