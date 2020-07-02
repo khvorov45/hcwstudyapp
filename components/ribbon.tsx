@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
 import { ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
 import { accessAPI, toTitleCase, User } from '../lib/util'
@@ -61,6 +61,9 @@ export function UpdateDatabaseButton (
     }
     await trackPromise(updateAndAfter(), promiseArea)
   }
+  useEffect(() => {
+    accessAPI('update', 'GET').then((d) => setLastUpdate(new Date(d)))
+  }, [])
   const [lastUpdate, setLastUpdate] = useState(new Date(0))
   return <ButtonWithTimestamp
     label="Update"
