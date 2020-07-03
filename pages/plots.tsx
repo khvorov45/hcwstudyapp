@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Layout from '../components/layout'
-import db from '../lib/db'
-import { fetchParticipantData, User } from '../lib/util'
+import { fetchParticipantData } from '../lib/util'
 import Ribbon from '../components/ribbon'
 import Plotlist, { AgeHistogram, GenderBar, PrevVacBar }
   from '../components/plot'
+import { useUser } from '../lib/hooks'
 
-export default function Plots (
-  { user } :
-  {user: User}
-) {
+export default function Plots () {
+  const user = useUser()
   const [data, setData] = useState([])
   const [accessGroup, setAccessGroup] = useState(user.accessGroup)
   async function updateData () {
+    if (!user.authorised) return
     setData(await fetchParticipantData(user, 'baseline', accessGroup))
   }
   useEffect(() => { updateData() }, [accessGroup])
+  if (!user.authorised) return <></>
   return (
     <Layout
       user={user}
@@ -40,19 +40,4 @@ export default function Plots (
       </Plotlist>
     </Layout>
   )
-}
-
-export async function getServerSideProps (context) {
-  return {
-    props: {
-      user: {
-        authorised: await db.authoriseUser(
-          context.query.email, context.query.token
-        ),
-        email: context.query.email || null,
-        token: context.query.token || null,
-        accessGroup: await db.getUserAccessGroup(context.query.email)
-      }
-    }
-  }
 }

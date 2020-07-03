@@ -4,7 +4,12 @@ import { useRouter } from 'next/router'
 
 export function useUser (): User {
   const router = useRouter()
-  const [user2, setUser]: [User, (u: User) => void] = useState(null)
+  const [user2, setUser]: [User, (u: User) => void] = useState({
+    authorised: undefined,
+    email: undefined,
+    token: undefined,
+    accessGroup: undefined
+  })
   async function updateUser () {
     const splitpath = router.asPath.split('?')
     const query = new URLSearchParams(splitpath[splitpath.length - 1])
@@ -23,7 +28,7 @@ export function useUser (): User {
   }
   useEffect(() => { updateUser() }, [])
   useEffect(() => {
-    if (user2 === null) return
+    if (user2.authorised === undefined) return
     if (user2.authorised === null) {
       router.push('/getlink')
     } else if (!user2.authorised) {

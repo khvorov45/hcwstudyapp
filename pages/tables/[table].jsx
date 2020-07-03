@@ -22,7 +22,7 @@ export default function ParticipantTable (
       'site'
     ]
   }
-  if (user === null || !user.authorised) return <></>
+  if (!user.authorised) return <></>
   return <Layout
     user={user}
     active="tables"
