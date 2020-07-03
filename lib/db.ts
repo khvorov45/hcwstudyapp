@@ -258,7 +258,7 @@ FROM "Participant" INNER JOIN
       (SELECT "redcapRecordId", SUM("status"::int)::int as "numSeasVac"
       FROM "VaccinationHistory"
       GROUP BY "redcapRecordId") AS "Vachissum"
-      ON "Vachissum"."redcapRecordId" = "Participant"."redcapRecordId";`
+      ON "Vachissum"."redcapRecordId" = "Participant"."redcapRecordId"`
     return await this.getParticipants(accessGroup, query)
   }
 
