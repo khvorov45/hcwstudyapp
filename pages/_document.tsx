@@ -24,9 +24,10 @@ export default class MyDocument extends Document {
 function ThemeSwitchScript () {
   return <script
     dangerouslySetInnerHTML={{
-      __html:
-`if (!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark')
-document.documentElement.setAttribute('theme', localStorage.getItem('theme'))`
+      __html: 'if(!localStorage.getItem(\'theme\')){' +
+'localStorage.setItem(\'theme\',\'dark\');}' +
+'document.documentElement.setAttribute(' +
+'\'theme\',localStorage.getItem(\'theme\'));'
     }}
   >
   </script>
