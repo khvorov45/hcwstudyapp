@@ -38,7 +38,8 @@ main {
     width: 7px;
 }
 
-::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
     background: var(--bg-color);
 }
 
@@ -50,7 +51,8 @@ main {
     background: var(--font-color);
 }
 
-html, html * {
+html,
+html * {
     scrollbar-color: var(--border) var(--bg-color);
     scrollbar-width: thin;
 }
