@@ -29,3 +29,6 @@ Participant:
   - my: gender
     redcap: a1_gender
     label: Gender
+  - my: numSeasVac
+    redcap: num_seas_vac
+    label: Previous Vaccinations

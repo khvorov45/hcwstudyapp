@@ -98,7 +98,7 @@ export class Postgres {
       DROP TABLE IF EXISTS "Meta";
       DROP TABLE IF EXISTS "User";
     `)
-    await this.removeParticipantTable()
+    await this.removeAllParticipantTables()
     await this.execute('DROP TABLE IF EXISTS "AccessGroup"')
   }
 
@@ -117,7 +117,7 @@ export class Postgres {
           ON UPDATE CASCADE ON DELETE CASCADE
       );
     `)
-    await this.createParticipantTable()
+    await this.createAllParticipantTables()
   }
 
   async wipe (): Promise<void> {
@@ -125,9 +125,9 @@ export class Postgres {
       'SELECT "email", "accessGroup", "tokenhash" FROM "User" ' +
       'WHERE tokenhash IS NOT NULL'
     )
+    await this.execute('DELETE FROM "Meta";')
+    await this.wipeAllParticipant()
     await this.execute(`
-      DELETE FROM "Meta";
-      DELETE FROM "Participant";
       DELETE FROM "User";
       DELETE FROM "AccessGroup";
     `)
@@ -136,7 +136,7 @@ export class Postgres {
   async fill (): Promise<void> {
     await this.fillAccessGroup()
     await this.fillUser()
-    await this.fillParticipant()
+    await this.fillAllParticipant()
     await this.execute(
       `INSERT INTO "Meta" ("key", "value")
       VALUES ('lastFill', '${new Date().toString()}');`
@@ -159,11 +159,30 @@ export class Postgres {
   // All participant-related tables interactions ------------------------------
 
   async resetAllParticipantTables (): Promise<void> {
+    await this.removeAllParticipantTables()
+    await this.createAllParticipantTables()
+    await this.fillAllParticipant()
+  }
+
+  async removeAllParticipantTables (): Promise<void> {
     await this.removeVachisTable()
     await this.removeParticipantTable()
+  }
+
+  async createAllParticipantTables (): Promise<void> {
     await this.createParticipantTable()
-    await this.fillParticipant()
     await this.createVachisTable()
+  }
+
+  async wipeAllParticipant (): Promise<void> {
+    await this.execute(`
+      DELETE FROM "Participant";
+      DELETE FROM "VaccinationHistory";
+    `)
+  }
+
+  async fillAllParticipant (): Promise<void> {
+    await this.fillParticipant()
     await this.fillVachis()
   }
 
@@ -226,14 +245,20 @@ export class Postgres {
 
   async getParticipantsBaseline (accessGroup: string): Promise<any[]> {
     const query =
-    `SELECT "pid", "gender", "dob",
+`SELECT "pid", "gender", "dob",
     ROUND((
       EXTRACT(EPOCH FROM AGE("dob")) /
       EXTRACT(EPOCH FROM INTERVAL '1 year')
     )::numeric, 1)::double precision as age,
+    "numSeasVac",
     "dateScreening",
-    "email", "mobile", "redcapRecordId",
-    "accessGroup", "site" FROM "Participant"`
+    "email", "mobile", "Participant"."redcapRecordId",
+    "accessGroup", "site"
+FROM "Participant" INNER JOIN
+      (SELECT "redcapRecordId", SUM("status"::int)::int as "numSeasVac"
+      FROM "VaccinationHistory"
+      GROUP BY "redcapRecordId") AS "Vachissum"
+      ON "Vachissum"."redcapRecordId" = "Participant"."redcapRecordId";`
     return await this.getParticipants(accessGroup, query)
   }
 
