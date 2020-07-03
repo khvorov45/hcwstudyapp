@@ -1,11 +1,11 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
-import db from '../lib/db'
-import { User } from '../lib/util'
+import { useUser } from '../lib/hooks'
 
 export default function Home (
-  { user }: { user: User}
 ) {
+  const user = useUser()
+  if (user === null || !user.authorised) return <></>
   return (
     <Layout
       user={user}
@@ -18,19 +18,4 @@ export default function Home (
       <p>Authorised</p>
     </Layout>
   )
-}
-
-export async function getServerSideProps (context) {
-  return {
-    props: {
-      user: {
-        authorised: await db.authoriseUser(
-          context.query.email, context.query.token
-        ),
-        email: context.query.email || null,
-        token: context.query.token || null,
-        accessGroup: await db.getUserAccessGroup(context.query.email)
-      }
-    }
-  }
 }

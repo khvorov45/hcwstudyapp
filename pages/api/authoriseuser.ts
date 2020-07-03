@@ -8,8 +8,10 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     return
   }
   res.setHeader('Content-Type', 'application/json')
-  if (!req.query.email || !req.query.token) {
-    res.status(200).send(JSON.stringify(false))
+  if (!req.query.email || !req.query.token ||
+    req.query.email === 'undefined' || req.query.token === 'undefined' ||
+    req.query.email === 'null' || req.query.token === 'null') {
+    res.status(200).send(JSON.stringify(null))
     return
   }
   const email = req.query.email.toString().toLowerCase()

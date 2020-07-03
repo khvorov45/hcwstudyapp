@@ -56,7 +56,7 @@ export class Postgres {
 
   async getValue<T> (sql: string, values?: Array<any>): Promise<T> {
     const col = await this.getColumn<T>(sql, values)
-    return col[0]
+    return col[0] || null
   }
 
   async getRows<T> (sql: string, values?: Array<any>): Promise<T[]> {
