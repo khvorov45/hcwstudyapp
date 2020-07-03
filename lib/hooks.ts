@@ -6,7 +6,7 @@ export function useUser (): User {
   const router = useRouter()
   const [user2, setUser]: [User, (u: User) => void] = useState(null)
   async function updateUser () {
-    const splitpath = router.asPath.split('/')
+    const splitpath = router.asPath.split('?')
     const query = new URLSearchParams(splitpath[splitpath.length - 1])
     setUser({
       authorised: await accessAPI(
@@ -23,7 +23,6 @@ export function useUser (): User {
   }
   useEffect(() => { updateUser() }, [])
   useEffect(() => {
-    console.log(user2)
     if (user2 === null) return
     if (user2.authorised === null) {
       router.push('/getlink')

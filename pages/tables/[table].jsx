@@ -1,17 +1,18 @@
 import Head from 'next/head'
 import { toTitleCase } from '../../lib/util'
 import { newconfig } from '../../lib/config'
-import db from '../../lib/db'
 import TablePage from '../../components/tablePage'
 import Layout from '../../components/layout'
 import { SubnavbarTables } from '../../components/navbar'
 import { useRouter } from 'next/router'
+import { useUser } from '../../lib/hooks'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
 export default function ParticipantTable (
-  { user, variables }
+  { variables }
 ) {
+  const user = useUser()
   const router = useRouter()
   const { table } = router.query
   const hidden = {
@@ -21,6 +22,7 @@ export default function ParticipantTable (
       'site'
     ]
   }
+  if (user === null || !user.authorised) return <></>
   return <Layout
     user={user}
     active="tables"
@@ -49,17 +51,9 @@ export default function ParticipantTable (
   </Layout>
 }
 
-export async function getServerSideProps (context) {
+export async function getServerSideProps (_) {
   return {
     props: {
-      user: {
-        authorised: await db.authoriseUser(
-          context.query.email, context.query.token
-        ),
-        email: context.query.email || null,
-        token: context.query.token || null,
-        accessGroup: await db.getUserAccessGroup(context.query.email)
-      },
       variables: newconfig.db.variables.Participant
     }
   }
