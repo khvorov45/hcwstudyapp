@@ -9,4 +9,6 @@
 .plot,
 .plot>* {
     max-width: 100%;
+    /* This is to remove annoying 1mm vertical scroll when they actually fit */
+    max-height: 98%;
 }
