@@ -16,7 +16,7 @@ export function GenericBar (
   {data: any, xlab: string}
 ) {
   return <BarChart
-    width={500} height={250} data={data}
+    width={450} height={250} data={data}
     margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
   >
     <XAxis
