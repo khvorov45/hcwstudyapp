@@ -258,7 +258,6 @@ export class Postgres {
 
   async fillVachis (): Promise<void> {
     const vachis = await exportVaccinationHistory()
-    console.log(vachis)
     await this.execute(pgp().helpers.insert(
       vachis,
       ['redcapRecordId', 'year', 'status'],
