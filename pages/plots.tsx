@@ -4,7 +4,8 @@ import Layout from '../components/layout'
 import db from '../lib/db'
 import { fetchParticipantData, User } from '../lib/util'
 import Ribbon from '../components/ribbon'
-import Plotlist, { AgeHistogram, GenderBar } from '../components/plot'
+import Plotlist, { AgeHistogram, GenderBar, PrevVacBar }
+  from '../components/plot'
 
 export default function Plots (
   { user } :
@@ -35,6 +36,7 @@ export default function Plots (
       <Plotlist>
         <AgeHistogram data={data} />
         <GenderBar data={data} />
+        <PrevVacBar data={data} />
       </Plotlist>
     </Layout>
   )

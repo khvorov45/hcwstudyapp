@@ -55,21 +55,33 @@ export function GenericBar (
   </BarChart>
 }
 
-export function GenderBar ({ data }: {data: any}) {
+export function CategoricalBar (
+  { data, accessor, xlab }:
+  {data: any, accessor: (row) => string, xlab: string}
+) {
   const processedData = {}
   data.map(row => {
-    Object.keys(processedData).includes(row.gender)
-      ? ++processedData[row.gender]
-      : processedData[row.gender] = 1
+    const val = accessor(row)
+    Object.keys(processedData).includes(val)
+      ? ++processedData[val]
+      : processedData[val] = 1
   })
   const barData = []
-  for (const genderName in processedData) {
+  for (const val in processedData) {
     barData.push({
-      x: genderName === '' ? '(Missing)' : genderName,
-      y: processedData[genderName]
+      x: val,
+      y: processedData[val]
     })
   }
-  return <GenericBar data={barData} xlab='Gender' />
+  return <GenericBar data={barData} xlab={xlab} />
+}
+
+export function GenderBar ({ data }: {data: any}) {
+  return <CategoricalBar
+    data={data}
+    accessor={row => row.gender === '' ? '(Missing)' : row.gender}
+    xlab='Gender'
+  />
 }
 
 export function AgeHistogram ({ data }: {data: any}) {
@@ -89,4 +101,12 @@ export function AgeHistogram ({ data }: {data: any}) {
       []
     )
   return <GenericBar data={histData} xlab='Age' />
+}
+
+export function PrevVacBar ({ data }: {data: any}) {
+  return <CategoricalBar
+    data={data}
+    accessor={row => row.numSeasVac.toString()}
+    xlab='Previous Vaccinations'
+  />
 }
