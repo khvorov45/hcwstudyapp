@@ -18,6 +18,7 @@ export function GenericBar (
   return <BarChart
     width={450} height={250} data={data}
     margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+    className={styles.plot}
   >
     <XAxis
       dataKey="x" tick={{
