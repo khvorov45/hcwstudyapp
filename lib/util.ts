@@ -34,10 +34,14 @@ export async function accessAPI (
       body: body ? new URLSearchParams(body) : null
     }
   )
+  if (res.status !== 200) {
+    console.error('API access failed with response status ' + res.status)
+  }
+  // Not interested in what the response is if it's not jsonable
   try {
     return await res.json()
   } catch (e) {
-    return res.status
+    return null
   }
 }
 

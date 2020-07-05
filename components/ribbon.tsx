@@ -60,7 +60,7 @@ export function UpdateDatabaseButton (
         'update', 'POST', { email: email, token: token }
       )
       await afterdbUpdate()
-      date !== 401 && setLastUpdate(new Date(date))
+      date && setLastUpdate(new Date(date))
     }
     await trackPromise(updateAndAfter(), promiseArea)
   }

@@ -14,7 +14,7 @@ export default function Home (
         <title>HCW flu study reports</title>
         <meta name="Description" content="Reports for the HCW flu study" />
       </Head>
-      <p>Authorised</p>
+      {user.authorised && <p>Authorised</p>}
     </Layout>
   )
 }
