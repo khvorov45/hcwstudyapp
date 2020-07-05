@@ -12,21 +12,18 @@ export default function Navbar (
         content="Help"
         link={'/'}
         user={user}
-        authorisedOnly={false}
         active={active === 'home'}
       />
       <Navelement
         content="Tables"
         link={'/tables/contact'}
         user={user}
-        authorisedOnly={true}
         active={active === 'tables'}
       />
       <Navelement
         content="Plots"
         link={'/plots'}
         user={user}
-        authorisedOnly={true}
         active={active === 'plots'}
       />
     </div>
@@ -37,15 +34,12 @@ export default function Navbar (
 }
 
 export function Navelement (
-  { content, link, user, active, authorisedOnly }:
+  { content, link, user, active }:
   {
     content: string, link: string, user: User,
-    active: boolean, authorisedOnly: boolean
+    active: boolean
   }
 ) {
-  if (authorisedOnly && user.authorised !== true) {
-    return <></>
-  }
   return <li>
     <a
       href={`${link}${getConstQuery(user.email, user.token)}`}
@@ -80,14 +74,12 @@ export function SubnavbarTables (
       content="Contact"
       link={'/tables/contact'}
       user={user}
-      authorisedOnly={true}
       active={active === 'contact'}
     />
     <Navelement
       content="Baseline"
       link={'/tables/baseline'}
       user={user}
-      authorisedOnly={true}
       active={active === 'baseline'}
     />
   </Subnavbar>

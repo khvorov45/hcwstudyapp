@@ -16,7 +16,6 @@ export default function Plots () {
     setData(await fetchParticipantData(user, 'baseline', accessGroup))
   }
   useEffect(() => { updateData() }, [accessGroup])
-  if (!user.authorised) return <></>
   return (
     <Layout
       user={user}

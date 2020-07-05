@@ -8,7 +8,6 @@ export default function Layout (
     active: string,
   }
 ) {
-  if (!user.authorised) return <></>
   return <>
     <Navbar
       user={user}

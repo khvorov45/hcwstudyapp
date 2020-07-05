@@ -15,6 +15,7 @@ export function GenericBar (
   { data, xlab }:
   {data: any, xlab: string}
 ) {
+  if (data.length === 0) return <></>
   return <BarChart
     width={450} height={250} data={data}
     margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
@@ -86,6 +87,7 @@ export function GenderBar ({ data }: {data: any}) {
 }
 
 export function AgeHistogram ({ data }: {data: any}) {
+  if (data.length === 0) return <></>
   const histData = bin()
     .value(row => row.age)
     .thresholds([18, 30, 40, 50, 66])(data)

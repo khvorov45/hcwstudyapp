@@ -17,6 +17,7 @@ export default function TablePage (
   const [jsonrows, setData] = useState([])
   // Data updating
   async function updateData () {
+    if (!user.authorised) return
     setData(await fetchParticipantData(user, tableName, accessGroup))
   }
   useEffect(() => { updateData() }, [accessGroup])

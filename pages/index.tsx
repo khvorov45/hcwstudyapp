@@ -5,7 +5,6 @@ import { useUser } from '../lib/hooks'
 export default function Home (
 ) {
   const user = useUser()
-  if (!user.authorised) return <></>
   return (
     <Layout
       user={user}
