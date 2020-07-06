@@ -32,3 +32,9 @@ Participant:
   - my: numSeasVac
     redcap: num_seas_vac
     label: Previous Vaccinations
+  - my: day
+    redcap:
+    label: Day
+  - my: date
+    redcap:
+    label: Date

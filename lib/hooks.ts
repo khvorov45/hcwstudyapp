@@ -12,7 +12,8 @@ export function useUser (): User {
   })
   async function updateUser () {
     const splitpath = router.asPath.split('?')
-    const query = new URLSearchParams(splitpath[splitpath.length - 1])
+    if (splitpath.length < 2) return
+    const query = new URLSearchParams(splitpath[1])
     setUser({
       authorised: await accessAPI(
         'authoriseuser', 'GET',
