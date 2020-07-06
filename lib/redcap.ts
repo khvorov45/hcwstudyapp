@@ -130,6 +130,7 @@ export async function exportSchedule () {
   const recordsLong = []
   recordsFiltered.map(r => {
     for (let i = 0; i < timepoints.length; ++i) {
+      if (r[varNames[i]] === '') continue
       recordsLong.push({
         redcapRecordId: r.record_id,
         day: timepoints[i],

@@ -266,7 +266,9 @@ FROM "Participant" INNER JOIN
     return await this.getParticipants(accessGroup, query)
   }
 
-  async getParticipantsSchedule (accessGroup: string): Promise<any[]> {
+  async getParticipantsSchedule (
+    accessGroup: string, wide: boolean
+  ): Promise<any[]> {
     const query =
 `SELECT "pid",
     "Schedule"."day", "Schedule"."date",
@@ -275,8 +277,34 @@ FROM "Participant" INNER JOIN
 FROM "Participant" INNER JOIN
       (SELECT "redcapRecordId", "day", "date"
       FROM "Schedule") AS "Schedule"
-      ON "Schedule"."redcapRecordId" = "Participant"."redcapRecordId"`
-    return await this.getParticipants(accessGroup, query)
+      ON "Schedule"."redcapRecordId" = "Participant"."redcapRecordId"
+      ${wide ? 'ORDER BY "redcapRecordId"' : ''}`
+    const res = await this.getParticipants(accessGroup, query)
+    if (!wide) return res
+    const resWide = []
+    function createEntry (row) {
+      return {
+        pid: row.pid,
+        day0: null,
+        day7: null,
+        day14: null,
+        day280: null,
+        email: row.email,
+        mobile: row.mobile,
+        redcapRecordId: row.redcapRecordId,
+        accessGroup: row.accessGroup,
+        site: row.site
+      }
+    }
+    let curEntry = createEntry(res[0])
+    res.map(row => {
+      if (curEntry.redcapRecordId !== row.redcapRecordId) {
+        resWide.push(curEntry)
+        curEntry = createEntry(row)
+      }
+      curEntry['day' + row.day] = row.date
+    })
+    return resWide
   }
 
   // Vaccination history table interactions -----------------------------------
