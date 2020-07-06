@@ -3,7 +3,7 @@ import pgp from 'pg-promise'
 import bcrypt from 'bcrypt'
 import { newconfig } from './config'
 import {
-  exportParticipants, exportUsers, exportVaccinationHistory
+  exportParticipants, exportUsers, exportVaccinationHistory, exportSchedule
 } from './redcap'
 
 interface MyPostgresConfig extends PoolConfig {
@@ -166,24 +166,28 @@ export class Postgres {
 
   async removeAllParticipantTables (): Promise<void> {
     await this.removeVachisTable()
+    await this.removeSchedule()
     await this.removeParticipantTable()
   }
 
   async createAllParticipantTables (): Promise<void> {
     await this.createParticipantTable()
     await this.createVachisTable()
+    await this.createSchedule()
   }
 
   async wipeAllParticipant (): Promise<void> {
     await this.execute(`
       DELETE FROM "Participant";
       DELETE FROM "VaccinationHistory";
+      DELETE FROM "Schedule";
     `)
   }
 
   async fillAllParticipant (): Promise<void> {
     await this.fillParticipant()
     await this.fillVachis()
+    await this.fillSchedule()
   }
 
   // Participant table interactions -------------------------------------------
@@ -263,6 +267,7 @@ FROM "Participant" INNER JOIN
   }
 
   // Vaccination history table interactions -----------------------------------
+
   async createVachisTable (): Promise<void> {
     await this.execute(`
       CREATE TABLE "VaccinationHistory" (
@@ -301,6 +306,36 @@ FROM "Participant" INNER JOIN
     query += ';'
     return await this.getRows<any>(query, params)
   }
+
+  // Schedule history table interactions --------------------------------------
+
+  async createSchedule () {
+    await this.execute(`
+      CREATE TABLE "Schedule" (
+          "redcapRecordId" TEXT NOT NULL,
+          "day" INTEGER NOT NULL,
+          "date" TIMESTAMPTZ,
+          PRIMARY KEY ("redcapRecordId", "day"),
+          FOREIGN KEY ("redcapRecordId")
+          REFERENCES "Participant" ("redcapRecordId")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+    `)
+  }
+
+  async removeSchedule () {
+    await this.execute('DROP TABLE IF EXISTS "Schedule"')
+  }
+
+  async fillSchedule () {
+    const schedule = await exportSchedule()
+    await this.execute(pgp().helpers.insert(
+      schedule,
+      ['redcapRecordId', 'day', 'date'],
+      'Schedule'
+    ))
+  }
+
   // User table interactions --------------------------------------------------
 
   async fillUser (): Promise<void> {

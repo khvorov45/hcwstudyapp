@@ -1,6 +1,10 @@
 import fetch from 'cross-fetch'
 import { newconfig } from './config'
 
+function processDate (date: string) {
+  return date === '' ? null : new Date(date)
+}
+
 /** Makes a REDCap API request
  *
  * @param body Object with request parameters except token
@@ -67,9 +71,6 @@ export async function exportParticipants () {
   )
   // Filter out all non-participants
   const recordsFiltered = records.filter(r => r.pid !== '')
-  function processDate (date: string) {
-    return date === '' ? null : new Date(date)
-  }
   return recordsFiltered.map(r => {
     return {
       redcapRecordId: r.record_id,
@@ -104,6 +105,35 @@ export async function exportVaccinationHistory () {
         redcapRecordId: r.record_id,
         year: years[i],
         status: r[varNames[i]] === '1'
+      })
+    }
+  })
+  return recordsLong
+}
+
+export async function exportSchedule () {
+  const records = await exportRecords(
+    [
+      'record_id', 'pid',
+      'scheduled_date_v0', 'scheduled_date_v7', 'scheduled_date_v14',
+      'scheduled_date_v280'
+    ],
+    ['baseline_arm_1'], 'flat', false
+  )
+  const varNames = [
+    'scheduled_date_v0', 'scheduled_date_v7',
+    'scheduled_date_v14', 'scheduled_date_v280'
+  ]
+  const timepoints = [0, 7, 14, 280]
+  // Filter out all non-participants
+  const recordsFiltered = records.filter(r => r.pid !== '')
+  const recordsLong = []
+  recordsFiltered.map(r => {
+    for (let i = 0; i < timepoints.length; ++i) {
+      recordsLong.push({
+        redcapRecordId: r.record_id,
+        day: timepoints[i],
+        date: processDate(r[varNames[i]])
       })
     }
   })
