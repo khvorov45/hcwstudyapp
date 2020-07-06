@@ -1,20 +1,23 @@
 import Head from 'next/head'
-import { toTitleCase } from '../../lib/util'
-import { newconfig } from '../../lib/config'
+import { toTitleCase, accessAPI } from '../../lib/util'
 import TablePage from '../../components/tablePage'
 import Layout from '../../components/layout'
 import { SubnavbarTables } from '../../components/navbar'
 import { useRouter } from 'next/router'
 import { useUser } from '../../lib/hooks'
+import { useState, useEffect } from 'react'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
-export default function ParticipantTable (
-  { variables }
-) {
+export default function ParticipantTable () {
   const user = useUser()
   const router = useRouter()
   const { table } = router.query
+  const [variables, setVariables] = useState()
+  useEffect(
+    () => { accessAPI('getvariables', 'GET').then(vars => setVariables(vars)) },
+    []
+  )
   const hidden = {
     contact: ['accessGroup', 'site', 'dateScreening'],
     baseline: [
@@ -42,22 +45,12 @@ export default function ParticipantTable (
       tables={Object.keys(hidden)}
     />
     {
-      Object.keys(hidden).includes(table)
-        ? <TablePage
-          user = {user}
-          tableName = {table}
-          variables = {variables}
-          hidden = {hidden[table]}
-        />
-        : <p>No such table</p>
+      Object.keys(hidden).includes(table) && <TablePage
+        user = {user}
+        tableName = {table}
+        variables = {variables}
+        hidden = {hidden[table]}
+      />
     }
   </Layout>
-}
-
-export async function getServerSideProps (_) {
-  return {
-    props: {
-      variables: newconfig.db.variables.Participant
-    }
-  }
 }

@@ -27,7 +27,7 @@ export function useUser (): User {
       )
     })
   }
-  useEffect(() => { updateUser() }, [])
+  useEffect(() => { updateUser() }, [router])
   useEffect(() => {
     if (user2.authorised === undefined) return
     if (user2.authorised === null) {
