@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 export function useUser (): User {
   const router = useRouter()
   const [user2, setUser]: [User, (u: User) => void] = useState({
+    // undefined means unknown
     authorised: undefined,
     email: undefined,
     token: undefined,
@@ -12,7 +13,16 @@ export function useUser (): User {
   })
   async function updateUser () {
     const splitpath = router.asPath.split('?')
-    if (splitpath.length < 2) return
+    if (splitpath.length < 2) {
+      setUser({
+        // null means no credentials provided
+        authorised: null,
+        email: null,
+        token: null,
+        accessGroup: null
+      })
+      return
+    }
     const query = new URLSearchParams(splitpath[1])
     setUser({
       authorised: await accessAPI(

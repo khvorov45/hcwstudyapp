@@ -54,3 +54,8 @@ export default function ParticipantTable () {
     }
   </Layout>
 }
+
+// I need this here, otherwise the query will not be inserted into the
+// router object quickly enough, and it will look like the link does not
+// provide any credentials which will cause `useUser` to redirect to `getlink`
+export async function getServerSideProps (_) { return { props: {} } }
