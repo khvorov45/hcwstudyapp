@@ -86,13 +86,14 @@ export function ColumnSelect (
   return <div
     className={`${inputStyles.input} ${inputStyles.multipleSelect}`}
   >
-    {columns.map(column => (
-      <Checkbox
-        label={variables.filter(v => v.my === column.id)[0].label}
+    {columns.map(column => {
+      const varinfo = variables.filter(v => v.my === column.id)[0]
+      return <Checkbox
+        label={varinfo ? varinfo.label : column.id}
         key={column.id}
         checkboxProps={column.getToggleHiddenProps()}
       />
-    ))}
+    })}
   </div>
 }
 

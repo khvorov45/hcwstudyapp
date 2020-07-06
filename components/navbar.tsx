@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import styles from './navbar.module.css'
-import { getConstQuery, User } from '../lib/util'
+import { getConstQuery, User, toTitleCase } from '../lib/util'
 
 export default function Navbar (
   { user, active }:
@@ -66,22 +66,17 @@ export function Subnavbar (
 }
 
 export function SubnavbarTables (
-  { user, active }:
-  {user: User, active: string}
+  { user, active, tables }:
+  {user: User, active: string, tables: string[]}
 ) {
   return <Subnavbar>
-    <Navelement
-      content="Contact"
-      link={'/tables/contact'}
+    {tables.map(tbl => <Navelement
+      key={tbl}
+      content={toTitleCase(tbl)}
+      link={'/tables/' + tbl}
       user={user}
-      active={active === 'contact'}
-    />
-    <Navelement
-      content="Baseline"
-      link={'/tables/baseline'}
-      user={user}
-      active={active === 'baseline'}
-    />
+      active={active === tbl}
+    />)}
   </Subnavbar>
 }
 

@@ -266,6 +266,19 @@ FROM "Participant" INNER JOIN
     return await this.getParticipants(accessGroup, query)
   }
 
+  async getParticipantsSchedule (accessGroup: string): Promise<any[]> {
+    const query =
+`SELECT "pid",
+    "Schedule"."day", "Schedule"."date",
+    "email", "mobile", "Participant"."redcapRecordId",
+    "accessGroup", "site"
+FROM "Participant" INNER JOIN
+      (SELECT "redcapRecordId", "day", "date"
+      FROM "Schedule") AS "Schedule"
+      ON "Schedule"."redcapRecordId" = "Participant"."redcapRecordId"`
+    return await this.getParticipants(accessGroup, query)
+  }
+
   // Vaccination history table interactions -----------------------------------
 
   async createVachisTable (): Promise<void> {

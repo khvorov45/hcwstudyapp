@@ -24,7 +24,7 @@ export default function TablePage (
   // Table generation
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
-    () => generateColumns(data[0], variables),
+    () => generateColumns(data, variables),
     [jsonrows]
   )
   const {
@@ -71,14 +71,16 @@ export default function TablePage (
   </>
 }
 
-function generateColumns (exampleRow, variables) {
+function generateColumns (data, variables) {
+  if (!data) return []
+  const exampleRow = data[0]
   const cols = []
   for (const fieldname in exampleRow) {
     const varinfo = variables.filter(v => v.my === fieldname)[0]
     cols.push({
       Header: <ColumnNames
-        label={varinfo.label}
-        redcapName={varinfo.redcap}
+        label={varinfo ? varinfo.label : fieldname}
+        redcapName={varinfo ? varinfo.redcap : ''}
       />,
       id: fieldname,
       accessor: (row) => {

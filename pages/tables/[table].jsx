@@ -20,6 +20,9 @@ export default function ParticipantTable (
     baseline: [
       'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
       'site'
+    ],
+    schedule: [
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
     ]
   }
   return <Layout
@@ -36,9 +39,10 @@ export default function ParticipantTable (
     <SubnavbarTables
       user={user}
       active={table}
+      tables={Object.keys(hidden)}
     />
     {
-      ['contact', 'baseline'].includes(table)
+      Object.keys(hidden).includes(table)
         ? <TablePage
           user = {user}
           tableName = {table}
