@@ -124,7 +124,8 @@ function generateColumns (data, variables) {
           return row[fieldname] ? 'Yes' : 'No'
         }
         return row[fieldname]
-      }
+      },
+      filter: typeof exampleRow[fieldname] === 'number' ? 'exactText' : 'text'
     })
   }
   return cols
