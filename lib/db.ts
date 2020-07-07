@@ -280,7 +280,8 @@ FROM "Participant" INNER JOIN
 `SELECT "Participant"."pid",
     "index",
     "date",
-    "ari", "Participant"."mobile", "Participant"."redcapRecordId",
+    "ari", "Participant"."email", "Participant"."mobile",
+    "Participant"."redcapRecordId",
     "Participant"."accessGroup", "Participant"."site"
 FROM "WeeklySurvey" INNER JOIN "Participant"
       ON "WeeklySurvey"."redcapRecordId" = "Participant"."redcapRecordId"`
