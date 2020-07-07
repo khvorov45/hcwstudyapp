@@ -1,11 +1,7 @@
 import fetch from 'cross-fetch'
 
 export function getConstQuery (email: string, token: string) {
-  var constQuery = ''
-  if (email && token) {
-    constQuery = `?email=${email}&token=${token}`
-  }
-  return constQuery
+  return email && token ? `?email=${email}&token=${token}` : '#'
 }
 
 export function isDateISOString (datestring: string) {

@@ -148,7 +148,8 @@ export async function exportWeeklySurveys () {
     [
       'record_id',
       'ari_definition',
-      'date_symptom_survey'
+      'date_symptom_survey',
+      'swab_collection'
     ],
     Array.from(Array(50).keys())
       .map(n => `weekly_survey_${n}_arm_1`), 'flat', false
@@ -161,6 +162,8 @@ export async function exportWeeklySurveys () {
       index: parseInt(r.redcap_event_name
         .match(/weekly_survey_(\d+)_arm_1/)[1]),
       date: processDate(r.date_symptom_survey),
-      ari: r.ari_definition === '1'
+      ari: r.ari_definition === '1',
+      swabCollection: r.swab_collection === '' ? null
+        : r.swab_collection === '1'
     }))
 }

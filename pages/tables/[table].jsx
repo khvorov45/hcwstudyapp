@@ -74,7 +74,8 @@ const VARIABLES = {
   weeklysurvey: [
     { my: 'index', redcap: '', label: 'Week' },
     { my: 'date', redcap: 'date_symptom_survey', label: 'Date' },
-    { my: 'ari', redcap: 'ari_definition', label: 'ARI' }
+    { my: 'ari', redcap: 'ari_definition', label: 'ARI' },
+    { my: 'swabCollection', redcap: 'swab_collection', label: 'Swabbed' }
   ]
 }
 

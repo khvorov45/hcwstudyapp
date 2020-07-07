@@ -278,9 +278,8 @@ FROM "Participant" INNER JOIN
   async getParticipantsWeeklySurveys (accessGroup: string): Promise<any[]> {
     const query =
 `SELECT "Participant"."pid",
-    "index",
-    "date",
-    "ari", "Participant"."email", "Participant"."mobile",
+    "index", "date", "ari", "swabCollection",
+    "Participant"."email", "Participant"."mobile",
     "Participant"."redcapRecordId",
     "Participant"."accessGroup", "Participant"."site"
 FROM "WeeklySurvey" INNER JOIN "Participant"
@@ -403,6 +402,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
           "index" INTEGER NOT NULL,
           "date" TIMESTAMPTZ,
           "ari" BOOLEAN NOT NULL,
+          "swabCollection" BOOLEAN,
           PRIMARY KEY ("redcapRecordId", "index"),
           FOREIGN KEY ("redcapRecordId")
           REFERENCES "Participant" ("redcapRecordId")
@@ -419,7 +419,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
     const surveys = await exportWeeklySurveys()
     await this.execute(pgp().helpers.insert(
       surveys,
-      ['redcapRecordId', 'index', 'date', 'ari'],
+      ['redcapRecordId', 'index', 'date', 'ari', 'swabCollection'],
       'WeeklySurvey'
     ))
   }

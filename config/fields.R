@@ -14,7 +14,11 @@ dat <- RCurl::postForm(
   token = yaml::read_yaml("config/config.yaml")$db$redcap$token,
   content = "record",
   format = "json",
-  fields = "record_id,redcap_event_name,ari_definition,survey_week",
+  fields = paste(
+    "record_id", "redcap_event_name", "ari_definition",
+    "survey_week", "swab_collection"
+    sep = ","
+  )
   exportDataAccessGroups = TRUE
 ) %>%
   jsonlite::fromJSON() %>%
