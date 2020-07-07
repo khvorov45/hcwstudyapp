@@ -65,7 +65,7 @@ export async function fetchParticipantData (
     {
       email: user.email,
       token: user.token,
-      subset: tableName === 'schedule' ? 'schedule-wide' : tableName,
+      subset: tableName,
       accessGroup: accessGroup
     }
   )

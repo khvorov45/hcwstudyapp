@@ -416,7 +416,6 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
 
   async fillWeeklySurvey () {
     const surveys = await exportWeeklySurveys()
-    console.log(surveys[0])
     await this.execute(pgp().helpers.insert(
       surveys,
       ['redcapRecordId', 'index', 'date', 'ari'],

@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import { toTitleCase } from '../../lib/util'
 import TablePage from '../../components/tablePage'
 import Layout from '../../components/layout'
 import { SubnavbarTables } from '../../components/navbar'
@@ -12,42 +11,30 @@ export default function ParticipantTable () {
   const user = useUser()
   const router = useRouter()
   const { table } = router.query
+  const thisTableConf = TABLECONF.filter(t => t.id === table)[0]
 
-  const hidden = {
-    contact: ['accessGroup', 'site', 'dateScreening'],
-    baseline: [
-      'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
-      'site'
-    ],
-    schedule: [
-      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
-    ],
-    weeklysurvey: [
-      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
-    ]
-  }
   return <Layout
     user={user}
     active="tables"
   >
     <Head>
-      <title>{toTitleCase(table)} - HCW flu study</title>
+      <title>{thisTableConf.label} - HCW flu study</title>
       <meta
         name="Description"
-        content={`${toTitleCase(table)} - HCW flu study`}
+        content={`${thisTableConf.label} - HCW flu study`}
       />
     </Head>
     <SubnavbarTables
       user={user}
       active={table}
-      tables={Object.keys(hidden)}
+      tables={TABLECONF}
     />
     {
-      Object.keys(hidden).includes(table) && <TablePage
+      TABLECONF.map(t => t.id).includes(table) && <TablePage
         user = {user}
         tableName = {table}
         variables = {getVariables(table)}
-        hidden = {hidden[table]}
+        hidden = {thisTableConf.hidden}
       />
     }
   </Layout>
@@ -95,3 +82,33 @@ function getVariables (tableName) {
   if (VARIABLES[tableName]) return VARIABLES.common.concat(VARIABLES[tableName])
   return VARIABLES.common
 }
+
+const TABLECONF = [
+  {
+    id: 'contact',
+    label: 'Contact',
+    hidden: ['accessGroup', 'site', 'dateScreening']
+  },
+  {
+    id: 'baseline',
+    label: 'Baseline',
+    hidden: [
+      'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
+      'site'
+    ]
+  },
+  {
+    id: 'schedule-wide',
+    label: 'Schedule',
+    hidden: [
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
+    ]
+  },
+  {
+    id: 'weeklysurvey',
+    label: 'Weekly survey',
+    hidden: [
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
+    ]
+  }
+]
