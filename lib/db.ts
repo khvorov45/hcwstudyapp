@@ -3,7 +3,8 @@ import pgp from 'pg-promise'
 import bcrypt from 'bcrypt'
 import { newconfig } from './config'
 import {
-  exportParticipants, exportUsers, exportVaccinationHistory, exportSchedule
+  exportParticipants, exportUsers, exportVaccinationHistory,
+  exportSchedule, exportWeeklySurveys
 } from './redcap'
 
 interface MyPostgresConfig extends PoolConfig {
@@ -167,6 +168,7 @@ export class Postgres {
   async removeAllParticipantTables (): Promise<void> {
     await this.removeVachisTable()
     await this.removeSchedule()
+    await this.removeWeeklySurvey()
     await this.removeParticipantTable()
   }
 
@@ -174,6 +176,7 @@ export class Postgres {
     await this.createParticipantTable()
     await this.createVachisTable()
     await this.createSchedule()
+    await this.createWeeklySurvey()
   }
 
   async wipeAllParticipant (): Promise<void> {
@@ -181,6 +184,7 @@ export class Postgres {
       DELETE FROM "Participant";
       DELETE FROM "VaccinationHistory";
       DELETE FROM "Schedule";
+      DELETE FROM "WeeklySurvey";
     `)
   }
 
@@ -188,6 +192,7 @@ export class Postgres {
     await this.fillParticipant()
     await this.fillVachis()
     await this.fillSchedule()
+    await this.fillWeeklySurvey()
   }
 
   // Participant table interactions -------------------------------------------
@@ -226,6 +231,9 @@ export class Postgres {
     ))
   }
 
+  // @REVIEW
+  // Move these participant-related queries elsewhere since they span multiple
+  // tables
   async getParticipants (
     accessGroup: string, prequery?: string
   ): Promise<any[]> {
@@ -374,6 +382,37 @@ FROM "Participant" INNER JOIN
       schedule,
       ['redcapRecordId', 'day', 'date'],
       'Schedule'
+    ))
+  }
+
+  // Weekly survey table interactions -----------------------------------------
+
+  async createWeeklySurvey () {
+    await this.execute(`
+      CREATE TABLE "WeeklySurvey" (
+          "redcapRecordId" TEXT NOT NULL,
+          "index" INTEGER NOT NULL,
+          "date" TIMESTAMPTZ,
+          "ari" BOOLEAN NOT NULL,
+          PRIMARY KEY ("redcapRecordId", "index"),
+          FOREIGN KEY ("redcapRecordId")
+          REFERENCES "Participant" ("redcapRecordId")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+    `)
+  }
+
+  async removeWeeklySurvey () {
+    await this.execute('DROP TABLE IF EXISTS "WeeklySurvey"')
+  }
+
+  async fillWeeklySurvey () {
+    const surveys = await exportWeeklySurveys()
+    console.log(surveys[0])
+    await this.execute(pgp().helpers.insert(
+      surveys,
+      ['redcapRecordId', 'index', 'date', 'ari'],
+      'WeeklySurvey'
     ))
   }
 

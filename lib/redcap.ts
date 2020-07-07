@@ -126,6 +126,8 @@ export async function exportSchedule () {
   ]
   const timepoints = [0, 7, 14, 280]
   // Filter out all non-participants
+  // @REVIEW
+  // Convert this wide-to-long procedure into a function
   const recordsFiltered = records.filter(r => r.pid !== '')
   const recordsLong = []
   recordsFiltered.map(r => {
@@ -139,4 +141,26 @@ export async function exportSchedule () {
     }
   })
   return recordsLong
+}
+
+export async function exportWeeklySurveys () {
+  const records = await exportRecords(
+    [
+      'record_id',
+      'ari_definition',
+      'date_symptom_survey'
+    ],
+    Array.from(Array(50).keys())
+      .map(n => `weekly_survey_${n}_arm_1`), 'flat', false
+  )
+  // PID won't be present here because it's only present at baseline event
+  return records
+    .filter(r => r.ari_definition !== '')
+    .map(r => ({
+      redcapRecordId: r.record_id,
+      index: parseInt(r.redcap_event_name
+        .match(/weekly_survey_(\d+)_arm_1/)[1]),
+      date: processDate(r.date_symptom_survey),
+      ari: r.ari_definition === '1'
+    }))
 }
