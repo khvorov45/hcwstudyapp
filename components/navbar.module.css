@@ -7,7 +7,8 @@
     justify-content: space-between;
 }
 
-.leftside, .rightside {
+.leftside,
+.rightside {
     display: flex;
     align-items: center;
 }
@@ -18,10 +19,14 @@
 
 .element {
     color: var(--font-color);
-    background-color: var(--bg-color-alt);
+
     padding: 10px;
     user-select: none;
     font-weight: bold;
+}
+
+.container *:nth-child(even) {
+    background-color: var(--bg-color-alt);
 }
 
 .link {
@@ -34,14 +39,7 @@
     background-color: var(--bg-highlight);
 }
 
-/*
-.siteswitch {
-    margin-left: auto;
-}
-*/
-
 .themeswitch {
     cursor: pointer;
     user-select: none;
-    /*margin-left: auto;*/
 }

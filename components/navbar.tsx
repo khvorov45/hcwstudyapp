@@ -40,18 +40,16 @@ export function Navelement (
     active: boolean
   }
 ) {
-  return <li>
-    <a
-      href={`${link}${getConstQuery(user.email, user.token)}`}
-      className={styles.link}
-    >
-      <div className={
-        active ? `${styles.element} ${styles.active}` : styles.element
-      }>
-        {content}
-      </div>
-    </a>
-  </li>
+  return <a
+    href={`${link}${getConstQuery(user.email, user.token)}`}
+    className={styles.link}
+  >
+    <div className={
+      active ? `${styles.element} ${styles.active}` : styles.element
+    }>
+      {content}
+    </div>
+  </a>
 }
 
 export function Subnavbar (
