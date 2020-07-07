@@ -26,6 +26,9 @@ export default function ParticipantTable () {
     ],
     schedule: [
       'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
+    ],
+    weeklysurvey: [
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
     ]
   }
   return <Layout

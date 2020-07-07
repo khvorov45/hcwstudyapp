@@ -87,6 +87,9 @@ function generateColumns (data, variables) {
         if (isDateISOString(row[fieldname])) {
           return row[fieldname].split('T')[0]
         }
+        if (typeof row[fieldname] === 'boolean') {
+          return row[fieldname] ? 'Yes' : 'No'
+        }
         return row[fieldname]
       }
     })

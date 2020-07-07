@@ -195,45 +195,6 @@ export class Postgres {
     await this.fillWeeklySurvey()
   }
 
-  // Participant table interactions -------------------------------------------
-
-  async createParticipantTable (): Promise<void> {
-    await this.execute(`
-      CREATE TABLE "Participant" (
-          "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
-          "pid" TEXT NOT NULL UNIQUE,
-          "accessGroup" TEXT NOT NULL,
-          "site" TEXT NOT NULL,
-          "dateScreening" TIMESTAMPTZ,
-          "email" TEXT,
-          "mobile" TEXT,
-          "dob" TIMESTAMPTZ,
-          "gender" TEXT,
-          FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
-          ON UPDATE CASCADE ON DELETE CASCADE
-      );
-    `)
-  }
-
-  async removeParticipantTable (): Promise<void> {
-    await this.execute('DROP TABLE IF EXISTS "Participant"')
-  }
-
-  async fillParticipant (): Promise<void> {
-    const participants = await exportParticipants()
-    await this.execute(pgp().helpers.insert(
-      participants,
-      [
-        'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
-        'mobile', 'email', 'gender'
-      ],
-      'Participant'
-    ))
-  }
-
-  // @REVIEW
-  // Move these participant-related queries elsewhere since they span multiple
-  // tables
   async getParticipants (
     accessGroup: string, prequery?: string
   ): Promise<any[]> {
@@ -313,6 +274,54 @@ FROM "Participant" INNER JOIN
       curEntry['day' + row.day] = row.date
     })
     return resWide
+  }
+
+  async getParticipantsWeeklySurveys (accessGroup: string): Promise<any[]> {
+    const query =
+`SELECT "Participant"."pid",
+    "index",
+    "date",
+    "ari", "Participant"."mobile", "Participant"."redcapRecordId",
+    "Participant"."accessGroup", "Participant"."site"
+FROM "WeeklySurvey" INNER JOIN "Participant"
+      ON "WeeklySurvey"."redcapRecordId" = "Participant"."redcapRecordId"`
+    return await this.getParticipants(accessGroup, query)
+  }
+
+  // Participant table interactions -------------------------------------------
+
+  async createParticipantTable (): Promise<void> {
+    await this.execute(`
+      CREATE TABLE "Participant" (
+          "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
+          "pid" TEXT NOT NULL UNIQUE,
+          "accessGroup" TEXT NOT NULL,
+          "site" TEXT NOT NULL,
+          "dateScreening" TIMESTAMPTZ,
+          "email" TEXT,
+          "mobile" TEXT,
+          "dob" TIMESTAMPTZ,
+          "gender" TEXT,
+          FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
+          ON UPDATE CASCADE ON DELETE CASCADE
+      );
+    `)
+  }
+
+  async removeParticipantTable (): Promise<void> {
+    await this.execute('DROP TABLE IF EXISTS "Participant"')
+  }
+
+  async fillParticipant (): Promise<void> {
+    const participants = await exportParticipants()
+    await this.execute(pgp().helpers.insert(
+      participants,
+      [
+        'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
+        'mobile', 'email', 'gender'
+      ],
+      'Participant'
+    ))
   }
 
   // Vaccination history table interactions -----------------------------------

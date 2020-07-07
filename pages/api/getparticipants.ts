@@ -31,16 +31,17 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     return
   }
   let data: any
+  const getters = {
+    contact: () => db.getParticipantsContact(accessGroup),
+    baseline: () => db.getParticipantsBaseline(accessGroup),
+    'schedule-long': () => db.getParticipantsSchedule(accessGroup, false),
+    'schedule-wide': () => db.getParticipantsSchedule(accessGroup, true),
+    weeklysurvey: () => db.getParticipantsWeeklySurveys(accessGroup)
+  }
   if (!req.query.subset) {
     data = await db.getParticipants(accessGroup)
-  } else if (req.query.subset === 'contact') {
-    data = await db.getParticipantsContact(accessGroup)
-  } else if (req.query.subset === 'baseline') {
-    data = await db.getParticipantsBaseline(accessGroup)
-  } else if (req.query.subset === 'schedule-long') {
-    data = await db.getParticipantsSchedule(accessGroup, false)
-  } else if (req.query.subset === 'schedule-wide') {
-    data = await db.getParticipantsSchedule(accessGroup, true)
+  } else if (Object.keys(getters).includes(req.query.subset.toString())) {
+    data = await getters[req.query.subset.toString()]()
   } else {
     res.status(404).end()
     return
