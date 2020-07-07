@@ -4,7 +4,7 @@ import Table from './table'
 import { isDateISOString, fetchParticipantData } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
-import { Button } from './input'
+import { Button, TextLine } from './input'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -162,13 +162,13 @@ function DefaultColumnFilter ({
   column: { filterValue, preFilteredRows, setFilter }
 }) {
   return (
-    <input
+    <TextLine
       value={filterValue || ''}
       onChange={e => {
         // Set undefined to remove the filter entirely
         setFilter(e.target.value || undefined)
       }}
-      placeholder={`Search ${preFilteredRows.length} records...`}
+      placeholder={`Search ${preFilteredRows.length} rows...`}
     />
   )
 }

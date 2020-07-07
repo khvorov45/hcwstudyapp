@@ -50,7 +50,7 @@
 .textLine {
     border: 0;
     border-bottom: 2px solid var(--border);
-    padding: 5px;
+    padding-bottom: 5px;
     width: 100%;
     max-width: 20em;
 }

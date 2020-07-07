@@ -55,7 +55,7 @@ export function ButtonWithIndicator (props: {
 
 export function TextLine (
   props: {
-    value: string, onChange: any, type: string,
+    value: string, onChange: any, type?: string,
     id?: string, placeholder?: string
 }
 ) {
