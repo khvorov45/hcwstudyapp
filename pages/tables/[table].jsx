@@ -1,11 +1,10 @@
 import Head from 'next/head'
-import { toTitleCase, accessAPI } from '../../lib/util'
+import { toTitleCase } from '../../lib/util'
 import TablePage from '../../components/tablePage'
 import Layout from '../../components/layout'
 import { SubnavbarTables } from '../../components/navbar'
 import { useRouter } from 'next/router'
 import { useUser } from '../../lib/hooks'
-import { useState, useEffect } from 'react'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -13,11 +12,7 @@ export default function ParticipantTable () {
   const user = useUser()
   const router = useRouter()
   const { table } = router.query
-  const [variables, setVariables] = useState()
-  useEffect(
-    () => { accessAPI('getvariables', 'GET').then(vars => setVariables(vars)) },
-    []
-  )
+
   const hidden = {
     contact: ['accessGroup', 'site', 'dateScreening'],
     baseline: [
@@ -51,7 +46,7 @@ export default function ParticipantTable () {
       Object.keys(hidden).includes(table) && <TablePage
         user = {user}
         tableName = {table}
-        variables = {variables}
+        variables = {getVariables(table)}
         hidden = {hidden[table]}
       />
     }
@@ -62,3 +57,41 @@ export default function ParticipantTable () {
 // router object quickly enough, and it will look like the link does not
 // provide any credentials which will cause `useUser` to redirect to `getlink`
 export async function getServerSideProps (_) { return { props: {} } }
+
+const VARIABLES = {
+  common: [
+    { my: 'redcapRecordId', redcap: 'record_id', label: 'Record ID' },
+    { my: 'pid', redcap: 'pid', label: 'PID' },
+    { my: 'email', redcap: 'email', label: 'Email' },
+    { my: 'mobile', redcap: 'mobile_number', label: 'Mobile' },
+    {
+      my: 'accessGroup',
+      redcap: 'redcap_data_access_group',
+      label: 'Access Group'
+    },
+    { my: 'site', redcap: 'site_name', label: 'Site' }
+  ],
+  baseline: [
+    {
+      my: 'dateScreening',
+      redcap: 'date_screening',
+      label: 'Date of Screening'
+    },
+    { my: 'gender', redcap: 'a1_gender', label: 'Gender' },
+    { my: 'dob', redcap: 'a2_dob', label: 'Date of Birth' },
+    { my: 'age', redcap: '', label: 'Age' },
+    { my: 'numSeasVac', redcap: 'num_seas_vac', label: 'Previous vaccinations' }
+  ],
+  schedule: [0, 7, 14, 280]
+    .map(n => ({ my: `day${n}`, redcap: '', label: `Day ${n}` })),
+  weeklysurvey: [
+    { my: 'index', redcap: '', label: 'Week' },
+    { my: 'date', redcap: 'date_symptom_survey', label: 'Date' },
+    { my: 'ari', redcap: 'ari_definition', label: 'ARI' }
+  ]
+}
+
+function getVariables (tableName) {
+  if (VARIABLES[tableName]) return VARIABLES.common.concat(VARIABLES[tableName])
+  return VARIABLES.common
+}

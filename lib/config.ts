@@ -7,11 +7,4 @@ const config = YAML.parse(readFileSync(
   'utf-8'
 ))
 
-const variables = YAML.parse(readFileSync(
-  path.join(process.cwd(), 'config', 'db', 'variables.yaml'),
-  'utf-8'
-))
-
-config.db.variables = variables
-
 export const newconfig = config

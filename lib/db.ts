@@ -211,7 +211,6 @@ export class Postgres {
   async getParticipantsContact (accessGroup: string): Promise<any[]> {
     const query =
     `SELECT "redcapRecordId", "pid", "email", "mobile",
-    "dateScreening",
     "accessGroup", "site" FROM "Participant"`
     return await this.getParticipants(accessGroup, query)
   }
