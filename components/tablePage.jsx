@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useTable, useSortBy, usePagination } from 'react-table'
+import { useTable, useSortBy, usePagination, useFilters } from 'react-table'
 import Table from './table'
 import { isDateISOString, fetchParticipantData } from '../lib/util'
 import Ribbon from './ribbon'
@@ -29,6 +29,13 @@ export default function TablePage (
     [jsonrows]
   )
   const paginationThreshold = 1000
+  const defaultColumn = useMemo(
+    () => ({
+      // Let's set up our default Filter UI
+      Filter: DefaultColumnFilter
+    }),
+    []
+  )
   const {
     getTableProps,
     getTableBodyProps,
@@ -48,6 +55,7 @@ export default function TablePage (
     {
       columns,
       data,
+      defaultColumn,
       initialState: {
         hiddenColumns: hidden,
         sortBy: [
@@ -59,6 +67,7 @@ export default function TablePage (
         pageSize: paginationThreshold
       }
     },
+    useFilters,
     useSortBy,
     usePagination
   )
@@ -147,4 +156,19 @@ function Paginator ({
     }
     <Button onClick={updateMax} label={max ? 'Pages' : 'All'}/>
   </div>
+}
+
+function DefaultColumnFilter ({
+  column: { filterValue, preFilteredRows, setFilter }
+}) {
+  return (
+    <input
+      value={filterValue || ''}
+      onChange={e => {
+        // Set undefined to remove the filter entirely
+        setFilter(e.target.value || undefined)
+      }}
+      placeholder={`Search ${preFilteredRows.length} records...`}
+    />
+  )
 }

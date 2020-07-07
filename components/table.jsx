@@ -46,16 +46,22 @@ function Thead ({ headerGroups }) {
     {headerGroups.map(headerGroup => (
       <tr {...headerGroup.getHeaderGroupProps()}>
         {headerGroup.headers.map(column => (
-          <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+          <th {...column.getHeaderProps()}>
             <div className={tableStyles.columnHeader}>
-              {column.render('Header')}
-              <span className={tableStyles.columnController}>
-                {column.isSorted
-                  ? column.isSortedDesc
-                    ? ' ▼'
-                    : ' ▲'
-                  : ' ⇅'}
-              </span>
+              <div
+                className={tableStyles.columnHeaderClickable}
+                {...column.getSortByToggleProps()}
+              >
+                {column.render('Header')}
+                <span className={tableStyles.columnController}>
+                  {column.isSorted
+                    ? column.isSortedDesc
+                      ? ' ▼'
+                      : ' ▲'
+                    : ' ⇅'}
+                </span>
+              </div>
+              <div>{column.canFilter && column.render('Filter')}</div>
             </div>
           </th>
         ))}

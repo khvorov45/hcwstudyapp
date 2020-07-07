@@ -16,6 +16,10 @@
     background: var(--bg-color);
 }
 
+.table th input {
+    margin-top: auto;
+}
+
 .table td {
     text-align: center;
 }
@@ -42,10 +46,12 @@
     font-family: 'Courier New', Courier, monospace;
     font-style: normal;
     font-size: 0.9em;
-    color: var(--font-color-muted)
+    color: var(--font-color-muted);
+    line-height: 1em;
+    min-height: 1em;
 }
 
-.columnHeader {
+.columnHeaderClickable {
     display: grid;
     grid-template-areas: 'names controller';
     align-items: center;
