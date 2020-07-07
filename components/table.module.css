@@ -24,7 +24,8 @@
     border-right: 0;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     margin: 0;
     padding: 0.5rem;
 }
@@ -58,4 +59,8 @@
 .columnController {
     grid-area: controller;
     justify-self: end;
+}
+
+.paginator {
+    align-self: center;
 }

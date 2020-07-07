@@ -29,6 +29,15 @@
     margin: 5px;
 }
 
+.squarebutton {
+    border: 1px solid var(--border);
+    background-color: var(--bg-color-alt);
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+    margin: 5px;
+}
+
 .bigbutton {
     border: 1px solid var(--border);
     background-color: transparent;

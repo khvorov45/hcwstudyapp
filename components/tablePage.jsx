@@ -1,9 +1,10 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useTable, useSortBy } from 'react-table'
+import { useTable, useSortBy, usePagination } from 'react-table'
 import Table from './table'
 import { isDateISOString, fetchParticipantData } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
+import { Button } from './input'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -27,13 +28,22 @@ export default function TablePage (
     () => generateColumns(data, variables),
     [jsonrows]
   )
+  const paginationThreshold = 1000
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-    allColumns
+    allColumns,
+    page,
+    nextPage,
+    previousPage,
+    pageCount,
+    canPreviousPage,
+    canNextPage,
+    setPageSize,
+    state: { pageIndex }
   } = useTable(
     {
       columns,
@@ -45,10 +55,12 @@ export default function TablePage (
             id: 'pid',
             desc: false
           }
-        ]
+        ],
+        pageSize: paginationThreshold
       }
     },
-    useSortBy
+    useSortBy,
+    usePagination
   )
   return <>
     <Ribbon
@@ -60,10 +72,22 @@ export default function TablePage (
         varselect: { columns: allColumns, variables: variables }
       }}
     />
+    {rows.length > paginationThreshold &&
+    <Paginator
+      nextPage={nextPage}
+      previousPage={previousPage}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      canPreviousPage={canPreviousPage}
+      canNextPage={canNextPage}
+      pageSizeLow={paginationThreshold}
+      pageSizeMax={rows.length}
+      setPageSize={setPageSize}
+    />}
     <Table
       getTableProps={getTableProps}
       headerGroups={headerGroups}
-      rows={rows}
+      rows={page}
       prepareRow={prepareRow}
       getTableBodyProps={getTableBodyProps}
       promiseArea="updatedb"
@@ -101,5 +125,26 @@ function ColumnNames ({ label, redcapName }) {
   return <div className={tableStyles.columnNames}>
     <div>{label}</div>
     <div className={tableStyles.columnRedcapName}>{redcapName}</div>
+  </div>
+}
+
+function Paginator ({
+  nextPage, previousPage, pageIndex, pageCount, canPreviousPage, canNextPage,
+  pageSizeLow, pageSizeMax, setPageSize
+}) {
+  const [max, setMax] = useState(false)
+  function updateMax () {
+    max ? setPageSize(pageSizeLow) : setPageSize(pageSizeMax)
+    setMax(!max)
+  }
+  return <div className={tableStyles.paginator}>
+    {
+      !max && <>
+        <Button onClick={previousPage} disabled={!canPreviousPage} label='<'/>
+        <span>{`${pageIndex + 1} (${pageCount})`}</span>
+        <Button onClick={nextPage} disabled={!canNextPage} label='>'/>
+      </>
+    }
+    <Button onClick={updateMax} label={max ? 'Pages' : 'All'}/>
   </div>
 }

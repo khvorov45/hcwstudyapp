@@ -4,6 +4,18 @@ import { Timestamp } from './util'
 import { toTitleCase } from '../lib/util'
 import styles from './input.module.css'
 
+export function Button (
+  { label, onClick }:
+  {label: string, onClick: () => void}
+) {
+  return <button
+    className={`${styles.input} ${styles.squarebutton}`}
+    onClick={onClick}
+  >
+    {label}
+  </button>
+}
+
 export function ButtonWithTimestamp (
   { label, onClick, promiseArea, timestamp }:
   {label: string, onClick: () => void, promiseArea: string, timestamp?: Date}
