@@ -64,7 +64,27 @@
 }
 
 .paginator {
-    align-self: center;
+    border: 2px solid var(--border);
+    border-top: 0;
+    align-self: left;
+}
+
+.paginator * {
+    margin-left: 5px;
+    margin-right: 5px;
+    border: 0;
+}
+
+.pageswitchButton {
+    border: 0;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}
+
+.rowcount {
+    margin-left: 10px;
+    margin-right: 10px;
+    color: var(--font-color-muted)
 }
 
 .numberFilter {

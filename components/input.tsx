@@ -5,11 +5,13 @@ import { toTitleCase } from '../lib/util'
 import styles from './input.module.css'
 
 export function Button (
-  { label, onClick }:
-  {label: string, onClick: () => void}
+  { label, onClick, className }:
+  {label: string, onClick: () => void, className?: string}
 ) {
   return <button
-    className={`${styles.input} ${styles.squarebutton}`}
+    className={`
+      ${styles.input} ${styles.squarebutton} ${className || ''}
+    `}
     onClick={onClick}
   >
     {label}

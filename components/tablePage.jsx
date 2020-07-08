@@ -30,7 +30,7 @@ export default function TablePage (
     () => generateColumns(data, variables),
     [jsonrows]
   )
-  const paginationThreshold = 1000
+  const paginationThreshold = 500
   const defaultColumn = useMemo(
     () => ({
       // Let's set up our default Filter UI
@@ -118,6 +118,7 @@ export default function TablePage (
       pageSizeLow={paginationThreshold}
       pageSizeMax={rows.length}
       setPageSize={setPageSize}
+      totalRows={rows.length}
     />}
     <Table
       getTableProps={getTableProps}
@@ -168,7 +169,7 @@ function ColumnNames ({ label, redcapName }) {
 
 function Paginator ({
   nextPage, previousPage, pageIndex, pageCount, canPreviousPage, canNextPage,
-  pageSizeLow, pageSizeMax, setPageSize
+  pageSizeLow, pageSizeMax, setPageSize, totalRows
 }) {
   const [max, setMax] = useState(false)
   function updateMax () {
@@ -176,14 +177,22 @@ function Paginator ({
     setMax(!max)
   }
   return <div className={tableStyles.paginator}>
+    <span className={tableStyles.rowcount}>Total rows: {totalRows}</span>
     {
       !max && <>
-        <Button onClick={previousPage} disabled={!canPreviousPage} label='<'/>
+        <Button
+          onClick={previousPage} disabled={!canPreviousPage} label='<'
+          className={tableStyles.pageswitchButton}
+        />
         <span>{`${pageIndex + 1} (${pageCount})`}</span>
-        <Button onClick={nextPage} disabled={!canNextPage} label='>'/>
+        <Button onClick={nextPage} disabled={!canNextPage} label='>'
+          className={tableStyles.pageswitchButton}
+        />
       </>
     }
-    <Button onClick={updateMax} label={max ? 'Pages' : 'All'}/>
+    <Button onClick={updateMax} label={max ? 'Pages' : 'All'}
+      className={tableStyles.pageswitchButton}
+    />
   </div>
 }
 
