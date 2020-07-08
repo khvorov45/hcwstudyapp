@@ -196,7 +196,7 @@ export class Postgres {
   }
 
   async getParticipants (
-    accessGroup: string, prequery?: string
+    accessGroup: string, prequery?: string, postquery?: string
   ): Promise<any[]> {
     let query = prequery || 'SELECT * FROM "Participant"'
     let params = []
@@ -204,7 +204,7 @@ export class Postgres {
       query += ' WHERE "accessGroup" = $1'
       params = [accessGroup.toLowerCase()]
     }
-    query += ';'
+    query += `${postquery || ''};`
     return await this.getRows<any>(query, params)
   }
 
@@ -245,16 +245,17 @@ FROM "Participant" INNER JOIN
     accessGroup: string, wide: boolean
   ): Promise<any[]> {
     const query =
-`SELECT "pid",
+`SELECT "Participant"."pid",
     "Schedule"."day", "Schedule"."date",
-    "email", "mobile", "addBleed", "Participant"."redcapRecordId",
-    "accessGroup", "site"
-FROM "Participant" INNER JOIN
-      (SELECT "redcapRecordId", "day", "date"
-      FROM "Schedule") AS "Schedule"
-      ON "Schedule"."redcapRecordId" = "Participant"."redcapRecordId"
-      ${wide ? 'ORDER BY "redcapRecordId"' : ''}`
-    const res = await this.getParticipants(accessGroup, query)
+    "Participant"."email", "Participant"."mobile",
+    "Participant"."addBleed", "Participant"."redcapRecordId",
+    "Participant"."accessGroup", "Participant"."site"
+FROM "Schedule"
+INNER JOIN "Participant"
+    ON "Schedule"."redcapRecordId" = "Participant"."redcapRecordId"`
+    const res = await this.getParticipants(
+      accessGroup, query, `${wide ? 'ORDER BY "redcapRecordId"' : ''}`
+    )
     if (!wide) return res
     const resWide = []
     function createEntry (row) {
