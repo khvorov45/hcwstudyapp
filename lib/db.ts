@@ -208,9 +208,15 @@ export class Postgres {
     return await this.getRows<any>(query, params)
   }
 
+  async getParticipantIds (accessGroup: string): Promise<string[]> {
+    const query = 'SELECT "redcapRecordId" FROM "Participant"'
+    const queryRes = await this.getParticipants(accessGroup, query)
+    return queryRes.map(q => q.redcapRecordId)
+  }
+
   async getParticipantsContact (accessGroup: string): Promise<any[]> {
     const query =
-    `SELECT "redcapRecordId", "pid", "email", "mobile",
+    `SELECT "redcapRecordId", "pid", "email", "mobile", "addBleed",
     "accessGroup", "site" FROM "Participant"`
     return await this.getParticipants(accessGroup, query)
   }
@@ -223,6 +229,7 @@ export class Postgres {
       EXTRACT(EPOCH FROM INTERVAL '1 year')
     )::numeric, 1)::double precision as age,
     "numSeasVac",
+    "addBleed",
     "dateScreening",
     "email", "mobile", "Participant"."redcapRecordId",
     "accessGroup", "site"
@@ -240,7 +247,7 @@ FROM "Participant" INNER JOIN
     const query =
 `SELECT "pid",
     "Schedule"."day", "Schedule"."date",
-    "email", "mobile", "Participant"."redcapRecordId",
+    "email", "mobile", "addBleed", "Participant"."redcapRecordId",
     "accessGroup", "site"
 FROM "Participant" INNER JOIN
       (SELECT "redcapRecordId", "day", "date"
@@ -259,6 +266,7 @@ FROM "Participant" INNER JOIN
         day280: null,
         email: row.email,
         mobile: row.mobile,
+        addBleed: row.addBleed,
         redcapRecordId: row.redcapRecordId,
         accessGroup: row.accessGroup,
         site: row.site
@@ -279,7 +287,7 @@ FROM "Participant" INNER JOIN
     const query =
 `SELECT "Participant"."pid",
     "index", "date", "ari", "swabCollection",
-    "Participant"."email", "Participant"."mobile",
+    "Participant"."email", "Participant"."mobile", "Participant"."addBleed",
     "Participant"."redcapRecordId",
     "Participant"."accessGroup", "Participant"."site"
 FROM "WeeklySurvey" INNER JOIN "Participant"
@@ -299,6 +307,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
           "dateScreening" TIMESTAMPTZ,
           "email" TEXT,
           "mobile" TEXT,
+          "addBleed" BOOLEAN,
           "dob" TIMESTAMPTZ,
           "gender" TEXT,
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
@@ -317,7 +326,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
       participants,
       [
         'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
-        'mobile', 'email', 'gender'
+        'mobile', 'email', 'gender', 'addBleed'
       ],
       'Participant'
     ))
@@ -416,7 +425,9 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
   }
 
   async fillWeeklySurvey () {
-    const surveys = await exportWeeklySurveys()
+    let surveys = await exportWeeklySurveys()
+    const allPartIds = await this.getParticipantIds('unrestricted')
+    surveys = surveys.filter(s => allPartIds.includes(s.redcapRecordId))
     await this.execute(pgp().helpers.insert(
       surveys,
       ['redcapRecordId', 'index', 'date', 'ari', 'swabCollection'],

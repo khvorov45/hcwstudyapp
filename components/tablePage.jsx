@@ -152,9 +152,13 @@ function generateColumns (data, variables) {
         }
         return row[fieldname]
       },
-      Filter: varinfo.filter ? MYFILTERS[varinfo.filter] : DefaultColumnFilter,
-      filter: varinfo.filter ||
-        (typeof exampleRow[fieldname] === 'number' ? 'exactText' : 'text')
+      Filter: varinfo
+        ? (varinfo.filter ? MYFILTERS[varinfo.filter] : DefaultColumnFilter)
+        : DefaultColumnFilter,
+      filter: varinfo
+        ? varinfo.filter ||
+          (typeof exampleRow[fieldname] === 'number' ? 'exactText' : 'text')
+        : 'text'
     })
   }
   return cols

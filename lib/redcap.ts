@@ -65,7 +65,8 @@ export async function exportParticipants () {
   const records = await exportRecords(
     [
       'record_id', 'redcap_data_access_group', 'pid', 'site_name',
-      'date_screening', 'email', 'mobile_number', 'a1_gender', 'a2_dob'
+      'date_screening', 'email', 'mobile_number', 'a1_gender', 'a2_dob',
+      'add_bleed', 'study_group_vacc'
     ],
     ['baseline_arm_1'], 'flat', true
   )
@@ -80,6 +81,7 @@ export async function exportParticipants () {
       dateScreening: processDate(r.date_screening),
       email: r.email.toLowerCase(),
       mobile: r.mobile_number,
+      addBleed: r.add_bleed === 'Yes' || r.study_group_vacc === 'Nested study',
       gender: r.a1_gender,
       dob: processDate(r.a2_dob)
     }

@@ -51,6 +51,7 @@ const VARIABLES = {
     { my: 'pid', redcap: 'pid', label: 'PID' },
     { my: 'email', redcap: 'email', label: 'Email' },
     { my: 'mobile', redcap: 'mobile_number', label: 'Mobile' },
+    { my: 'addBleed', redcap: '', label: 'Nested' },
     {
       my: 'accessGroup',
       redcap: 'redcap_data_access_group',
@@ -100,21 +101,21 @@ const TABLECONF = [
     label: 'Baseline',
     hidden: [
       'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
-      'site'
+      'site', 'addBleed'
     ]
   },
   {
     id: 'schedule-wide',
     label: 'Schedule',
     hidden: [
-      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed'
     ]
   },
   {
     id: 'weeklysurvey',
     label: 'Weekly survey',
     hidden: [
-      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site'
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed'
     ]
   }
 ]
