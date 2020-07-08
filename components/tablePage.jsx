@@ -205,7 +205,7 @@ function Paginator ({
 }
 
 function DefaultColumnFilter ({
-  column: { filterValue, preFilteredRows, setFilter }
+  column: { filterValue, setFilter }
 }) {
   return (
     <TextLine
@@ -213,7 +213,7 @@ function DefaultColumnFilter ({
       onChange={e => {
         setFilter(e.target.value || undefined)
       }}
-      placeholder={`Search ${preFilteredRows.length} rows...`}
+      placeholder={'Search...'}
       width='150px'
     />
   )
