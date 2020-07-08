@@ -72,7 +72,7 @@ const VARIABLES = {
   'schedule-wide': [0, 7, 14, 280]
     .map(n => ({ my: `day${n}`, redcap: '', label: `Day ${n}` })),
   weeklysurvey: [
-    { my: 'index', redcap: '', label: 'Week' },
+    { my: 'index', redcap: '', label: 'Week', filter: 'between' },
     { my: 'date', redcap: 'date_symptom_survey', label: 'Date' },
     { my: 'ari', redcap: 'ari_definition', label: 'ARI' },
     { my: 'swabCollection', redcap: 'swab_collection', label: 'Swabbed' }

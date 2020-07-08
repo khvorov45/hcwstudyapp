@@ -16,10 +16,6 @@
     background: var(--bg-color);
 }
 
-.table th input {
-    margin-top: auto;
-}
-
 .table td {
     text-align: center;
 }
@@ -69,4 +65,17 @@
 
 .paginator {
     align-self: center;
+}
+
+.numberFilter {
+    display: flex;
+    align-items: center;
+}
+
+.numberFilter>*:first-child {
+    margin-right: 5px;
+}
+
+.numberFilter>*:nth-child(2) {
+    margin-left: 5px;
 }

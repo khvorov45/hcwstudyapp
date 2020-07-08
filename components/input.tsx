@@ -178,3 +178,17 @@ export function Select (
     }
   </select>
 }
+
+export function NumberLine (
+  { value, onChange, placeholder, width }:
+  {value: number, onChange: () => void, placeholder: string, width: string}
+) {
+  return <input
+    className={`${styles.input} ${styles.number}`}
+    value={value || ''}
+    type="number"
+    onChange={onChange}
+    placeholder={placeholder}
+    style={{ width: width || '70px' }}
+  />
+}

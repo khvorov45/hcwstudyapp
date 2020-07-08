@@ -4,7 +4,7 @@ import Table from './table'
 import { isDateISOString, fetchParticipantData } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
-import { Button, TextLine } from './input'
+import { Button, TextLine, NumberLine } from './input'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -125,7 +125,9 @@ function generateColumns (data, variables) {
         }
         return row[fieldname]
       },
-      filter: typeof exampleRow[fieldname] === 'number' ? 'exactText' : 'text'
+      Filter: varinfo.filter ? MYFILTERS[varinfo.filter] : DefaultColumnFilter,
+      filter: varinfo.filter ||
+        (typeof exampleRow[fieldname] === 'number' ? 'exactText' : 'text')
     })
   }
   return cols
@@ -171,5 +173,45 @@ function DefaultColumnFilter ({
       }}
       placeholder={`Search ${preFilteredRows.length} rows...`}
     />
+  )
+}
+
+const MYFILTERS = {
+  between: NumberRangeColumnFilter
+}
+
+function NumberRangeColumnFilter ({
+  column: { filterValue = [], preFilteredRows, setFilter, id }
+}) {
+  const [min, max] = useMemo(() => {
+    let min = preFilteredRows.length ? preFilteredRows[0].values[id] : 0
+    let max = preFilteredRows.length ? preFilteredRows[0].values[id] : 0
+    preFilteredRows.forEach(row => {
+      min = Math.min(row.values[id], min)
+      max = Math.max(row.values[id], max)
+    })
+    return [min, max]
+  }, [id, preFilteredRows])
+
+  return (
+    <div className={tableStyles.numberFilter}>
+      <NumberLine
+        value={filterValue[0] || ''}
+        onChange={e => {
+          const val = e.target.value
+          setFilter((old = []) => [val ? parseInt(val, 10) : undefined, old[1]])
+        }}
+        placeholder={`Min (${min})`}
+      />
+      -
+      <NumberLine
+        value={filterValue[1] || ''}
+        onChange={e => {
+          const val = e.target.value
+          setFilter((old = []) => [old[0], val ? parseInt(val, 10) : undefined])
+        }}
+        placeholder={`Max (${max})`}
+      />
+    </div>
   )
 }

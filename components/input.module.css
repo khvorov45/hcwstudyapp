@@ -8,6 +8,10 @@
     border: 0;
 }
 
+.input[type=number] {
+    -moz-appearance: textfield;
+}
+
 .verticalContainerCenter {
     display: flex;
     flex-direction: column;
@@ -128,6 +132,13 @@
     transform: scale(.6);
 }
 
+.number {
+    border: 0;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 5px;
+    text-align: center;
+}
+
 /* Chrome's BS
 @PROBLEM
 Cant remove chrome's border
@@ -137,4 +148,10 @@ Cant remove chrome's border
     box-shadow: 0 0 0 30px var(--bg-color) inset;
     -webkit-box-shadow: 0 0 0 30px var(--bg-color) inset;
     -webkit-text-fill-color: var(--font-color);
+}
+
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
