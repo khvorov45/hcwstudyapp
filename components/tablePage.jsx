@@ -1,10 +1,12 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useTable, useSortBy, usePagination, useFilters } from 'react-table'
 import Table from './table'
-import { isDateISOString, fetchParticipantData } from '../lib/util'
+import {
+  isDateISOString, fetchParticipantData, myFormatDate
+} from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
-import { Button, TextLine, NumberLine } from './input'
+import { Button, TextLine } from './input'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -36,6 +38,29 @@ export default function TablePage (
     }),
     []
   )
+  const filterTypes = useMemo(
+    () => ({
+      betweenDates: (rows, ids, filterValue) => {
+        let [min, max] = filterValue || []
+
+        min = min instanceof Date ? min : -Infinity
+        max = max instanceof Date ? max : Infinity
+
+        if (min > max) {
+          const temp = min
+          min = max
+          max = temp
+        }
+        return rows.filter(row => {
+          return ids.some(id => {
+            const rowValue = new Date(row.values[id])
+            return rowValue >= min && rowValue <= max
+          })
+        })
+      }
+    }),
+    []
+  )
   const {
     getTableProps,
     getTableBodyProps,
@@ -56,6 +81,7 @@ export default function TablePage (
       columns,
       data,
       defaultColumn,
+      filterTypes,
       initialState: {
         hiddenColumns: hidden,
         sortBy: [
@@ -168,16 +194,17 @@ function DefaultColumnFilter ({
     <TextLine
       value={filterValue || ''}
       onChange={e => {
-        // Set undefined to remove the filter entirely
         setFilter(e.target.value || undefined)
       }}
       placeholder={`Search ${preFilteredRows.length} rows...`}
+      width='150px'
     />
   )
 }
 
 const MYFILTERS = {
-  between: NumberRangeColumnFilter
+  between: NumberRangeColumnFilter,
+  betweenDates: DatesRangeColumnFilter
 }
 
 function NumberRangeColumnFilter ({
@@ -192,25 +219,56 @@ function NumberRangeColumnFilter ({
     })
     return [min, max]
   }, [id, preFilteredRows])
-
   return (
     <div className={tableStyles.numberFilter}>
-      <NumberLine
+      <TextLine
         value={filterValue[0] || ''}
         onChange={e => {
           const val = e.target.value
           setFilter((old = []) => [val ? parseInt(val, 10) : undefined, old[1]])
         }}
         placeholder={`Min (${min})`}
+        type='number'
+        width='70px'
       />
       -
-      <NumberLine
+      <TextLine
         value={filterValue[1] || ''}
         onChange={e => {
           const val = e.target.value
           setFilter((old = []) => [old[0], val ? parseInt(val, 10) : undefined])
         }}
         placeholder={`Max (${max})`}
+        type='number'
+        width='70px'
+      />
+    </div>
+  )
+}
+
+function DatesRangeColumnFilter ({
+  column: { filterValue = [], setFilter }
+}) {
+  return (
+    <div className={tableStyles.numberFilter}>
+      <TextLine
+        value={filterValue[0] ? myFormatDate(filterValue[0]).datePart : ''}
+        onChange={e => {
+          const val = e.target.value
+          setFilter((old = []) => [val ? new Date(val) : undefined, old[1]])
+        }}
+        type='date'
+        width='14ch'
+      />
+      -
+      <TextLine
+        value={filterValue[1] ? myFormatDate(filterValue[1]).datePart : ''}
+        onChange={e => {
+          const val = e.target.value
+          setFilter((old = []) => [old[0], val ? new Date(val) : undefined])
+        }}
+        type='date'
+        width='14ch'
       />
     </div>
   )

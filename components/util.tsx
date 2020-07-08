@@ -1,13 +1,7 @@
 import { usePromiseTracker } from 'react-promise-tracker'
 import Loader from 'react-loader-spinner'
 import styles from './util.module.css'
-
-function myFormatDate (d: Date): {datePart: string, timePart: string} {
-  return {
-    datePart: d.toISOString().split('T')[0],
-    timePart: d.toTimeString().slice(0, 8)
-  }
-}
+import { myFormatDate } from '../lib/util'
 
 export function Timestamp (
   { promiseArea, timestamp }:

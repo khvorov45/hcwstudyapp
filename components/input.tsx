@@ -56,7 +56,7 @@ export function ButtonWithIndicator (props: {
 export function TextLine (
   props: {
     value: string, onChange: any, type?: string,
-    id?: string, placeholder?: string
+    id?: string, placeholder?: string, width?: string
 }
 ) {
   return <input
@@ -66,6 +66,7 @@ export function TextLine (
     value={props.value}
     onChange={props.onChange}
     placeholder={props.placeholder}
+    style={props.width && { width: props.width }}
   />
 }
 
@@ -177,18 +178,4 @@ export function Select (
       )
     }
   </select>
-}
-
-export function NumberLine (
-  { value, onChange, placeholder, width }:
-  {value: number, onChange: () => void, placeholder: string, width: string}
-) {
-  return <input
-    className={`${styles.input} ${styles.number}`}
-    value={value || ''}
-    type="number"
-    onChange={onChange}
-    placeholder={placeholder}
-    style={{ width: width || '70px' }}
-  />
 }

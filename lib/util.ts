@@ -4,6 +4,13 @@ export function getConstQuery (email: string, token: string) {
   return email && token ? `?email=${email}&token=${token}` : '#'
 }
 
+export function myFormatDate (d: Date): {datePart: string, timePart: string} {
+  return {
+    datePart: d.toISOString().split('T')[0],
+    timePart: d.toTimeString().slice(0, 8)
+  }
+}
+
 export function isDateISOString (datestring: string) {
   const reISO = new RegExp(
     /^(\d{4})-(\d{2})-(\d{2})/.source +
