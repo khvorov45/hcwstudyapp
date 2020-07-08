@@ -107,7 +107,6 @@ export default function TablePage (
         varselect: { columns: allColumns, variables: variables }
       }}
     />
-    {rows.length > paginationThreshold &&
     <Paginator
       nextPage={nextPage}
       previousPage={previousPage}
@@ -119,7 +118,7 @@ export default function TablePage (
       pageSizeMax={rows.length}
       setPageSize={setPageSize}
       totalRows={rows.length}
-    />}
+    />
     <Table
       getTableProps={getTableProps}
       headerGroups={headerGroups}
@@ -180,23 +179,28 @@ function Paginator ({
     max ? setPageSize(pageSizeLow) : setPageSize(pageSizeMax)
     setMax(!max)
   }
+  console.log(pageSizeLow, pageSizeMax)
   return <div className={tableStyles.paginator}>
     <span className={tableStyles.rowcount}>Total rows: {totalRows}</span>
     {
-      !max && <>
-        <Button
-          onClick={previousPage} disabled={!canPreviousPage} label='<'
-          className={tableStyles.pageswitchButton}
-        />
-        <span>{`${pageIndex + 1} (${pageCount})`}</span>
-        <Button onClick={nextPage} disabled={!canNextPage} label='>'
-          className={tableStyles.pageswitchButton}
-        />
-      </>
+      (pageSizeLow < pageSizeMax) && (
+        <>
+          <Button onClick={updateMax} label={max ? 'Pages' : 'All'}
+            className={tableStyles.pageswitchButton}
+          />
+          {!max && <>
+            <Button
+              onClick={previousPage} disabled={!canPreviousPage} label='<'
+              className={tableStyles.pageswitchButton}
+            />
+            <span>{`${pageIndex + 1} (${pageCount})`}</span>
+            <Button onClick={nextPage} disabled={!canNextPage} label='>'
+              className={tableStyles.pageswitchButton}
+            /> </>}
+        </>
+      )
     }
-    <Button onClick={updateMax} label={max ? 'Pages' : 'All'}
-      className={tableStyles.pageswitchButton}
-    />
+
   </div>
 }
 

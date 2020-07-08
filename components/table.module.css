@@ -64,9 +64,11 @@
 }
 
 .paginator {
+    display: flex;
     border: 2px solid var(--border);
     border-top: 0;
-    align-self: left;
+    height: 2em;
+    align-items: center;
 }
 
 .paginator * {
