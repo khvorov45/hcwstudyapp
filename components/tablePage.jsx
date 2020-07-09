@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useTable, useSortBy, usePagination, useFilters } from 'react-table'
 import Table from './table'
 import {
-  isDateISOString, fetchParticipantData, myFormatDate
+  isDateISOString, fetchParticipantData
 } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
@@ -179,7 +179,6 @@ function Paginator ({
     max ? setPageSize(pageSizeLow) : setPageSize(pageSizeMax)
     setMax(!max)
   }
-  console.log(pageSizeLow, pageSizeMax)
   return <div className={tableStyles.paginator}>
     <span className={tableStyles.rowcount}>Total rows: {totalRows}</span>
     {
@@ -205,12 +204,14 @@ function Paginator ({
 }
 
 function DefaultColumnFilter ({
-  column: { filterValue, setFilter }
+  column: { setFilter }
 }) {
+  const [val, setVal] = useState('')
   return (
     <TextLine
-      value={filterValue || ''}
+      value={val}
       onChange={e => {
+        setVal(e.target.value)
         setFilter(e.target.value || undefined)
       }}
       placeholder={'Search...'}
@@ -225,7 +226,7 @@ const MYFILTERS = {
 }
 
 function NumberRangeColumnFilter ({
-  column: { filterValue = [], preFilteredRows, setFilter, id }
+  column: { preFilteredRows, setFilter, id }
 }) {
   const [min, max] = useMemo(() => {
     let min = preFilteredRows.length ? preFilteredRows[0].values[id] : 0
@@ -236,13 +237,18 @@ function NumberRangeColumnFilter ({
     })
     return [min, max]
   }, [id, preFilteredRows])
+  const [lowvalue, setLowvalue] = useState('')
+  const [highvalue, setHighvalue] = useState('')
   return (
     <div className={tableStyles.numberFilter}>
       <TextLine
-        value={filterValue[0] || ''}
+        value={lowvalue}
         onChange={e => {
           const val = e.target.value
-          setFilter((old = []) => [val ? parseInt(val, 10) : undefined, old[1]])
+          setLowvalue(val)
+          setFilter(
+            (old = []) => [val !== '' ? Number(val) : undefined, old[1]]
+          )
         }}
         placeholder={`Min (${min})`}
         type='number'
@@ -250,10 +256,13 @@ function NumberRangeColumnFilter ({
       />
       -
       <TextLine
-        value={filterValue[1] || ''}
+        value={highvalue}
         onChange={e => {
           const val = e.target.value
-          setFilter((old = []) => [old[0], val ? parseInt(val, 10) : undefined])
+          setHighvalue(val)
+          setFilter(
+            (old = []) => [old[0], val !== '' ? Number(val) : undefined]
+          )
         }}
         placeholder={`Max (${max})`}
         type='number'
@@ -264,25 +273,33 @@ function NumberRangeColumnFilter ({
 }
 
 function DatesRangeColumnFilter ({
-  column: { filterValue = [], setFilter }
+  column: { setFilter }
 }) {
+  const [lowvalue, setLowvalue] = useState('')
+  const [highvalue, setHighvalue] = useState('')
   return (
     <div className={tableStyles.numberFilter}>
       <TextLine
-        value={filterValue[0] ? myFormatDate(filterValue[0]).datePart : ''}
+        value={lowvalue}
         onChange={e => {
           const val = e.target.value
-          setFilter((old = []) => [val ? new Date(val) : undefined, old[1]])
+          setLowvalue(val)
+          setFilter(
+            (old = []) => [val !== '' ? new Date(val) : undefined, old[1]]
+          )
         }}
         type='date'
         width='14ch'
       />
       -
       <TextLine
-        value={filterValue[1] ? myFormatDate(filterValue[1]).datePart : ''}
+        value={highvalue}
         onChange={e => {
           const val = e.target.value
-          setFilter((old = []) => [old[0], val ? new Date(val) : undefined])
+          setHighvalue(val)
+          setFilter(
+            (old = []) => [old[0], val !== '' ? new Date(val) : undefined]
+          )
         }}
         type='date'
         width='14ch'

@@ -67,7 +67,7 @@ const VARIABLES = {
     },
     { my: 'gender', redcap: 'a1_gender', label: 'Gender' },
     { my: 'dob', redcap: 'a2_dob', label: 'Date of Birth' },
-    { my: 'age', redcap: '', label: 'Age' },
+    { my: 'age', redcap: '', label: 'Age', filter: 'between' },
     { my: 'numSeasVac', redcap: 'num_seas_vac', label: 'Previous vaccinations' }
   ],
   'schedule-wide': [0, 7, 14, 280]
