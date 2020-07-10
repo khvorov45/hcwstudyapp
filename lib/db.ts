@@ -254,7 +254,7 @@ FROM "Participant" INNER JOIN
     "Participant"."withdrawn",
     "Participant"."accessGroup", "Participant"."site"
 FROM "Schedule"
-INNER JOIN "Participant"
+RIGHT JOIN "Participant"
     ON "Schedule"."redcapRecordId" = "Participant"."redcapRecordId"`
     const res = await this.getParticipants(
       accessGroup, query, `${wide ? 'ORDER BY "redcapRecordId"' : ''}`
@@ -285,6 +285,7 @@ INNER JOIN "Participant"
       }
       curEntry['day' + row.day] = row.date
     })
+    resWide.push(curEntry)
     return resWide
   }
 
