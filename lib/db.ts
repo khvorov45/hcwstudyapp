@@ -300,6 +300,20 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
     return await this.getParticipants(accessGroup, query)
   }
 
+  async getParticipantsWeeklyCompletion (accessGroup: string): Promise<any[]> {
+    const query =
+`SELECT "Participant"."pid",
+    ARRAY_AGG("index") as "completed",
+    "Participant"."email", "Participant"."mobile", "Participant"."addBleed",
+    "Participant"."redcapRecordId", "Participant"."withdrawn",
+    "Participant"."accessGroup", "Participant"."site"
+FROM "WeeklySurvey" RIGHT JOIN "Participant"
+      ON "WeeklySurvey"."redcapRecordId" = "Participant"."redcapRecordId"`
+    return await this.getParticipants(
+      accessGroup, query, 'GROUP BY "Participant"."redcapRecordId"'
+    )
+  }
+
   // Participant table interactions -------------------------------------------
 
   async createParticipantTable (): Promise<void> {

@@ -36,7 +36,8 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     baseline: () => db.getParticipantsBaseline(accessGroup),
     'schedule-long': () => db.getParticipantsSchedule(accessGroup, false),
     'schedule-wide': () => db.getParticipantsSchedule(accessGroup, true),
-    weeklysurvey: () => db.getParticipantsWeeklySurveys(accessGroup)
+    weeklysurvey: () => db.getParticipantsWeeklySurveys(accessGroup),
+    weeklycompletion: () => db.getParticipantsWeeklyCompletion(accessGroup)
   }
   if (!req.query.subset) {
     data = await db.getParticipants(accessGroup)

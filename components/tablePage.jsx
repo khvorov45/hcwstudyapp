@@ -154,6 +154,9 @@ function generateColumns (data, variables) {
         if (typeof row[fieldname] === 'boolean') {
           return row[fieldname] ? 'Yes' : 'No'
         }
+        if (row[fieldname] instanceof Array) {
+          return row[fieldname].join(' ')
+        }
         return row[fieldname]
       },
       Filter: varinfo

@@ -92,6 +92,9 @@ const VARIABLES = {
     },
     { my: 'ari', redcap: 'ari_definition', label: 'ARI' },
     { my: 'swabCollection', redcap: 'swab_collection', label: 'Swabbed' }
+  ],
+  weeklycompletion: [
+    { my: 'completed', redcap: '', label: 'Completed' }
   ]
 }
 
@@ -125,6 +128,14 @@ const TABLECONF = [
   {
     id: 'weeklysurvey',
     label: 'Weekly survey',
+    hidden: [
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed',
+      'withdrawn'
+    ]
+  },
+  {
+    id: 'weeklycompletion',
+    label: 'Weekly completion',
     hidden: [
       'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed',
       'withdrawn'
