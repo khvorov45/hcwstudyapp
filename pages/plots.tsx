@@ -11,11 +11,21 @@ export default function Plots () {
   const user = useUser()
   const [data, setData] = useState([])
   const [accessGroup, setAccessGroup] = useState(user.accessGroup)
+  const [withdrawn, setWithdrawn] = useState('no')
   async function updateData () {
     if (!user.authorised) return
-    setData(await fetchParticipantData(user, 'baseline', accessGroup))
+    const fetchedData = await fetchParticipantData(
+      user, 'baseline', accessGroup
+    )
+    if (withdrawn === 'any') {
+      setData(fetchedData)
+    } else if (withdrawn === 'no') {
+      setData(fetchedData.filter(r => !r.withdrawn))
+    } else {
+      setData(fetchedData.filter(r => r.withdrawn))
+    }
   }
-  useEffect(() => { updateData() }, [accessGroup])
+  useEffect(() => { updateData() }, [accessGroup, withdrawn])
   return (
     <Layout
       user={user}
@@ -30,7 +40,16 @@ export default function Plots () {
         updateDBPromiseArea="updatedb"
         afterdbUpdate={updateData}
         onAccessGroupChange={(value) => { setAccessGroup(value) }}
-        elements={{}}
+        elements={{
+          filters: [
+            {
+              id: 'withdrawn',
+              label: 'Withdrawn',
+              defaultValue: withdrawn,
+              fun: (newValue: string) => { setWithdrawn(newValue) }
+            }
+          ]
+        }}
       />
       <Plotlist>
         <AgeHistogram data={data} />

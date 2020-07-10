@@ -14,7 +14,12 @@ export default function Ribbon (
     user: User, updateDBPromiseArea: string,
     afterdbUpdate: () => Promise<void>,
     onAccessGroupChange: (value: string) => void,
-    elements: {varselect?: {columns: any, variables: any}}
+    elements: {
+      varselect?: {columns: any, variables: any},
+      filters?: {
+        id: string, label: string, defaultValue: any, fun: (a: any) => void
+      }[]
+    }
   }
 ) {
   return <div className={styles.ribbon}>
@@ -43,6 +48,15 @@ export default function Ribbon (
         columns={elements.varselect.columns}
         variables={elements.varselect.variables}
       />
+    }
+    {
+      elements.filters &&
+      elements.filters.map(
+        el => <Filter
+          key={el.id} label={el.label}
+          defaultValue={el.defaultValue} fun={el.fun}
+        />
+      )
     }
   </div>
 }
@@ -109,5 +123,21 @@ export function SiteSelect (
         s => ({ value: s, label: toTitleCase(s), default: s === defaultSite })
       )
     }
+  />
+}
+
+function Filter (
+  { label, defaultValue, fun }:
+  {label: string, defaultValue: any, fun: (newValue: any) => void}
+) {
+  return <RadioGroup
+    name={'withdrawn'}
+    onChange={fun}
+    options={[
+      { value: 'any', label: 'Any', default: defaultValue === 'any' },
+      { value: 'yes', label: 'Yes', default: defaultValue === 'yes' },
+      { value: 'no', label: 'No', default: defaultValue === 'no' }
+    ]}
+    label={label}
   />
 }

@@ -135,11 +135,12 @@ export function Radio (
 }
 
 export function RadioGroup (
-  { options, name, onChange }:
+  { options, name, onChange, label }:
   {
     options: {label: string, value: string, default: boolean}[],
     name: string,
-    onChange: (value: string) => void
+    onChange: (value: string) => void,
+    label?: string
   }
 ) {
   const [value, setValue] = useState(
@@ -151,6 +152,7 @@ export function RadioGroup (
       `${styles.input} ${styles.radioGroup} ${styles.multipleSelect}`
     }
   >
+    {label && <span className={styles.radioGroupLabel}>{label}</span>}
     {options.map(opt => (
       <Radio
         name={name}
