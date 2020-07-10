@@ -70,6 +70,12 @@ export async function exportParticipants () {
     ],
     ['baseline_arm_1'], 'flat', true
   )
+  const withdrawn = await exportRecords(
+    ['record_id', 'withdrawn'], ['withdrawal_arm_1'], 'flat', false
+  )
+  const withdrawnIDs = withdrawn
+    .filter(r => r.withdrawn === '1')
+    .map(r => r.record_id)
   // Filter out all non-participants
   const recordsFiltered = records.filter(r => r.pid !== '')
   return recordsFiltered.map(r => {
@@ -83,7 +89,8 @@ export async function exportParticipants () {
       mobile: r.mobile_number,
       addBleed: r.add_bleed === 'Yes' || r.study_group_vacc === 'Nested study',
       gender: r.a1_gender,
-      dob: processDate(r.a2_dob)
+      dob: processDate(r.a2_dob),
+      withdrawn: withdrawnIDs.includes(r.record_id)
     }
   })
 }

@@ -217,7 +217,7 @@ export class Postgres {
   async getParticipantsContact (accessGroup: string): Promise<any[]> {
     const query =
     `SELECT "redcapRecordId", "pid", "email", "mobile", "addBleed",
-    "accessGroup", "site" FROM "Participant"`
+    "accessGroup", "site", "Participant"."withdrawn" FROM "Participant"`
     return await this.getParticipants(accessGroup, query)
   }
 
@@ -232,6 +232,7 @@ export class Postgres {
     "addBleed",
     "dateScreening",
     "email", "mobile", "Participant"."redcapRecordId",
+    "Participant"."withdrawn",
     "accessGroup", "site"
 FROM "Participant" INNER JOIN
       (SELECT "redcapRecordId", SUM("status"::int)::int as "numSeasVac"
@@ -249,6 +250,7 @@ FROM "Participant" INNER JOIN
     "Schedule"."day", "Schedule"."date",
     "Participant"."email", "Participant"."mobile",
     "Participant"."addBleed", "Participant"."redcapRecordId",
+    "Participant"."withdrawn",
     "Participant"."accessGroup", "Participant"."site"
 FROM "Schedule"
 INNER JOIN "Participant"
@@ -270,7 +272,8 @@ INNER JOIN "Participant"
         addBleed: row.addBleed,
         redcapRecordId: row.redcapRecordId,
         accessGroup: row.accessGroup,
-        site: row.site
+        site: row.site,
+        withdrawn: row.withdrawn
       }
     }
     let curEntry = createEntry(res[0])
@@ -289,7 +292,7 @@ INNER JOIN "Participant"
 `SELECT "Participant"."pid",
     "index", "date", "ari", "swabCollection",
     "Participant"."email", "Participant"."mobile", "Participant"."addBleed",
-    "Participant"."redcapRecordId",
+    "Participant"."redcapRecordId", "Participant"."withdrawn",
     "Participant"."accessGroup", "Participant"."site"
 FROM "WeeklySurvey" INNER JOIN "Participant"
       ON "WeeklySurvey"."redcapRecordId" = "Participant"."redcapRecordId"`
@@ -311,6 +314,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
           "addBleed" BOOLEAN,
           "dob" TIMESTAMPTZ,
           "gender" TEXT,
+          "withdrawn" BOOLEAN NOT NULL,
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
@@ -327,7 +331,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
       participants,
       [
         'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
-        'mobile', 'email', 'gender', 'addBleed'
+        'mobile', 'email', 'gender', 'addBleed', 'withdrawn'
       ],
       'Participant'
     ))

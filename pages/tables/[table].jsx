@@ -57,7 +57,8 @@ const VARIABLES = {
       redcap: 'redcap_data_access_group',
       label: 'Access Group'
     },
-    { my: 'site', redcap: 'site_name', label: 'Site' }
+    { my: 'site', redcap: 'site_name', label: 'Site' },
+    { my: 'withdrawn', redcap: 'withdrawn', label: 'Withdrawn' }
   ],
   baseline: [
     {
@@ -94,28 +95,30 @@ const TABLECONF = [
   {
     id: 'contact',
     label: 'Contact',
-    hidden: ['accessGroup', 'site', 'dateScreening']
+    hidden: ['accessGroup', 'site', 'dateScreening', 'withdrawn']
   },
   {
     id: 'baseline',
     label: 'Baseline',
     hidden: [
       'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
-      'site', 'addBleed'
+      'site', 'addBleed', 'withdrawn'
     ]
   },
   {
     id: 'schedule-wide',
     label: 'Schedule',
     hidden: [
-      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed'
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed',
+      'withdrawn'
     ]
   },
   {
     id: 'weeklysurvey',
     label: 'Weekly survey',
     hidden: [
-      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed'
+      'email', 'mobile', 'redcapRecordId', 'accessGroup', 'site', 'addBleed',
+      'withdrawn'
     ]
   }
 ]

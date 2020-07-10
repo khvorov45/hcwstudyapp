@@ -90,7 +90,8 @@ export default function TablePage (
             desc: false
           }
         ],
-        pageSize: paginationThreshold
+        pageSize: paginationThreshold,
+        filters: [{ id: 'withdrawn', value: 'No' }]
       }
     },
     useFilters,
@@ -204,9 +205,9 @@ function Paginator ({
 }
 
 function DefaultColumnFilter ({
-  column: { setFilter }
+  column: { filterValue, setFilter }
 }) {
-  const [val, setVal] = useState('')
+  const [val, setVal] = useState(filterValue)
   return (
     <TextLine
       value={val}
