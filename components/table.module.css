@@ -63,7 +63,7 @@
     justify-self: end;
 }
 
-.paginator {
+.strip {
     display: flex;
     border: 2px solid var(--border);
     border-top: 0;
@@ -71,10 +71,15 @@
     align-items: center;
 }
 
-.paginator * {
+.strip * {
     margin-left: 5px;
     margin-right: 5px;
     border: 0;
+}
+
+.strip *:first-child {
+    margin-left: 0;
+    border-left: 0;
 }
 
 .pageswitchButton {
@@ -84,9 +89,11 @@
 }
 
 .rowcount {
-    margin-left: 10px;
-    margin-right: 10px;
     color: var(--font-color-muted)
+}
+
+.download {
+    color: var(--font-color);
 }
 
 .numberFilter {

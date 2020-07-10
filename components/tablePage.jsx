@@ -7,6 +7,7 @@ import {
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
 import { Button, TextLine } from './input'
+import { CSVLink } from 'react-csv'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -108,18 +109,21 @@ export default function TablePage (
         varselect: { columns: allColumns, variables: variables }
       }}
     />
-    <Paginator
-      nextPage={nextPage}
-      previousPage={previousPage}
-      pageIndex={pageIndex}
-      pageCount={pageCount}
-      canPreviousPage={canPreviousPage}
-      canNextPage={canNextPage}
-      pageSizeLow={paginationThreshold}
-      pageSizeMax={rows.length}
-      setPageSize={setPageSize}
-      totalRows={rows.length}
-    />
+    <Strip>
+      <Download data={rows.map(r => r.values)} />
+      <Paginator
+        nextPage={nextPage}
+        previousPage={previousPage}
+        pageIndex={pageIndex}
+        pageCount={pageCount}
+        canPreviousPage={canPreviousPage}
+        canNextPage={canNextPage}
+        pageSizeLow={paginationThreshold}
+        pageSizeMax={rows.length}
+        setPageSize={setPageSize}
+        totalRows={rows.length}
+      />
+    </Strip>
     <Table
       getTableProps={getTableProps}
       headerGroups={headerGroups}
@@ -171,6 +175,12 @@ function ColumnNames ({ label, redcapName }) {
   </div>
 }
 
+function Strip ({ children }) {
+  return <div className={tableStyles.strip}>
+    {children}
+  </div>
+}
+
 function Paginator ({
   nextPage, previousPage, pageIndex, pageCount, canPreviousPage, canNextPage,
   pageSizeLow, pageSizeMax, setPageSize, totalRows
@@ -207,7 +217,7 @@ function Paginator ({
 function DefaultColumnFilter ({
   column: { filterValue, setFilter }
 }) {
-  const [val, setVal] = useState(filterValue)
+  const [val, setVal] = useState(filterValue || '')
   return (
     <TextLine
       value={val}
@@ -307,4 +317,14 @@ function DatesRangeColumnFilter ({
       />
     </div>
   )
+}
+
+function Download ({ data }) {
+  return <>
+    <CSVLink filename='table.csv' data={data} className={tableStyles.download}>
+      <Button onClick={() => {}} label={'⇩'}
+        className={tableStyles.pageswitchButton}
+      />
+    </CSVLink>
+  </>
 }
