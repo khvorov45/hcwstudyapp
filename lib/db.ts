@@ -229,6 +229,7 @@ export class Postgres {
       EXTRACT(EPOCH FROM INTERVAL '1 year')
     )::numeric, 1)::double precision as age,
     "numSeasVac",
+    "Participant"."baselineQuestComplete" as "complete",
     "addBleed",
     "dateScreening",
     "email", "mobile", "Participant"."redcapRecordId",
@@ -315,6 +316,7 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
           "dob" TIMESTAMPTZ,
           "gender" TEXT,
           "withdrawn" BOOLEAN NOT NULL,
+          "baselineQuestComplete" BOOLEAN NOT NULL,
           FOREIGN KEY ("accessGroup") REFERENCES "AccessGroup" ("name")
           ON UPDATE CASCADE ON DELETE CASCADE
       );
@@ -331,7 +333,8 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
       participants,
       [
         'redcapRecordId', 'pid', 'accessGroup', 'site', 'dob', 'dateScreening',
-        'mobile', 'email', 'gender', 'addBleed', 'withdrawn'
+        'mobile', 'email', 'gender', 'addBleed', 'withdrawn',
+        'baselineQuestComplete'
       ],
       'Participant'
     ))

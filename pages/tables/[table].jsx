@@ -69,7 +69,16 @@ const VARIABLES = {
     { my: 'gender', redcap: 'a1_gender', label: 'Gender' },
     { my: 'dob', redcap: 'a2_dob', label: 'Date of Birth' },
     { my: 'age', redcap: '', label: 'Age', filter: 'between' },
-    { my: 'numSeasVac', redcap: 'num_seas_vac', label: 'Previous vaccinations' }
+    {
+      my: 'numSeasVac',
+      redcap: 'num_seas_vac',
+      label: 'Previous vaccinations'
+    },
+    {
+      my: 'complete',
+      redcap: 'baseline_questionnaire_complete',
+      label: 'Complete'
+    }
   ],
   'schedule-wide': [0, 7, 14, 280]
     .map(n => ({ my: `day${n}`, redcap: '', label: `Day ${n}` })),
@@ -102,7 +111,7 @@ const TABLECONF = [
     label: 'Baseline',
     hidden: [
       'dateScreening', 'email', 'mobile', 'redcapRecordId', 'accessGroup',
-      'site', 'addBleed', 'withdrawn'
+      'site', 'addBleed', 'withdrawn', 'complete'
     ]
   },
   {

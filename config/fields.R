@@ -9,6 +9,9 @@ fields <- RCurl::postForm(
   jsonlite::fromJSON() %>%
   as_tibble()
 
+fields %>%
+  filter(str_detect(export_field_name, "baseline"))
+
 dat <- RCurl::postForm(
   "https://biredcap.mh.org.au/api/",
   token = yaml::read_yaml("config/config.yaml")$db$redcap$token,
@@ -16,9 +19,9 @@ dat <- RCurl::postForm(
   format = "json",
   fields = paste(
     "record_id", "redcap_event_name", "ari_definition",
-    "survey_week", "swab_collection"
+    "survey_week", "swab_collection",
     sep = ","
-  )
+  ),
   exportDataAccessGroups = TRUE
 ) %>%
   jsonlite::fromJSON() %>%

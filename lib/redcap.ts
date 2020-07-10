@@ -66,7 +66,7 @@ export async function exportParticipants () {
     [
       'record_id', 'redcap_data_access_group', 'pid', 'site_name',
       'date_screening', 'email', 'mobile_number', 'a1_gender', 'a2_dob',
-      'add_bleed', 'study_group_vacc'
+      'add_bleed', 'study_group_vacc', 'baseline_questionnaire_complete'
     ],
     ['baseline_arm_1'], 'flat', true
   )
@@ -90,7 +90,8 @@ export async function exportParticipants () {
       addBleed: r.add_bleed === 'Yes' || r.study_group_vacc === 'Nested study',
       gender: r.a1_gender,
       dob: processDate(r.a2_dob),
-      withdrawn: withdrawnIDs.includes(r.record_id)
+      withdrawn: withdrawnIDs.includes(r.record_id),
+      baselineQuestComplete: r.baseline_questionnaire_complete === 'Complete'
     }
   })
 }
