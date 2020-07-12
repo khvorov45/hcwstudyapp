@@ -96,7 +96,9 @@ const VARIABLES = {
     { my: 'swabCollection', redcap: 'swab_collection', label: 'Swabbed' }
   ],
   weeklycompletion: [
-    { my: 'completed', redcap: '', label: 'Completed' }
+    { my: 'completed', redcap: '', label: 'Completed' },
+    { my: 'weekRecruited', redcap: '', label: 'Recruited' },
+    { my: 'missing', redcap: '', label: 'Missing' }
   ]
 }
 

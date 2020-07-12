@@ -6,6 +6,7 @@ import {
   exportParticipants, exportUsers, exportVaccinationHistory,
   exportSchedule, exportWeeklySurveys
 } from './redcap'
+import { getWeek, seq } from './util'
 
 interface MyPostgresConfig extends PoolConfig {
   users?: {email: string, accessGroup: string}[]
@@ -316,11 +317,18 @@ FROM "WeeklySurvey" RIGHT JOIN
   EXTRACT('week' FROM "dateScreening") - 14 AS "weekRecruited"
   FROM "Participant") as "Participant"
       ON "WeeklySurvey"."redcapRecordId" = "Participant"."redcapRecordId"`
-    return await this.getParticipants(
+    const res = await this.getParticipants(
       accessGroup, query,
       `GROUP BY "Participant"."pid", "Participant"."weekRecruited",
       ${partNeedExtra}`
     )
+    // -14 would be the survey for this week to be sent out next week
+    const latestWeek = getWeek(new Date()) - 15
+    return res.map(r => {
+      r.missing = seq(r.weekRecruited, latestWeek)
+        .filter(i => !r.completed.includes(i))
+      return r
+    })
   }
 
   // Participant table interactions -------------------------------------------

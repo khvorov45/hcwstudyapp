@@ -73,3 +73,32 @@ export async function fetchParticipantData (
     }
   )
 }
+
+// Get day of week 0 Mon - 6 Sun
+export function getDayOfWeek (d: Date) {
+  return (d.getDay() + 6) % 7
+}
+
+// Returns the ISO week of the date.
+export function getWeek (d: Date) {
+  const date = new Date(d.getTime())
+  date.setHours(0, 0, 0, 0)
+  // Thursday in current week decides the year.
+  // So set to Monday and then shift to Thursday
+  date.setDate(date.getDate() - getDayOfWeek(date) + 3)
+  // January 4 is always in week 1.
+  const week1 = new Date(date.getFullYear(), 0, 4)
+  // Work out the number of days between this week's Thursday and Jan 4's week
+  // Thursday and divide by 7
+  const millisecondsInDay = 86400000
+  const daysFromJan4 = (date.getTime() - week1.getTime()) / millisecondsInDay
+  return 1 + Math.round((daysFromJan4 - 3 + getDayOfWeek(week1)) / 7)
+}
+
+export function seq (from: number, to: number) {
+  const result = []
+  for (let i = from; i <= to; i++) {
+    result.push(i)
+  }
+  return result
+}
