@@ -302,16 +302,24 @@ FROM "WeeklySurvey" INNER JOIN "Participant"
   }
 
   async getParticipantsWeeklyCompletion (accessGroup: string): Promise<any[]> {
+    const partNeedExtra = [
+      'email', 'mobile', 'addBleed', 'redcapRecordId', 'withdrawn',
+      'accessGroup', 'site'
+    ].map(p => `"Participant"."${p}"`)
     const query =
 `SELECT "Participant"."pid",
-    ARRAY_AGG("index") as "completed",
-    "Participant"."email", "Participant"."mobile", "Participant"."addBleed",
-    "Participant"."redcapRecordId", "Participant"."withdrawn",
-    "Participant"."accessGroup", "Participant"."site"
-FROM "WeeklySurvey" RIGHT JOIN "Participant"
+    ARRAY_AGG("index" ORDER BY "index") as "completed",
+    "Participant"."weekRecruited",
+    ${partNeedExtra}
+FROM "WeeklySurvey" RIGHT JOIN
+  (SELECT *, "dateScreening",
+  EXTRACT('week' FROM "dateScreening") - 14 AS "weekRecruited"
+  FROM "Participant") as "Participant"
       ON "WeeklySurvey"."redcapRecordId" = "Participant"."redcapRecordId"`
     return await this.getParticipants(
-      accessGroup, query, 'GROUP BY "Participant"."redcapRecordId"'
+      accessGroup, query,
+      `GROUP BY "Participant"."pid", "Participant"."weekRecruited",
+      ${partNeedExtra}`
     )
   }
 
