@@ -10,7 +10,7 @@ fields <- RCurl::postForm(
   as_tibble()
 
 fields %>%
-  filter(str_detect(export_field_name, "baseline"))
+  filter(str_detect(export_field_name, "schedule"))
 
 dat <- RCurl::postForm(
   "https://biredcap.mh.org.au/api/",

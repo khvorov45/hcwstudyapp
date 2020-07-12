@@ -81,7 +81,9 @@ const VARIABLES = {
     }
   ],
   'schedule-wide': [0, 7, 14, 280]
-    .map(n => ({ my: `day${n}`, redcap: '', label: `Day ${n}` })),
+    .map(n => ({
+      my: `day${n}`, redcap: `scheduled_date_v${n}`, label: `Day ${n}`
+    })),
   weeklysurvey: [
     { my: 'index', redcap: '', label: 'Week', filter: 'between' },
     {
