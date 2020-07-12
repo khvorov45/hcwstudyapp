@@ -31,7 +31,7 @@ export default function TablePage (
     () => generateColumns(data, variables),
     [jsonrows]
   )
-  const paginationThreshold = 100
+  const paginationThreshold = 17
   const defaultColumn = useMemo(
     () => ({
       Filter: DefaultColumnFilter
