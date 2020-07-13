@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SuccessIndicator } from './symbol'
-import { Timestamp } from './util'
+import { Timestamp, SuccessIndicator } from './util'
 import { toTitleCase } from '../lib/util'
 import styles from './input.module.css'
 
