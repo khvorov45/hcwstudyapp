@@ -3,7 +3,6 @@ import { useTable } from 'react-table'
 import Table from './table'
 import { toTitleCase } from '../lib/util'
 import { Download } from './ribbon'
-import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
