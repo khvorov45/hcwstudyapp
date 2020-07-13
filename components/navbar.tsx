@@ -26,6 +26,12 @@ export default function Navbar (
         user={user}
         active={active === 'plots'}
       />
+      <Navelement
+        content="Summary"
+        link={'/summarytables'}
+        user={user}
+        active={active === 'summarytables'}
+      />
     </div>
     <div className={styles.rightside}>
       <ThemeSwitch />

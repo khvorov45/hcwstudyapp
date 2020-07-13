@@ -25,6 +25,8 @@ export default function Table ({
 }
 
 function TableLoader () {
+  // @REVIEW
+  // Put this style into a css sheet
   return <div
     style={{
       width: '100%',
@@ -48,19 +50,27 @@ function Thead ({ headerGroups }) {
         {headerGroup.headers.map(column => (
           <th {...column.getHeaderProps()}>
             <div className={tableStyles.columnHeader}>
-              <div
-                className={tableStyles.columnHeaderClickable}
-                {...column.getSortByToggleProps()}
-              >
-                {column.render('Header')}
-                <span className={tableStyles.columnController}>
-                  {column.isSorted
-                    ? column.isSortedDesc
-                      ? ' ▼'
-                      : ' ▲'
-                    : ' ⇅'}
-                </span>
-              </div>
+              {
+                column.getSortByToggleProps
+                  ? <>
+                    <div
+                      className={tableStyles.columnHeaderClickable}
+                      {...column.getSortByToggleProps()}
+                    >
+                      {column.render('Header')}
+                      <span className={tableStyles.columnController}>
+                        {column.isSorted
+                          ? column.isSortedDesc
+                            ? ' ▼'
+                            : ' ▲'
+                          : ' ⇅'}
+                      </span>
+                    </div>
+                  </>
+                  : <div>
+                    {column.render('Header')}
+                  </div>
+              }
               <div>{column.canFilter && column.render('Filter')}</div>
             </div>
           </th>

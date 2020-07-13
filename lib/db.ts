@@ -331,6 +331,36 @@ FROM "WeeklySurvey" RIGHT JOIN
     })
   }
 
+  async getSiteVacSummary (accessGroup: string, withdrawn: boolean) {
+    const accessCond = !['unrestricted', 'admin'].includes(accessGroup)
+    let whereClause = ''
+    let params = []
+    if (accessCond && (withdrawn !== null)) {
+      whereClause =
+        'WHERE "accessGroup" = $1 ' +
+        `AND "withdrawn" IS ${withdrawn ? 'TRUE' : 'FALSE'}`
+      params = [accessGroup.toLowerCase()]
+    } else if (accessCond) {
+      whereClause = 'WHERE "accessGroup" = $1'
+      params = [accessGroup.toLowerCase()]
+    } else if (withdrawn !== null) {
+      whereClause = `WHERE "withdrawn" IS ${withdrawn ? 'TRUE' : 'FALSE'}`
+    }
+    const query =
+`SELECT "Participant"."site", "Participant"."accessGroup",
+"Vachissum"."numSeasVac", COUNT("Participant"."redcapRecordId")::int as "count"
+FROM "Participant"
+INNER JOIN
+(SELECT "redcapRecordId", SUM("status"::int)::int as "numSeasVac"
+FROM "VaccinationHistory"
+GROUP BY "redcapRecordId") AS "Vachissum"
+ON "Vachissum"."redcapRecordId" = "Participant"."redcapRecordId"
+${whereClause}
+GROUP BY "site", "numSeasVac", "accessGroup";`
+    const res = await this.getRows(query, params)
+    return res
+  }
+
   // Participant table interactions -------------------------------------------
 
   async createParticipantTable (): Promise<void> {

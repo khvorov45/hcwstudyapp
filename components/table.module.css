@@ -10,10 +10,14 @@
     border-spacing: 0;
 }
 
-.table th {
+.table tr:last-child th {
     position: sticky;
     top: 0px;
-    background: var(--bg-color);
+    background-color: var(--bg-color);
+}
+
+.table tr:last-child th:nth-child(even) {
+    background-color: var(--bg-color-alt);
 }
 
 .table td {

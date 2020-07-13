@@ -61,9 +61,9 @@ export function toTitleCase (str: string): string {
 }
 
 export async function fetchParticipantData (
-  user: User, tableName: string, accessGroup: string
+  user: User, tableName: string, accessGroup: string, withdrawn?: boolean
 ) {
-  return await accessAPI(
+  const fetchedData = await accessAPI(
     'getparticipants', 'GET',
     {
       email: user.email,
@@ -72,6 +72,13 @@ export async function fetchParticipantData (
       accessGroup: accessGroup
     }
   )
+  if (withdrawn === true) {
+    return fetchedData.filter(r => r.withdrawn)
+  } else if (withdrawn === false) {
+    return fetchedData.filter(r => !r.withdrawn)
+  } else {
+    return fetchedData
+  }
 }
 
 // Get day of week 0 Mon - 6 Sun
