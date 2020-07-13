@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useTable, useSortBy, usePagination, useFilters } from 'react-table'
 import Table from './table'
 import {
-  isDateISOString, fetchParticipantData
+  isDateISOString, fetchParticipantData, getWeek
 } from '../lib/util'
 import Ribbon from './ribbon'
 import tableStyles from './table.module.css'
@@ -122,6 +122,10 @@ export default function TablePage (
         setPageSize={setPageSize}
         totalRows={rows.length}
       />
+      {
+        ['weeklycompletion', 'weeklysurvey'].includes(tableName) &&
+      <LatestWeekIndex/>
+      }
     </Strip>
     <Table
       getTableProps={getTableProps}
@@ -329,4 +333,10 @@ function Download ({ data }) {
       />
     </CSVLink>
   </>
+}
+
+function LatestWeekIndex () {
+  return <div className={tableStyles.latestWeekIndex}>
+    Latest week: {getWeek(new Date()) - 15}
+  </div>
 }
