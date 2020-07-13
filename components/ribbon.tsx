@@ -20,7 +20,8 @@ export default function Ribbon (
       filters?: {
         id: string, label: string, defaultValue: any, fun: (a: any) => void
       }[]
-    }
+    },
+    children: ReactNode
   }
 ) {
   return <div className={styles.ribbon}>
@@ -160,8 +161,20 @@ export function Download (
   </>
 }
 
-export function Strip ({ children }: {children: ReactNode}) {
-  return <div className={styles.strip}>
+export function Strip (
+  { children, style }:
+  {children: ReactNode, style?: any}
+) {
+  return <div className={styles.strip} style={style}>
+    {children}
+  </div>
+}
+
+export function ButtonStrip (
+  { children, style }:
+  {children: ReactNode, style?: any}
+) {
+  return <div className={styles.buttonstrip} style={style}>
     {children}
   </div>
 }

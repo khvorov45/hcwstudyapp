@@ -18,12 +18,17 @@
     color: var(--font-color);
 }
 
-.strip {
+.strip,
+.buttonstrip {
     display: flex;
+    align-items: center;
+}
+
+.strip {
     border: 2px solid var(--border);
     border-top: 0;
     height: 2em;
-    align-items: center;
+
 }
 
 .strip * {
@@ -37,8 +42,13 @@
     border-left: 0;
 }
 
-.strip button {
+.strip button,
+.buttonstrip button {
     border: 0;
+}
+
+.strip button {
     border-left: 1px solid var(--border);
     border-right: 1px solid var(--border);
+    line-height: 2em;
 }

@@ -14,4 +14,3 @@ Summary tables: by site and vaccination history
 
 Write homepage content
 Replace the download symbol with something better
-Improve the top row of the summary table

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTable } from 'react-table'
 import Table from './table'
 import { toTitleCase } from '../lib/util'
-import { Download } from './ribbon'
+import { Download, ButtonStrip } from './ribbon'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -46,13 +46,13 @@ export default function SummaryTable ({ jsonrows }) {
     () => {
       const siteHeaders = [
         {
-          Header: <>
+          Header: <ButtonStrip>
             <Download
               filename='summary.csv'
               data={data}
             />
-          </>,
-          id: 'first',
+          </ButtonStrip>,
+          id: 'control-header',
           columns: [{
             Header: 'Previous vaccinations',
             accessor: 'numSeasVac'

@@ -45,39 +45,70 @@ function TableLoader () {
 
 function Thead ({ headerGroups }) {
   return <thead>
-    {headerGroups.map(headerGroup => (
-      <tr {...headerGroup.getHeaderGroupProps()}>
-        {headerGroup.headers.map(column => (
-          <th {...column.getHeaderProps()}>
-            <div className={tableStyles.columnHeader}>
-              {
-                column.getSortByToggleProps
-                  ? <>
-                    <div
-                      className={tableStyles.columnHeaderClickable}
-                      {...column.getSortByToggleProps()}
-                    >
-                      {column.render('Header')}
-                      <span className={tableStyles.columnController}>
-                        {column.isSorted
-                          ? column.isSortedDesc
-                            ? ' ▼'
-                            : ' ▲'
-                          : ' ⇅'}
-                      </span>
-                    </div>
-                  </>
-                  : <div>
-                    {column.render('Header')}
-                  </div>
-              }
-              <div>{column.canFilter && column.render('Filter')}</div>
-            </div>
-          </th>
-        ))}
-      </tr>
+    {headerGroups.map((headerGroup, i) => (
+      <HeaderRow
+        key={i}
+        getHeaderGroupProps={headerGroup.getHeaderGroupProps}
+        headers={headerGroup.headers}
+      />
     ))}
   </thead>
+}
+
+function HeaderRow ({ getHeaderGroupProps, headers }) {
+  return <tr
+    {...getHeaderGroupProps()}
+    className={
+      headers.map(c => c.originalId)
+        .includes('control-header')
+        ? tableStyles.control
+        : ''
+    }
+  >
+    {headers.map(column => (
+      <HeaderCell
+        key={column.id}
+        getHeaderProps={column.getHeaderProps}
+        getSortByToggleProps={column.getSortByToggleProps}
+        render={column.render}
+        isSorted={column.isSorted}
+        isSortedDesc={column.isSortedDesc}
+        canFilter={column.canFilter}
+      />
+    ))}
+  </tr>
+}
+
+function HeaderCell ({
+  getHeaderProps, getSortByToggleProps,
+  render, isSorted, isSortedDesc, canFilter
+}) {
+  return <th {...getHeaderProps()}>
+    <div className={tableStyles.columnHeader}>
+      {
+        getSortByToggleProps
+          ? <>
+            <div
+              className={tableStyles.columnHeaderClickable}
+              {...getSortByToggleProps()}
+            >
+              {render('Header')}
+              <span className={tableStyles.columnController}>
+                {isSorted
+                  ? isSortedDesc
+                    ? ' ▼'
+                    : ' ▲'
+                  : ' ⇅'}
+              </span>
+            </div>
+          </>
+          : <div>
+            {render('Header')}
+          </div>
+      }
+      <div>{canFilter && render('Filter')}</div>
+    </div>
+  </th>
 }
 
 function Tbody ({ rows, prepareRow, getTableBodyProps }) {

@@ -36,7 +36,6 @@
 .squarebutton {
     background-color: var(--bg-color-alt);
     cursor: pointer;
-    line-height: 2;
     outline: none;
 }
 
