@@ -144,11 +144,15 @@ function Filter (
 }
 
 export function Download (
-  { data, buttonClassName }:
-  {data: any, buttonClassName?: string}
+  { data, buttonClassName, fileName }:
+  {data: any, buttonClassName?: string, fileName?: string}
 ) {
   return <>
-    <CSVLink filename='table.csv' data={data} className={styles.download}>
+    <CSVLink
+      filename={fileName || 'table.csv'}
+      data={data}
+      className={styles.download}
+    >
       <Button onClick={() => {}} label={'⇩'}
         className={buttonClassName || ''}
       />

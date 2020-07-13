@@ -2,8 +2,7 @@ import { useMemo } from 'react'
 import { useTable } from 'react-table'
 import Table from './table'
 import { toTitleCase } from '../lib/util'
-import { CSVLink } from 'react-csv'
-import { Button } from './input'
+import { Download } from './ribbon'
 import tableStyles from './table.module.css'
 
 /* eslint-disable react/prop-types, react/jsx-key */
@@ -49,14 +48,10 @@ export default function SummaryTable ({ jsonrows }) {
       const siteHeaders = [
         {
           Header: <>
-            <CSVLink
+            <Download
               filename='summary.csv'
               data={data}
-              className={tableStyles.download}>
-              <Button onClick={() => {}} label={'⇩'}
-                className={tableStyles.pageswitchButton}
-              />
-            </CSVLink>
+            />
           </>,
           id: 'first',
           columns: [{
