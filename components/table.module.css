@@ -96,10 +96,6 @@
     color: var(--font-color-muted)
 }
 
-.download {
-    color: var(--font-color);
-}
-
 .numberFilter {
     display: flex;
     align-items: center;

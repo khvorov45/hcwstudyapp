@@ -13,3 +13,7 @@
 .ribbon>*:nth-child(even) {
     background-color: var(--bg-color-alt);
 }
+
+.download {
+    color: var(--font-color);
+}

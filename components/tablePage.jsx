@@ -4,10 +4,9 @@ import Table from './table'
 import {
   isDateISOString, fetchParticipantData, getWeek
 } from '../lib/util'
-import Ribbon from './ribbon'
+import Ribbon, { Download } from './ribbon'
 import tableStyles from './table.module.css'
 import { Button, TextLine } from './input'
-import { CSVLink } from 'react-csv'
 
 /* eslint-disable react/prop-types, react/jsx-key */
 
@@ -323,16 +322,6 @@ function DatesRangeColumnFilter ({
       />
     </div>
   )
-}
-
-function Download ({ data }) {
-  return <>
-    <CSVLink filename='table.csv' data={data} className={tableStyles.download}>
-      <Button onClick={() => {}} label={'⇩'}
-        className={tableStyles.pageswitchButton}
-      />
-    </CSVLink>
-  </>
 }
 
 function LatestWeekIndex () {

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
+import { Button, ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
 import { accessAPI, toTitleCase, User } from '../lib/util'
+import { CSVLink } from 'react-csv'
 import styles from './ribbon.module.css'
 import inputStyles from './input.module.css'
 
@@ -140,4 +141,17 @@ function Filter (
     ]}
     label={label}
   />
+}
+
+export function Download (
+  { data, buttonClassName }:
+  {data: any, buttonClassName?: string}
+) {
+  return <>
+    <CSVLink filename='table.csv' data={data} className={styles.download}>
+      <Button onClick={() => {}} label={'⇩'}
+        className={buttonClassName || ''}
+      />
+    </CSVLink>
+  </>
 }
