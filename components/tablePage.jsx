@@ -27,6 +27,11 @@ export default function TablePage (
     setData(await fetchParticipantData(user, tableName, accessGroup))
   }
   useEffect(() => { updateData() }, [accessGroup])
+  useEffect(() => {
+    setAccessGroup(
+      user.accessGroup === 'admin' ? 'unrestricted' : user.accessGroup
+    )
+  }, [user])
   // Table generation
   const data = useMemo(() => jsonrows, [jsonrows])
   const columns = useMemo(
