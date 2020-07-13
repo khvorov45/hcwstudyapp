@@ -4,7 +4,7 @@ import Table from './table'
 import {
   isDateISOString, fetchParticipantData, getWeek
 } from '../lib/util'
-import Ribbon, { Download } from './ribbon'
+import Ribbon, { Download, Strip } from './ribbon'
 import tableStyles from './table.module.css'
 import { Button, TextLine } from './input'
 
@@ -180,12 +180,6 @@ function ColumnNames ({ label, redcapName }) {
   </div>
 }
 
-function Strip ({ children }) {
-  return <div className={tableStyles.strip}>
-    {children}
-  </div>
-}
-
 function Paginator ({
   nextPage, previousPage, pageIndex, pageCount, canPreviousPage, canNextPage,
   pageSizeLow, pageSizeMax, setPageSize, totalRows
@@ -201,16 +195,13 @@ function Paginator ({
       (pageSizeLow < pageSizeMax) && (
         <>
           <Button onClick={updateMax} label={max ? 'Pages' : 'All'}
-            className={tableStyles.pageswitchButton}
           />
           {!max && <>
             <Button
               onClick={previousPage} disabled={!canPreviousPage} label='<'
-              className={tableStyles.pageswitchButton}
             />
             <span>{`${pageIndex + 1} (${pageCount})`}</span>
             <Button onClick={nextPage} disabled={!canNextPage} label='>'
-              className={tableStyles.pageswitchButton}
             /> </>}
         </>
       )

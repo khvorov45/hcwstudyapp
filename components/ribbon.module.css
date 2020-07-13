@@ -17,3 +17,28 @@
 .download {
     color: var(--font-color);
 }
+
+.strip {
+    display: flex;
+    border: 2px solid var(--border);
+    border-top: 0;
+    height: 2em;
+    align-items: center;
+}
+
+.strip * {
+    margin-left: 5px;
+    margin-right: 5px;
+    border: 0;
+}
+
+.strip *:first-child {
+    margin-left: 0;
+    border-left: 0;
+}
+
+.strip button {
+    border: 0;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}

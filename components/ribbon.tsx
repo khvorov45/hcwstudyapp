@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode } from 'react'
 import { trackPromise } from 'react-promise-tracker'
 import { Button, ButtonWithTimestamp, Checkbox, RadioGroup } from './input'
 import { accessAPI, toTitleCase, User } from '../lib/util'
@@ -154,4 +154,10 @@ export function Download (
       />
     </CSVLink>
   </>
+}
+
+export function Strip ({ children }: {children: ReactNode}) {
+  return <div className={styles.strip}>
+    {children}
+  </div>
 }
