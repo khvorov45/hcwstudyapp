@@ -1,6 +1,5 @@
 Summary tables: by site and vaccination history
 
-    - Site/vaccination history
     - Gender
     - Age and age group
     - ATSI
@@ -12,3 +11,7 @@ Summary tables: by site and vaccination history
     - Occupation type
     - Work department
     - Direct clinical care
+
+Write homepage content
+Replace the download symbol with something better
+Improve the top row of the summary table
