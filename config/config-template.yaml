@@ -17,7 +17,6 @@ db:
     database: hcwstudyapp-dev
     password:
     port: 3001
-    tableResetSqlPath: db/table-reset-postgres.sql
   redcap:
     url: https://biredcap.mh.org.au/api/
     token:
