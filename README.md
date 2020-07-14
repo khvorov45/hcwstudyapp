@@ -40,4 +40,4 @@ one of `admin`, `unrestricted`,
 
 # Source
 
-[Github](https://github.com/khvorov45/hcwstudyapp).
+[Github](https://github.com/khvorov45/hcwstudyapp)
