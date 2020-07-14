@@ -39,6 +39,10 @@
     outline: none;
 }
 
+.squarebutton>i {
+    vertical-align: middle;
+}
+
 .bigbutton {
     border: 1px solid var(--border);
     background-color: transparent;

@@ -13,4 +13,4 @@ Summary tables: by site and vaccination history
     - Direct clinical care
 
 Write homepage content
-Replace the download symbol with something better
+Give downloaded csvs appropriate names

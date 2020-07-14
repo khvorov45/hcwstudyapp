@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode } from 'react'
 import { Timestamp, SuccessIndicator } from './util'
 import { toTitleCase } from '../lib/util'
 import styles from './input.module.css'
 
 export function Button (
-  { label, onClick, className }:
-  {label: string, onClick: () => void, className?: string}
+  { label, onClick, className, children }:
+  {
+    label?: string, onClick: () => void,
+    className?: string, children?: ReactNode
+  }
 ) {
   return <button
     className={`
@@ -13,7 +16,7 @@ export function Button (
     `}
     onClick={onClick}
   >
-    {label}
+    {label || children}
   </button>
 }
 

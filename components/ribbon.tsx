@@ -154,9 +154,11 @@ export function Download (
       data={data}
       className={styles.download}
     >
-      <Button onClick={() => {}} label={'⇩'}
+      <Button onClick={() => {}}
         className={buttonClassName || ''}
-      />
+      >
+        <i className='material-icons'>get_app</i>
+      </Button>
     </CSVLink>
   </>
 }
