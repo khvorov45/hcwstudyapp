@@ -37,3 +37,7 @@ one of `admin`, `unrestricted`,
 `weeklysurvey`, `weeklycompletion`.
 
 `withdrawn` can be one of `yes`, `no`, `any`.
+
+# Source
+
+[Github](https://github.com/khvorov45/hcwstudyapp).
