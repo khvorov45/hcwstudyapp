@@ -116,7 +116,7 @@ export default function TablePage (
       }}
     />
     <Strip>
-      <Download data={rows.map(r => r.values)} />
+      <Download data={rows.map(r => r.values)} filename={`${tableName}.csv`} />
       <Paginator
         nextPage={nextPage}
         previousPage={previousPage}
