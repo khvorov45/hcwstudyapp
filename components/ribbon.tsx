@@ -20,8 +20,7 @@ export default function Ribbon (
       filters?: {
         id: string, label: string, defaultValue: any, fun: (a: any) => void
       }[]
-    },
-    children: ReactNode
+    }
   }
 ) {
   return <div className={styles.ribbon}>
