@@ -42,6 +42,10 @@
     border-left: 0;
 }
 
+.strip i {
+    margin-right: 0px;
+}
+
 .strip button,
 .buttonstrip button {
     border: 0;
