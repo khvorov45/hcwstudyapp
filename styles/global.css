@@ -27,6 +27,32 @@ body {
     color: var(--font-color);
     display: flex;
     flex-direction: column;
+    margin: 0;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+h3,
+h4,
+h5,
+h6 {
+    font-size: 18px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 8px;
 }
 
 main {
