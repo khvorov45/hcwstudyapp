@@ -1,0 +1,84 @@
+:root {
+    --font-color: #000000;
+    --font-color-muted: #4b4b4b;
+    --bg-color: #fff;
+    --bg-color-alt: rgb(230, 230, 230);
+    --border: #777777;
+    --bg-highlight: #02fff2;
+    --error: #ff0000;
+    --success: #00630d;
+    --menu-item-size: 3em;
+    --indicator-size: 25px;
+}
+
+[theme="dark"] {
+    --font-color: #ffffff;
+    --font-color-muted: #bebebe;
+    --bg-color: #000000;
+    --bg-color-alt: rgb(35, 35, 35);
+    --bg-highlight: #006e69;
+    --success: #00ff22;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    background-color: var(--bg-color);
+    color: var(--font-color);
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+h3,
+h4,
+h5,
+h6 {
+    font-size: 18px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 8px;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--font-color);
+}
+
+html,
+html * {
+    scrollbar-color: var(--border) var(--bg-color);
+    scrollbar-width: thin;
+}

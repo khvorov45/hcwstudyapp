@@ -1,9 +1,2 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-token
-key
-*.docx
-*.pdf
-*.tex
+node_modules
+.next

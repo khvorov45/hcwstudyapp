@@ -1,0 +1,91 @@
+.container {
+    max-width: 100%;
+    max-height: 75vh;
+    overflow: scroll;
+}
+
+.table {
+    margin-left: auto;
+    margin-right: auto;
+    border-spacing: 0;
+}
+
+.table tr:last-child th {
+    position: sticky;
+    top: 0px;
+    background-color: var(--bg-color);
+}
+
+.table tr:last-child th:nth-child(even) {
+    background-color: var(--bg-color-alt);
+}
+
+.table td {
+    text-align: center;
+}
+
+.table th,
+.table td {
+    margin: 0;
+    padding: 0.5rem;
+}
+
+.table tr.control * {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.5em;
+}
+
+.table th:nth-child(even) {
+    background: var(--bg-color-alt);
+}
+
+.table tr:nth-child(even) {
+    background: var(--bg-color-alt);
+}
+
+.columnRedcapName {
+    font-family: 'Courier New', Courier, monospace;
+    font-style: normal;
+    font-size: 0.9em;
+    color: var(--font-color-muted);
+    line-height: 1em;
+    min-height: 1em;
+}
+
+.columnHeaderClickable {
+    display: grid;
+    grid-template-areas: 'names controller';
+    align-items: center;
+    grid-template-columns: auto 2ch;
+}
+
+.columnNames {
+    grid-area: names;
+}
+
+.columnController {
+    grid-area: controller;
+    justify-self: end;
+}
+
+.rowcount {
+    color: var(--font-color-muted)
+}
+
+.numberFilter {
+    display: flex;
+    align-items: center;
+}
+
+.numberFilter>*:first-child {
+    margin-right: 5px;
+}
+
+.numberFilter>*:nth-child(2) {
+    margin-left: 5px;
+}
+
+.latestWeekIndex {
+    color: var(--font-color-muted)
+}

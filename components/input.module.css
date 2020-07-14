@@ -1,0 +1,155 @@
+.input {
+    background-color: inherit;
+    color: inherit;
+    font-size: inherit;
+}
+
+.input::-moz-focus-inner {
+    border: 0;
+}
+
+.input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.verticalContainerCenter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.horizontalContainerCenter {
+    display: flex;
+    align-items: center;
+}
+
+.button {
+    border: 2px solid var(--border);
+    border-radius: 1.5rem;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+    margin: 5px;
+}
+
+.squarebutton {
+    background-color: var(--bg-color-alt);
+    cursor: pointer;
+    outline: none;
+}
+
+.squarebutton>i {
+    vertical-align: middle;
+}
+
+.bigbutton {
+    border: 1px solid var(--border);
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 2;
+    outline: none;
+    padding: 5px;
+}
+
+.textLine {
+    border: 0;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 5px;
+    width: 100%;
+    max-width: 20em;
+}
+
+.textLine:required,
+.textLine:invalid {
+    box-shadow: none;
+    border-color: var(--error);
+}
+
+.linemsg {
+    margin: 5px;
+}
+
+.errormsg {
+    color: var(--error);
+}
+
+.multipleSelect {
+    border: 1px solid var(--border);
+    overflow-y: scroll;
+    width: 150px;
+}
+
+.multipleSelect * {
+    margin: 0px;
+}
+
+.checkbox,
+.radio {
+    display: flex;
+    align-items: center;
+    margin: 2.5px;
+    cursor: pointer;
+}
+
+.checkbox input,
+.radio input {
+    opacity: 0;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+.actualCheckbox,
+.actualRadio {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
+    margin-right: 5px;
+    position: relative;
+}
+
+.actualRadio {
+    border-radius: 100%;
+}
+
+.actualCheckbox::before,
+.actualRadio::before {
+    content: "";
+    display: block;
+    width: inherit;
+    height: inherit;
+    border-radius: inherit;
+    position: absolute;
+    transform: scale(0);
+    transform-origin: center center;
+    background: var(--font-color);
+}
+
+.checkbox input:checked+.actualCheckbox::before,
+.radio input:checked+.actualRadio::before {
+    transform: scale(.6);
+}
+
+.radioGroupLabel {
+    font-weight: bold;
+}
+
+/* Chrome's BS
+@PROBLEM
+Cant remove chrome's border
+*/
+
+.input:-webkit-autofill {
+    box-shadow: 0 0 0 30px var(--bg-color) inset;
+    -webkit-box-shadow: 0 0 0 30px var(--bg-color) inset;
+    -webkit-text-fill-color: var(--font-color);
+}
+
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
