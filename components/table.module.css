@@ -33,7 +33,7 @@
 .table tr.control * {
     padding-top: 0;
     padding-bottom: 0;
-    line-height: 2em;
+    line-height: 1.5em;
 }
 
 .table th:nth-child(even) {
