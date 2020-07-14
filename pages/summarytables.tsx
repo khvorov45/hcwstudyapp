@@ -10,6 +10,7 @@ export default function SummaryTables () {
   const user = useUser()
   const [data, setData] = useState([])
   const [accessGroup, setAccessGroup] = useState(user.accessGroup)
+  useEffect(() => { setAccessGroup(user.accessGroup) }, [user])
   const [withdrawn, setWithdrawn] = useState('no')
   async function updateData () {
     if (!user.authorised) return
