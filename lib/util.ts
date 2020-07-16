@@ -5,7 +5,6 @@ export function getConstQuery (email: string, token: string) {
 }
 
 export function myFormatDate (d: Date): {datePart: string, timePart: string} {
-  console.log('myformat: ' + d)
   return {
     datePart: `${d.getFullYear()}` +
     `-${d.getMonth().toString().padStart(2, '0')}` +
