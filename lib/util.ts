@@ -5,8 +5,11 @@ export function getConstQuery (email: string, token: string) {
 }
 
 export function myFormatDate (d: Date): {datePart: string, timePart: string} {
+  console.log('myformat: ' + d)
   return {
-    datePart: d.toISOString().split('T')[0],
+    datePart: `${d.getFullYear()}` +
+    `-${d.getMonth().toString().padStart(2, '0')}` +
+    `-${d.getDate().toString().padStart(2, '0')}`,
     timePart: d.toTimeString().slice(0, 8)
   }
 }
