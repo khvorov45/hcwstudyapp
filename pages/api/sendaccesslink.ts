@@ -21,9 +21,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const token = cryptoRandomString({ length: 32, type: 'url-safe' })
     await db.storeUserToken(email, token)
-    console.log(req.headers)
     await sendAccessLink(
-      req.headers.origin || `http://${req.headers.host}`, email, token
+      // I guess sometimes the origin header isn't present
+      req.headers.origin || 'https://reports.hcwflustudy.com', email, token
     )
     res.status(200).end()
   } catch (error) {
