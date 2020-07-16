@@ -67,4 +67,4 @@ test('postgres', async () => {
   expect(typeof baseline[0].age).toBe('number')
 
   await db.end()
-}, 15000)
+}, 25000)

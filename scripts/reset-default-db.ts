@@ -6,4 +6,4 @@ test('reset-default-db', async () => {
   await db.update(true)
   expect(await db.isEmpty()).toBe(false)
   await db.end()
-})
+}, 25000)

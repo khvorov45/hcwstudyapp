@@ -5,4 +5,4 @@ test('reset-participants', async () => {
   await db.resetAllParticipantTables()
   expect(await db.isEmpty()).toBe(false)
   await db.end()
-})
+}, 25000)
