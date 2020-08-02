@@ -6,6 +6,9 @@ test('postgres', async () => {
   // Basic initialisation
   const conf = newconfig.db.postgres
   conf.users = newconfig.db.users
+  conf.users.push(
+    { email: 'arseniy.khvorov@mh.org.au', accessGroup: 'melbourne' }
+  )
   // Local users should override redcap
   conf.database = 'hcwstudy-test'
   const db = new Postgres(conf)
