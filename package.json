@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcrypt": "^5.0.0",
     "cross-fetch": "^3.0.5",
     "crypto-random-string": "^3.2.0",
     "d3-array": "^2.5.0",
