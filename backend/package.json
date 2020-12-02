@@ -18,5 +18,8 @@
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.2"
   }
 }
