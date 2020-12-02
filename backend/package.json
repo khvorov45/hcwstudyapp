@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/khvorov45/hcwstudyapp/issues"
   },
-  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme"
+  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
