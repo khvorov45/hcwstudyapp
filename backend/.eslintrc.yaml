@@ -1,0 +1,4 @@
+rules:
+  quotes:
+    - warn
+    - single
