@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "0.0.0",
+  "description": "Backend for hcwflustudy reports app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khvorov45/hcwstudyapp.git"
+  },
+  "author": "Arseniy Khvorov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/khvorov45/hcwstudyapp/issues"
+  },
+  "homepage": "https://github.com/khvorov45/hcwstudyapp#readme"
+}
