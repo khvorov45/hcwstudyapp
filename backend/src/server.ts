@@ -7,14 +7,14 @@ import { BACKEND_PORT, DB_CONNECTION_STRING } from "./config"
 
 async function createDB() {
   console.log(`connecting to ${DB_CONNECTION_STRING}`)
-  const pg = pgp()(DB_CONNECTION_STRING)
+  const db = pgp()(DB_CONNECTION_STRING)
   try {
-    await pg.connect()
+    await db.connect()
     console.log(`connected successfully to ${DB_CONNECTION_STRING}`)
   } catch (e) {
     throw Error(`could not connect to ${DB_CONNECTION_STRING}: ${e.message}`)
   }
-  return pg
+  return db
 }
 
 async function main() {
