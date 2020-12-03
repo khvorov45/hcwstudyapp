@@ -2,3 +2,6 @@ rules:
   quotes:
     - warn
     - double
+  space-before-function-paren:
+    - error
+    - never
