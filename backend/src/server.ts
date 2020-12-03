@@ -2,6 +2,7 @@ import express, { Request, Response } from "express"
 import httpStatus from "http-status-codes"
 import pgp from "pg-promise"
 import { BACKEND_PORT, DB_CONNECTION_STRING } from "./config"
+import { isEmpty } from "./db"
 
 // Database connection
 
@@ -13,6 +14,9 @@ async function createDB() {
     console.log(`connected successfully to ${DB_CONNECTION_STRING}`)
   } catch (e) {
     throw Error(`could not connect to ${DB_CONNECTION_STRING}: ${e.message}`)
+  }
+  if (await isEmpty(db)) {
+    console.log("database empty, need to initialize")
   }
   return db
 }
