@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express"
 import httpStatus from "http-status-codes"
 import pgp from "pg-promise"
-import { BACKEND_PORT, DB_CONNECTION_STRING } from "./config"
-import { init, isEmpty } from "./db"
+import { BACKEND_PORT, DB_CLEAN, DB_CONNECTION_STRING } from "./config"
+import { dropSchema, init, isEmpty } from "./db"
 
 // Database connection
 
@@ -15,7 +15,11 @@ async function createDB() {
   } catch (e) {
     throw Error(`could not connect to ${DB_CONNECTION_STRING}: ${e.message}`)
   }
-  if (await isEmpty(db)) {
+  if (DB_CLEAN) {
+    console.log("cleaning db")
+    await dropSchema(db)
+    await init(db)
+  } else if (await isEmpty(db)) {
     console.log("database empty, initializing")
     await init(db)
   }
