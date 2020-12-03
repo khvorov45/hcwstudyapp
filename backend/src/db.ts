@@ -31,3 +31,8 @@ export async function init(db: DB) {
   );
 `)
 }
+
+export async function dropSchema(db: DB) {
+  await db.any('DROP SCHEMA "public" CASCADE;')
+  await db.any('CREATE SCHEMA "public";')
+}
