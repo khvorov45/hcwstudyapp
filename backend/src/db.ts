@@ -3,14 +3,16 @@ import pg from "pg-promise/typescript/pg-subset"
 
 type DB = pgp.IDatabase<{}, pg.IClient>
 
-export async function isEmpty(db: DB) {
-  const allTableNames = (
+export async function getTableNames(db: DB): Promise<string[]> {
+  return (
     await db.any(
       "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';"
     )
   ).map((r) => r.tablename)
-  console.log("found table names: ", JSON.stringify(allTableNames))
-  return allTableNames.length === 0
+}
+
+export async function isEmpty(db: DB) {
+  return (await getTableNames(db)).length === 0
 }
 
 export async function init(db: DB) {
