@@ -1,36 +1,9 @@
 import express, { Request, Response } from "express"
 import httpStatus from "http-status-codes"
-import pgp from "pg-promise"
 import yargs from "yargs"
-import { dropSchema, init, isEmpty } from "./db"
+import { create as createDB } from "./db"
 
 // Database connection
-
-async function createDB({
-  connectionString,
-  clean,
-}: {
-  connectionString: string
-  clean: boolean
-}) {
-  console.log(`connecting to ${connectionString}`)
-  const db = pgp()(connectionString)
-  try {
-    await db.connect()
-    console.log(`connected successfully to ${connectionString}`)
-  } catch (e) {
-    throw Error(`could not connect to ${connectionString}: ${e.message}`)
-  }
-  if (clean) {
-    console.log("cleaning db")
-    await dropSchema(db)
-    await init(db)
-  } else if (await isEmpty(db)) {
-    console.log("database empty, initializing")
-    await init(db)
-  }
-  return db
-}
 
 async function main() {
   const args = yargs(process.argv)

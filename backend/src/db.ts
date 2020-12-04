@@ -3,6 +3,32 @@ import pg from "pg-promise/typescript/pg-subset"
 
 type DB = pgp.IDatabase<{}, pg.IClient>
 
+export async function create({
+  connectionString,
+  clean,
+}: {
+  connectionString: string
+  clean: boolean
+}): Promise<DB> {
+  console.log(`connecting to ${connectionString}`)
+  const db = pgp()(connectionString)
+  try {
+    await db.connect()
+    console.log(`connected successfully to ${connectionString}`)
+  } catch (e) {
+    throw Error(`could not connect to ${connectionString}: ${e.message}`)
+  }
+  if (clean) {
+    console.log("cleaning db")
+    await dropSchema(db)
+    await init(db)
+  } else if (await isEmpty(db)) {
+    console.log("database empty, initializing")
+    await init(db)
+  }
+  return db
+}
+
 export async function getTableNames(db: DB): Promise<string[]> {
   return (
     await db.any(
