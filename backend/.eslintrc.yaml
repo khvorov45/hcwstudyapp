@@ -1,6 +1,7 @@
 rules:
   # Prettier takes care of quotes
   quotes: off
+  comma-dangle: off
   space-before-function-paren:
     - error
     - never
