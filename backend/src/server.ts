@@ -47,10 +47,7 @@ async function main() {
   // Sort out the database connection
   let _db
   try {
-    _db = await createDB({
-      connectionString: args.connectionString,
-      clean: args.clean,
-    })
+    _db = await createDB(args)
   } catch (e) {
     console.error(e.message)
     return
