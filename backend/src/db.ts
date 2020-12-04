@@ -1,6 +1,8 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import { User } from "./data"
+import * as t from "io-ts"
+import { User, UserV } from "./data"
+import { decode } from "./io"
 
 type DB = pgp.IDatabase<{}, pg.IClient>
 
@@ -64,5 +66,5 @@ export async function resetSchema(db: DB) {
 }
 
 export async function getUsers(db: DB): Promise<User[]> {
-  return await db.any('SELECT * FROM "User"')
+  return decode(t.array(UserV), await db.any('SELECT * FROM "User"'))
 }
