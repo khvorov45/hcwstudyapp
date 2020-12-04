@@ -20,7 +20,7 @@ export async function create({
   }
   if (clean) {
     console.log("cleaning db")
-    await dropSchema(db)
+    await resetSchema(db)
     await init(db)
   } else if (await isEmpty(db)) {
     console.log("database empty, initializing")
@@ -58,7 +58,7 @@ export async function init(db: DB) {
 `)
 }
 
-export async function dropSchema(db: DB) {
+export async function resetSchema(db: DB) {
   await db.any('DROP SCHEMA "public" CASCADE;')
   await db.any('CREATE SCHEMA "public";')
 }
