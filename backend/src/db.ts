@@ -1,5 +1,6 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
+import { User } from "./data"
 
 type DB = pgp.IDatabase<{}, pg.IClient>
 
@@ -60,4 +61,8 @@ export async function init(db: DB) {
 export async function resetSchema(db: DB) {
   await db.any('DROP SCHEMA "public" CASCADE;')
   await db.any('CREATE SCHEMA "public";')
+}
+
+export async function getUsers(db: DB): Promise<User[]> {
+  return await db.any('SELECT * FROM "User"')
 }
