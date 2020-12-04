@@ -1,21 +1,28 @@
 import express, { Request, Response } from "express"
 import httpStatus from "http-status-codes"
 import pgp from "pg-promise"
-import { BACKEND_PORT, DB_CLEAN, DB_CONNECTION_STRING } from "./config"
+import yargs from "yargs"
+import { BACKEND_PORT } from "./config"
 import { dropSchema, init, isEmpty } from "./db"
 
 // Database connection
 
-async function createDB() {
-  console.log(`connecting to ${DB_CONNECTION_STRING}`)
-  const db = pgp()(DB_CONNECTION_STRING)
+async function createDB({
+  connectionString,
+  clean,
+}: {
+  connectionString: string
+  clean: boolean
+}) {
+  console.log(`connecting to ${connectionString}`)
+  const db = pgp()(connectionString)
   try {
     await db.connect()
-    console.log(`connected successfully to ${DB_CONNECTION_STRING}`)
+    console.log(`connected successfully to ${connectionString}`)
   } catch (e) {
-    throw Error(`could not connect to ${DB_CONNECTION_STRING}: ${e.message}`)
+    throw Error(`could not connect to ${connectionString}: ${e.message}`)
   }
-  if (DB_CLEAN) {
+  if (clean) {
     console.log("cleaning db")
     await dropSchema(db)
     await init(db)
@@ -27,10 +34,22 @@ async function createDB() {
 }
 
 async function main() {
+  const args = yargs(process.argv)
+    .string("connectionString")
+    .boolean("clean")
+    .default(
+      "connectionString",
+      "postgres://postgres:admin@localhost:7000/postgres"
+    )
+    .default("clean", false).argv
+
   // Sort out the database connection
   let _db
   try {
-    _db = await createDB()
+    _db = await createDB({
+      connectionString: args.connectionString,
+      clean: args.clean,
+    })
   } catch (e) {
     console.error(e.message)
     return
