@@ -19,9 +19,9 @@ async function main() {
     .default("backendPort", 7001).argv
 
   // Sort out the database connection
-  let _db
+  let db
   try {
-    _db = await createDB(args)
+    db = await createDB(args)
   } catch (e) {
     console.error(e.message)
     return
@@ -30,7 +30,7 @@ async function main() {
   // Create the server
   const app = express()
 
-  app.use(`/${args.prefix}`, getRoutes())
+  app.use(`/${args.prefix}`, getRoutes(db))
 
   app.listen(args.backendPort, () => {
     console.log(`server started on port ${args.backendPort}`)

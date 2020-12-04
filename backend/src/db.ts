@@ -4,7 +4,7 @@ import * as t from "io-ts"
 import { User, UserV } from "./data"
 import { decode } from "./io"
 
-type DB = pgp.IDatabase<{}, pg.IClient>
+export type DB = pgp.IDatabase<{}, pg.IClient>
 
 export async function create({
   connectionString,
