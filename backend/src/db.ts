@@ -34,11 +34,14 @@ export async function create({
 }
 
 async function getTableNames(db: DB): Promise<string[]> {
-  return (
-    await db.any(
-      "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';"
+  return decode(
+    t.array(t.string),
+    await db.map(
+      "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';",
+      [],
+      (r) => r.tablename
     )
-  ).map((r) => r.tablename)
+  )
 }
 
 async function isEmpty(db: DB): Promise<boolean> {
