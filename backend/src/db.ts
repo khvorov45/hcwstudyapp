@@ -49,8 +49,7 @@ export async function init(db: DB) {
   DROP TYPE IF EXISTS hfs_access_group;
   CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted');
   CREATE TABLE "Meta" (
-    "key" TEXT NOT NULL PRIMARY KEY UNIQUE,
-    "value" TEXT
+    "lastUpdate" TIMESTAMPTZ
   );
   CREATE TABLE "User" (
       "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
@@ -58,6 +57,7 @@ export async function init(db: DB) {
       "tokenhash" TEXT
   );
 `)
+  await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
 }
 
 export async function resetSchema(db: DB) {
