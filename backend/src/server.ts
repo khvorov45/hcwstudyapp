@@ -27,7 +27,8 @@ async function main() {
 
   // Create the server
   const app = express()
-
+  app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
   app.use(`/${args.prefix}`, getRoutes(db))
 
   app.listen(args.backendPort, () => {
