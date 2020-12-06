@@ -1,11 +1,10 @@
 import { Router, Request, Response } from "express"
-import httpStatus from "http-status-codes"
-import { getUsers, DB } from "./db"
+import { getUsers, DB, getLastUpdate } from "./db"
 
 export function getRoutes(db: DB) {
   const routes = Router()
-  routes.get("/update", (req: Request, res: Response) => {
-    res.status(httpStatus.NO_CONTENT).end()
+  routes.get("/update", async (req: Request, res: Response) => {
+    res.json(await getLastUpdate(db))
   })
   routes.get("/users", async (req: Request, res: Response) => {
     res.json(await getUsers(db))

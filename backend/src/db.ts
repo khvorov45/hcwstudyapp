@@ -1,6 +1,7 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
 import * as t from "io-ts"
+import { date } from "io-ts-types"
 import { User, UserV } from "./data"
 import { decode } from "./io"
 
@@ -63,6 +64,13 @@ export async function init(db: DB) {
 export async function resetSchema(db: DB) {
   await db.any('DROP SCHEMA "public" CASCADE;')
   await db.any('CREATE SCHEMA "public";')
+}
+
+export async function getLastUpdate(db: DB) {
+  return decode(
+    date,
+    await db.one('SELECT "lastUpdate" FROM "Meta";', [], (v) => v.lastUpdate)
+  )
 }
 
 export async function getUsers(db: DB): Promise<User[]> {
