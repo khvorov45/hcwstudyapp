@@ -58,7 +58,7 @@ async function init(db: DB) {
   CREATE TABLE "User" (
       "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
       "accessGroup" hfs_access_group NOT NULL,
-      "tokenhash" TEXT
+      "tokenhash" TEXT UNIQUE
   );
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
