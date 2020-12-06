@@ -80,6 +80,13 @@ export async function getUsers(db: DB): Promise<User[]> {
   return decode(t.array(UserV), await db.any('SELECT * FROM "User"'))
 }
 
+export async function getUser(db: DB, email: string): Promise<User> {
+  return decode(
+    UserV,
+    await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
+  )
+}
+
 export async function insertUser(db: DB, u: User) {
   await db.any(
     `INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
