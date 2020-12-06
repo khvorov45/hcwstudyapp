@@ -79,3 +79,11 @@ export async function getLastUpdate(db: DB): Promise<Date> {
 export async function getUsers(db: DB): Promise<User[]> {
   return decode(t.array(UserV), await db.any('SELECT * FROM "User"'))
 }
+
+export async function insertUser(db: DB, u: User) {
+  await db.any(
+    `INSERT INTO "User" ("email", "accessGroup", "token") VALUES
+    ($email, $accessGroup, $token)`,
+    { email: u.email, accessGroup: u.accessGroup, token: u.token }
+  )
+}
