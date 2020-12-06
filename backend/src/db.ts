@@ -33,7 +33,7 @@ export async function create({
   return db
 }
 
-export async function getTableNames(db: DB): Promise<string[]> {
+async function getTableNames(db: DB): Promise<string[]> {
   return (
     await db.any(
       "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';"
@@ -41,11 +41,11 @@ export async function getTableNames(db: DB): Promise<string[]> {
   ).map((r) => r.tablename)
 }
 
-export async function isEmpty(db: DB): Promise<boolean> {
+async function isEmpty(db: DB): Promise<boolean> {
   return (await getTableNames(db)).length === 0
 }
 
-export async function init(db: DB) {
+async function init(db: DB) {
   await db.any(`
   DROP TYPE IF EXISTS hfs_access_group;
   CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted');
@@ -61,7 +61,7 @@ export async function init(db: DB) {
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
 }
 
-export async function resetSchema(db: DB) {
+async function resetSchema(db: DB) {
   await db.any('DROP SCHEMA "public" CASCADE;')
   await db.any('CREATE SCHEMA "public";')
 }
