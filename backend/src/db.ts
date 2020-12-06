@@ -41,7 +41,7 @@ export async function getTableNames(db: DB): Promise<string[]> {
   ).map((r) => r.tablename)
 }
 
-export async function isEmpty(db: DB) {
+export async function isEmpty(db: DB): Promise<boolean> {
   return (await getTableNames(db)).length === 0
 }
 
