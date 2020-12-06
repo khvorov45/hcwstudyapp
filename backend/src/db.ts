@@ -54,7 +54,7 @@ export async function init(db: DB) {
   );
   CREATE TABLE "User" (
       "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
-      "accessGroup" TEXT NOT NULL,
+      "accessGroup" hfs_access_group NOT NULL,
       "tokenhash" TEXT
   );
 `)
