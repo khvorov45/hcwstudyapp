@@ -3,8 +3,6 @@ import yargs from "yargs"
 import { getRoutes } from "./api"
 import { create as createDB } from "./db"
 
-// Database connection
-
 async function main() {
   const args = yargs(process.argv)
     .string(["connectionString", "prefix"])
