@@ -7,8 +7,8 @@ export function getRoutes(db: DB) {
   routes.get("/update", (req: Request, res: Response) => {
     res.status(httpStatus.NO_CONTENT).end()
   })
-  routes.get("/users", (req: Request, res: Response) => {
-    res.json(getUsers(db))
+  routes.get("/users", async (req: Request, res: Response) => {
+    res.json(await getUsers(db))
   })
   return routes
 }
