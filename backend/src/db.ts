@@ -58,7 +58,7 @@ async function init(db: DB) {
   CREATE TABLE "User" (
       "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
       "accessGroup" hfs_access_group NOT NULL,
-      "token" TEXT
+      "tokenhash" TEXT
   );
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
@@ -82,8 +82,8 @@ export async function getUsers(db: DB): Promise<User[]> {
 
 export async function insertUser(db: DB, u: User) {
   await db.any(
-    `INSERT INTO "User" ("email", "accessGroup", "token") VALUES
-    ($email, $accessGroup, $token)`,
-    { email: u.email, accessGroup: u.accessGroup, token: u.token }
+    `INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
+    ($(email), $(accessGroup), $(tokenhash))`,
+    { email: u.email, accessGroup: u.accessGroup, tokenhash: u.tokenhash }
   )
 }
