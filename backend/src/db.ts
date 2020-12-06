@@ -87,3 +87,7 @@ export async function insertUser(db: DB, u: User) {
     { email: u.email, accessGroup: u.accessGroup, tokenhash: u.tokenhash }
   )
 }
+
+export async function deleteUser(db: DB, email: string) {
+  await db.any('DELETE FROM "User" WHERE email=$1', [email])
+}
