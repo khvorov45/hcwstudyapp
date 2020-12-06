@@ -1,4 +1,5 @@
-import { Router, Request, Response } from "express"
+import { Request, Response } from "express"
+import Router from "express-promise-router"
 import randomString from "crypto-random-string"
 import SHA512 from "crypto-js/sha512"
 import * as t from "io-ts"
@@ -9,6 +10,8 @@ import { decode } from "./io"
 
 export function getRoutes(db: DB) {
   const routes = Router()
+
+  // Routes
   routes.get("/update", async (req: Request, res: Response) => {
     res.json(await getLastUpdate(db))
   })
@@ -28,6 +31,11 @@ export function getRoutes(db: DB) {
   routes.delete("/users", async (req: Request, res: Response) => {
     await deleteUser(db, decode(t.string, req.query.email))
     res.status(StatusCodes.NO_CONTENT).end()
+  })
+
+  // Errors
+  routes.use((err: Error, req: Request, res: Response, _next: any) => {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(err.message)
   })
   return routes
 }
