@@ -66,7 +66,7 @@ export async function resetSchema(db: DB) {
   await db.any('CREATE SCHEMA "public";')
 }
 
-export async function getLastUpdate(db: DB) {
+export async function getLastUpdate(db: DB): Promise<Date> {
   return decode(
     date,
     await db.one('SELECT "lastUpdate" FROM "Meta";', [], (v) => v.lastUpdate)
