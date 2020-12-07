@@ -5,13 +5,14 @@ import { create as createDB } from "./db"
 
 async function main() {
   const args = yargs(process.argv)
-    .string(["connectionString", "prefix"])
+    .string(["connectionString", "prefix", "firstAdminToken"])
     .boolean("clean")
     .number("backendPort")
     .default(
       "connectionString",
       "postgres://postgres:admin@localhost:7000/postgres"
     )
+    .default("firstAdminToken", "123")
     .default("prefix", "")
     .default("clean", false)
     .default("backendPort", 7001).argv
