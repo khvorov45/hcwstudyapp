@@ -28,5 +28,6 @@ export const ParticipantV = t.type({
   dob: date,
   gender: t.string,
   withdrawn: t.boolean,
+  baselineQuestComplete: t.boolean,
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
