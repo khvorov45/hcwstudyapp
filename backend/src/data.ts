@@ -30,6 +30,3 @@ export const ParticipantV = t.type({
   withdrawn: t.string,
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
-
-export const FullDataV = t.type({ user: UserV })
-export type FullData = t.TypeOf<typeof FullDataV>
