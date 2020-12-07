@@ -1,7 +1,5 @@
 import { Request, Response } from "express"
 import Router from "express-promise-router"
-import randomString from "crypto-random-string"
-import SHA512 from "crypto-js/sha512"
 import * as t from "io-ts"
 import StatusCodes from "http-status-codes"
 import {
@@ -14,6 +12,7 @@ import {
 } from "./db"
 import { User, UserV } from "./data"
 import { decode } from "./io"
+import { generateToken, hash } from "./auth"
 
 export function getRoutes(db: DB) {
   const routes = Router()
@@ -52,14 +51,6 @@ export function getRoutes(db: DB) {
     }
   })
   return routes
-}
-
-function generateToken(): string {
-  return randomString({ length: 40, type: "url-safe" })
-}
-
-function hash(s: string): string {
-  return SHA512(s).toString()
 }
 
 async function validateUser(req: Request, db: DB): Promise<User> {
