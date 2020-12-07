@@ -1,9 +1,6 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import * as t from "io-ts"
-import { date } from "io-ts-types"
-import { Participant, User, UserV } from "./data"
-import { decode } from "./io"
+import { Participant, User } from "./data"
 import { hash } from "./auth"
 
 export type DB = pgp.IDatabase<{}, pg.IClient>
@@ -37,13 +34,10 @@ export async function create({
 }
 
 async function getTableNames(db: DB): Promise<string[]> {
-  return decode(
-    t.array(t.string),
-    await db.map(
-      "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';",
-      [],
-      (r) => r.tablename
-    )
+  return await db.map(
+    "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';",
+    [],
+    (r) => r.tablename
   )
 }
 
@@ -93,31 +87,26 @@ async function resetSchema(db: DB) {
 }
 
 export async function getLastUpdate(db: DB): Promise<Date> {
-  return decode(
-    date,
-    await db.one('SELECT "lastUpdate" FROM "Meta";', [], (v) => v.lastUpdate)
+  return await db.one(
+    'SELECT "lastUpdate" FROM "Meta";',
+    [],
+    (v) => v.lastUpdate
   )
 }
 
 export async function getUsers(db: DB): Promise<User[]> {
-  return decode(t.array(UserV), await db.any('SELECT * FROM "User"'))
+  return await db.any('SELECT * FROM "User"')
 }
 
 export async function getUserByEmail(db: DB, email: string): Promise<User> {
-  return decode(
-    UserV,
-    await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
-  )
+  return await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
 }
 
 export async function getUserByTokenhash(
   db: DB,
   tokenhash: string
 ): Promise<User> {
-  return decode(
-    UserV,
-    await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
-  )
+  return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
 }
 
 export async function insertUser(db: DB, u: User) {
