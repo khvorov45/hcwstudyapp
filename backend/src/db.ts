@@ -2,7 +2,7 @@ import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
 import * as t from "io-ts"
 import { date } from "io-ts-types"
-import { User, UserV } from "./data"
+import { Participant, User, UserV } from "./data"
 import { decode } from "./io"
 import { hash } from "./auth"
 
@@ -130,4 +130,8 @@ export async function insertUser(db: DB, u: User) {
 
 export async function deleteUser(db: DB, email: string) {
   await db.any('DELETE FROM "User" WHERE email=$1', [email])
+}
+
+export async function insertParticipant(db: DB, p: Participant) {
+  await db.any(pgp().helpers.insert(p, Object.keys(p), "Participant"))
 }

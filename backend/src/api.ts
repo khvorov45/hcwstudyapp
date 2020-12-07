@@ -9,8 +9,9 @@ import {
   insertUser,
   deleteUser,
   getUserByTokenhash,
+  insertParticipant,
 } from "./db"
-import { User, UserV } from "./data"
+import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { generateToken, hash } from "./auth"
 
@@ -39,6 +40,11 @@ export function getRoutes(db: DB) {
   routes.delete("/users", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await deleteUser(db, decode(t.string, req.query.email))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.post("/participants", async (req: Request, res: Response) => {
+    await validateUser(req, db)
+    await insertParticipant(db, decode(ParticipantV, req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
 
