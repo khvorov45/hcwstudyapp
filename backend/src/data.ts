@@ -27,6 +27,6 @@ export const ParticipantV = t.type({
   addBleed: t.boolean,
   dob: date,
   gender: t.string,
-  withdrawn: t.string,
+  withdrawn: t.boolean,
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
