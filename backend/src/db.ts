@@ -63,6 +63,20 @@ async function init(db: DB, tok: string) {
       "accessGroup" hfs_access_group NOT NULL,
       "tokenhash" TEXT UNIQUE
   );
+  CREATE TABLE "Participant" (
+      "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
+      "pid" TEXT NOT NULL UNIQUE,
+      "accessGroup" hfs_access_group NOT NULL,
+      "site" TEXT NOT NULL,
+      "dateScreening" TIMESTAMPTZ,
+      "email" TEXT,
+      "mobile" TEXT,
+      "addBleed" BOOLEAN,
+      "dob" TIMESTAMPTZ,
+      "gender" TEXT,
+      "withdrawn" BOOLEAN NOT NULL,
+      "baselineQuestComplete" BOOLEAN NOT NULL
+  );
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUser(db, {
