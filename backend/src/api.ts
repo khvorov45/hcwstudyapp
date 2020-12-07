@@ -65,7 +65,8 @@ function hash(s: string): string {
 async function validateUser(req: Request, db: DB): Promise<User> {
   let token: string
   try {
-    token = decode(t.string, req.header("Authorization")).split(" ")[1]
+    const header = decode(t.string, req.header("Authorization")).split(" ")
+    token = decode(t.string, header[1])
   } catch (e) {
     throw Error("UNAUTHORIZED: failed to parse auth header")
   }
