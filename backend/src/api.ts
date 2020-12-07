@@ -70,7 +70,16 @@ async function validateUser(req: Request, db: DB): Promise<User> {
   } catch (e) {
     throw Error("UNAUTHORIZED: failed to parse auth header")
   }
-  return await getUserByTokenhash(db, hash(token))
+  let u: User
+  try {
+    u = await getUserByTokenhash(db, hash(token))
+  } catch (e) {
+    if (e.message === "No data returned from the query.") {
+      throw Error("UNAUTHORIZED: no user with the supplied token")
+    }
+    throw Error("UNAUTHORIZED: " + e.message)
+  }
+  return u
 }
 
 async function validateAdmin(req: Request, db: DB): Promise<User> {
