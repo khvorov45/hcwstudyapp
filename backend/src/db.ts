@@ -54,7 +54,7 @@ async function isEmpty(db: DB): Promise<boolean> {
 async function init(db: DB, tok: string) {
   await db.any(`
   DROP TYPE IF EXISTS hfs_access_group;
-  CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted');
+  CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted', 'melbourne');
   CREATE TABLE "Meta" (
     "lastUpdate" TIMESTAMPTZ
   );
