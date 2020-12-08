@@ -53,12 +53,12 @@ async function init(db: DB, tok: string) {
     "lastUpdate" TIMESTAMPTZ
   );
   CREATE TABLE "User" (
-      "email" TEXT NOT NULL PRIMARY KEY UNIQUE,
+      "email" TEXT PRIMARY KEY,
       "accessGroup" hfs_access_group NOT NULL,
       "tokenhash" TEXT NOT NULL UNIQUE
   );
   CREATE TABLE "Participant" (
-      "redcapRecordId" TEXT NOT NULL PRIMARY KEY UNIQUE,
+      "redcapRecordId" TEXT PRIMARY KEY,
       "pid" TEXT NOT NULL UNIQUE,
       "accessGroup" hfs_access_group NOT NULL,
       "site" TEXT NOT NULL,
