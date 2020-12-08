@@ -80,6 +80,15 @@ async function init(db: DB, tok: string) {
     REFERENCES "Participant" ("redcapRecordId")
     ON UPDATE CASCADE ON DELETE CASCADE
   );
+  CREATE TABLE "Schedule" (
+    "redcapRecordId" TEXT NOT NULL,
+    "day" INTEGER NOT NULL,
+    "date" TIMESTAMPTZ,
+    PRIMARY KEY ("redcapRecordId", "day"),
+    FOREIGN KEY ("redcapRecordId")
+    REFERENCES "Participant" ("redcapRecordId")
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUser(db, {
