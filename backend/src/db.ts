@@ -121,6 +121,10 @@ export async function deleteUser(db: DB, email: string) {
   await db.any('DELETE FROM "User" WHERE email=$1', [email])
 }
 
+export async function getParticipants(db: DB): Promise<Participant[]> {
+  return await db.any('SELECT * FROM "Participant"')
+}
+
 export async function insertParticipant(db: DB, p: Participant) {
   await db.any(pgp().helpers.insert(p, Object.keys(p), "Participant"))
 }
