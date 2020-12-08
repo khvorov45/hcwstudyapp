@@ -3,6 +3,8 @@ import pg from "pg-promise/typescript/pg-subset"
 import { Participant, User } from "./data"
 import { hash } from "./auth"
 
+const pgpInit = pgp()
+
 export type DB = pgp.IDatabase<{}, pg.IClient>
 
 export async function create({
@@ -15,7 +17,7 @@ export async function create({
   firstAdminToken: string
 }): Promise<DB> {
   console.log(`connecting to ${connectionString}`)
-  const db = pgp()(connectionString)
+  const db = pgpInit(connectionString)
   try {
     await db.connect()
     console.log(`connected successfully to ${connectionString}`)
@@ -155,7 +157,7 @@ export async function getParticipants(db: DB): Promise<Participant[]> {
 }
 
 export async function insertParticipant(db: DB, p: Participant) {
-  await db.any(pgp().helpers.insert(p, Object.keys(p), "Participant"))
+  await db.any(pgpInit.helpers.insert(p, Object.keys(p), "Participant"))
 }
 
 export async function deleteParticipant(db: DB, redcapRecordId: string) {
