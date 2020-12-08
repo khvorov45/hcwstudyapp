@@ -6,7 +6,7 @@ import {
   getUsers,
   DB,
   getLastUpdate,
-  insertUser,
+  insertUsers,
   deleteUser,
   getUserByTokenhash,
   insertParticipant,
@@ -16,7 +16,7 @@ import {
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
-import { generateToken, hash } from "./auth"
+import { hash } from "./auth"
 import { RedcapConfig } from "./redcap"
 
 export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
@@ -32,14 +32,9 @@ export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
   })
   routes.post("/users", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
-    const token = generateToken()
-    const u = decode(UserV, {
-      email: req.body.email,
-      accessGroup: req.body.accessGroup,
-      tokenhash: hash(token),
-    })
-    await insertUser(db, u)
-    res.json(token)
+    const us = decode(t.array(UserV), req.body)
+    await insertUsers(db, us)
+    res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users/redcap/sync", async (req: Request, res: Response) => {
     await validateAdmin(req, db)

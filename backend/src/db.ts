@@ -115,11 +115,13 @@ async function init({
   );
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
-  await insertUser(db, {
-    email: firstAdminEmail,
-    accessGroup: "admin",
-    tokenhash: hash(firstAdminToken),
-  })
+  await insertUsers(db, [
+    {
+      email: firstAdminEmail,
+      accessGroup: "admin",
+      tokenhash: hash(firstAdminToken),
+    },
+  ])
 }
 
 async function resetSchema(db: DB): Promise<void> {
@@ -148,10 +150,6 @@ export async function getUserByTokenhash(
   tokenhash: string
 ): Promise<User> {
   return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
-}
-
-export async function insertUser(db: DB, u: User): Promise<void> {
-  await db.any(pgpInit.helpers.insert(u, Object.keys(u), "User"))
 }
 
 export async function insertUsers(db: DB, us: User[]): Promise<void> {
