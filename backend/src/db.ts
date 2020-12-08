@@ -57,7 +57,7 @@ async function init({
   db: DB
   firstAdminEmail: string
   firstAdminToken: string
-}) {
+}): Promise<void> {
   await db.any(`
   DROP TYPE IF EXISTS hfs_access_group;
   CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted', 'melbourne');
@@ -121,7 +121,7 @@ async function init({
   })
 }
 
-async function resetSchema(db: DB) {
+async function resetSchema(db: DB): Promise<void> {
   await db.any('DROP SCHEMA "public" CASCADE;')
   await db.any('CREATE SCHEMA "public";')
 }
@@ -149,11 +149,11 @@ export async function getUserByTokenhash(
   return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
 }
 
-export async function insertUser(db: DB, u: User) {
+export async function insertUser(db: DB, u: User): Promise<void> {
   await db.any(pgpInit.helpers.insert(u, Object.keys(u), "User"))
 }
 
-export async function deleteUser(db: DB, email: string) {
+export async function deleteUser(db: DB, email: string): Promise<void> {
   await db.any('DELETE FROM "User" WHERE email=$1', [email])
 }
 
@@ -161,11 +161,14 @@ export async function getParticipants(db: DB): Promise<Participant[]> {
   return await db.any('SELECT * FROM "Participant"')
 }
 
-export async function insertParticipant(db: DB, p: Participant) {
+export async function insertParticipant(db: DB, p: Participant): Promise<void> {
   await db.any(pgpInit.helpers.insert(p, Object.keys(p), "Participant"))
 }
 
-export async function deleteParticipant(db: DB, redcapRecordId: string) {
+export async function deleteParticipant(
+  db: DB,
+  redcapRecordId: string
+): Promise<void> {
   await db.any('DELETE FROM "Participant" WHERE "redcapRecordId"=$1', [
     redcapRecordId,
   ])
