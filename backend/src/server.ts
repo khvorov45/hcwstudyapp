@@ -10,6 +10,8 @@ async function main() {
       "prefix",
       "firstAdminEmail",
       "firstAdminToken",
+      "redcapUrl",
+      "redcapToken",
     ])
     .boolean("clean")
     .number("backendPort")
@@ -19,6 +21,9 @@ async function main() {
     )
     .default("firstAdminEmail", "admin@example.com")
     .default("firstAdminToken", "admin")
+    // THE TRAILING SLASH IS IMPORTANT CARL IT WILL FAIL OTHERWISE
+    .default("redcapUrl", "https://biredcap.mh.org.au/api/")
+    .default("redcapToken", "")
     .default("prefix", "")
     .default("clean", false)
     .default("backendPort", 7001).argv
@@ -35,7 +40,10 @@ async function main() {
   // Create the server
   const app = express()
   app.use(express.json())
-  app.use(`/${args.prefix}`, getRoutes(db))
+  app.use(
+    `/${args.prefix}`,
+    getRoutes(db, { url: args.redcapUrl, token: args.redcapToken })
+  )
 
   app.listen(args.backendPort, () => {
     console.log(`server started on port ${args.backendPort}`)

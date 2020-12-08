@@ -2,6 +2,7 @@ import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
 import { Participant, User } from "./data"
 import { hash } from "./auth"
+import { exportUsers, RedcapConfig } from "./redcap"
 
 const pgpInit = pgp()
 
@@ -67,7 +68,7 @@ async function init({
   CREATE TABLE "User" (
       "email" TEXT PRIMARY KEY,
       "accessGroup" hfs_access_group NOT NULL,
-      "tokenhash" TEXT NOT NULL UNIQUE
+      "tokenhash" TEXT UNIQUE
   );
   CREATE TABLE "Participant" (
       "redcapRecordId" TEXT PRIMARY KEY,
@@ -153,8 +154,38 @@ export async function insertUser(db: DB, u: User): Promise<void> {
   await db.any(pgpInit.helpers.insert(u, Object.keys(u), "User"))
 }
 
+export async function insertUsers(db: DB, us: User[]): Promise<void> {
+  if (us.length === 0) {
+    return
+  }
+  await db.any(pgpInit.helpers.insert(us, Object.keys(us[0]), "User"))
+}
+
 export async function deleteUser(db: DB, email: string): Promise<void> {
   await db.any('DELETE FROM "User" WHERE email=$1', [email])
+}
+
+export async function deleteUsers(db: DB, emails: string[]): Promise<void> {
+  await db.any('DELETE FROM "User" WHERE email IN ($1:csv)', [emails])
+}
+
+/** Will not touch the admins, drop everyone else and replace with redcap users
+ */
+export async function syncRedcapUsers(
+  db: DB,
+  redcapConfig: RedcapConfig
+): Promise<void> {
+  const [redcapUsers, dbUsers] = await Promise.all([
+    exportUsers(redcapConfig),
+    getUsers(db),
+  ])
+  const dbNonAdminEmails = dbUsers
+    .filter((u) => u.accessGroup !== "admin")
+    .map((u) => u.email)
+  if (dbNonAdminEmails.length > 0) {
+    await deleteUsers(db, dbNonAdminEmails)
+  }
+  await insertUsers(db, redcapUsers)
 }
 
 export async function getParticipants(db: DB): Promise<Participant[]> {

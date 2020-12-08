@@ -12,12 +12,14 @@ import {
   insertParticipant,
   getParticipants,
   deleteParticipant,
+  syncRedcapUsers,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { generateToken, hash } from "./auth"
+import { RedcapConfig } from "./redcap"
 
-export function getRoutes(db: DB) {
+export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
   const routes = Router()
 
   // Routes
@@ -38,6 +40,11 @@ export function getRoutes(db: DB) {
     })
     await insertUser(db, u)
     res.json(token)
+  })
+  routes.put("/users/redcap/sync", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await syncRedcapUsers(db, redcapConfig)
+    res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/users", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
