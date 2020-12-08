@@ -141,11 +141,7 @@ export async function getUserByTokenhash(
 }
 
 export async function insertUser(db: DB, u: User) {
-  await db.any(
-    `INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
-    ($(email), $(accessGroup), $(tokenhash))`,
-    { email: u.email, accessGroup: u.accessGroup, tokenhash: u.tokenhash }
-  )
+  await db.any(pgpInit.helpers.insert(u, Object.keys(u), "User"))
 }
 
 export async function deleteUser(db: DB, email: string) {
