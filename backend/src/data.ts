@@ -1,5 +1,5 @@
 import * as t from "io-ts"
-import { date } from "io-ts-types"
+import { DateFromISOString } from "io-ts-types"
 
 // https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals
 export const AccessGroupV = t.keyof({
@@ -21,12 +21,12 @@ export const ParticipantV = t.type({
   pid: t.string,
   accessGroup: AccessGroupV,
   site: t.string,
-  dateScreening: date,
-  email: t.string,
-  mobile: t.string,
-  addBleed: t.boolean,
-  dob: date,
-  gender: t.string,
+  dateScreening: t.union([DateFromISOString, t.null]),
+  email: t.union([t.string, t.null]),
+  mobile: t.union([t.string, t.null]),
+  addBleed: t.union([t.boolean, t.null]),
+  dob: t.union([DateFromISOString, t.null]),
+  gender: t.union([DateFromISOString, t.null]),
   withdrawn: t.boolean,
   baselineQuestComplete: t.boolean,
 })
