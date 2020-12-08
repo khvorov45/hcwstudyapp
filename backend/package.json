@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
+    "axios": "^0.21.0",
     "crypto-js": "^4.0.0",
     "crypto-random-string": "^3.3.0",
     "express": "^4.17.1",
