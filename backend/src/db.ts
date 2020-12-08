@@ -71,6 +71,15 @@ async function init(db: DB, tok: string) {
       "withdrawn" BOOLEAN NOT NULL,
       "baselineQuestComplete" BOOLEAN NOT NULL
   );
+  CREATE TABLE "VaccinationHistory" (
+    "redcapRecordId" TEXT NOT NULL,
+    "year" INTEGER NOT NULL,
+    "status" BOOLEAN,
+    PRIMARY KEY ("redcapRecordId", "year"),
+    FOREIGN KEY ("redcapRecordId")
+    REFERENCES "Participant" ("redcapRecordId")
+    ON UPDATE CASCADE ON DELETE CASCADE
+  );
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUser(db, {
