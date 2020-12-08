@@ -10,10 +10,12 @@ export type DB = pgp.IDatabase<{}, pg.IClient>
 export async function create({
   connectionString,
   clean,
+  firstAdminEmail,
   firstAdminToken,
 }: {
   connectionString: string
   clean: boolean
+  firstAdminEmail: string
   firstAdminToken: string
 }): Promise<DB> {
   console.log(`connecting to ${connectionString}`)
@@ -27,10 +29,10 @@ export async function create({
   if (clean) {
     console.log("cleaning db")
     await resetSchema(db)
-    await init(db, firstAdminToken)
+    await init({ db, firstAdminEmail, firstAdminToken })
   } else if (await isEmpty(db)) {
     console.log("database empty, initializing")
-    await init(db, firstAdminToken)
+    await init({ db, firstAdminEmail, firstAdminToken })
   }
   return db
 }
@@ -47,7 +49,15 @@ async function isEmpty(db: DB): Promise<boolean> {
   return (await getTableNames(db)).length === 0
 }
 
-async function init(db: DB, tok: string) {
+async function init({
+  db,
+  firstAdminEmail,
+  firstAdminToken,
+}: {
+  db: DB
+  firstAdminEmail: string
+  firstAdminToken: string
+}) {
   await db.any(`
   DROP TYPE IF EXISTS hfs_access_group;
   CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted', 'melbourne');
@@ -105,11 +115,10 @@ async function init(db: DB, tok: string) {
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUser(db, {
-    email: "khvorov45@gmail.com",
+    email: firstAdminEmail,
     accessGroup: "admin",
-    tokenhash: hash(tok),
+    tokenhash: hash(firstAdminToken),
   })
-  return tok
 }
 
 async function resetSchema(db: DB) {
