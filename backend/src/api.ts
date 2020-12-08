@@ -13,6 +13,7 @@ import {
   getParticipants,
   deleteParticipant,
   syncRedcapUsers,
+  addRedcapUsers,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -39,6 +40,11 @@ export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
   routes.put("/users/redcap/sync", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await syncRedcapUsers(db, redcapConfig)
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.put("/users/redcap/add", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await addRedcapUsers(db, redcapConfig)
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/users", async (req: Request, res: Response) => {
