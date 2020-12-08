@@ -88,7 +88,7 @@ async function init(db: DB, tok: string) {
     FOREIGN KEY ("redcapRecordId")
     REFERENCES "Participant" ("redcapRecordId")
     ON UPDATE CASCADE ON DELETE CASCADE
-);
+  );
 `)
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUser(db, {
