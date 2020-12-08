@@ -26,7 +26,7 @@ export const ParticipantV = t.type({
   mobile: t.union([t.string, t.null]),
   addBleed: t.union([t.boolean, t.null]),
   dob: t.union([DateFromISOString, t.null]),
-  gender: t.union([DateFromISOString, t.null]),
+  gender: t.union([t.string, t.null]),
   withdrawn: t.boolean,
   baselineQuestComplete: t.boolean,
 })
