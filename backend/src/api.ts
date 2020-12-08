@@ -11,6 +11,7 @@ import {
   getUserByTokenhash,
   insertParticipant,
   getParticipants,
+  deleteParticipant,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -50,6 +51,11 @@ export function getRoutes(db: DB) {
   routes.post("/participants", async (req: Request, res: Response) => {
     await validateUser(req, db)
     await insertParticipant(db, decode(ParticipantV, req.body))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.delete("/participants", async (req: Request, res: Response) => {
+    await validateUser(req, db)
+    await deleteParticipant(db, decode(t.string, req.query.redcapRecordId))
     res.status(StatusCodes.NO_CONTENT).end()
   })
 

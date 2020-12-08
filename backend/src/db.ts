@@ -128,3 +128,9 @@ export async function getParticipants(db: DB): Promise<Participant[]> {
 export async function insertParticipant(db: DB, p: Participant) {
   await db.any(pgp().helpers.insert(p, Object.keys(p), "Participant"))
 }
+
+export async function deleteParticipant(db: DB, redcapRecordId: string) {
+  await db.any('DELETE FROM "Participant" WHERE "redcapRecordId"=$1', [
+    redcapRecordId,
+  ])
+}
