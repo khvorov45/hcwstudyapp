@@ -14,7 +14,6 @@ import {
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { generateToken, hash } from "./auth"
-import { DateFromISOString } from "io-ts-types"
 
 export function getRoutes(db: DB) {
   const routes = Router()
@@ -45,8 +44,6 @@ export function getRoutes(db: DB) {
   })
   routes.post("/participants", async (req: Request, res: Response) => {
     await validateUser(req, db)
-    req.body.dateScreening = decode(DateFromISOString, req.body.dateScreening)
-    req.body.dob = decode(DateFromISOString, req.body.dob)
     await insertParticipant(db, decode(ParticipantV, req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
