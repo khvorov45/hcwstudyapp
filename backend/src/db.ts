@@ -59,65 +59,9 @@ async function init({
   firstAdminEmail: string
   firstAdminToken: string
 }): Promise<void> {
-  console.log(Object.keys(AccessGroupV.keys))
-  await db.any(
-    `
-  DROP TYPE IF EXISTS hfs_access_group;
-  CREATE TYPE hfs_access_group AS ENUM ($1:csv);
-  CREATE TABLE "Meta" (
-    "lastUpdate" TIMESTAMPTZ
-  );
-  CREATE TABLE "User" (
-      "email" TEXT PRIMARY KEY,
-      "accessGroup" hfs_access_group NOT NULL,
-      "tokenhash" TEXT UNIQUE
-  );
-  CREATE TABLE "Participant" (
-      "redcapRecordId" TEXT PRIMARY KEY,
-      "pid" TEXT NOT NULL UNIQUE,
-      "accessGroup" hfs_access_group NOT NULL,
-      "site" TEXT NOT NULL,
-      "dateScreening" TIMESTAMPTZ,
-      "email" TEXT,
-      "mobile" TEXT,
-      "addBleed" BOOLEAN,
-      "dob" TIMESTAMPTZ,
-      "gender" TEXT,
-      "withdrawn" BOOLEAN NOT NULL,
-      "baselineQuestComplete" BOOLEAN NOT NULL
-  );
-  CREATE TABLE "VaccinationHistory" (
-    "redcapRecordId" TEXT NOT NULL,
-    "year" INTEGER NOT NULL,
-    "status" BOOLEAN,
-    PRIMARY KEY ("redcapRecordId", "year"),
-    FOREIGN KEY ("redcapRecordId")
-    REFERENCES "Participant" ("redcapRecordId")
-    ON UPDATE CASCADE ON DELETE CASCADE
-  );
-  CREATE TABLE "Schedule" (
-    "redcapRecordId" TEXT NOT NULL,
-    "day" INTEGER NOT NULL,
-    "date" TIMESTAMPTZ,
-    PRIMARY KEY ("redcapRecordId", "day"),
-    FOREIGN KEY ("redcapRecordId")
-    REFERENCES "Participant" ("redcapRecordId")
-    ON UPDATE CASCADE ON DELETE CASCADE
-  );
-  CREATE TABLE "WeeklySurvey" (
-    "redcapRecordId" TEXT NOT NULL,
-    "index" INTEGER NOT NULL,
-    "date" TIMESTAMPTZ,
-    "ari" BOOLEAN NOT NULL,
-    "swabCollection" BOOLEAN,
-    PRIMARY KEY ("redcapRecordId", "index"),
-    FOREIGN KEY ("redcapRecordId")
-    REFERENCES "Participant" ("redcapRecordId")
-    ON UPDATE CASCADE ON DELETE CASCADE
-  );
-`,
-    [Object.keys(AccessGroupV.keys)]
-  )
+  await db.any(new pgp.QueryFile("../sql/init.sql"), {
+    accessGroupValues: Object.keys(AccessGroupV.keys),
+  })
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUsers(db, [
     {
