@@ -6,6 +6,7 @@ import { createTransport } from "./email"
 
 async function main() {
   const args = yargs(process.argv)
+    .config()
     .string([
       "connectionString",
       "prefix",
