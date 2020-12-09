@@ -1,8 +1,8 @@
 CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
 
 CREATE TABLE "LastRedcapSync" (
-    "User" timestamptz,
-    "Participant" timestamptz
+    "user" timestamptz,
+    "participant" timestamptz
 );
 
 CREATE TABLE "User" (
