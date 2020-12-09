@@ -134,7 +134,7 @@ export async function syncRedcapUsers(
       .filter((u) => u.tokenhash)
       .map((u) => restoreUserTokenHash(db, u))
   )
-  await db.any('UPDATE "LastRedcapSync" SET "User" = $1', [new Date()])
+  await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
 
 export async function updateUserToken(db: DB, et: EmailToken) {
