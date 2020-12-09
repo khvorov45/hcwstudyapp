@@ -78,6 +78,10 @@ export function getRoutes(
     })
     res.status(StatusCodes.NO_CONTENT).end()
   })
+  routes.get("/auth/token/verify", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json({ email: u.email, accessGroup: u.accessGroup })
+  })
 
   // Participants
   routes.get("/participants", async (req: Request, res: Response) => {
