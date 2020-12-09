@@ -1,6 +1,6 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import { Participant, User } from "./data"
+import { AccessGroupV, Participant, User } from "./data"
 import { hash } from "./auth"
 import { exportUsers, RedcapConfig } from "./redcap"
 
@@ -59,12 +59,11 @@ async function init({
   firstAdminEmail: string
   firstAdminToken: string
 }): Promise<void> {
-  await db.any(`
+  console.log(Object.keys(AccessGroupV.keys))
+  await db.any(
+    `
   DROP TYPE IF EXISTS hfs_access_group;
-  CREATE TYPE hfs_access_group AS ENUM (
-    'admin', 'unrestricted', 'melbourne', 'sydney', 'brisbane', 'newcastle',
-    'perth', 'adelaide'
-  );
+  CREATE TYPE hfs_access_group AS ENUM ($1:csv);
   CREATE TABLE "Meta" (
     "lastUpdate" TIMESTAMPTZ
   );
@@ -116,7 +115,9 @@ async function init({
     REFERENCES "Participant" ("redcapRecordId")
     ON UPDATE CASCADE ON DELETE CASCADE
   );
-`)
+`,
+    [Object.keys(AccessGroupV.keys)]
+  )
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUsers(db, [
     {
