@@ -34,22 +34,13 @@ async function main() {
     .default("clean", false)
     .default("backendPort", 7001).argv
 
-  // Sort out the database connection
-  let db
-  try {
-    db = await createDB(args)
-  } catch (e) {
-    console.error(e.message)
-    return
-  }
-
   // Create the server
   const app = express()
   app.use(express.json())
   app.use(
     `/${args.prefix}`,
     getRoutes(
-      db,
+      await createDB(args),
       {
         url: args.redcapUrl,
         token2020: args.redcapToken2020,
