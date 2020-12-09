@@ -6,6 +6,11 @@ export const AccessGroupV = t.keyof({
   admin: null,
   unrestricted: null,
   melbourne: null,
+  sydney: null,
+  adelaide: null,
+  brisbane: null,
+  newcastle: null,
+  perth: null,
 })
 export type AccessGroup = t.TypeOf<typeof AccessGroupV>
 

@@ -11,7 +11,8 @@ async function main() {
       "firstAdminEmail",
       "firstAdminToken",
       "redcapUrl",
-      "redcapToken",
+      "redcapToken2020",
+      "redcapToken2021",
     ])
     .boolean("clean")
     .number("backendPort")
@@ -23,7 +24,8 @@ async function main() {
     .default("firstAdminToken", "admin")
     // THE TRAILING SLASH IS IMPORTANT CARL IT WILL FAIL OTHERWISE
     .default("redcapUrl", "https://biredcap.mh.org.au/api/")
-    .default("redcapToken", "")
+    .default("redcapToken2020", "")
+    .default("redcapToken2021", "")
     .default("prefix", "")
     .default("clean", false)
     .default("backendPort", 7001).argv
@@ -42,7 +44,11 @@ async function main() {
   app.use(express.json())
   app.use(
     `/${args.prefix}`,
-    getRoutes(db, { url: args.redcapUrl, token: args.redcapToken })
+    getRoutes(db, {
+      url: args.redcapUrl,
+      token2020: args.redcapToken2020,
+      token2021: args.redcapToken2021,
+    })
   )
 
   app.listen(args.backendPort, () => {

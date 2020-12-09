@@ -61,7 +61,10 @@ async function init({
 }): Promise<void> {
   await db.any(`
   DROP TYPE IF EXISTS hfs_access_group;
-  CREATE TYPE hfs_access_group AS ENUM ('admin', 'unrestricted', 'melbourne');
+  CREATE TYPE hfs_access_group AS ENUM (
+    'admin', 'unrestricted', 'melbourne', 'sydney', 'brisbane', 'newcastle',
+    'perth', 'adelaide'
+  );
   CREATE TABLE "Meta" (
     "lastUpdate" TIMESTAMPTZ
   );
