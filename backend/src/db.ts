@@ -122,13 +122,18 @@ export async function syncRedcapUsers(
     exportUsers(redcapConfig),
     getUsers(db),
   ])
-  const dbNonAdminEmails = dbUsers
-    .filter((u) => u.accessGroup !== "admin")
-    .map((u) => u.email)
+  const dbNonAdminUsers = dbUsers.filter((u) => u.accessGroup !== "admin")
+  const dbNonAdminEmails = dbNonAdminUsers.map((u) => u.email)
   if (dbNonAdminEmails.length > 0) {
     await deleteUsers(db, dbNonAdminEmails)
   }
   await insertUsers(db, redcapUsers)
+  // Restore hashes
+  await Promise.all(
+    dbNonAdminUsers
+      .filter((u) => u.tokenhash)
+      .map((u) => restoreUserTokenHash(db, u))
+  )
 }
 
 export async function updateUserToken(db: DB, et: EmailToken) {
@@ -139,6 +144,13 @@ export async function updateUserToken(db: DB, et: EmailToken) {
   if (res.rowCount === 0) {
     throw Error("NOT FOUND: no such email " + et.email)
   }
+}
+
+async function restoreUserTokenHash(db: DB, u: User): Promise<void> {
+  await db.result('UPDATE "User" SET tokenhash = $1 WHERE email = $2', [
+    u.tokenhash,
+    u.email,
+  ])
 }
 
 export async function getParticipants(db: DB): Promise<Participant[]> {
