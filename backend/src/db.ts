@@ -8,6 +8,8 @@ const pgpInit = pgp()
 
 export type DB = pgp.IDatabase<{}, pg.IClient>
 
+type EmailToken = { email: string; token: string }
+
 export async function create({
   connectionString,
   clean,
@@ -21,6 +23,10 @@ export async function create({
 }): Promise<DB> {
   console.log(`connecting to ${connectionString}`)
   const db = pgpInit(connectionString)
+  const firstAdmin: EmailToken = {
+    email: firstAdminEmail,
+    token: firstAdminToken,
+  }
   try {
     await db.connect()
     console.log(`connected successfully to ${connectionString}`)
@@ -30,10 +36,10 @@ export async function create({
   if (clean) {
     console.log("cleaning db")
     await resetSchema(db)
-    await init({ db, firstAdminEmail, firstAdminToken })
+    await init(db, firstAdmin)
   } else if (await isEmpty(db)) {
     console.log("database empty, initializing")
-    await init({ db, firstAdminEmail, firstAdminToken })
+    await init(db, firstAdmin)
   }
   return db
 }
@@ -50,24 +56,16 @@ async function isEmpty(db: DB): Promise<boolean> {
   return (await getTableNames(db)).length === 0
 }
 
-async function init({
-  db,
-  firstAdminEmail,
-  firstAdminToken,
-}: {
-  db: DB
-  firstAdminEmail: string
-  firstAdminToken: string
-}): Promise<void> {
+async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
   })
   await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUsers(db, [
     {
-      email: firstAdminEmail,
+      email: firstAdmin.email,
       accessGroup: "admin",
-      tokenhash: hash(firstAdminToken),
+      tokenhash: hash(firstAdmin.token),
     },
   ])
 }
@@ -148,6 +146,16 @@ export async function addRedcapUsers(
     db,
     redcapUsers.filter((u) => !dbEmails.includes(u.email))
   )
+}
+
+export async function updateUserToken(db: DB, et: EmailToken) {
+  const res = await db.result(
+    'UPDATE "User" SET tokenhash = $1 WHERE email = $2',
+    [hash(et.token), et.email]
+  )
+  if (res.rowCount === 0) {
+    throw Error("NOT FOUND: no such email " + et.email)
+  }
 }
 
 export async function getParticipants(db: DB): Promise<Participant[]> {
