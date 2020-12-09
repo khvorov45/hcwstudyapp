@@ -20,9 +20,13 @@ import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { generateToken, hash } from "./auth"
 import { RedcapConfig } from "./redcap"
-import { emailToken } from "./email"
+import { Emailer, emailToken } from "./email"
 
-export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
+export function getRoutes(
+  db: DB,
+  redcapConfig: RedcapConfig,
+  emailer: Emailer
+) {
   const routes = Router()
 
   // Routes
@@ -53,7 +57,7 @@ export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
     const email = decode(t.string, req.query.email)
     const token = generateToken()
     await updateUserToken(db, { email, token })
-    await emailToken({ email, token })
+    await emailToken(emailer, { email, token })
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/users", async (req: Request, res: Response) => {

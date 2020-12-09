@@ -2,6 +2,7 @@ import express from "express"
 import yargs from "yargs"
 import { getRoutes } from "./api"
 import { create as createDB } from "./db"
+import { createTransport } from "./email"
 
 async function main() {
   const args = yargs(process.argv)
@@ -13,6 +14,7 @@ async function main() {
       "redcapUrl",
       "redcapToken2020",
       "redcapToken2021",
+      "emailConnectionString",
     ])
     .boolean("clean")
     .number("backendPort")
@@ -26,6 +28,7 @@ async function main() {
     .default("redcapUrl", "https://biredcap.mh.org.au/api/")
     .default("redcapToken2020", "")
     .default("redcapToken2021", "")
+    .default("emailConnectionString", "smtp://user:password@smtp.hostname.com")
     .default("prefix", "")
     .default("clean", false)
     .default("backendPort", 7001).argv
@@ -44,11 +47,15 @@ async function main() {
   app.use(express.json())
   app.use(
     `/${args.prefix}`,
-    getRoutes(db, {
-      url: args.redcapUrl,
-      token2020: args.redcapToken2020,
-      token2021: args.redcapToken2021,
-    })
+    getRoutes(
+      db,
+      {
+        url: args.redcapUrl,
+        token2020: args.redcapToken2020,
+        token2021: args.redcapToken2021,
+      },
+      createTransport(args.emailConnectionString)
+    )
   )
 
   app.listen(args.backendPort, () => {
