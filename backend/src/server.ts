@@ -8,7 +8,7 @@ async function main() {
   const args = yargs(process.argv)
     .config()
     .string([
-      "connectionString",
+      "dbConnectionString",
       "prefix",
       "firstAdminEmail",
       "firstAdminToken",
@@ -20,7 +20,7 @@ async function main() {
     .boolean("clean")
     .number("backendPort")
     .default(
-      "connectionString",
+      "dbConnectionString",
       "postgres://postgres:admin@localhost:7000/postgres"
     )
     .default("firstAdminEmail", "admin@example.com")

@@ -11,27 +11,27 @@ export type DB = pgp.IDatabase<{}, pg.IClient>
 type EmailToken = { email: string; token: string }
 
 export async function create({
-  connectionString,
+  dbConnectionString,
   clean,
   firstAdminEmail,
   firstAdminToken,
 }: {
-  connectionString: string
+  dbConnectionString: string
   clean: boolean
   firstAdminEmail: string
   firstAdminToken: string
 }): Promise<DB> {
-  console.log(`connecting to ${connectionString}`)
-  const db = pgpInit(connectionString)
+  console.log(`connecting to ${dbConnectionString}`)
+  const db = pgpInit(dbConnectionString)
   const firstAdmin: EmailToken = {
     email: firstAdminEmail,
     token: firstAdminToken,
   }
   try {
     await db.connect()
-    console.log(`connected successfully to ${connectionString}`)
+    console.log(`connected successfully to ${dbConnectionString}`)
   } catch (e) {
-    throw Error(`could not connect to ${connectionString}: ${e.message}`)
+    throw Error(`could not connect to ${dbConnectionString}: ${e.message}`)
   }
   if (clean) {
     console.log("cleaning db")
