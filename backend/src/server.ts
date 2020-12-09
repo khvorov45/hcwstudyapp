@@ -16,6 +16,7 @@ async function main() {
       "redcapToken2020",
       "redcapToken2021",
       "emailConnectionString",
+      "linkPrefix",
     ])
     .boolean("clean")
     .number("backendPort")
@@ -32,6 +33,7 @@ async function main() {
     .default("redcapToken2021", "")
     .default("emailConnectionString", "smtp://user:password@smtp.hostname.com")
     .default("prefix", "")
+    .default("linkPrefix", "https://reports.hcwflustudy.com/?token=")
     .default("clean", false)
     .default("backendPort", 7001).argv
 
@@ -47,7 +49,10 @@ async function main() {
         token2020: args.redcapToken2020,
         token2021: args.redcapToken2021,
       },
-      createTransport(args.emailConnectionString)
+      {
+        emailer: createTransport(args.emailConnectionString),
+        linkPrefix: args.linkPrefix,
+      }
     )
   )
 

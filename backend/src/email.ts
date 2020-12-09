@@ -24,16 +24,19 @@ export async function emailToken(
   {
     email,
     token,
+    linkPrefix,
   }: {
     email: string
     token: string
+    linkPrefix: string
   }
 ): Promise<void> {
+  const content = `Access link:\n\n${linkPrefix}${token}\n\nToken:\n\n${token}`
   await t.transporter.sendMail({
     from: t.from,
     to: email,
     subject: "token",
-    text: `token: ${token}`,
-    html: `token: ${token}`,
+    text: content,
+    html: content.replace(/\n/g, "<br/>"),
   })
 }

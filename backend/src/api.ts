@@ -25,7 +25,10 @@ import { Emailer, emailToken } from "./email"
 export function getRoutes(
   db: DB,
   redcapConfig: RedcapConfig,
-  emailer: Emailer
+  emailConfig: {
+    emailer: Emailer
+    linkPrefix: string
+  }
 ) {
   const routes = Router()
 
@@ -57,7 +60,11 @@ export function getRoutes(
     const email = decode(t.string, req.query.email)
     const token = generateToken()
     await updateUserToken(db, { email, token })
-    await emailToken(emailer, { email, token })
+    await emailToken(emailConfig.emailer, {
+      email,
+      token,
+      linkPrefix: emailConfig.linkPrefix,
+    })
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/users", async (req: Request, res: Response) => {
