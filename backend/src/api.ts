@@ -33,9 +33,13 @@ export function getRoutes(
   const routes = Router()
 
   // Routes
+
+  // Metadata
   routes.get("/update", async (req: Request, res: Response) => {
     res.json(await getLastUpdate(db))
   })
+
+  // Users
   routes.get("/users", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     res.json(await getUsers(db))
@@ -44,6 +48,11 @@ export function getRoutes(
     await validateAdmin(req, db)
     const us = decode(t.array(UserV), req.body)
     await insertUsers(db, us)
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.delete("/users", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await deleteUser(db, decode(t.string, req.query.email))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users/redcap/sync", async (req: Request, res: Response) => {
@@ -56,7 +65,9 @@ export function getRoutes(
     await addRedcapUsers(db, redcapConfig)
     res.status(StatusCodes.NO_CONTENT).end()
   })
-  routes.put("/users/token/send", async (req: Request, res: Response) => {
+
+  // Auth
+  routes.put("/auth/token/send", async (req: Request, res: Response) => {
     const email = decode(t.string, req.query.email)
     const token = generateToken()
     await updateUserToken(db, { email, token })
@@ -67,11 +78,8 @@ export function getRoutes(
     })
     res.status(StatusCodes.NO_CONTENT).end()
   })
-  routes.delete("/users", async (req: Request, res: Response) => {
-    await validateAdmin(req, db)
-    await deleteUser(db, decode(t.string, req.query.email))
-    res.status(StatusCodes.NO_CONTENT).end()
-  })
+
+  // Participants
   routes.get("/participants", async (req: Request, res: Response) => {
     await validateUser(req, db)
     res.json(await getParticipants(db))
