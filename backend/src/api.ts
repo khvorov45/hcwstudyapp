@@ -49,7 +49,7 @@ export function getRoutes(db: DB, redcapConfig: RedcapConfig) {
     await addRedcapUsers(db, redcapConfig)
     res.status(StatusCodes.NO_CONTENT).end()
   })
-  routes.put("/users/token/email", async (req: Request, res: Response) => {
+  routes.put("/users/token/send", async (req: Request, res: Response) => {
     const email = decode(t.string, req.query.email)
     const token = generateToken()
     await updateUserToken(db, { email, token })
