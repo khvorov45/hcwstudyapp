@@ -19,6 +19,7 @@ async function main() {
     ])
     .boolean("clean")
     .number("backendPort")
+    .default("config", "config.json")
     .default(
       "dbConnectionString",
       "postgres://postgres:admin@localhost:7000/postgres"
