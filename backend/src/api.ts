@@ -67,7 +67,7 @@ export function getRoutes(
   })
 
   // Auth
-  routes.put("/auth/token/send", async (req: Request, res: Response) => {
+  routes.post("/auth/token/send", async (req: Request, res: Response) => {
     const email = decode(t.string, req.query.email)
     const token = generateToken()
     await updateUserToken(db, { email, token })
