@@ -131,22 +131,6 @@ export async function syncRedcapUsers(
   await insertUsers(db, redcapUsers)
 }
 
-/** Adds Redcap users whose emails aren't already present */
-export async function addRedcapUsers(
-  db: DB,
-  redcapConfig: RedcapConfig
-): Promise<void> {
-  const [redcapUsers, dbUsers] = await Promise.all([
-    exportUsers(redcapConfig),
-    getUsers(db),
-  ])
-  const dbEmails = dbUsers.map((u) => u.email)
-  await insertUsers(
-    db,
-    redcapUsers.filter((u) => !dbEmails.includes(u.email))
-  )
-}
-
 export async function updateUserToken(db: DB, et: EmailToken) {
   const res = await db.result(
     'UPDATE "User" SET tokenhash = $1 WHERE email = $2',
