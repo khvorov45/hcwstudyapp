@@ -60,7 +60,6 @@ async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
   })
-  await db.any('INSERT INTO "Meta" ("lastUpdate") VALUES ($1)', [new Date()])
   await insertUsers(db, [
     {
       email: firstAdmin.email,
