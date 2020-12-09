@@ -67,6 +67,7 @@ async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
       tokenhash: hash(firstAdmin.token),
     },
   ])
+  await db.any('INSERT INTO "LastRedcapSync" VALUES (NULL, NULL)')
 }
 
 async function resetSchema(db: DB): Promise<void> {
