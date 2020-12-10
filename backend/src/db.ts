@@ -1,12 +1,6 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import {
-  AccessGroup,
-  AccessGroupV,
-  Participant,
-  User,
-  VaccinationHistory,
-} from "./data"
+import { AccessGroupV, Participant, User, VaccinationHistory } from "./data"
 import { hash } from "./auth"
 import { exportUsers, RedcapConfig, exportParticipants } from "./redcap"
 
@@ -78,24 +72,27 @@ async function resetSchema(db: DB): Promise<void> {
 // Users ======================================================================
 
 export async function getUsers(db: DB): Promise<User[]> {
-  return await db.any('SELECT * FROM "User"')
+  return await db.any('SELECT "email", "accessGroup" FROM "User"')
 }
 
 export async function getUserByEmail(db: DB, email: string): Promise<User> {
-  return await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
+  return await db.one(
+    'SELECT "email", "accessGroup" FROM "User" WHERE "email"=$1',
+    [email]
+  )
 }
 
 export async function getUserByTokenhash(
   db: DB,
   tokenhash: string
 ): Promise<User> {
-  return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
+  return await db.one(
+    'SELECT "email", "accessGroup" FROM "User" WHERE "tokenhash"=$1',
+    [tokenhash]
+  )
 }
 
-export async function insertUsers(
-  db: DB,
-  us: { email: string; accessGroup: AccessGroup }[]
-): Promise<void> {
+export async function insertUsers(db: DB, us: User[]): Promise<void> {
   if (us.length === 0) {
     return
   }
@@ -120,7 +117,7 @@ export async function syncRedcapUsers(
 ): Promise<void> {
   const [redcapUsers, dbUsers] = await Promise.all([
     exportUsers(redcapConfig),
-    getUsers(db),
+    await db.any('SELECT * FROM "User"'),
   ])
   const dbNonAdminUsers = dbUsers.filter((u) => u.accessGroup !== "admin")
   const dbNonAdminEmails = dbNonAdminUsers.map((u) => u.email)
