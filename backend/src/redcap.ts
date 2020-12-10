@@ -13,7 +13,7 @@ type RedcapRequestData = {
   [index: string]: string | undefined
   content: "record" | "user"
   type?: "flat" | "eav"
-  labels?: "true" | "false"
+  rawOrLabel?: "raw" | "label"
   fields?: string
 }
 
@@ -113,7 +113,7 @@ export async function exportParticipants(
       ].toString(),
       events: "baseline_arm_1",
       type: "flat",
-      labels: "true",
+      rawOrLabel: "label",
     })
   )
     .map((r: any) => ({
