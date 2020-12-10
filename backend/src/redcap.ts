@@ -1,6 +1,6 @@
 import axios from "axios"
 import * as t from "io-ts"
-import { AccessGroup, User, UserV } from "./data"
+import { User, UserV, Participant } from "./data"
 import { decode } from "./io"
 
 export type RedcapConfig = {
@@ -13,7 +13,7 @@ type RedcapRequestData = {
   [index: string]: string | undefined
   content: "record" | "user"
   type?: "flat" | "eav"
-  lables?: "true" | "false"
+  labels?: "true" | "false"
 }
 
 /** This is type-extremely-unsafe, always decode whatever this returns */
