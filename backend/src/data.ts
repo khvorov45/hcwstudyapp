@@ -17,7 +17,7 @@ export type AccessGroup = t.TypeOf<typeof AccessGroupV>
 export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
-  tokenhash: t.union([t.string, t.null, t.undefined]),
+  tokenhash: t.union([t.string, t.null]),
 })
 export type User = t.TypeOf<typeof UserV>
 

@@ -1,6 +1,6 @@
 import axios from "axios"
 import * as t from "io-ts"
-import { User, UserV } from "./data"
+import { AccessGroup, User, UserV } from "./data"
 import { decode } from "./io"
 
 export type RedcapConfig = {
@@ -8,8 +8,6 @@ export type RedcapConfig = {
   token2020: string
   token2021: string
 }
-
-type RedcapYears = "year2020" | "year2021"
 
 type RedcapRequestData = {
   [index: string]: string | undefined
@@ -22,7 +20,7 @@ type RedcapRequestData = {
 async function redcapApiReq(
   config: RedcapConfig,
   body: RedcapRequestData
-): Promise<Record<RedcapYears, any>> {
+): Promise<any> {
   // Drop all empty fields
   const bodyNonEmpty2020: Record<string, string> = {
     token: config.token2020,
@@ -42,30 +40,46 @@ async function redcapApiReq(
     axios.post(config.url, new URLSearchParams(bodyNonEmpty2020)),
     axios.post(config.url, new URLSearchParams(bodyNonEmpty2021)),
   ])
-  return { year2020: year2020.data, year2021: year2021.data }
+  return year2020.data
+    .map((r: any) => {
+      r.redcapProjectYear = 2020
+      return r
+    })
+    .concat(
+      year2021.data.map((r: any) => {
+        r.redcapProjectYear = 2021
+        return r
+      })
+    )
+}
+
+function unique<T>(a: T[]): T[] {
+  return Array.from(new Set(a))
 }
 
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
-  const usersRes = await redcapApiReq(config, { content: "user" })
-  // Pull emails out of users
-  const emailsRes: Record<RedcapYears, string[]> = {
-    year2020: usersRes.year2020.map((u: any) => u.email.toLowerCase()),
-    year2021: usersRes.year2021.map((u: any) => u.email.toLowerCase()),
-  }
-  // Now concatenate with no email duplicates
-  const users = usersRes.year2020
-    // Attach only those 2021 users that are not present in 2020
-    .concat(
-      usersRes.year2021.filter(
-        (u: any) => !emailsRes.year2020.includes(u.email.toLowerCase())
-      )
+  const usersRaw: {
+    email: string
+    accessGroup: AccessGroup
+    year: number
+  }[] = (await redcapApiReq(config, { content: "user" })).map((u: any) => ({
+    email: u.email.toLowerCase(),
+    accessGroup:
+      u.data_access_group === ""
+        ? "unrestricted"
+        : u.data_access_group.toLowerCase(),
+    year: u.redcapProjectYear,
+  }))
+  const allYears = unique(usersRaw.map((u) => u.year))
+  const usersUnique = allYears.reduce((users, year) => {
+    const usersKeep = users.filter((u) => u.year <= year)
+    const usersDrop = users.filter((u) => u.year > year)
+    const allCurrentYearEmails = usersKeep
+      .filter((u) => u.year === year)
+      .map((u) => u.email)
+    return usersKeep.concat(
+      usersDrop.filter((u) => !allCurrentYearEmails.includes(u.email))
     )
-    .map((u: any) => ({
-      email: u.email.toLowerCase(),
-      accessGroup:
-        u.data_access_group === ""
-          ? "unrestricted"
-          : u.data_access_group.toLowerCase(),
-    }))
-  return decode(t.array(UserV), users)
+  }, usersRaw)
+  return decode(t.array(UserV), usersUnique)
 }

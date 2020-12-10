@@ -1,6 +1,6 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import { AccessGroupV, Participant, User } from "./data"
+import { AccessGroup, AccessGroupV, Participant, User } from "./data"
 import { hash } from "./auth"
 import { exportUsers, RedcapConfig } from "./redcap"
 
@@ -64,9 +64,9 @@ async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
     {
       email: firstAdmin.email,
       accessGroup: "admin",
-      tokenhash: hash(firstAdmin.token),
     },
   ])
+  await updateUserToken(db, firstAdmin)
   await db.any('INSERT INTO "LastRedcapSync" VALUES (NULL, NULL)')
 }
 
@@ -98,11 +98,16 @@ export async function getUserByTokenhash(
   return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
 }
 
-export async function insertUsers(db: DB, us: User[]): Promise<void> {
+export async function insertUsers(
+  db: DB,
+  us: { email: string; accessGroup: AccessGroup }[]
+): Promise<void> {
   if (us.length === 0) {
     return
   }
-  await db.any(pgpInit.helpers.insert(us, Object.keys(us[0]), "User"))
+  // Best not to use Object.keys here because there may be more fields in the
+  // actual object that's passed
+  await db.any(pgpInit.helpers.insert(us, ["email", "accessGroup"], "User"))
 }
 
 export async function deleteUser(db: DB, email: string): Promise<void> {
