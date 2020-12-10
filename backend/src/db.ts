@@ -83,6 +83,8 @@ export async function getLastUpdate(db: DB): Promise<Date> {
   )
 }
 
+// Users ======================================================================
+
 export async function getUsers(db: DB): Promise<User[]> {
   return await db.any('SELECT * FROM "User"')
 }
@@ -159,6 +161,8 @@ async function restoreUserTokenHash(db: DB, u: User): Promise<void> {
     u.email,
   ])
 }
+
+// Particpants ================================================================
 
 export async function getParticipants(db: DB): Promise<Participant[]> {
   return await db.any('SELECT * FROM "Participant"')
