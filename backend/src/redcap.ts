@@ -96,31 +96,12 @@ export async function exportUsers(config: RedcapConfig): Promise<User[]> {
 export async function exportParticipants(
   config: RedcapConfig
 ): Promise<Participant[]> {
-  // Find the withdrawn here
-  const withdrawn = (
-    await redcapApiReq(config, {
-      content: "record",
-      fields: ["record_id", "withdrawn"].toString(),
-      events: "withdrawal_arm_1",
-      type: "flat",
-      labels: "false",
-    })
-  )
-    .map((r: any) => ({
-      redcapRecordId: r.record_id,
-      withdrawn: processRedcapString(r.withdrawn),
-      redcapProjectYear: r.redcapProjectYear,
-    }))
-    .filter((r) => r.withdrawn === "1")
-
   const records = (
     await redcapApiReq(config, {
       content: "record",
       fields: [
-        "record_id",
         "redcap_data_access_group",
         "pid",
-        "site_name",
         "date_screening",
         "email",
         "mobile_number",
@@ -136,10 +117,8 @@ export async function exportParticipants(
     })
   )
     .map((r: any) => ({
-      redcapRecordId: r.record_id,
       pid: processRedcapString(r.pid),
       accessGroup: processRedcapDataAccessGroup(r.redcap_data_access_group),
-      site: processRedcapString(r.site_name),
       dateScreening: processRedcapString(r.date_screening),
       email: processRedcapStringLower(r.email),
       mobile: processRedcapString(r.mobile_number),
@@ -148,12 +127,6 @@ export async function exportParticipants(
       dob: processRedcapString(r.a2_dob),
       baselineQuestComplete: r.baseline_questionnaire_complete === "Complete",
       redcapProjectYear: r.redcapProjectYear,
-      withdrawn:
-        withdrawn.find(
-          (w) =>
-            w.redcapProjectYear === r.redcapProjectYear &&
-            w.redcapRecordId === r.redcapRecordId
-        ) !== undefined,
     }))
     .filter((r) => r.pid)
 

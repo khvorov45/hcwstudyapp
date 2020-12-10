@@ -22,17 +22,14 @@ export const UserV = t.type({
 export type User = t.TypeOf<typeof UserV>
 
 export const ParticipantV = t.type({
-  redcapRecordId: t.string,
   pid: t.string,
   accessGroup: AccessGroupV,
-  site: t.string,
   dateScreening: t.union([DateFromISOString, t.null]),
   email: t.union([t.string, t.null]),
   mobile: t.union([t.string, t.null]),
   addBleed: t.union([t.boolean, t.null]),
   dob: t.union([DateFromISOString, t.null]),
   gender: t.union([t.string, t.null]),
-  withdrawn: t.boolean,
   baselineQuestComplete: t.boolean,
 })
 export type Participant = t.TypeOf<typeof ParticipantV>

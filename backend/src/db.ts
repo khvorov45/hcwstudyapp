@@ -172,17 +172,14 @@ export async function insertParticipants(
     pgpInit.helpers.insert(
       ps,
       [
-        "redcapRecordId",
         "pid",
         "accessGroup",
-        "site",
         "dateScreening",
         "email",
         "mobile",
         "addBleed",
         "dob",
         "gender",
-        "withdrawn",
         "baselineQuestComplete",
       ],
       "Participant"
