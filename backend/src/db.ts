@@ -137,7 +137,7 @@ export async function syncRedcapUsers(
   await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
 
-export async function getLastUserUpdate(db: DB): Promise<Date> {
+export async function getLastUserUpdate(db: DB): Promise<Date | null> {
   return await db.one('SELECT "user" FROM "LastRedcapSync";', [], (v) => v.user)
 }
 
@@ -210,7 +210,7 @@ export async function syncRedcapParticipants(
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
 }
 
-export async function getLastParticipantUpdate(db: DB): Promise<Date> {
+export async function getLastParticipantUpdate(db: DB): Promise<Date | null> {
   return await db.one(
     'SELECT "participant" FROM "LastRedcapSync";',
     [],
