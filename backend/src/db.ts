@@ -65,14 +65,9 @@ async function isEmpty(db: DB): Promise<boolean> {
 async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
+    firstAdminEmail: firstAdmin.email,
+    firstAdminTokenHash: hash(firstAdmin.token),
   })
-  await insertUsers(db, [
-    {
-      email: firstAdmin.email,
-      accessGroup: "admin",
-    },
-  ])
-  await updateUserToken(db, firstAdmin)
 }
 
 async function resetSchema(db: DB): Promise<void> {

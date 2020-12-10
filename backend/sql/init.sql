@@ -24,6 +24,8 @@ CREATE TABLE "User" (
     "accessGroup" hfs_access_group NOT NULL,
     "tokenhash" text UNIQUE
 );
+INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
+    (${firstAdminEmail}, 'admin', ${firstAdminTokenHash});
 
 -- Every participant is recruited at a site
 CREATE TABLE "Participant" (
