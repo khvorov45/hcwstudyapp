@@ -22,7 +22,8 @@ INSERT INTO "Site" ("accessGroup", "site") VALUES
 CREATE TABLE "User" (
     "email" text PRIMARY KEY,
     "accessGroup" hfs_access_group NOT NULL,
-    "tokenhash" text UNIQUE
+    -- Attempt to prevent insertion of actual tokens with a length check
+    "tokenhash" text UNIQUE CHECK (length("tokenhash") = 128)
 );
 INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
     (${firstAdminEmail}, 'admin', ${firstAdminTokenHash});
