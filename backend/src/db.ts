@@ -164,8 +164,30 @@ export async function getParticipants(db: DB): Promise<Participant[]> {
   return await db.any('SELECT * FROM "Participant"')
 }
 
-export async function insertParticipant(db: DB, p: Participant): Promise<void> {
-  await db.any(pgpInit.helpers.insert(p, Object.keys(p), "Participant"))
+export async function insertParticipants(
+  db: DB,
+  ps: Participant[]
+): Promise<void> {
+  await db.any(
+    pgpInit.helpers.insert(
+      ps,
+      [
+        "redcapRecordId",
+        "pid",
+        "accessGroup",
+        "site",
+        "dateScreening",
+        "email",
+        "mobile",
+        "addBleed",
+        "dob",
+        "gender",
+        "withdrawn",
+        "baselineQuestComplete",
+      ],
+      "Participant"
+    )
+  )
 }
 
 export async function deleteParticipant(

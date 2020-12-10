@@ -9,7 +9,7 @@ import {
   insertUsers,
   deleteUser,
   getUserByTokenhash,
-  insertParticipant,
+  insertParticipants,
   getParticipants,
   deleteParticipant,
   syncRedcapUsers,
@@ -85,7 +85,7 @@ export function getRoutes(
   })
   routes.post("/participants", async (req: Request, res: Response) => {
     await validateUser(req, db)
-    await insertParticipant(db, decode(ParticipantV, req.body))
+    await insertParticipants(db, decode(t.array(ParticipantV), req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/participants", async (req: Request, res: Response) => {
