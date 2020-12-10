@@ -75,14 +75,6 @@ async function resetSchema(db: DB): Promise<void> {
   await db.any('CREATE SCHEMA "public";')
 }
 
-export async function getLastParticipantUpdate(db: DB): Promise<Date> {
-  return await db.one(
-    'SELECT "participant" FROM "LastRedcapSync";',
-    [],
-    (v) => v.lastUpdate
-  )
-}
-
 // Users ======================================================================
 
 export async function getUsers(db: DB): Promise<User[]> {
@@ -211,4 +203,13 @@ export async function syncRedcapParticipants(
   const redcapParticipants = await exportParticipants(redcapConfig)
   await db.any('DELETE FROM "Participant"')
   await insertParticipants(db, redcapParticipants)
+  await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
+}
+
+export async function getLastParticipantUpdate(db: DB): Promise<Date> {
+  return await db.one(
+    'SELECT "participant" FROM "LastRedcapSync";',
+    [],
+    (v) => v.participant
+  )
 }
