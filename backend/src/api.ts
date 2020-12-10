@@ -5,7 +5,7 @@ import StatusCodes from "http-status-codes"
 import {
   getUsers,
   DB,
-  getLastUpdate,
+  getLastParticipantUpdate,
   insertUsers,
   deleteUser,
   getUserByTokenhash,
@@ -33,11 +33,6 @@ export function getRoutes(
   const routes = Router()
 
   // Routes
-
-  // Metadata
-  routes.get("/update", async (req: Request, res: Response) => {
-    res.json(await getLastUpdate(db))
-  })
 
   // Users
   routes.get("/users", async (req: Request, res: Response) => {
@@ -99,6 +94,12 @@ export function getRoutes(
       await validateUser(req, db)
       await syncRedcapParticipants(db, redcapConfig)
       res.status(StatusCodes.NO_CONTENT).end()
+    }
+  )
+  routes.get(
+    "/participants/redcap/sync",
+    async (req: Request, res: Response) => {
+      res.json(await getLastParticipantUpdate(db))
     }
   )
 

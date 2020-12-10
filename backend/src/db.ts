@@ -75,9 +75,9 @@ async function resetSchema(db: DB): Promise<void> {
   await db.any('CREATE SCHEMA "public";')
 }
 
-export async function getLastUpdate(db: DB): Promise<Date> {
+export async function getLastParticipantUpdate(db: DB): Promise<Date> {
   return await db.one(
-    'SELECT "lastUpdate" FROM "Meta";',
+    'SELECT "participant" FROM "LastRedcapSync";',
     [],
     (v) => v.lastUpdate
   )
