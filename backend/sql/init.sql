@@ -4,6 +4,7 @@ CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
     "participant" timestamptz
 );
+INSERT INTO "LastRedcapSync" VALUES (NULL, NULL);
 
 -- A subset of access groups corresponds to sites
 CREATE TABLE "Site" (
