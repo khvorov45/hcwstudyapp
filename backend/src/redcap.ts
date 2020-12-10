@@ -1,6 +1,6 @@
 import axios from "axios"
 import * as t from "io-ts"
-import { User, UserV, Participant } from "./data"
+import { User, UserV, Participant, ParticipantV } from "./data"
 import { decode } from "./io"
 
 export type RedcapConfig = {
@@ -69,16 +69,93 @@ function uniqueRows<T extends { redcapProjectYear: number }>(
   }, a)
 }
 
+function processRedcapString(s: string | null | undefined): string | null {
+  return s === undefined || s === null || s === "" ? null : s
+}
+
+function processRedcapStringLower(s: string | null | undefined): string | null {
+  const p = processRedcapString(s)
+  return p ? p.toLowerCase() : p
+}
+
+function processRedcapDataAccessGroup(s: string | null | undefined): string {
+  return s === undefined || s === null || s === ""
+    ? "unrestricted"
+    : s.toLowerCase()
+}
+
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
   const users = (await redcapApiReq(config, { content: "user" })).map((u) => ({
-    email: u.email.toLowerCase(),
-    accessGroup:
-      u.data_access_group === ""
-        ? "unrestricted"
-        : u.data_access_group.toLowerCase(),
+    email: processRedcapStringLower(u.email),
+    accessGroup: processRedcapDataAccessGroup(u.data_access_group),
     redcapProjectYear: u.redcapProjectYear,
   }))
   return decode(t.array(UserV), uniqueRows(users, "email"))
 }
 
+export async function exportParticipants(
+  config: RedcapConfig
+): Promise<Participant[]> {
+  // Find the withdrawn here
+  const withdrawn = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: ["record_id", "withdrawn"].toString(),
+      events: "withdrawal_arm_1",
+      type: "flat",
+      labels: "false",
+    })
+  )
+    .map((r: any) => ({
+      redcapRecordId: r.record_id,
+      withdrawn: processRedcapString(r.withdrawn),
+      redcapProjectYear: r.redcapProjectYear,
+    }))
+    .filter((r) => r.withdrawn === "1")
+
+  const records = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: [
+        "record_id",
+        "redcap_data_access_group",
+        "pid",
+        "site_name",
+        "date_screening",
+        "email",
+        "mobile_number",
+        "a1_gender",
+        "a2_dob",
+        "add_bleed",
+        "study_group_vacc",
+        "baseline_questionnaire_complete",
+      ].toString(),
+      events: "baseline_arm_1",
+      type: "flat",
+      labels: "true",
+    })
+  )
+    .map((r: any) => ({
+      redcapRecordId: r.record_id,
+      pid: processRedcapString(r.pid),
+      accessGroup: processRedcapDataAccessGroup(r.redcap_data_access_group),
+      site: processRedcapString(r.site_name),
+      dateScreening: processRedcapString(r.date_screening),
+      email: processRedcapStringLower(r.email),
+      mobile: processRedcapString(r.mobile_number),
+      addBleed: r.add_bleed === "Yes" || r.study_group_vacc === "Nested study",
+      gender: processRedcapStringLower(r.a1_gender),
+      dob: processRedcapString(r.a2_dob),
+      baselineQuestComplete: r.baseline_questionnaire_complete === "Complete",
+      redcapProjectYear: r.redcapProjectYear,
+      withdrawn:
+        withdrawn.find(
+          (w) =>
+            w.redcapProjectYear === r.redcapProjectYear &&
+            w.redcapRecordId === r.redcapRecordId
+        ) !== undefined,
+    }))
+    .filter((r) => r.pid)
+
+  return decode(t.array(ParticipantV), uniqueRows(records, "pid"))
 }

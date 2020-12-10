@@ -202,3 +202,13 @@ export async function deleteParticipant(
     redcapRecordId,
   ])
 }
+
+export async function syncRedcapParticipants(
+  db: DB,
+  redcapConfig: RedcapConfig
+) {
+  // Wait for this to succeed before doing anyting else
+  const redcapParticipants = await exportParticipants(redcapConfig)
+  await db.any('DELETE FROM "Participant"')
+  await insertParticipants(db, redcapParticipants)
+}
