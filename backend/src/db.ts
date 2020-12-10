@@ -2,7 +2,7 @@ import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
 import { AccessGroup, AccessGroupV, Participant, User } from "./data"
 import { hash } from "./auth"
-import { exportUsers, RedcapConfig } from "./redcap"
+import { exportUsers, RedcapConfig, exportParticipants } from "./redcap"
 
 const pgpInit = pgp()
 
