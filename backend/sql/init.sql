@@ -55,7 +55,7 @@ CREATE TABLE "Withdrawn" (
 
 CREATE TABLE "VaccinationHistory" (
     "pid" text REFERENCES "Participant"("pid"),
-    "year" integer,
+    "year" integer CHECK ("redcapProjectYear" >= 2015 and "redcapProjectYear" <= 2020),
     "status" boolean,
     PRIMARY KEY ("pid", "year")
 );
