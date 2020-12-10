@@ -36,3 +36,10 @@ export const ParticipantV = t.type({
   baselineQuestComplete: t.boolean,
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
+
+export const VaccinationHistoryV = t.type({
+  redcapRecordId: t.string,
+  year: t.number,
+  status: t.union([t.boolean, t.null]),
+})
+export type VaccinationHistory = t.TypeOf<typeof VaccinationHistoryV>
