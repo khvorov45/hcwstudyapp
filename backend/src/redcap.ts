@@ -57,29 +57,31 @@ function unique<T>(a: T[]): T[] {
   return Array.from(new Set(a))
 }
 
+function uniqueRows<T extends { redcapProjectYear: number }>(
+  a: T[],
+  id: keyof T
+): T[] {
+  const allYears = unique(a.map((e) => e.redcapProjectYear))
+  return allYears.reduce((a, year) => {
+    const aKeep = a.filter((e) => e.redcapProjectYear <= year)
+    const aDrop = a.filter((e) => e.redcapProjectYear > year)
+    const allCurrentYearIds = aKeep
+      .filter((e) => e.redcapProjectYear === year)
+      .map((e) => e[id])
+    return aKeep.concat(aDrop.filter((e) => !allCurrentYearIds.includes(e[id])))
+  }, a)
+}
+
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
-  const usersRaw: {
-    email: string
-    accessGroup: AccessGroup
-    year: number
-  }[] = (await redcapApiReq(config, { content: "user" })).map((u: any) => ({
+  const users = (await redcapApiReq(config, { content: "user" })).map((u) => ({
     email: u.email.toLowerCase(),
     accessGroup:
       u.data_access_group === ""
         ? "unrestricted"
         : u.data_access_group.toLowerCase(),
-    year: u.redcapProjectYear,
+    redcapProjectYear: u.redcapProjectYear,
   }))
-  const allYears = unique(usersRaw.map((u) => u.year))
-  const usersUnique = allYears.reduce((users, year) => {
-    const usersKeep = users.filter((u) => u.year <= year)
-    const usersDrop = users.filter((u) => u.year > year)
-    const allCurrentYearEmails = usersKeep
-      .filter((u) => u.year === year)
-      .map((u) => u.email)
-    return usersKeep.concat(
-      usersDrop.filter((u) => !allCurrentYearEmails.includes(u.email))
-    )
-  }, usersRaw)
-  return decode(t.array(UserV), usersUnique)
+  return decode(t.array(UserV), uniqueRows(users, "email"))
+}
+
 }
