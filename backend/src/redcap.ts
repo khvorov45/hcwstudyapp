@@ -14,6 +14,7 @@ type RedcapRequestData = {
   content: "record" | "user"
   type?: "flat" | "eav"
   labels?: "true" | "false"
+  fields?: string
 }
 
 /** This is type-extremely-unsafe, always decode whatever this returns */
