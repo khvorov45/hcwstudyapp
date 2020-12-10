@@ -20,7 +20,7 @@ INSERT INTO "Site" ("accessGroup", "site") VALUES
     ('sydney', 'Westmead Children''s Hospital');
 
 CREATE TABLE "User" (
-    "email" text PRIMARY KEY,
+    "email" text PRIMARY KEY CHECK ("email" = lower("email")),
     "accessGroup" hfs_access_group NOT NULL,
     -- Attempt to prevent insertion of actual tokens with a length check
     "tokenhash" text UNIQUE CHECK (length("tokenhash") = 128)
