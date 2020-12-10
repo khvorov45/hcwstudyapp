@@ -14,6 +14,13 @@ export const AccessGroupV = t.keyof({
 })
 export type AccessGroup = t.TypeOf<typeof AccessGroupV>
 
+export const GenderV = t.keyof({
+  female: null,
+  male: null,
+  other: null,
+})
+export type Gender = t.TypeOf<typeof GenderV>
+
 export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
@@ -29,7 +36,7 @@ export const ParticipantV = t.type({
   mobile: t.union([t.string, t.null]),
   addBleed: t.union([t.boolean, t.null]),
   dob: t.union([DateFromISOString, t.null]),
-  gender: t.union([t.string, t.null]),
+  gender: t.union([GenderV, t.null]),
   baselineQuestComplete: t.boolean,
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
