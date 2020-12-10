@@ -1,6 +1,12 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import { AccessGroup, AccessGroupV, Participant, User } from "./data"
+import {
+  AccessGroup,
+  AccessGroupV,
+  Participant,
+  User,
+  VaccinationHistory,
+} from "./data"
 import { hash } from "./auth"
 import { exportUsers, RedcapConfig, exportParticipants } from "./redcap"
 
@@ -216,4 +222,12 @@ export async function getLastParticipantUpdate(db: DB): Promise<Date | null> {
     [],
     (v) => v.participant
   )
+}
+
+// Vaccination history ========================================================
+
+export async function getVaccinationHistory(
+  db: DB
+): Promise<VaccinationHistory[]> {
+  return await db.any('SELECT * FROM "VaccinationHistory"')
 }
