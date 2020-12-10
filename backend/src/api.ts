@@ -15,7 +15,7 @@ import {
   syncRedcapUsers,
   updateUserToken,
 } from "./db"
-import { AccessGroupV, ParticipantV, User, UserV } from "./data"
+import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { generateToken, hash } from "./auth"
 import { RedcapConfig } from "./redcap"
