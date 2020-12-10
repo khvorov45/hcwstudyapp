@@ -15,6 +15,7 @@ import {
   syncRedcapUsers,
   updateUserToken,
   syncRedcapParticipants,
+  getLastUserUpdate,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -54,6 +55,9 @@ export function getRoutes(
     await validateAdmin(req, db)
     await syncRedcapUsers(db, redcapConfig)
     res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.get("/users/redcap/sync", async (req: Request, res: Response) => {
+    res.json(await getLastUserUpdate(db))
   })
 
   // Auth

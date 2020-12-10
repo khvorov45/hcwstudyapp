@@ -137,6 +137,10 @@ export async function syncRedcapUsers(
   await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
 
+export async function getLastUserUpdate(db: DB): Promise<Date> {
+  return await db.one('SELECT "user" FROM "LastRedcapSync";', [], (v) => v.user)
+}
+
 export async function updateUserToken(db: DB, et: EmailToken) {
   const res = await db.result(
     'UPDATE "User" SET tokenhash = $1 WHERE email = $2',
