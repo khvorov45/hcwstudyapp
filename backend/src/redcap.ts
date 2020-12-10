@@ -53,15 +53,11 @@ async function redcapApiReq(
     )
 }
 
-function unique<T>(a: T[]): T[] {
-  return Array.from(new Set(a))
-}
-
 function uniqueRows<T extends { redcapProjectYear: number }>(
   a: T[],
   id: keyof T
 ): T[] {
-  const allYears = unique(a.map((e) => e.redcapProjectYear))
+  const allYears = Array.from(new Set(a.map((e) => e.redcapProjectYear)))
   return allYears.reduce((a, year) => {
     const aKeep = a.filter((e) => e.redcapProjectYear <= year)
     const aDrop = a.filter((e) => e.redcapProjectYear > year)
