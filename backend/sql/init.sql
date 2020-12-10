@@ -1,5 +1,5 @@
 CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
-CREATE TYPE hfs_gender AS ENUM ('male', 'female');
+CREATE TYPE hfs_gender AS ENUM (${genders:csv});
 CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unknown');
 
 CREATE TABLE "LastRedcapSync" (

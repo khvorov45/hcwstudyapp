@@ -1,6 +1,12 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import { AccessGroupV, Participant, User, VaccinationHistory } from "./data"
+import {
+  AccessGroupV,
+  GenderV,
+  Participant,
+  User,
+  VaccinationHistory,
+} from "./data"
 import { hash } from "./auth"
 import { exportUsers, RedcapConfig, exportParticipants } from "./redcap"
 
@@ -59,6 +65,7 @@ async function isEmpty(db: DB): Promise<boolean> {
 async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
+    genders: Object.keys(GenderV.keys),
     firstAdminEmail: firstAdmin.email,
     firstAdminTokenHash: hash(firstAdmin.token),
   })
