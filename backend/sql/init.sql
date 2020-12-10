@@ -1,5 +1,6 @@
 CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
 CREATE TYPE hfs_gender AS ENUM ('male', 'female');
+CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unknown');
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -53,10 +54,10 @@ CREATE TABLE "Withdrawn" (
     "pid" text PRIMARY KEY REFERENCES "Participant"("pid")
 );
 
-CREATE TABLE "VaccinationHistory" (
+CREATE TABLE "Vaccination" (
     "pid" text REFERENCES "Participant"("pid"),
     "year" integer CHECK ("year" >= 2015 and "year" <= 2020),
-    "status" boolean,
+    "status" hfs_vaccination_status,
     PRIMARY KEY ("pid", "year")
 );
 
