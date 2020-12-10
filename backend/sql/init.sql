@@ -5,49 +5,68 @@ CREATE TABLE "LastRedcapSync" (
     "participant" timestamptz
 );
 
+-- A subset of access groups corresponds to sites
+CREATE TABLE "Site" (
+    "accessGroup" hfs_access_group PRIMARY KEY,
+    "site" TEXT NOT NULL UNIQUE
+);
+INSERT INTO "Site" ("accessGroup", "site") VALUES
+    ('adelaide', 'Adelaide Women and Children''s Hospital'),
+    ('brisbane', 'Queensland Children''s Hospital'),
+    ('melbourne', 'Alfred Hospital'),
+    ('newcastle', 'John Hunter Hospital'),
+    ('perth', 'Perth Children''s Hospital'),
+    ('sydney', 'Westmead Children''s Hospital');
+
 CREATE TABLE "User" (
     "email" text PRIMARY KEY,
     "accessGroup" hfs_access_group NOT NULL,
     "tokenhash" text UNIQUE
 );
 
+-- Every participant is recruited at a site
 CREATE TABLE "Participant" (
-    "redcapRecordId" text PRIMARY KEY,
-    "pid" text NOT NULL UNIQUE,
-    "accessGroup" hfs_access_group NOT NULL,
-    "site" text NOT NULL,
+    "pid" text PRIMARY KEY,
+    "accessGroup" hfs_access_group NOT NULL REFERENCES "Site"("accessGroup"),
     "dateScreening" timestamptz,
     "email" text,
     "mobile" text,
     "addBleed" boolean,
     "dob" timestamptz,
     "gender" text,
-    "withdrawn" boolean NOT NULL,
     "baselineQuestComplete" boolean NOT NULL
 );
 
+CREATE TABLE "RedcapId" (
+    "redcapRecordId" text,
+    "redcapProjectYear" int,
+    "pid" text NOT NULL REFERENCES "Participant"("pid"),
+    PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
+);
+
+CREATE TABLE "Withdrawn" (
+    "pid" text PRIMARY KEY REFERENCES "Participant"("pid")
+);
+
 CREATE TABLE "VaccinationHistory" (
-    "redcapRecordId" text NOT NULL,
-    "year" integer NOT NULL,
+    "pid" text REFERENCES "Participant"("pid"),
+    "year" integer,
     "status" boolean,
-    PRIMARY KEY ("redcapRecordId", "year"),
-    FOREIGN KEY ("redcapRecordId") REFERENCES "Participant" ("redcapRecordId") ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY ("pid", "year")
 );
 
 CREATE TABLE "Schedule" (
-    "redcapRecordId" text NOT NULL,
-    "day" integer NOT NULL,
+    "pid" text REFERENCES "Participant"("pid"),
+    "day" integer,
     "date" timestamptz,
-    PRIMARY KEY ("redcapRecordId", "day"),
-    FOREIGN KEY ("redcapRecordId") REFERENCES "Participant" ("redcapRecordId") ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY ("pid", "day")
 );
 
 CREATE TABLE "WeeklySurvey" (
-    "redcapRecordId" text NOT NULL,
+    "pid" text REFERENCES "Participant"("pid"),
     "index" integer NOT NULL,
     "date" timestamptz,
     "ari" boolean NOT NULL,
     "swabCollection" boolean,
-    PRIMARY KEY ("redcapRecordId", "index"),
-    FOREIGN KEY ("redcapRecordId") REFERENCES "Participant" ("redcapRecordId") ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY ("pid", "index")
 );
