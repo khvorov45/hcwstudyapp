@@ -1,4 +1,5 @@
 CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
+CREATE TYPE hfs_gender AS ENUM ('male', 'female');
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -33,17 +34,17 @@ CREATE TABLE "Participant" (
     "pid" text PRIMARY KEY,
     "accessGroup" hfs_access_group NOT NULL REFERENCES "Site"("accessGroup"),
     "dateScreening" timestamptz,
-    "email" text,
-    "mobile" text,
+    "email" text UNIQUE CHECK ("email" = lower("email")),
+    "mobile" text UNIQUE,
     "addBleed" boolean,
     "dob" timestamptz,
-    "gender" text,
+    "gender" hfs_gender,
     "baselineQuestComplete" boolean NOT NULL
 );
 
 CREATE TABLE "RedcapId" (
     "redcapRecordId" text,
-    "redcapProjectYear" int,
+    "redcapProjectYear" int CHECK ("redcapProjectYear" >= 2015 and "redcapProjectYear" <= 2020),
     "pid" text NOT NULL REFERENCES "Participant"("pid"),
     PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
 );
