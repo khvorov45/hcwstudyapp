@@ -15,7 +15,7 @@ import {
   syncRedcapUsers,
   updateUserToken,
 } from "./db"
-import { AccessGroupV, ParticipantV, User } from "./data"
+import { AccessGroupV, ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { generateToken, hash } from "./auth"
 import { RedcapConfig } from "./redcap"
@@ -45,10 +45,7 @@ export function getRoutes(
   })
   routes.post("/users", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
-    const us = decode(
-      t.array(t.type({ email: t.string, accessGroup: AccessGroupV })),
-      req.body
-    )
+    const us = decode(t.array(UserV), req.body)
     await insertUsers(db, us)
     res.status(StatusCodes.NO_CONTENT).end()
   })
