@@ -20,7 +20,7 @@ type RedcapRequestData = {
 async function redcapApiReq(
   config: RedcapConfig,
   body: RedcapRequestData
-): Promise<any> {
+): Promise<any[]> {
   // Drop all empty fields
   const bodyNonEmpty2020: Record<string, string> = {
     token: config.token2020,
