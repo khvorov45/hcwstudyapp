@@ -15,6 +15,7 @@ type RedcapRequestData = {
   type?: "flat" | "eav"
   rawOrLabel?: "raw" | "label"
   fields?: string
+  exportDataAccessGroups?: "true" | "false"
 }
 
 /** This is type-extremely-unsafe, always decode whatever this returns */
@@ -122,6 +123,7 @@ export async function exportParticipants(
       events: "baseline_arm_1",
       type: "flat",
       rawOrLabel: "label",
+      exportDataAccessGroups: "true",
     })
   )
     .map((r: any) => ({
