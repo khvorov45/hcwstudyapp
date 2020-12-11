@@ -93,6 +93,14 @@ export async function exportUsers(config: RedcapConfig): Promise<User[]> {
   return decode(t.array(UserV), uniqueRows(users, "email"))
 }
 
+/** Handle special cases for participants
+ *
+ * WCH-025 became WCH-818
+ */
+function participantsSpecial(ps: Participant[]): Participant[] {
+  return ps.filter((p) => p.pid !== "WCH-025")
+}
+
 export async function exportParticipants(
   config: RedcapConfig
 ): Promise<Participant[]> {
@@ -130,5 +138,7 @@ export async function exportParticipants(
     }))
     .filter((r) => r.pid)
 
-  return decode(t.array(ParticipantV), uniqueRows(records, "pid"))
+  return participantsSpecial(
+    decode(t.array(ParticipantV), uniqueRows(records, "pid"))
+  )
 }
