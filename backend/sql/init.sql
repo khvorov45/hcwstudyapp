@@ -1,3 +1,4 @@
+CREATE TYPE hfs_site AS ENUM (${sites:csv});
 CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
 CREATE TYPE hfs_gender AS ENUM (${genders:csv});
 CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unknown');
@@ -8,10 +9,9 @@ CREATE TABLE "LastRedcapSync" (
 );
 INSERT INTO "LastRedcapSync" VALUES (NULL, NULL);
 
--- A subset of access groups corresponds to sites
 CREATE TABLE "Site" (
-    "accessGroup" hfs_access_group PRIMARY KEY,
-    "site" TEXT NOT NULL UNIQUE
+    "siteShort" hfs_site PRIMARY KEY,
+    "siteLong" TEXT NOT NULL UNIQUE
 );
 INSERT INTO "Site" ("accessGroup", "site") VALUES
     ('adelaide', 'Adelaide Women and Children''s Hospital'),
@@ -33,7 +33,7 @@ INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
 -- Every participant is recruited at a site
 CREATE TABLE "Participant" (
     "pid" text PRIMARY KEY,
-    "accessGroup" hfs_access_group NOT NULL REFERENCES "Site"("accessGroup"),
+    "site" hfs_site NOT NULL,
     "dateScreening" timestamptz,
     "email" text UNIQUE CHECK ("email" = lower("email")),
     "mobile" text UNIQUE,
