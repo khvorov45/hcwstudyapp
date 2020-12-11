@@ -10,7 +10,7 @@ import {
   deleteUser,
   getUserByTokenhash,
   insertParticipants,
-  getParticipants,
+  getParticipantsSubset,
   deleteParticipant,
   syncRedcapUsers,
   updateUserToken,
@@ -80,8 +80,8 @@ export function getRoutes(
 
   // Participants
   routes.get("/participants", async (req: Request, res: Response) => {
-    await validateUser(req, db)
-    res.json(await getParticipants(db))
+    const u = await validateUser(req, db)
+    res.json(await getParticipantsSubset(db, u.accessGroup))
   })
   routes.post("/participants", async (req: Request, res: Response) => {
     await validateUser(req, db)

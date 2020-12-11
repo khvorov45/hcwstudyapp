@@ -1,6 +1,7 @@
 import pgp from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
 import {
+  AccessGroup,
   AccessGroupV,
   GenderV,
   Participant,
@@ -164,8 +165,13 @@ async function restoreUserTokenHash(db: DB, u: User): Promise<void> {
 
 // Particpants ================================================================
 
-export async function getParticipants(db: DB): Promise<Participant[]> {
-  return await db.any('SELECT * FROM "Participant"')
+export async function getParticipantsSubset(
+  db: DB,
+  a: AccessGroup
+): Promise<Participant[]> {
+  return ["admin", "unrestricted"].includes(a)
+    ? await db.any('SELECT * FROM "Participant"')
+    : await db.any('SELECT * FROM "Participant" WHERE "accessGroup" = $1', [a])
 }
 
 export async function insertParticipants(
