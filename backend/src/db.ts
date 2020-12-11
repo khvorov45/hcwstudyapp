@@ -5,6 +5,7 @@ import {
   AccessGroupV,
   GenderV,
   Participant,
+  SiteV,
   User,
   VaccinationHistory,
 } from "./data"
@@ -69,6 +70,7 @@ async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
     genders: Object.keys(GenderV.keys),
     firstAdminEmail: firstAdmin.email,
     firstAdminTokenHash: hash(firstAdmin.token),
+    sites: Object.keys(SiteV.keys),
   })
 }
 
