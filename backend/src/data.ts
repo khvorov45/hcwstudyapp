@@ -2,15 +2,20 @@ import * as t from "io-ts"
 import { DateFromISOString } from "io-ts-types"
 
 // https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals
-export const AccessGroupV = t.keyof({
-  admin: null,
-  unrestricted: null,
+export const SiteV = t.keyof({
   melbourne: null,
   sydney: null,
   adelaide: null,
   brisbane: null,
   newcastle: null,
   perth: null,
+})
+export type Site = t.TypeOf<typeof SiteV>
+
+export const AccessGroupV = t.keyof({
+  admin: null,
+  unrestricted: null,
+  ...SiteV.keys,
 })
 export type AccessGroup = t.TypeOf<typeof AccessGroupV>
 
