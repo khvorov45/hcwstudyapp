@@ -13,7 +13,7 @@ CREATE TABLE "Site" (
     "siteShort" hfs_site PRIMARY KEY,
     "siteLong" TEXT NOT NULL UNIQUE
 );
-INSERT INTO "Site" ("accessGroup", "site") VALUES
+INSERT INTO "Site" ("siteShort", "siteLong") VALUES
     ('adelaide', 'Adelaide Women and Children''s Hospital'),
     ('brisbane', 'Queensland Children''s Hospital'),
     ('melbourne', 'Alfred Hospital'),
