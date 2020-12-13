@@ -128,7 +128,7 @@ export async function exportParticipants(
   )
     .map((r: any) => ({
       pid: processRedcapString(r.pid),
-      accessGroup: processRedcapDataAccessGroup(r.redcap_data_access_group),
+      site: processRedcapDataAccessGroup(r.redcap_data_access_group),
       dateScreening: processRedcapString(r.date_screening),
       email: processRedcapStringLower(r.email),
       mobile: processRedcapString(r.mobile_number),

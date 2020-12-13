@@ -182,7 +182,7 @@ export async function insertParticipants(
   ps: Participant[],
   a: AccessGroup
 ): Promise<void> {
-  if (isSite(a) && ps.find((p) => p.accessGroup !== a)) {
+  if (isSite(a) && ps.find((p) => p.site !== a)) {
     throw Error("UNAUTHORIZED: participants with invalid site")
   }
   await db.any(
@@ -190,7 +190,7 @@ export async function insertParticipants(
       ps,
       [
         "pid",
-        "accessGroup",
+        "site",
         "dateScreening",
         "email",
         "mobile",

@@ -39,7 +39,7 @@ export type User = t.TypeOf<typeof UserV>
 
 export const ParticipantV = t.type({
   pid: t.string,
-  accessGroup: AccessGroupV,
+  site: SiteV,
   dateScreening: t.union([DateFromISOString, t.null]),
   email: t.union([t.string, t.null]),
   mobile: t.union([t.string, t.null]),

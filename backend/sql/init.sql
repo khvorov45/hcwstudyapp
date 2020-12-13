@@ -33,7 +33,7 @@ INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
 -- Every participant is recruited at a site
 CREATE TABLE "Participant" (
     "pid" text PRIMARY KEY,
-    "accessGroup" hfs_access_group NOT NULL,
+    "site" hfs_site NOT NULL,
     "dateScreening" timestamptz,
     "email" text UNIQUE CHECK ("email" = lower("email")),
     "mobile" text UNIQUE,
