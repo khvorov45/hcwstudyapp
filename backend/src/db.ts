@@ -10,6 +10,7 @@ import {
   SiteV,
   User,
   VaccinationHistory,
+  Withdrawn,
 } from "./data"
 import { hash } from "./auth"
 import {
@@ -17,6 +18,7 @@ import {
   RedcapConfig,
   exportParticipants,
   exportRedcapIds,
+  exportWithdrawn,
 } from "./redcap"
 
 const pgpInit = pgp()
@@ -224,18 +226,41 @@ export async function syncRedcapParticipants(
   redcapConfig: RedcapConfig
 ) {
   // Wait for this to succeed before doing anyting else
-  const [redcapParticipants, redcapIds] = await Promise.all([
+  const [redcapParticipants, redcapIds, withdrawn] = await Promise.all([
     exportParticipants(redcapConfig),
     exportRedcapIds(redcapConfig),
+    exportWithdrawn(redcapConfig),
   ])
   const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
 
   await db.any('DELETE FROM "Participant"')
   await insertParticipants(db, redcapParticipants, "admin")
-  await insertRedcapIds(
-    db,
-    redcapIds.filter((r) => redcapParticipantIds.includes(r.pid))
-  )
+  await Promise.all([
+    insertRedcapIds(
+      db,
+      redcapIds.filter((r) => redcapParticipantIds.includes(r.pid))
+    ),
+    insertWithdrawn(
+      db,
+      withdrawn.map((w) => {
+        const pid = redcapIds.find(
+          (r) =>
+            r.redcapProjectYear === w.redcapProjectYear &&
+            r.redcapRecordId === w.redcapRecordId
+        )?.pid
+        if (!pid) {
+          throw Error(
+            `PID not found for withdrawn record ${w.redcapRecordId}
+            in year ${w.redcapProjectYear}`
+          )
+        }
+        return {
+          date: w.date,
+          pid,
+        }
+      })
+    ),
+  ])
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
 }
 
@@ -257,6 +282,12 @@ async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
       "RedcapId"
     )
   )
+}
+
+// Withdrawn =================================================================
+
+async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
+  await db.any(pgpInit.helpers.insert(w, ["pid", "date"], "Withdrawn"))
 }
 
 // Vaccination history ========================================================

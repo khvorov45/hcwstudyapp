@@ -57,6 +57,12 @@ export const RedcapIdV = t.type({
 })
 export type RedcapId = t.TypeOf<typeof RedcapIdV>
 
+export const WithdrawnV = t.type({
+  pid: t.string,
+  date: DateFromISOString,
+})
+export type Withdrawn = t.TypeOf<typeof WithdrawnV>
+
 export const VaccinationHistoryV = t.type({
   redcapRecordId: t.string,
   year: t.number,

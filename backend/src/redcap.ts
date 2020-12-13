@@ -1,5 +1,6 @@
 import axios from "axios"
 import * as t from "io-ts"
+import { DateFromISOString } from "io-ts-types"
 import {
   User,
   UserV,
@@ -173,4 +174,35 @@ export async function exportRedcapIds(
     .filter((r) => r.pid)
 
   return decode(t.array(RedcapIdV), redcapIds)
+}
+
+const RedcapWithdrawnV = t.type({
+  redcapRecordId: t.string,
+  redcapProjectYear: t.number,
+  date: DateFromISOString,
+})
+type RedcapWithdrawn = t.TypeOf<typeof RedcapWithdrawnV>
+
+export async function exportWithdrawn(
+  config: RedcapConfig
+): Promise<RedcapWithdrawn[]> {
+  const withdrawn = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: ["record_id", "withdrawn", "withdrawal_date"].toString(),
+      events: "withdrawal_arm_1",
+      type: "flat",
+      rawOrLabel: "raw",
+      exportDataAccessGroups: "false",
+    })
+  )
+    .map((r: any) => ({
+      redcapRecordId: processRedcapString(r.record_id),
+      redcapProjectYear: r.redcapProjectYear,
+      withdrawn: r.withdrawn === "1",
+      date: processRedcapString(r.withdrawal_date),
+    }))
+    .filter((r) => r.withdrawn)
+
+  return decode(t.array(RedcapWithdrawnV), withdrawn)
 }

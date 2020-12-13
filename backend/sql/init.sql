@@ -51,7 +51,8 @@ CREATE TABLE "RedcapId" (
 );
 
 CREATE TABLE "Withdrawn" (
-    "pid" text PRIMARY KEY REFERENCES "Participant"("pid")
+    "pid" text PRIMARY KEY REFERENCES "Participant"("pid") ON DELETE CASCADE,
+    "date" timestamptz NOT NULL
 );
 
 CREATE TABLE "Vaccination" (
