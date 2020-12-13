@@ -30,6 +30,14 @@ export const GenderV = t.keyof({
 })
 export type Gender = t.TypeOf<typeof GenderV>
 
+export const VaccinationStatusV = t.keyof({
+  australia: null,
+  overseas: null,
+  no: null,
+  unknown: null,
+})
+export type VaccinationStatus = t.TypeOf<typeof VaccinationStatusV>
+
 export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
@@ -64,8 +72,8 @@ export const WithdrawnV = t.type({
 export type Withdrawn = t.TypeOf<typeof WithdrawnV>
 
 export const VaccinationV = t.type({
-  redcapRecordId: t.string,
+  pid: t.string,
   year: t.number,
-  status: t.union([t.boolean, t.null]),
+  status: t.union([VaccinationStatusV, t.null]),
 })
 export type Vaccination = t.TypeOf<typeof VaccinationV>
