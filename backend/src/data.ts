@@ -63,9 +63,9 @@ export const WithdrawnV = t.type({
 })
 export type Withdrawn = t.TypeOf<typeof WithdrawnV>
 
-export const VaccinationHistoryV = t.type({
+export const VaccinationV = t.type({
   redcapRecordId: t.string,
   year: t.number,
   status: t.union([t.boolean, t.null]),
 })
-export type VaccinationHistory = t.TypeOf<typeof VaccinationHistoryV>
+export type Vaccination = t.TypeOf<typeof VaccinationV>

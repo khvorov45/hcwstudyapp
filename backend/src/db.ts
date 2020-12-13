@@ -9,7 +9,7 @@ import {
   RedcapId,
   SiteV,
   User,
-  VaccinationHistory,
+  Vaccination,
   Withdrawn,
 } from "./data"
 import { hash } from "./auth"
@@ -292,8 +292,6 @@ async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
 
 // Vaccination history ========================================================
 
-export async function getVaccinationHistory(
-  db: DB
-): Promise<VaccinationHistory[]> {
-  return await db.any('SELECT * FROM "VaccinationHistory"')
+export async function getVaccinationHistory(db: DB): Promise<Vaccination[]> {
+  return await db.any('SELECT * FROM "Vaccination"')
 }
