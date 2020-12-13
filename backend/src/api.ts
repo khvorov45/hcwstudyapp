@@ -84,8 +84,12 @@ export function getRoutes(
     res.json(await getParticipantsSubset(db, u.accessGroup))
   })
   routes.post("/participants", async (req: Request, res: Response) => {
-    await validateUser(req, db)
-    await insertParticipants(db, decode(t.array(ParticipantV), req.body))
+    const u = await validateUser(req, db)
+    await insertParticipants(
+      db,
+      decode(t.array(ParticipantV), req.body),
+      u.accessGroup
+    )
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/participants", async (req: Request, res: Response) => {

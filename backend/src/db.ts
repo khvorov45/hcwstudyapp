@@ -179,8 +179,12 @@ export async function getParticipantsSubset(
 
 export async function insertParticipants(
   db: DB,
-  ps: Participant[]
+  ps: Participant[],
+  a: AccessGroup
 ): Promise<void> {
+  if (isSite(a) && ps.find((p) => p.accessGroup !== a)) {
+    throw Error("UNAUTHORIZED: participants with invalid site")
+  }
   await db.any(
     pgpInit.helpers.insert(
       ps,
@@ -216,7 +220,7 @@ export async function syncRedcapParticipants(
   // Wait for this to succeed before doing anyting else
   const redcapParticipants = await exportParticipants(redcapConfig)
   await db.any('DELETE FROM "Participant"')
-  await insertParticipants(db, redcapParticipants)
+  await insertParticipants(db, redcapParticipants, "admin")
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
 }
 
