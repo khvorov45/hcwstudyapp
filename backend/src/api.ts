@@ -16,7 +16,7 @@ import {
   updateUserToken,
   syncRedcapParticipants,
   getLastUserUpdate,
-  getVaccinationHistory,
+  getVaccination,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -115,7 +115,7 @@ export function getRoutes(
   // Vaccination history
   routes.get("/vaccination-history", async (req: Request, res: Response) => {
     await validateUser(req, db)
-    res.json(await getVaccinationHistory(db))
+    res.json(await getVaccination(db))
   })
 
   // Errors
