@@ -4,6 +4,7 @@ import {
   AccessGroup,
   AccessGroupV,
   GenderV,
+  isSite,
   Participant,
   SiteV,
   User,
@@ -171,9 +172,9 @@ export async function getParticipantsSubset(
   db: DB,
   a: AccessGroup
 ): Promise<Participant[]> {
-  return ["admin", "unrestricted"].includes(a)
-    ? await db.any('SELECT * FROM "Participant"')
-    : await db.any('SELECT * FROM "Participant" WHERE "accessGroup" = $1', [a])
+  return isSite(a)
+    ? await db.any('SELECT * FROM "Participant" WHERE "accessGroup" = $1', [a])
+    : await db.any('SELECT * FROM "Participant"')
 }
 
 export async function insertParticipants(

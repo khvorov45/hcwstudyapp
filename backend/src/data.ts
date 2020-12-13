@@ -19,6 +19,10 @@ export const AccessGroupV = t.keyof({
 })
 export type AccessGroup = t.TypeOf<typeof AccessGroupV>
 
+export function isSite(a: AccessGroup) {
+  return Object.keys(SiteV.keys).includes(a)
+}
+
 export const GenderV = t.keyof({
   female: null,
   male: null,
