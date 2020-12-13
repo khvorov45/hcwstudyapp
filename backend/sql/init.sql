@@ -46,7 +46,7 @@ CREATE TABLE "Participant" (
 CREATE TABLE "RedcapId" (
     "redcapRecordId" text,
     "redcapProjectYear" int CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
-    "pid" text NOT NULL REFERENCES "Participant"("pid"),
+    "pid" text NOT NULL REFERENCES "Participant"("pid") ON DELETE CASCADE,
     PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
 );
 

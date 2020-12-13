@@ -1,6 +1,13 @@
 import axios from "axios"
 import * as t from "io-ts"
-import { User, UserV, Participant, ParticipantV } from "./data"
+import {
+  User,
+  UserV,
+  Participant,
+  ParticipantV,
+  RedcapId,
+  RedcapIdV,
+} from "./data"
 import { decode } from "./io"
 
 export type RedcapConfig = {
@@ -143,4 +150,27 @@ export async function exportParticipants(
   return participantsSpecial(
     decode(t.array(ParticipantV), uniqueRows(records, "pid"))
   )
+}
+
+export async function exportRedcapIds(
+  config: RedcapConfig
+): Promise<RedcapId[]> {
+  const redcapIds = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: ["record_id", "pid"].toString(),
+      events: "baseline_arm_1",
+      type: "flat",
+      rawOrLabel: "raw",
+      exportDataAccessGroups: "false",
+    })
+  )
+    .map((r: any) => ({
+      redcapRecordId: processRedcapString(r.record_id),
+      pid: processRedcapString(r.pid),
+      redcapProjectYear: r.redcapProjectYear,
+    }))
+    .filter((r) => r.pid)
+
+  return decode(t.array(RedcapIdV), redcapIds)
 }

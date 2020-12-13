@@ -6,12 +6,18 @@ import {
   GenderV,
   isSite,
   Participant,
+  RedcapId,
   SiteV,
   User,
   VaccinationHistory,
 } from "./data"
 import { hash } from "./auth"
-import { exportUsers, RedcapConfig, exportParticipants } from "./redcap"
+import {
+  exportUsers,
+  RedcapConfig,
+  exportParticipants,
+  exportRedcapIds,
+} from "./redcap"
 
 const pgpInit = pgp()
 
@@ -218,9 +224,18 @@ export async function syncRedcapParticipants(
   redcapConfig: RedcapConfig
 ) {
   // Wait for this to succeed before doing anyting else
-  const redcapParticipants = await exportParticipants(redcapConfig)
+  const [redcapParticipants, redcapIds] = await Promise.all([
+    exportParticipants(redcapConfig),
+    exportRedcapIds(redcapConfig),
+  ])
+  const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
+
   await db.any('DELETE FROM "Participant"')
   await insertParticipants(db, redcapParticipants, "admin")
+  await insertRedcapIds(
+    db,
+    redcapIds.filter((r) => redcapParticipantIds.includes(r.pid))
+  )
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
 }
 
@@ -229,6 +244,18 @@ export async function getLastParticipantUpdate(db: DB): Promise<Date | null> {
     'SELECT "participant" FROM "LastRedcapSync";',
     [],
     (v) => v.participant
+  )
+}
+
+// Redcap ids =================================================================
+
+async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
+  await db.any(
+    pgpInit.helpers.insert(
+      ids,
+      ["redcapRecordId", "redcapProjectYear", "pid"],
+      "RedcapId"
+    )
   )
 }
 

@@ -50,6 +50,13 @@ export const ParticipantV = t.type({
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
 
+export const RedcapIdV = t.type({
+  redcapRecordId: t.string,
+  redcapProjectYear: t.number,
+  pid: t.string,
+})
+export type RedcapId = t.TypeOf<typeof RedcapIdV>
+
 export const VaccinationHistoryV = t.type({
   redcapRecordId: t.string,
   year: t.number,
