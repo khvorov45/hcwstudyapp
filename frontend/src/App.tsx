@@ -1,6 +1,7 @@
 import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
 import axios from "axios"
 import React, { useState } from "react"
+import StatusCodes from "http-status-codes"
 import { useAsync } from "react-async-hook"
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
 import Nav from "./components/nav"
@@ -32,10 +33,18 @@ export default function App() {
   // Auth ---------------------------------------------------------------------
   const tok = new URLSearchParams(window.location.search).get("token")
   const auth = useAsync(async () => {
-    const res = await axios.get("http://localhost:7001/auth/token/verify")
+    const res = await axios.get("http://localhost:7001/auth/token/verify", {
+      validateStatus: (s) =>
+        [StatusCodes.OK, StatusCodes.UNAUTHORIZED].includes(s),
+      headers: { Authorization: `Bearer ${tok}` },
+    })
+    if (res.status !== StatusCodes.OK) {
+      throw Error(res.data)
+    }
     return res.data
   }, [])
-  console.log(auth)
+  console.log(auth.result)
+  console.log(auth.error?.message)
 
   return (
     <div>
