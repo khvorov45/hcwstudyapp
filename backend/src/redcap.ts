@@ -278,3 +278,54 @@ export async function exportSchedule(
 
   return decode(t.array(ScheduleV), scheduleLong)
 }
+
+export const RedcapWeeklySurveyV = t.type({
+  redcapRecordId: t.string,
+  redcapProjectYear: t.number,
+  index: t.number,
+  date: t.union([DateFromISOString, t.null]),
+  ari: t.boolean,
+  swabCollection: t.union([t.boolean, t.null]),
+})
+export type RedcapWeeklySurvey = t.TypeOf<typeof RedcapWeeklySurveyV>
+
+export async function exportWeeklySurvey(
+  config: RedcapConfig
+): Promise<RedcapWeeklySurvey[]> {
+  const surv = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: [
+        "record_id",
+        "ari_definition",
+        "date_symptom_survey",
+        "swab_collection",
+      ].toString(),
+      events: Array.from(Array(50).keys())
+        .map((n) => `weekly_survey_${n}_arm_1`)
+        .toString(),
+      type: "flat",
+      rawOrLabel: "raw",
+      exportDataAccessGroups: "false",
+    })
+  )
+    .map((r) => ({
+      ari: processRedcapString(r.ari_definition),
+      swabCollection: processRedcapString(r.swab_collection),
+      ...r,
+    }))
+    .map((r: any) => ({
+      redcapRecordId: r.record_id,
+      redcapProjectYear: r.redcapProjectYear,
+      index: parseInt(
+        r.redcap_event_name.match(/weekly_survey_(\d+)_arm_1/)[1]
+      ),
+      date: processRedcapString(r.date_symptom_survey),
+      ari: r.ari ? r.ari === "1" : null,
+      swabCollection: r.swabCollection ? r.swabCollection === "1" : null,
+    }))
+    // Remove incomplete surveys
+    .filter((r) => r.ari !== null)
+
+  return decode(t.array(RedcapWeeklySurveyV), surv)
+}

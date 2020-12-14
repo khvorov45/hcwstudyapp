@@ -11,6 +11,7 @@ import {
   SiteV,
   User,
   Vaccination,
+  WeeklySurvey,
   Withdrawn,
 } from "./data"
 import { hash } from "./auth"
@@ -22,6 +23,7 @@ import {
   exportWithdrawn,
   exportVaccination,
   exportSchedule,
+  exportWeeklySurvey,
 } from "./redcap"
 
 const pgpInit = pgp()
@@ -235,50 +237,50 @@ export async function syncRedcapParticipants(
     withdrawn,
     vac,
     schedule,
+    weeklySurvey,
   ] = await Promise.all([
     exportParticipants(redcapConfig),
     exportRedcapIds(redcapConfig),
     exportWithdrawn(redcapConfig),
     exportVaccination(redcapConfig),
     exportSchedule(redcapConfig),
+    exportWeeklySurvey(redcapConfig),
   ])
   const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
 
   await db.any('DELETE FROM "Participant"')
   await insertParticipants(db, redcapParticipants, "admin")
+
+  function isInParticipant<T extends { pid: string }>(r: T) {
+    return redcapParticipantIds.includes(r.pid)
+  }
+
+  function findPid<
+    T extends { redcapRecordId: string; redcapProjectYear: number }
+  >(r: T) {
+    const pid = redcapIds.find(
+      (id) =>
+        id.redcapProjectYear === r.redcapProjectYear &&
+        id.redcapRecordId === r.redcapRecordId
+    )?.pid
+    if (!pid) {
+      throw Error(
+        `PID not found for record ${r.redcapRecordId}
+        in year ${r.redcapProjectYear}`
+      )
+    }
+    return {
+      pid,
+      ...r,
+    }
+  }
+
   await Promise.all([
-    insertRedcapIds(
-      db,
-      redcapIds.filter((r) => redcapParticipantIds.includes(r.pid))
-    ),
-    insertWithdrawn(
-      db,
-      withdrawn.map((w) => {
-        const pid = redcapIds.find(
-          (r) =>
-            r.redcapProjectYear === w.redcapProjectYear &&
-            r.redcapRecordId === w.redcapRecordId
-        )?.pid
-        if (!pid) {
-          throw Error(
-            `PID not found for withdrawn record ${w.redcapRecordId}
-            in year ${w.redcapProjectYear}`
-          )
-        }
-        return {
-          date: w.date,
-          pid,
-        }
-      })
-    ),
-    insertVaccination(
-      db,
-      vac.filter((v) => redcapParticipantIds.includes(v.pid))
-    ),
-    insertSchedule(
-      db,
-      schedule.filter((v) => redcapParticipantIds.includes(v.pid))
-    ),
+    insertRedcapIds(db, redcapIds.filter(isInParticipant)),
+    insertWithdrawn(db, withdrawn.map(findPid).filter(isInParticipant)),
+    insertVaccination(db, vac.filter(isInParticipant)),
+    insertSchedule(db, schedule.filter(isInParticipant)),
+    insertWeeklySurvey(db, weeklySurvey.map(findPid).filter(isInParticipant)),
   ])
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
 }
@@ -325,4 +327,16 @@ async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
 
 async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
   await db.any(pgpInit.helpers.insert(v, ["pid", "day", "date"], "Schedule"))
+}
+
+// Weekly survey ==============================================================
+
+async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
+  await db.any(
+    pgpInit.helpers.insert(
+      s,
+      ["pid", "index", "date", "ari", "swabCollection"],
+      "WeeklySurvey"
+    )
+  )
 }
