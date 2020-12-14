@@ -1,5 +1,6 @@
 import express from "express"
 import yargs from "yargs"
+import cors from "cors"
 import { getRoutes } from "./api"
 import { create as createDB } from "./db"
 import { createTransport } from "./email"
@@ -18,7 +19,7 @@ async function main() {
       "emailConnectionString",
       "linkPrefix",
     ])
-    .boolean("clean")
+    .boolean(["clean", "cors"])
     .number("backendPort")
     .default("config", "hsa-config.json")
     .default(
@@ -35,11 +36,15 @@ async function main() {
     .default("prefix", "")
     .default("linkPrefix", "https://reports.hcwflustudy.com/?token=")
     .default("clean", false)
+    .default("cors", false)
     .default("backendPort", 7001).argv
 
   // Create the server
   const app = express()
   app.use(express.json())
+  if (args.cors) {
+    app.use(cors())
+  }
   app.use(
     `/${args.prefix}`,
     getRoutes(

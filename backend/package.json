@@ -20,7 +20,10 @@
   },
   "homepage": "https://github.com/khvorov45/hcwstudyapp#readme",
   "dependencies": {
+    "@types/cors": "^2.8.9",
+    "@types/nodemailer": "^6.4.0",
     "axios": "^0.21.0",
+    "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
     "crypto-random-string": "^3.3.0",
     "express": "^4.17.1",
