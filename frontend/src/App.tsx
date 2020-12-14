@@ -1,13 +1,37 @@
-import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
-import React from "react"
+import {
+  Button,
+  createMuiTheme,
+  CssBaseline,
+  ThemeProvider,
+} from "@material-ui/core"
+import React, { useState } from "react"
+
+function themeInit(): "dark" | "light" {
+  let localtheme = localStorage.getItem("theme")
+  if (!localtheme || !["dark", "light"].includes(localtheme)) {
+    localStorage.setItem("theme", "dark")
+    return "dark"
+  } else if (localtheme === "dark") {
+    return "dark"
+  } else {
+    return "light"
+  }
+}
 
 export default function App() {
-  const theme = createMuiTheme({ palette: { type: "dark" } })
+  const [paletteType, setPaletteType] = useState<"dark" | "light">(themeInit())
+  function togglePalette() {
+    const newPalette: "dark" | "light" =
+      paletteType === "dark" ? "light" : "dark"
+    setPaletteType(newPalette)
+    localStorage.setItem("theme", newPalette)
+  }
+  const theme = createMuiTheme({ palette: { type: paletteType } })
   return (
     <div>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        App
+        <Button onClick={(_) => togglePalette()}>Theme switch</Button>
       </ThemeProvider>
     </div>
   )
