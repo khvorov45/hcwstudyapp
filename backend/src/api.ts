@@ -18,6 +18,7 @@ import {
   getLastUserUpdate,
   getVaccinationSubset,
   getRedcapIdSubset,
+  getWithdrawnSubset,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -117,6 +118,12 @@ export function getRoutes(
   routes.get("/redcap-id", async (req: Request, res: Response) => {
     const u = await validateUser(req, db)
     res.json(await getRedcapIdSubset(db, u.accessGroup))
+  })
+
+  // Withdrawn
+  routes.get("/withdrawn", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json(await getWithdrawnSubset(db, u.accessGroup))
   })
 
   // Vaccination history
