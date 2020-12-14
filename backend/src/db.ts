@@ -314,7 +314,7 @@ export async function getRedcapIdSubset(
     ? await db.any(
         `SELECT * FROM "RedcapId" WHERE "pid" IN
         (SELECT "pid" FROM "Participant" WHERE "site" = $1)`,
-        a
+        [a]
       )
     : await db.any('SELECT * FROM "RedcapId"')
 }
