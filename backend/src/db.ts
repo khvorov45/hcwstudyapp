@@ -217,13 +217,8 @@ export async function insertParticipants(
   )
 }
 
-export async function deleteParticipant(
-  db: DB,
-  redcapRecordId: string
-): Promise<void> {
-  await db.any('DELETE FROM "Participant" WHERE "redcapRecordId"=$1', [
-    redcapRecordId,
-  ])
+export async function deleteParticipant(db: DB, pid: string): Promise<void> {
+  await db.any('DELETE FROM "Participant" WHERE "pid"=$1', [pid])
 }
 
 export async function syncRedcapParticipants(
