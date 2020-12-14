@@ -63,7 +63,7 @@ CREATE TABLE "Vaccination" (
 );
 
 CREATE TABLE "Schedule" (
-    "pid" text REFERENCES "Participant"("pid"),
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE,
     "day" integer,
     "date" timestamptz,
     PRIMARY KEY ("pid", "day")
