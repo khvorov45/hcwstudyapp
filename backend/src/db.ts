@@ -93,6 +93,21 @@ async function resetSchema(db: DB): Promise<void> {
   await db.any('CREATE SCHEMA "public";')
 }
 
+/** Get site subset for tables with PID as FK */
+async function getTableSubset(
+  db: DB,
+  a: AccessGroup,
+  t: "Vaccination" | "RedcapId"
+) {
+  return isSite(a)
+    ? await db.any(
+        `SELECT * FROM "${t}" WHERE "pid" IN
+        (SELECT "pid" FROM "Participant" WHERE "site" = $1)`,
+        [a]
+      )
+    : await db.any(`SELECT * FROM "${t}"`)
+}
+
 // Users ======================================================================
 
 export async function getUsers(db: DB): Promise<User[]> {
@@ -310,13 +325,7 @@ export async function getRedcapIdSubset(
   db: DB,
   a: AccessGroup
 ): Promise<RedcapId[]> {
-  return isSite(a)
-    ? await db.any(
-        `SELECT * FROM "RedcapId" WHERE "pid" IN
-        (SELECT "pid" FROM "Participant" WHERE "site" = $1)`,
-        [a]
-      )
-    : await db.any('SELECT * FROM "RedcapId"')
+  return await getTableSubset(db, a, "RedcapId")
 }
 
 async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
@@ -341,13 +350,7 @@ export async function getVaccinationSubset(
   db: DB,
   a: AccessGroup
 ): Promise<Vaccination[]> {
-  return isSite(a)
-    ? await db.any(
-        `SELECT * FROM "Vaccination" WHERE "pid" IN
-        (SELECT "pid" FROM "Participant" WHERE "site" = $1)`,
-        [a]
-      )
-    : await db.any('SELECT * FROM "Vaccination"')
+  return await getTableSubset(db, a, "Vaccination")
 }
 
 async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
