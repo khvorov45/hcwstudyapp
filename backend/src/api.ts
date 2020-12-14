@@ -17,6 +17,7 @@ import {
   syncRedcapParticipants,
   getLastUserUpdate,
   getVaccination,
+  getRedcapIdSubset,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -111,6 +112,12 @@ export function getRoutes(
       res.json(await getLastParticipantUpdate(db))
     }
   )
+
+  // Redcap IDs
+  routes.get("/redcap-id", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json(await getRedcapIdSubset(db, u.accessGroup))
+  })
 
   // Vaccination history
   routes.get("/vaccination-history", async (req: Request, res: Response) => {

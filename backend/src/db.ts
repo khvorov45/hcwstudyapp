@@ -295,6 +295,19 @@ export async function getLastParticipantUpdate(db: DB): Promise<Date | null> {
 
 // Redcap ids =================================================================
 
+export async function getRedcapIdSubset(
+  db: DB,
+  a: AccessGroup
+): Promise<RedcapId[]> {
+  return isSite(a)
+    ? await db.any(
+        `SELECT * FROM "RedcapId" WHERE "pid" IN
+        (SELECT "pid" FROM "Participant" WHERE "site" = $1)`,
+        a
+      )
+    : await db.any('SELECT * FROM "RedcapId"')
+}
+
 async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
   await db.any(
     pgpInit.helpers.insert(
