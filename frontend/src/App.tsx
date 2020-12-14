@@ -1,9 +1,4 @@
-import {
-  Button,
-  createMuiTheme,
-  CssBaseline,
-  ThemeProvider,
-} from "@material-ui/core"
+import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
 import React, { useState } from "react"
 import Nav from "./components/nav"
 
