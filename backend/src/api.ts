@@ -20,6 +20,7 @@ import {
   getRedcapIdSubset,
   getWithdrawnSubset,
   getScheduleSubset,
+  getWeeklySurveySubset,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -137,6 +138,12 @@ export function getRoutes(
   routes.get("/schedule", async (req: Request, res: Response) => {
     const u = await validateUser(req, db)
     res.json(await getScheduleSubset(db, u.accessGroup))
+  })
+
+  // Weekly survey
+  routes.get("/weekly-survey", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json(await getWeeklySurveySubset(db, u.accessGroup))
   })
 
   // Errors

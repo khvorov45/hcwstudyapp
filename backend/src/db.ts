@@ -97,7 +97,7 @@ async function resetSchema(db: DB): Promise<void> {
 async function getTableSubset(
   db: DB,
   a: AccessGroup,
-  t: "Vaccination" | "RedcapId" | "Withdrawn" | "Schedule"
+  t: "Vaccination" | "RedcapId" | "Withdrawn" | "Schedule" | "WeeklySurvey"
 ) {
   return isSite(a)
     ? await db.any(
@@ -380,6 +380,13 @@ async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
 }
 
 // Weekly survey ==============================================================
+
+export async function getWeeklySurveySubset(
+  db: DB,
+  a: AccessGroup
+): Promise<Schedule[]> {
+  return await getTableSubset(db, a, "WeeklySurvey")
+}
 
 async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
   await db.any(
