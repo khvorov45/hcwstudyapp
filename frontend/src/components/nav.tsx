@@ -1,10 +1,13 @@
-import { Button } from "@material-ui/core"
+import { IconButton } from "@material-ui/core"
+import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import React from "react"
 
 export default function Nav({ togglePalette }: { togglePalette: () => void }) {
   return (
     <div>
-      <Button onClick={(_) => togglePalette()}>Theme switch</Button>
+      <IconButton onClick={(_) => togglePalette()}>
+        <BrightnessMediumIcon />
+      </IconButton>
     </div>
   )
 }
