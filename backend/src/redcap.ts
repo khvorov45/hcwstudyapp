@@ -8,6 +8,8 @@ import {
   ParticipantV,
   RedcapId,
   RedcapIdV,
+  Vaccination,
+  VaccinationV,
 } from "./data"
 import { decode } from "./io"
 
@@ -205,4 +207,39 @@ export async function exportWithdrawn(
     .filter((r) => r.withdrawn)
 
   return decode(t.array(RedcapWithdrawnV), withdrawn)
+}
+
+export async function exportVaccination(
+  config: RedcapConfig
+): Promise<Vaccination[]> {
+  const years = [2015, 2016, 2017, 2018, 2019, 2020]
+  const varNames = years.map((y) => `vac_${y}`)
+  const vacLong: any[] = []
+
+  const _ = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: ["pid", ...varNames].toString(),
+      events: "baseline_arm_1",
+      type: "flat",
+      rawOrLabel: "label",
+      exportDataAccessGroups: "false",
+    })
+  ).map((v) =>
+    years.reduce((vacLongCurrent, year) => {
+      if (!v.pid) {
+        return vacLongCurrent
+      }
+      vacLongCurrent.push({
+        pid: processRedcapString(v.pid),
+        year: year,
+        status:
+          processRedcapStringLower(v[`vac_${year}`])?.replace("yes - ", "") ??
+          null,
+      })
+      return vacLongCurrent
+    }, vacLong)
+  )
+
+  return decode(t.array(VaccinationV), vacLong)
 }

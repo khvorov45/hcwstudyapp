@@ -19,6 +19,7 @@ import {
   exportParticipants,
   exportRedcapIds,
   exportWithdrawn,
+  exportVaccination,
 } from "./redcap"
 
 const pgpInit = pgp()
@@ -226,10 +227,11 @@ export async function syncRedcapParticipants(
   redcapConfig: RedcapConfig
 ) {
   // Wait for this to succeed before doing anyting else
-  const [redcapParticipants, redcapIds, withdrawn] = await Promise.all([
+  const [redcapParticipants, redcapIds, withdrawn, vac] = await Promise.all([
     exportParticipants(redcapConfig),
     exportRedcapIds(redcapConfig),
     exportWithdrawn(redcapConfig),
+    exportVaccination(redcapConfig),
   ])
   const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
 
@@ -259,6 +261,10 @@ export async function syncRedcapParticipants(
           pid,
         }
       })
+    ),
+    insertVaccination(
+      db,
+      vac.filter((v) => redcapParticipantIds.includes(v.pid))
     ),
   ])
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
@@ -294,4 +300,10 @@ async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
 
 export async function getVaccination(db: DB): Promise<Vaccination[]> {
   return await db.any('SELECT * FROM "Vaccination"')
+}
+
+async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
+  await db.any(
+    pgpInit.helpers.insert(v, ["pid", "year", "status"], "Vaccination")
+  )
 }
