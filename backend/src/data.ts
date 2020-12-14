@@ -84,3 +84,12 @@ export const ScheduleV = t.type({
   date: t.union([DateFromISOString, t.null]),
 })
 export type Schedule = t.TypeOf<typeof ScheduleV>
+
+export const WeeklySurveyV = t.type({
+  pid: t.string,
+  index: t.number,
+  date: t.union([DateFromISOString, t.null]),
+  ari: t.boolean,
+  swabCollection: t.union([t.boolean, t.null]),
+})
+export type WeeklySurvey = t.TypeOf<typeof WeeklySurveyV>
