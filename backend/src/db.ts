@@ -217,7 +217,23 @@ export async function insertParticipants(
   )
 }
 
-export async function deleteParticipant(db: DB, pid: string): Promise<void> {
+export async function deleteParticipant(
+  db: DB,
+  pid: string,
+  a: AccessGroup
+): Promise<void> {
+  let p: Participant
+  try {
+    p = await db.one('SELECT * FROM "Participant" WHERE "pid" = $1', [pid])
+  } catch (e) {
+    if (e.message === "No data returned from the query.") {
+      throw Error("NOT FOUND: no such pid")
+    }
+    throw Error(e.message)
+  }
+  if (isSite(a) && p.site !== a) {
+    throw Error("UNAUTHORIZED: invalid participant site")
+  }
   await db.any('DELETE FROM "Participant" WHERE "pid"=$1', [pid])
 }
 

@@ -94,8 +94,8 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/participants", async (req: Request, res: Response) => {
-    await validateUser(req, db)
-    await deleteParticipant(db, decode(t.string, req.query.redcapRecordId))
+    const u = await validateUser(req, db)
+    await deleteParticipant(db, decode(t.string, req.query.pid), u.accessGroup)
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put(
@@ -129,6 +129,8 @@ export function getRoutes(
   routes.use((err: Error, req: Request, res: Response, _next: any) => {
     if (err.message.startsWith("UNAUTHORIZED")) {
       res.status(StatusCodes.UNAUTHORIZED).json(err.message)
+    } else if (err.message.startsWith("NOT FOUND")) {
+      res.status(StatusCodes.NOT_FOUND).json(err.message)
     } else {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(err.message)
     }
