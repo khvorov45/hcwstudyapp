@@ -5,6 +5,7 @@ import {
   ThemeProvider,
 } from "@material-ui/core"
 import React, { useState } from "react"
+import Nav from "./components/nav"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -31,7 +32,7 @@ export default function App() {
     <div>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Button onClick={(_) => togglePalette()}>Theme switch</Button>
+        <Nav togglePalette={togglePalette} />
       </ThemeProvider>
     </div>
   )
