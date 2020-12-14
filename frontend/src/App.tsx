@@ -1,10 +1,10 @@
 import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
-import axios from "axios"
 import React, { useState } from "react"
 import StatusCodes from "http-status-codes"
 import { useAsync } from "react-async-hook"
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
 import Nav from "./components/nav"
+import { apiReq } from "./lib/api"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -31,20 +31,19 @@ export default function App() {
   const theme = createMuiTheme({ palette: { type: paletteType } })
 
   // Auth ---------------------------------------------------------------------
-  const tok = new URLSearchParams(window.location.search).get("token")
-  const auth = useAsync(async () => {
-    const res = await axios.get("http://localhost:7001/auth/token/verify", {
-      validateStatus: (s) =>
-        [StatusCodes.OK, StatusCodes.UNAUTHORIZED].includes(s),
-      headers: { Authorization: `Bearer ${tok}` },
-    })
-    if (res.status !== StatusCodes.OK) {
-      throw Error(res.data)
-    }
-    return res.data
-  }, [])
-  console.log(auth.result)
-  console.log(auth.error?.message)
+  const auth = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        url: "http://localhost:7001/auth/token/verify",
+        token: new URLSearchParams(window.location.search).get("token"),
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+      }),
+    []
+  )
+  console.log("result: " + auth.result)
+  console.log("error: " + auth.error?.message)
 
   return (
     <div>
