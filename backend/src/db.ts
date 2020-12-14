@@ -337,8 +337,17 @@ async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
 
 // Vaccination history ========================================================
 
-export async function getVaccination(db: DB): Promise<Vaccination[]> {
-  return await db.any('SELECT * FROM "Vaccination"')
+export async function getVaccinationSubset(
+  db: DB,
+  a: AccessGroup
+): Promise<Vaccination[]> {
+  return isSite(a)
+    ? await db.any(
+        `SELECT * FROM "Vaccination" WHERE "pid" IN
+        (SELECT "pid" FROM "Participant" WHERE "site" = $1)`,
+        [a]
+      )
+    : await db.any('SELECT * FROM "Vaccination"')
 }
 
 async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
