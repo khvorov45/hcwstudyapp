@@ -81,6 +81,6 @@ export type Vaccination = t.TypeOf<typeof VaccinationV>
 export const ScheduleV = t.type({
   pid: t.string,
   day: t.number,
-  date: DateFromISOString,
+  date: t.union([DateFromISOString, t.null]),
 })
 export type Schedule = t.TypeOf<typeof ScheduleV>
