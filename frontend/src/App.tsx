@@ -1,5 +1,6 @@
 import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
 import React, { useState } from "react"
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
 import Nav from "./components/nav"
 
 function themeInit(): "dark" | "light" {
@@ -27,7 +28,14 @@ export default function App() {
     <div>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Nav togglePalette={togglePalette} />
+        <Router>
+          <Nav togglePalette={togglePalette} />
+          <Switch>
+            <Route exact path="/">
+              Home
+            </Route>
+          </Switch>
+        </Router>
       </ThemeProvider>
     </div>
   )
