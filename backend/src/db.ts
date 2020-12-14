@@ -97,7 +97,7 @@ async function resetSchema(db: DB): Promise<void> {
 async function getTableSubset(
   db: DB,
   a: AccessGroup,
-  t: "Vaccination" | "RedcapId" | "Withdrawn"
+  t: "Vaccination" | "RedcapId" | "Withdrawn" | "Schedule"
 ) {
   return isSite(a)
     ? await db.any(
@@ -367,6 +367,13 @@ async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
 }
 
 // Schedule ===================================================================
+
+export async function getScheduleSubset(
+  db: DB,
+  a: AccessGroup
+): Promise<Schedule[]> {
+  return await getTableSubset(db, a, "Schedule")
+}
 
 async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
   await db.any(pgpInit.helpers.insert(v, ["pid", "day", "date"], "Schedule"))

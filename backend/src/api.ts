@@ -19,6 +19,7 @@ import {
   getVaccinationSubset,
   getRedcapIdSubset,
   getWithdrawnSubset,
+  getScheduleSubset,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -130,6 +131,12 @@ export function getRoutes(
   routes.get("/vaccination", async (req: Request, res: Response) => {
     const u = await validateUser(req, db)
     res.json(await getVaccinationSubset(db, u.accessGroup))
+  })
+
+  // Schedule
+  routes.get("/schedule", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json(await getScheduleSubset(db, u.accessGroup))
   })
 
   // Errors
