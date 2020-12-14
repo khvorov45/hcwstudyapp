@@ -186,7 +186,7 @@ export async function getParticipantsSubset(
   a: AccessGroup
 ): Promise<Participant[]> {
   return isSite(a)
-    ? await db.any('SELECT * FROM "Participant" WHERE "accessGroup" = $1', [a])
+    ? await db.any('SELECT * FROM "Participant" WHERE "site" = $1', [a])
     : await db.any('SELECT * FROM "Participant"')
 }
 
