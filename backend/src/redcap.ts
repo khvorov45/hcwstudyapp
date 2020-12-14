@@ -10,6 +10,8 @@ import {
   RedcapIdV,
   Vaccination,
   VaccinationV,
+  Schedule,
+  ScheduleV,
 } from "./data"
 import { decode } from "./io"
 
@@ -242,4 +244,37 @@ export async function exportVaccination(
   )
 
   return decode(t.array(VaccinationV), vacLong)
+}
+
+export async function exportSchedule(
+  config: RedcapConfig
+): Promise<Schedule[]> {
+  const days = [0, 7, 14, 280]
+  const varNames = days.map((d) => `scheduled_date_v${d}`)
+  const scheduleLong: any[] = []
+
+  const _ = (
+    await redcapApiReq(config, {
+      content: "record",
+      fields: ["pid", ...varNames].toString(),
+      events: "baseline_arm_1",
+      type: "flat",
+      rawOrLabel: "raw",
+      exportDataAccessGroups: "false",
+    })
+  ).map((r: any) => {
+    days.reduce((scheduleLongCurrent, day) => {
+      if (!r.pid) {
+        return scheduleLongCurrent
+      }
+      scheduleLongCurrent.push({
+        pid: processRedcapString(r.pid),
+        day: day,
+        date: processRedcapString(r[`scheduled_date_v${day}`]),
+      })
+      return scheduleLongCurrent
+    }, scheduleLong)
+  })
+
+  return decode(t.array(ScheduleV), scheduleLong)
 }

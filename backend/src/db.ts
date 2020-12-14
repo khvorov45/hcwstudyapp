@@ -7,6 +7,7 @@ import {
   isSite,
   Participant,
   RedcapId,
+  Schedule,
   SiteV,
   User,
   Vaccination,
@@ -20,6 +21,7 @@ import {
   exportRedcapIds,
   exportWithdrawn,
   exportVaccination,
+  exportSchedule,
 } from "./redcap"
 
 const pgpInit = pgp()
@@ -227,11 +229,18 @@ export async function syncRedcapParticipants(
   redcapConfig: RedcapConfig
 ) {
   // Wait for this to succeed before doing anyting else
-  const [redcapParticipants, redcapIds, withdrawn, vac] = await Promise.all([
+  const [
+    redcapParticipants,
+    redcapIds,
+    withdrawn,
+    vac,
+    schedule,
+  ] = await Promise.all([
     exportParticipants(redcapConfig),
     exportRedcapIds(redcapConfig),
     exportWithdrawn(redcapConfig),
     exportVaccination(redcapConfig),
+    exportSchedule(redcapConfig),
   ])
   const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
 
@@ -265,6 +274,10 @@ export async function syncRedcapParticipants(
     insertVaccination(
       db,
       vac.filter((v) => redcapParticipantIds.includes(v.pid))
+    ),
+    insertSchedule(
+      db,
+      schedule.filter((v) => redcapParticipantIds.includes(v.pid))
     ),
   ])
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
@@ -306,4 +319,10 @@ async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
   await db.any(
     pgpInit.helpers.insert(v, ["pid", "year", "status"], "Vaccination")
   )
+}
+
+// Schedule ===================================================================
+
+async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
+  await db.any(pgpInit.helpers.insert(v, ["pid", "day", "date"], "Schedule"))
 }
