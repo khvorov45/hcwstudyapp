@@ -10,9 +10,10 @@ import {
 } from "react-router-dom"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
-import { User, UserV } from "./lib/data"
+import { UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
+import { AdminOnly } from "./components/auth"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -105,14 +106,4 @@ function AuthRoute({
       )}
     </Route>
   )
-}
-
-function AdminOnly({
-  user,
-  children,
-}: {
-  user: User | null | undefined
-  children: ReactNode
-}) {
-  return <>{user?.accessGroup === "admin" ? children : <></>}</>
 }
