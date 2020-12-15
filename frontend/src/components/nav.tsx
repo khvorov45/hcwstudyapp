@@ -42,7 +42,7 @@ export default function Nav({
       {/* RIGHT */}
       <div>
         <AdminOnly user={user}>
-          <IconButton component={Link} to={`/users?=${token}`}>
+          <IconButton component={Link} to={`/users?token=${token}`}>
             <People />
           </IconButton>
         </AdminOnly>
