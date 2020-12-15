@@ -11,6 +11,8 @@ import {
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
 import { UserV } from "./lib/data"
+import ReactMarkdown from "react-markdown"
+import homeMdPath from "./md/home.md"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -51,6 +53,13 @@ export default function App() {
     []
   )
 
+  // Home page md -------------------------------------------------------------
+
+  const [homePageContent, setHomePageContent] = useState<string>()
+  fetch(homeMdPath)
+    .then((d) => d.text())
+    .then((t) => setHomePageContent(t))
+
   return (
     <div>
       <ThemeProvider theme={theme}>
@@ -62,7 +71,7 @@ export default function App() {
               Get link
             </Route>
             <AuthRoute exact authStatus={auth.status} path="/">
-              Home
+              <ReactMarkdown>{homePageContent ?? ""}</ReactMarkdown>
             </AuthRoute>
           </Switch>
         </Router>
