@@ -10,7 +10,7 @@ import {
 } from "react-router-dom"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
-import { UserV } from "./lib/data"
+import { User, UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 
@@ -73,6 +73,9 @@ export default function App() {
             <AuthRoute exact authStatus={auth.status} path="/">
               <ReactMarkdown>{homePageContent ?? ""}</ReactMarkdown>
             </AuthRoute>
+            <AuthRoute exact authStatus={auth.status} path="/admin">
+              <AdminOnly user={auth.result}>Admin panel</AdminOnly>
+            </AuthRoute>
           </Switch>
         </Router>
       </ThemeProvider>
@@ -102,4 +105,14 @@ function AuthRoute({
       )}
     </Route>
   )
+}
+
+function AdminOnly({
+  user,
+  children,
+}: {
+  user: User | null | undefined
+  children: ReactNode
+}) {
+  return <>{user?.accessGroup === "admin" ? children : <></>}</>
 }
