@@ -88,6 +88,20 @@ export default function App() {
             >
               Users
             </AuthRoute>
+            <AuthRoute
+              authStatus={auth.status}
+              user={auth.result}
+              path="/tables"
+            >
+              Tables
+            </AuthRoute>
+            <AuthRoute
+              authStatus={auth.status}
+              user={auth.result}
+              path="/plots"
+            >
+              Plots
+            </AuthRoute>
           </Switch>
         </Router>
       </ThemeProvider>
