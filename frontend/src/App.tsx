@@ -10,10 +10,9 @@ import {
 } from "react-router-dom"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
-import { UserV } from "./lib/data"
+import { User, UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
-import { AdminOnly } from "./components/auth"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -72,11 +71,22 @@ export default function App() {
             <Route exact path="/get-link">
               Get link
             </Route>
-            <AuthRoute exact authStatus={auth.status} path="/">
+            <AuthRoute
+              exact
+              authStatus={auth.status}
+              user={auth.result}
+              path="/"
+            >
               <ReactMarkdown>{homePageContent ?? ""}</ReactMarkdown>
             </AuthRoute>
-            <AuthRoute exact authStatus={auth.status} path="/users">
-              <AdminOnly user={auth.result}>Users</AdminOnly>
+            <AuthRoute
+              exact
+              admin
+              authStatus={auth.status}
+              user={auth.result}
+              path="/users"
+            >
+              Users
             </AuthRoute>
           </Switch>
         </Router>
@@ -87,24 +97,31 @@ export default function App() {
 
 function AuthRoute({
   path,
-  authStatus,
-  children,
   exact,
+  authStatus,
+  user,
+  admin,
+  children,
 }: {
   path: string
-  authStatus: AsyncStateStatus
-  children: ReactNode
   exact?: boolean
+  authStatus: AsyncStateStatus
+  user: User | null | undefined
+  admin?: boolean
+  children: ReactNode
 }) {
+  if (authStatus === "error") {
+    return <Redirect to="/get-link" />
+  }
+  if (authStatus === "loading" || authStatus === "not-requested" || !user) {
+    return <></>
+  }
+  if (admin && user.accessGroup !== "admin") {
+    return <Redirect to="/get-link" />
+  }
   return (
     <Route exact={exact} path={path}>
-      {authStatus === "error" ? (
-        <Redirect to="/get-link" />
-      ) : authStatus === "success" ? (
-        children
-      ) : (
-        <></>
-      )}
+      {children}
     </Route>
   )
 }
