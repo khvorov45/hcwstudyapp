@@ -89,12 +89,12 @@ function Contact({ token }: { token: string | null }) {
         accessor: (p: Participant) => p.mobile,
       },
       {
-        Header: "Site",
-        accessor: (p: Participant) => p.site,
-      },
-      {
         Header: "Screened",
         accessor: (p: Participant) => formatDate(p.dateScreening),
+      },
+      {
+        Header: "Site",
+        accessor: (p: Participant) => p.site,
       },
     ]
   }, [])
