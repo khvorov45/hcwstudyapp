@@ -1,8 +1,13 @@
 import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
-import React, { useState } from "react"
+import React, { ReactNode, useState } from "react"
 import StatusCodes from "http-status-codes"
-import { useAsync } from "react-async-hook"
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
+import { AsyncStateStatus, useAsync } from "react-async-hook"
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
 import { UserV } from "./lib/data"
@@ -32,6 +37,7 @@ export default function App() {
   const theme = createMuiTheme({ palette: { type: paletteType } })
 
   // Auth ---------------------------------------------------------------------
+
   const auth = useAsync(
     () =>
       apiReq({
@@ -44,8 +50,6 @@ export default function App() {
       }),
     []
   )
-  console.log("result: " + auth.result)
-  console.log("error: " + auth.error?.message)
 
   return (
     <div>
@@ -54,12 +58,39 @@ export default function App() {
         <Router>
           <Nav togglePalette={togglePalette} />
           <Switch>
-            <Route exact path="/">
-              Home
+            <Route exact path="/get-link">
+              Get link
             </Route>
+            <AuthRoute exact authStatus={auth.status} path="/">
+              Home
+            </AuthRoute>
           </Switch>
         </Router>
       </ThemeProvider>
     </div>
+  )
+}
+
+function AuthRoute({
+  path,
+  authStatus,
+  children,
+  exact,
+}: {
+  path: string
+  authStatus: AsyncStateStatus
+  children: ReactNode
+  exact?: boolean
+}) {
+  return (
+    <Route exact={exact} path={path}>
+      {authStatus === "error" ? (
+        <Redirect to="/get-link" />
+      ) : authStatus === "success" ? (
+        children
+      ) : (
+        <></>
+      )}
+    </Route>
   )
 }
