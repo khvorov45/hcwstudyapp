@@ -40,7 +40,9 @@ export default function Tables({ token }: { token: string | null }) {
       <Route path={tablePaths[0]}>
         <Contact token={token} />
       </Route>
-      <Route path={tablePaths[1]}>Baseline</Route>
+      <Route path={tablePaths[1]}>
+        <Baseline token={token} />
+      </Route>
       <Route path={tablePaths[2]}>Schedule</Route>
       <Route path={tablePaths[3]}>Weekly survey</Route>
       <Route path={tablePaths[4]}>Weekly completion</Route>
@@ -91,6 +93,53 @@ function Contact({ token }: { token: string | null }) {
       {
         Header: "Screened",
         accessor: (p: Participant) => formatDate(p.dateScreening),
+      },
+      {
+        Header: "Site",
+        accessor: (p: Participant) => p.site,
+      },
+    ]
+  }, [])
+
+  const table = useTable<Participant>({
+    columns: columns,
+    data: participants,
+  })
+
+  return <Table table={table} />
+}
+
+function Baseline({ token }: { token: string | null }) {
+  const participantsFetch = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        url: "http://localhost:7001/participants",
+        token: token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(ParticipantV),
+      }),
+    []
+  )
+
+  const participants = useMemo(() => participantsFetch.result ?? [], [
+    participantsFetch,
+  ])
+
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: Participant) => p.pid,
+      },
+      {
+        Header: "DoB",
+        accessor: (p: Participant) => formatDate(p.dob),
+      },
+      {
+        Header: "Gender",
+        accessor: (p: Participant) => p.gender,
       },
       {
         Header: "Site",
