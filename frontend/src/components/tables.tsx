@@ -113,7 +113,7 @@ function Contact({ token }: { token: string | null }) {
   return (
     <>
       <TableContainer>
-        <Table {...getTableProps}>
+        <Table {...getTableProps()}>
           <TableHead>
             <TableRow>
               {headers.map((h) => (
