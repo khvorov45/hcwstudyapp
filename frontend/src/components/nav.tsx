@@ -1,6 +1,9 @@
 import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core"
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import React from "react"
+import { Link } from "react-router-dom"
+import { User } from "../lib/data"
+import { AdminOnly } from "./auth"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -14,7 +17,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function Nav({ togglePalette }: { togglePalette: () => void }) {
+export default function Nav({
+  togglePalette,
+  user,
+}: {
+  togglePalette: () => void
+  user: User | null | undefined
+}) {
   const classes = useStyles()
   return (
     <div className={classes.nav}>
@@ -24,6 +33,11 @@ export default function Nav({ togglePalette }: { togglePalette: () => void }) {
       <div></div>
       {/* RIGHT */}
       <div>
+        <AdminOnly user={user}>
+          <IconButton component={Link} to="/admin">
+            <BrightnessMediumIcon />
+          </IconButton>
+        </AdminOnly>
         <IconButton onClick={(_) => togglePalette()}>
           <BrightnessMediumIcon />
         </IconButton>

@@ -66,7 +66,7 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Nav togglePalette={togglePalette} />
+          <Nav togglePalette={togglePalette} user={auth.result} />
           <Switch>
             <Route exact path="/get-link">
               Get link
