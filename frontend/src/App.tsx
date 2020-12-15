@@ -41,12 +41,13 @@ export default function App() {
 
   // Auth ---------------------------------------------------------------------
 
+  const token = new URLSearchParams(window.location.search).get("token")
   const auth = useAsync(
     () =>
       apiReq({
         method: "GET",
         url: "http://localhost:7001/auth/token/verify",
-        token: new URLSearchParams(window.location.search).get("token"),
+        token: token,
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],
         validator: UserV,
@@ -66,7 +67,7 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Nav togglePalette={togglePalette} user={auth.result} />
+          <Nav togglePalette={togglePalette} user={auth.result} token={token} />
           <Switch>
             <Route exact path="/get-link">
               Get link

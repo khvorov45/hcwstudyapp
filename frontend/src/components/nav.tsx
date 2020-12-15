@@ -21,9 +21,11 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Nav({
   togglePalette,
   user,
+  token,
 }: {
   togglePalette: () => void
   user: User | null | undefined
+  token: string | null
 }) {
   const classes = useStyles()
   return (
@@ -35,7 +37,7 @@ export default function Nav({
       {/* RIGHT */}
       <div>
         <AdminOnly user={user}>
-          <IconButton component={Link} to="/users">
+          <IconButton component={Link} to={`/users?=${token}`}>
             <People />
           </IconButton>
         </AdminOnly>
