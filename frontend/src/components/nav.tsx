@@ -1,6 +1,7 @@
 import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core"
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import People from "@material-ui/icons/People"
+import Home from "@material-ui/icons/Home"
 import React from "react"
 import { Link } from "react-router-dom"
 import { User } from "../lib/data"
@@ -31,7 +32,11 @@ export default function Nav({
   return (
     <div className={classes.nav}>
       {/* LEFT */}
-      <div></div>
+      <div>
+        <IconButton component={Link} to={`/?token=${token}`}>
+          <Home />
+        </IconButton>
+      </div>
       {/* CENTER */}
       <div></div>
       {/* RIGHT */}
