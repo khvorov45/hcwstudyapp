@@ -2,10 +2,9 @@ import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core"
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
-import React from "react"
+import React, { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { User } from "../lib/data"
-import { AdminOnly, UserOnly } from "./auth"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,25 +32,43 @@ export default function Nav({
     <div className={classes.nav}>
       {/* LEFT */}
       <div>
-        <UserOnly user={user}>
+        <AuthOnly user={user}>
           <IconButton component={Link} to={`/?token=${token}`}>
             <Home />
           </IconButton>
-        </UserOnly>
+        </AuthOnly>
       </div>
       {/* CENTER */}
       <div></div>
       {/* RIGHT */}
       <div>
-        <AdminOnly user={user}>
+        <AuthOnly user={user} admin>
           <IconButton component={Link} to={`/users?token=${token}`}>
             <People />
           </IconButton>
-        </AdminOnly>
+        </AuthOnly>
         <IconButton onClick={(_) => togglePalette()}>
           <BrightnessMediumIcon />
         </IconButton>
       </div>
     </div>
   )
+}
+
+function AuthOnly({
+  user,
+  admin,
+  children,
+}: {
+  user: User | null | undefined
+  admin?: boolean
+  children: ReactNode
+}) {
+  if (!user) {
+    return <></>
+  }
+  if (admin && user.accessGroup !== "admin") {
+    return <></>
+  }
+  return <>{children}</>
 }
