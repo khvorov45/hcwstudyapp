@@ -74,8 +74,8 @@ export default function App() {
             <AuthRoute exact authStatus={auth.status} path="/">
               <ReactMarkdown>{homePageContent ?? ""}</ReactMarkdown>
             </AuthRoute>
-            <AuthRoute exact authStatus={auth.status} path="/admin">
-              <AdminOnly user={auth.result}>Admin panel</AdminOnly>
+            <AuthRoute exact authStatus={auth.status} path="/users">
+              <AdminOnly user={auth.result}>Users</AdminOnly>
             </AuthRoute>
           </Switch>
         </Router>

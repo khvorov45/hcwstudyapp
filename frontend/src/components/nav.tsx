@@ -1,5 +1,6 @@
 import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core"
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
+import People from "@material-ui/icons/People"
 import React from "react"
 import { Link } from "react-router-dom"
 import { User } from "../lib/data"
@@ -34,8 +35,8 @@ export default function Nav({
       {/* RIGHT */}
       <div>
         <AdminOnly user={user}>
-          <IconButton component={Link} to="/admin">
-            <BrightnessMediumIcon />
+          <IconButton component={Link} to="/users">
+            <People />
           </IconButton>
         </AdminOnly>
         <IconButton onClick={(_) => togglePalette()}>
