@@ -1,4 +1,10 @@
-import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core"
+import {
+  Button,
+  createStyles,
+  IconButton,
+  makeStyles,
+  Theme,
+} from "@material-ui/core"
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
@@ -36,6 +42,12 @@ export default function Nav({
           <IconButton component={Link} to={`/?token=${token}`}>
             <Home />
           </IconButton>
+          <Button component={Link} to={`/tables?token=${token}`}>
+            Tables
+          </Button>
+          <Button component={Link} to={`/plots?token=${token}`}>
+            Plots
+          </Button>
         </AuthOnly>
       </div>
       {/* CENTER */}
