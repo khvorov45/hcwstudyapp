@@ -1,0 +1,33 @@
+openapi: "3.0.2"
+info:
+  title: HCW flu study app API
+  version: "1.0"
+servers:
+  - url: https://reports.hcwflustudy.com/api
+paths:
+  /users:
+    get:
+      summary: List all users
+      responses:
+        "200":
+          description: Array of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Users"
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - accessGroup
+      properties:
+        email:
+          type: string
+        accessGroup:
+          enum: [admin, unrestricted]
+    Users:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
