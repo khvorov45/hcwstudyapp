@@ -5,6 +5,7 @@ import { useAsync } from "react-async-hook"
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
+import { UserV } from "./lib/data"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -39,6 +40,7 @@ export default function App() {
         token: new URLSearchParams(window.location.search).get("token"),
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],
+        validator: UserV,
       }),
     []
   )
