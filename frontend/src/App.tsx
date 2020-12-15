@@ -13,6 +13,7 @@ import { apiReq } from "./lib/api"
 import { User, UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
+import Tables from "./components/tables"
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -93,7 +94,7 @@ export default function App() {
               user={auth.result}
               path="/tables"
             >
-              Tables
+              <Tables token={token} />
             </AuthRoute>
             <AuthRoute
               authStatus={auth.status}

@@ -21,6 +21,9 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
+    simpleNav: {
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    },
   })
 )
 
@@ -83,4 +86,21 @@ function AuthOnly({
     return <></>
   }
   return <>{children}</>
+}
+
+export function SimpleNav({
+  links,
+}: {
+  links: { name: string; link: string }[]
+}) {
+  const classes = useStyles()
+  return (
+    <div className={classes.simpleNav}>
+      {links.map(({ name, link }) => (
+        <Button key={name} component={Link} to={`${link}`}>
+          {name}
+        </Button>
+      ))}
+    </div>
+  )
 }
