@@ -10,3 +10,13 @@ export function AdminOnly({
 }) {
   return <>{user?.accessGroup === "admin" ? children : <></>}</>
 }
+
+export function UserOnly({
+  user,
+  children,
+}: {
+  user: User | null | undefined
+  children: ReactNode
+}) {
+  return <>{user ? children : <></>}</>
+}

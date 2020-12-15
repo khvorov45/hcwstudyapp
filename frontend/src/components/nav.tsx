@@ -5,7 +5,7 @@ import Home from "@material-ui/icons/Home"
 import React from "react"
 import { Link } from "react-router-dom"
 import { User } from "../lib/data"
-import { AdminOnly } from "./auth"
+import { AdminOnly, UserOnly } from "./auth"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,9 +33,11 @@ export default function Nav({
     <div className={classes.nav}>
       {/* LEFT */}
       <div>
-        <IconButton component={Link} to={`/?token=${token}`}>
-          <Home />
-        </IconButton>
+        <UserOnly user={user}>
+          <IconButton component={Link} to={`/?token=${token}`}>
+            <Home />
+          </IconButton>
+        </UserOnly>
       </div>
       {/* CENTER */}
       <div></div>
