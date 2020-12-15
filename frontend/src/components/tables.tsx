@@ -4,7 +4,17 @@ import * as t from "io-ts"
 import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
-import { ParticipantV } from "../lib/data"
+import { Participant, ParticipantV } from "../lib/data"
+import { useMemo } from "react"
+import { useTable } from "react-table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@material-ui/core"
 
 export default function Tables({ token }: { token: string | null }) {
   const tableNames = [
@@ -39,6 +49,13 @@ export default function Tables({ token }: { token: string | null }) {
   )
 }
 
+function formatDate(d: Date | null | undefined): string {
+  if (!d) {
+    return ""
+  }
+  return d.toISOString().split("T")[0]
+}
+
 function Contact({ token }: { token: string | null }) {
   const participantsFetch = useAsync(
     () =>
@@ -52,7 +69,76 @@ function Contact({ token }: { token: string | null }) {
       }),
     []
   )
-  console.log(participantsFetch.result)
-  console.log(participantsFetch.error?.message)
-  return <>Contact</>
+
+  const participants = useMemo(() => participantsFetch.result ?? [], [
+    participantsFetch,
+  ])
+
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: Participant) => p.pid,
+      },
+      {
+        Header: "Email",
+        accessor: (p: Participant) => p.email,
+      },
+      {
+        Header: "Mobile",
+        accessor: (p: Participant) => p.mobile,
+      },
+      {
+        Header: "Site",
+        accessor: (p: Participant) => p.site,
+      },
+      {
+        Header: "Screened",
+        accessor: (p: Participant) => formatDate(p.dateScreening),
+      },
+    ]
+  }, [])
+
+  const {
+    headers,
+    rows,
+    getTableProps,
+    getTableBodyProps,
+    prepareRow,
+  } = useTable<Participant>({
+    columns: columns,
+    data: participants,
+  })
+
+  return (
+    <>
+      <TableContainer>
+        <Table {...getTableProps}>
+          <TableHead>
+            <TableRow>
+              {headers.map((h) => (
+                <TableCell {...h.getHeaderProps()}>
+                  {h.render("Header")}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody {...getTableBodyProps()}>
+            {rows.map((r) => {
+              prepareRow(r)
+              return (
+                <TableRow {...r.getRowProps()}>
+                  {r.cells.map((c) => (
+                    <TableCell {...c.getCellProps()}>
+                      {c.render("Cell")}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  )
 }
