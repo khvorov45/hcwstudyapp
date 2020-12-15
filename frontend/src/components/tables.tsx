@@ -6,9 +6,9 @@ import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
 import { Participant, ParticipantV } from "../lib/data"
 import { useMemo } from "react"
-import { useTable } from "react-table"
+import { TableInstance, useTable } from "react-table"
 import {
-  Table,
+  Table as MaterialTable,
   TableBody,
   TableCell,
   TableContainer,
@@ -99,33 +99,31 @@ function Contact({ token }: { token: string | null }) {
     ]
   }, [])
 
-  const {
-    headers,
-    rows,
-    getTableProps,
-    getTableBodyProps,
-    prepareRow,
-  } = useTable<Participant>({
+  const table = useTable<Participant>({
     columns: columns,
     data: participants,
   })
 
+  return <Table table={table} />
+}
+
+function Table<T extends object>({ table }: { table: TableInstance<T> }) {
   return (
     <>
       <TableContainer>
-        <Table {...getTableProps()}>
+        <MaterialTable {...table.getTableProps()}>
           <TableHead>
             <TableRow>
-              {headers.map((h) => (
+              {table.headers.map((h) => (
                 <TableCell {...h.getHeaderProps()}>
                   {h.render("Header")}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {rows.map((r) => {
-              prepareRow(r)
+          <TableBody {...table.getTableBodyProps()}>
+            {table.rows.map((r) => {
+              table.prepareRow(r)
               return (
                 <TableRow {...r.getRowProps()}>
                   {r.cells.map((c) => (
@@ -137,7 +135,7 @@ function Contact({ token }: { token: string | null }) {
               )
             })}
           </TableBody>
-        </Table>
+        </MaterialTable>
       </TableContainer>
     </>
   )
