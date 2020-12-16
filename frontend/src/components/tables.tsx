@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     table: {
       "& .header": {
+        whiteSpace: "nowrap",
         "& :nth-child(even)": {
           background: theme.palette.background.alt,
         },
