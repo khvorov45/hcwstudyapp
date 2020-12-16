@@ -9,6 +9,7 @@ import { CSSProperties, useMemo } from "react"
 import { Column, useBlockLayout, useTable } from "react-table"
 import { FixedSizeList } from "react-window"
 import { makeStyles, Theme, createStyles } from "@material-ui/core"
+import detectScrollbarWidth from "../lib/scrollbar-width"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -187,6 +188,7 @@ function Table<T extends object>({
     )
   }
   const classes = useStyles()
+  const scrollbarWidth = useMemo(() => detectScrollbarWidth(), [])
   return (
     <div {...table.getTableProps()} className={classes.table}>
       {/*Headers*/}
@@ -203,7 +205,7 @@ function Table<T extends object>({
           height={500}
           itemCount={table.rows.length}
           itemSize={35}
-          width={table.totalColumnsWidth + 5}
+          width={table.totalColumnsWidth + scrollbarWidth}
         >
           {renderRow}
         </FixedSizeList>
