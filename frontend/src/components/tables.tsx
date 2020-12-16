@@ -106,22 +106,27 @@ function Contact({ participants }: { participants: Participant[] }) {
       {
         Header: "PID",
         accessor: (p: Participant) => p.pid,
+        width: 75,
       },
       {
         Header: "Email",
         accessor: (p: Participant) => p.email,
+        width: 400,
       },
       {
         Header: "Mobile",
         accessor: (p: Participant) => p.mobile,
+        width: 120,
       },
       {
         Header: "Screened",
         accessor: (p: Participant) => formatDate(p.dateScreening),
+        width: 100,
       },
       {
         Header: "Site",
         accessor: (p: Participant) => p.site,
+        width: 100,
       },
     ]
   }, [])
@@ -135,18 +140,22 @@ function Baseline({ participants }: { participants: Participant[] }) {
       {
         Header: "PID",
         accessor: (p: Participant) => p.pid,
+        width: 75,
       },
       {
         Header: "DoB",
         accessor: (p: Participant) => formatDate(p.dob),
+        width: 100,
       },
       {
         Header: "Gender",
         accessor: (p: Participant) => p.gender,
+        width: 75,
       },
       {
         Header: "Site",
         accessor: (p: Participant) => p.site,
+        width: 100,
       },
     ]
   }, [])
