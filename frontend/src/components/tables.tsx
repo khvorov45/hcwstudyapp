@@ -6,7 +6,7 @@ import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
 import { Participant, ParticipantV } from "../lib/data"
 import { useMemo } from "react"
-import { TableInstance, useTable } from "react-table"
+import { Column, useTable } from "react-table"
 import {
   Table as MaterialTable,
   TableBody,
@@ -102,12 +102,7 @@ function Contact({ participants }: { participants: Participant[] }) {
     ]
   }, [])
 
-  const table = useTable<Participant>({
-    columns: columns,
-    data: participants,
-  })
-
-  return <Table table={table} />
+  return <Table columns={columns} data={participants} />
 }
 
 function Baseline({ participants }: { participants: Participant[] }) {
@@ -132,15 +127,20 @@ function Baseline({ participants }: { participants: Participant[] }) {
     ]
   }, [])
 
-  const table = useTable<Participant>({
-    columns: columns,
-    data: participants,
-  })
-
-  return <Table table={table} />
+  return <Table columns={columns} data={participants} />
 }
 
-function Table<T extends object>({ table }: { table: TableInstance<T> }) {
+function Table<T extends object>({
+  columns,
+  data,
+}: {
+  columns: Column<T>[]
+  data: T[]
+}) {
+  const table = useTable<T>({
+    columns: columns,
+    data: data,
+  })
   return (
     <>
       <TableContainer>
