@@ -41,7 +41,12 @@ export default function App() {
     document.documentElement.setAttribute("theme", newPalette)
     localStorage.setItem("theme", newPalette)
   }
-  const theme = createMuiTheme({ palette: { type: paletteType } })
+  const theme = createMuiTheme({
+    palette: {
+      type: paletteType,
+      background: { default: paletteType === "dark" ? "black" : "white" },
+    },
+  })
 
   // Auth ---------------------------------------------------------------------
 
