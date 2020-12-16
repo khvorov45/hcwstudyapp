@@ -14,27 +14,8 @@ import detectScrollbarWidth from "../lib/scrollbar-width"
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     table: {
-      display: "inline-block",
-      borderSpacing: 0,
-      border: "1px solid black",
-
-      "& .tr": {
-        ":last-child": {
-          ".td": {
-            borderBottom: 0,
-          },
-        },
-      },
-
       "& .th, & .td": {
-        margin: 0,
         padding: "0.5rem",
-        borderBottom: "1px solid black",
-        borderRight: "1px solid black",
-
-        "&:last-child": {
-          borderRight: "1px solid black",
-        },
       },
     },
   })
