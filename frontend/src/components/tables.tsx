@@ -5,16 +5,39 @@ import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
 import { Participant, ParticipantV } from "../lib/data"
-import { useMemo } from "react"
-import { Column, useTable } from "react-table"
-import {
-  Table as MaterialTable,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@material-ui/core"
+import { CSSProperties, useMemo } from "react"
+import { Column, useBlockLayout, useTable } from "react-table"
+import { FixedSizeList } from "react-window"
+import { makeStyles, Theme, createStyles } from "@material-ui/core"
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    table: {
+      display: "inline-block",
+      borderSpacing: 0,
+      border: "1px solid black",
+
+      "& .tr": {
+        ":last-child": {
+          ".td": {
+            borderBottom: 0,
+          },
+        },
+      },
+
+      "& .th, & .td": {
+        margin: 0,
+        padding: "0.5rem",
+        borderBottom: "1px solid black",
+        borderRight: "1px solid black",
+
+        "&:last-child": {
+          borderRight: "1px solid black",
+        },
+      },
+    },
+  })
+)
 
 export default function Tables({ token }: { token: string | null }) {
   const tableNames = [
@@ -137,39 +160,54 @@ function Table<T extends object>({
   columns: Column<T>[]
   data: T[]
 }) {
-  const table = useTable<T>({
-    columns: columns,
-    data: data,
-  })
+  const table = useTable<T>(
+    {
+      columns: columns,
+      data: data,
+    },
+    useBlockLayout
+  )
+  function renderRow({
+    index,
+    style,
+  }: {
+    index: number
+    style: CSSProperties
+  }) {
+    const r = table.rows[index]
+    table.prepareRow(r)
+    return (
+      <div {...r.getRowProps({ style })} className="tr">
+        {r.cells.map((c) => (
+          <div {...c.getCellProps()} className="td">
+            {c.render("Cell")}
+          </div>
+        ))}
+      </div>
+    )
+  }
+  const classes = useStyles()
   return (
-    <>
-      <TableContainer>
-        <MaterialTable {...table.getTableProps()}>
-          <TableHead>
-            <TableRow>
-              {table.headers.map((h) => (
-                <TableCell {...h.getHeaderProps()}>
-                  {h.render("Header")}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody {...table.getTableBodyProps()}>
-            {table.rows.map((r) => {
-              table.prepareRow(r)
-              return (
-                <TableRow {...r.getRowProps()}>
-                  {r.cells.map((c) => (
-                    <TableCell {...c.getCellProps()}>
-                      {c.render("Cell")}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </MaterialTable>
-      </TableContainer>
-    </>
+    <div {...table.getTableProps()} className={classes.table}>
+      {/*Headers*/}
+      <div>
+        {table.headers.map((h) => (
+          <div {...h.getHeaderProps()} className="th">
+            {h.render("Header")}
+          </div>
+        ))}
+      </div>
+      {/*Body*/}
+      <div {...table.getTableBodyProps()}>
+        <FixedSizeList
+          height={500}
+          itemCount={table.rows.length}
+          itemSize={35}
+          width={table.totalColumnsWidth + 5}
+        >
+          {renderRow}
+        </FixedSizeList>
+      </div>
+    </div>
   )
 }
