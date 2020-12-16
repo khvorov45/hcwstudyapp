@@ -14,6 +14,16 @@ import detectScrollbarWidth from "../lib/scrollbar-width"
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     table: {
+      "& .header": {
+        "& :nth-child(even)": {
+          background: theme.palette.background.alt,
+        },
+      },
+      "& .body": {
+        "& .rowEven": {
+          background: theme.palette.background.alt,
+        },
+      },
       "& .th, & .td": {
         padding: "0.5rem",
       },
@@ -168,7 +178,10 @@ function Table<T extends object>({
     const r = table.rows[index]
     table.prepareRow(r)
     return (
-      <div {...r.getRowProps({ style })} className="tr">
+      <div
+        {...r.getRowProps({ style })}
+        className={`tr ${index % 2 === 1 ? "rowEven" : ""}`}
+      >
         {r.cells.map((c) => (
           <div {...c.getCellProps()} className="td">
             {c.render("Cell")}
@@ -182,7 +195,7 @@ function Table<T extends object>({
   return (
     <div {...table.getTableProps()} className={classes.table}>
       {/*Headers*/}
-      <div>
+      <div className="tr header">
         {table.headers.map((h) => (
           <div {...h.getHeaderProps()} className="th">
             {h.render("Header")}
@@ -190,7 +203,7 @@ function Table<T extends object>({
         ))}
       </div>
       {/*Body*/}
-      <div {...table.getTableBodyProps()}>
+      <div {...table.getTableBodyProps()} className="body">
         <FixedSizeList
           height={500}
           itemCount={table.rows.length}

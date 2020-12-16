@@ -44,7 +44,10 @@ export default function App() {
   const theme = createMuiTheme({
     palette: {
       type: paletteType,
-      background: { default: paletteType === "dark" ? "black" : "white" },
+      background: {
+        default: paletteType === "dark" ? "black" : "white",
+        alt: paletteType === "dark" ? "rgb(40, 40, 40)" : "rgb(220, 220, 220)",
+      },
     },
   })
 
