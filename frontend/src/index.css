@@ -1,0 +1,33 @@
+:root {
+  --bg: black;
+  --bg-alt: gray;
+  --font: white;
+}
+[theme="light"] {
+  --bg: white;
+  --font: black;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-alt);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--font);
+}
+
+html,
+html * {
+  scrollbar-color: var(--bg-alt) var(--bg);
+  scrollbar-width: thin;
+}
