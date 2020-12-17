@@ -13,6 +13,10 @@ import detectScrollbarWidth from "../lib/scrollbar-width"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    tableContainer: {
+      display: "flex",
+      justifyContent: "center",
+    },
     table: {
       overflow: "auto",
       "& .header": {
@@ -20,6 +24,9 @@ const useStyles = makeStyles((theme: Theme) =>
         borderBottom: `1px solid ${theme.palette.divider}`,
         "&>*": {
           borderRight: `1px solid ${theme.palette.divider}`,
+        },
+        "&>*:first-child": {
+          borderLeft: `1px solid ${theme.palette.divider}`,
         },
       },
       "& .body": {
@@ -196,25 +203,27 @@ function Table<T extends object>({
   const classes = useStyles()
   const scrollbarWidth = useMemo(() => detectScrollbarWidth(), [])
   return (
-    <div {...table.getTableProps()} className={classes.table}>
-      {/*Headers*/}
-      <div className="tr header" style={{ width: table.totalColumnsWidth }}>
-        {table.headers.map((h) => (
-          <div {...h.getHeaderProps()} className="th">
-            {h.render("Header")}
-          </div>
-        ))}
-      </div>
-      {/*Body*/}
-      <div {...table.getTableBodyProps()} className="body">
-        <FixedSizeList
-          height={500}
-          itemCount={table.rows.length}
-          itemSize={35}
-          width={table.totalColumnsWidth + scrollbarWidth}
-        >
-          {renderRow}
-        </FixedSizeList>
+    <div className={classes.tableContainer}>
+      <div {...table.getTableProps()} className={classes.table}>
+        {/*Headers*/}
+        <div className="tr header" style={{ width: table.totalColumnsWidth }}>
+          {table.headers.map((h) => (
+            <div {...h.getHeaderProps()} className="th">
+              {h.render("Header")}
+            </div>
+          ))}
+        </div>
+        {/*Body*/}
+        <div {...table.getTableBodyProps()} className="body">
+          <FixedSizeList
+            height={500}
+            itemCount={table.rows.length}
+            itemSize={35}
+            width={table.totalColumnsWidth + scrollbarWidth}
+          >
+            {renderRow}
+          </FixedSizeList>
+        </div>
       </div>
     </div>
   )
