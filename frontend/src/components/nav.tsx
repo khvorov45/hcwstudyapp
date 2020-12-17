@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "center",
       borderBottom: `1px solid ${theme.palette.divider}`,
+      "&>*": {
+        flexShrink: 0,
+      },
     },
   })
 )
