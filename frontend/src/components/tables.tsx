@@ -129,7 +129,9 @@ export default function Tables({ token }: { token: string | null }) {
       <Route path={tablePaths[3]}>
         <WeeklySurveyTable weeklySurvey={weeklySurvey} />
       </Route>
-      <Route path={tablePaths[4]}>Weekly completion</Route>
+      <Route path={tablePaths[4]}>
+        <WeeklyCompletion weeklySurvey={weeklySurvey} />
+      </Route>
       <Route path={tablePaths[5]}>Summary</Route>
     </>
   )
@@ -262,6 +264,39 @@ function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
   }, [])
 
   return <Table columns={columns} data={weeklySurvey} />
+}
+
+function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
+  type WeeklyCompletion = { pid: string; weeks: number[] }
+
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: WeeklyCompletion) => p.pid,
+        width: 75,
+      },
+      {
+        Header: "Weeks",
+        accessor: (p: WeeklyCompletion) => p.weeks.join(" "),
+        width: 550,
+      },
+    ]
+  }, [])
+
+  const weeklyCompletion: WeeklyCompletion[] = []
+  weeklySurvey
+    .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
+    .reduce((a, s) => {
+      if (a[a.length - 1]?.pid === s.pid) {
+        a[a.length - 1].weeks.push(s.index)
+      } else {
+        a.push({ pid: s.pid, weeks: [s.index] })
+      }
+      return a
+    }, weeklyCompletion)
+
+  return <Table columns={columns} data={weeklyCompletion} />
 }
 
 function Table<T extends object>({
