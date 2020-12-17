@@ -4,7 +4,14 @@ import * as t from "io-ts"
 import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
-import { Participant, ParticipantV, Schedule, ScheduleV } from "../lib/data"
+import {
+  Participant,
+  ParticipantV,
+  Schedule,
+  ScheduleV,
+  WeeklySurvey,
+  WeeklySurveyV,
+} from "../lib/data"
 import { CSSProperties, useMemo } from "react"
 import { Column, useBlockLayout, useTable } from "react-table"
 import { FixedSizeList } from "react-window"
@@ -83,10 +90,26 @@ export default function Tables({ token }: { token: string | null }) {
     []
   )
 
+  const weeklySurveyFetch = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        path: "weekly-survey",
+        token: token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(WeeklySurveyV),
+      }),
+    []
+  )
+
   const participants = useMemo(() => participantsFetch.result ?? [], [
     participantsFetch,
   ])
   const schedule = useMemo(() => scheduleFetch.result ?? [], [scheduleFetch])
+  const weeklySurvey = useMemo(() => weeklySurveyFetch.result ?? [], [
+    weeklySurveyFetch,
+  ])
 
   return (
     <>
@@ -103,7 +126,9 @@ export default function Tables({ token }: { token: string | null }) {
       <Route path={tablePaths[2]}>
         <ScheduleTable schedule={schedule} />
       </Route>
-      <Route path={tablePaths[3]}>Weekly survey</Route>
+      <Route path={tablePaths[3]}>
+        <WeeklySurveyTable weeklySurvey={weeklySurvey} />
+      </Route>
       <Route path={tablePaths[4]}>Weekly completion</Route>
       <Route path={tablePaths[5]}>Summary</Route>
     </>
@@ -201,9 +226,42 @@ function ScheduleTable({ schedule }: { schedule: Schedule[] }) {
     ]
   }, [])
 
-  console.log(schedule)
-
   return <Table columns={columns} data={schedule} />
+}
+
+function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: WeeklySurvey) => p.pid,
+        width: 75,
+      },
+      {
+        Header: "Week",
+        accessor: (p: WeeklySurvey) => p.index,
+        width: 75,
+      },
+      {
+        Header: "Date",
+        accessor: (p: WeeklySurvey) => formatDate(p.date),
+        width: 100,
+      },
+      {
+        Header: "ARI",
+        accessor: (p: WeeklySurvey) => p.ari.toString(),
+        width: 75,
+      },
+      {
+        Header: "Swab",
+        accessor: (p: WeeklySurvey) =>
+          p.swabCollection ? p.swabCollection.toString() : "",
+        width: 75,
+      },
+    ]
+  }, [])
+
+  return <Table columns={columns} data={weeklySurvey} />
 }
 
 function Table<T extends object>({
