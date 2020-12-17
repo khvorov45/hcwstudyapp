@@ -11,7 +11,7 @@ import Home from "@material-ui/icons/Home"
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos"
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos"
 import React, { ReactNode, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
 import { useWindowSize } from "../lib/hooks"
 
@@ -24,6 +24,10 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: "space-between",
       alignItems: "center",
       borderBottom: `1px solid ${theme.palette.divider}`,
+      "&>div": {
+        display: "flex",
+        alignItems: "center",
+      },
     },
     simpleNav: {
       height: 50,
@@ -53,6 +57,7 @@ export default function Nav({
   token: string | null
 }) {
   const classes = useStyles()
+  const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
   return (
     <div className={classes.nav}>
       {/* LEFT */}
@@ -61,12 +66,13 @@ export default function Nav({
           <IconButton component={Link} to={`/?token=${token}`}>
             <Home />
           </IconButton>
-          <Button component={Link} to={`/tables?token=${token}`}>
-            Tables
-          </Button>
-          <Button component={Link} to={`/plots?token=${token}`}>
-            Plots
-          </Button>
+          <SimpleNav
+            links={["tables", "plots"].map((l) => ({
+              name: l,
+              link: `/${l}?token=${token}`,
+            }))}
+            active={(l) => matchRes?.params.location === l}
+          />
         </AuthOnly>
       </div>
       {/* CENTER */}
