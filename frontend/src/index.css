@@ -1,3 +1,7 @@
+/* This file is for scrollbars and placeholder body style before the
+actual style loads. Do not put anything here that can be done through
+Material theming */
+
 :root {
   --bg: black;
   --bg-alt: gray;
