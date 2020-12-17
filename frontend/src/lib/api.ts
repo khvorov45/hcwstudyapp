@@ -5,7 +5,7 @@ import { decode } from "./io"
 
 type ApiRequestConfig<T, O, I> = {
   method: "GET" | "POST" | "PUT" | "DELETE"
-  path: "participants" | "users" | "auth/token/verify"
+  path: "participants" | "users" | "auth/token/verify" | "schedule"
   token?: string | null
   success: number
   failure: number[]

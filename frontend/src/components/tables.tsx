@@ -4,7 +4,7 @@ import * as t from "io-ts"
 import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
-import { Participant, ParticipantV } from "../lib/data"
+import { Participant, ParticipantV, Schedule, ScheduleV } from "../lib/data"
 import { CSSProperties, useMemo } from "react"
 import { Column, useBlockLayout, useTable } from "react-table"
 import { FixedSizeList } from "react-window"
@@ -70,9 +70,23 @@ export default function Tables({ token }: { token: string | null }) {
     []
   )
 
+  const scheduleFetch = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        path: "schedule",
+        token: token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(ScheduleV),
+      }),
+    []
+  )
+
   const participants = useMemo(() => participantsFetch.result ?? [], [
     participantsFetch,
   ])
+  const schedule = useMemo(() => scheduleFetch.result ?? [], [scheduleFetch])
 
   return (
     <>
@@ -86,7 +100,9 @@ export default function Tables({ token }: { token: string | null }) {
       <Route path={tablePaths[1]}>
         <Baseline participants={participants} />
       </Route>
-      <Route path={tablePaths[2]}>Schedule</Route>
+      <Route path={tablePaths[2]}>
+        <ScheduleTable schedule={schedule} />
+      </Route>
       <Route path={tablePaths[3]}>Weekly survey</Route>
       <Route path={tablePaths[4]}>Weekly completion</Route>
       <Route path={tablePaths[5]}>Summary</Route>
@@ -162,6 +178,32 @@ function Baseline({ participants }: { participants: Participant[] }) {
   }, [])
 
   return <Table columns={columns} data={participants} />
+}
+
+function ScheduleTable({ schedule }: { schedule: Schedule[] }) {
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: Schedule) => p.pid,
+        width: 75,
+      },
+      {
+        Header: "Day",
+        accessor: (p: Schedule) => p.day,
+        width: 75,
+      },
+      {
+        Header: "Date",
+        accessor: (p: Schedule) => formatDate(p.date),
+        width: 100,
+      },
+    ]
+  }, [])
+
+  console.log(schedule)
+
+  return <Table columns={columns} data={schedule} />
 }
 
 function Table<T extends object>({
