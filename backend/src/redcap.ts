@@ -302,7 +302,7 @@ export async function exportWeeklySurvey(
         "date_symptom_survey",
         "swab_collection",
       ].toString(),
-      events: Array.from(Array(50).keys())
+      events: Array.from(Array(32).keys())
         .map((n) => `weekly_survey_${n + 1}_arm_1`)
         .toString(),
       type: "flat",
