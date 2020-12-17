@@ -1,4 +1,4 @@
-import { Redirect, Route } from "react-router-dom"
+import { Redirect, Route, useRouteMatch } from "react-router-dom"
 import StatusCodes from "http-status-codes"
 import * as t from "io-ts"
 import { SimpleNav } from "./nav"
@@ -113,9 +113,16 @@ export default function Tables({ token }: { token: string | null }) {
     weeklySurveyFetch,
   ])
 
+  // Figure out active link
+  const matchRes = useRouteMatch<{ table: string }>({ path: "/tables/:table" })
+  const currentTable = matchRes?.params.table
+
   return (
     <>
-      <SimpleNav links={tableNamedLinks} />
+      <SimpleNav
+        links={tableNamedLinks}
+        active={(name) => name === currentTable}
+      />
       <Route exact path={"/tables"}>
         <Redirect to={tableLinks[0]} />
       </Route>

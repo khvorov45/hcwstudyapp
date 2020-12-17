@@ -36,6 +36,9 @@ const useStyles = makeStyles((theme: Theme) =>
       "& .forward": {
         marginLeft: "auto",
       },
+      "& .active": {
+        backgroundColor: theme.palette.primary[theme.palette.type],
+      },
     },
   })
 )
@@ -132,8 +135,10 @@ function findEnd(
 
 export function SimpleNav({
   links,
+  active,
 }: {
   links: { name: string; link: string }[]
+  active: (name: string) => boolean
 }) {
   const windowSize = useWindowSize()
   const [start, setStart] = useState(0)
@@ -156,7 +161,12 @@ export function SimpleNav({
         <></>
       )}
       {links.slice(start, end).map(({ name, link }) => (
-        <Button key={name} component={Link} to={`${link}`}>
+        <Button
+          key={name}
+          component={Link}
+          to={`${link}`}
+          className={active(name) ? "active" : ""}
+        >
           {name}
         </Button>
       ))}
