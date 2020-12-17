@@ -124,7 +124,7 @@ function findEnd(
     getApproximateTextNavWidth(links.slice(start, end)) +
     (start > 0 ? 48 : 0) +
     (end < links.length ? 48 : 0)
-  if (start === end || fullNavWidth < desiredWidth || desiredWidth === 0) {
+  if (start === end - 1 || fullNavWidth < desiredWidth || desiredWidth === 0) {
     return end
   }
   return findEnd(links, desiredWidth, start, end - 1)
