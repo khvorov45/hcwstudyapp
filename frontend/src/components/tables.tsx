@@ -14,6 +14,7 @@ import detectScrollbarWidth from "../lib/scrollbar-width"
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     table: {
+      overflow: "auto",
       "& .header": {
         whiteSpace: "nowrap",
         borderBottom: `1px solid ${theme.palette.divider}`,
