@@ -15,6 +15,7 @@ import { User } from "../lib/data"
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     nav: {
+      height: 50,
       overflow: "auto",
       display: "flex",
       justifyContent: "space-between",
@@ -22,6 +23,9 @@ const useStyles = makeStyles((theme: Theme) =>
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
     simpleNav: {
+      height: 40,
+      display: "flex",
+      alignItems: "center",
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
   })
