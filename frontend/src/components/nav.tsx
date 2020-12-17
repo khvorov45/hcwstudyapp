@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
     simpleNav: {
-      height: 40,
+      height: 50,
       display: "flex",
       alignItems: "center",
       borderBottom: `1px solid ${theme.palette.divider}`,
