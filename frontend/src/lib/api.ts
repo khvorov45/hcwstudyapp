@@ -1,10 +1,11 @@
 import axios from "axios"
 import * as t from "io-ts"
+import { API_ROOT } from "./config"
 import { decode } from "./io"
 
 type ApiRequestConfig<T, O, I> = {
   method: "GET" | "POST" | "PUT" | "DELETE"
-  url: string
+  path: "participants" | "users" | "auth/token/verify"
   token?: string | null
   success: number
   failure: number[]
@@ -16,7 +17,7 @@ export async function apiReq<T, O, I>(
 ): Promise<T> {
   const res = await axios.request({
     method: c.method,
-    url: c.url,
+    url: `${API_ROOT}/${c.path}`,
     headers: c.token ? { Authorization: `Bearer ${c.token}` } : undefined,
     validateStatus: (s) => [c.success, ...c.failure].includes(s),
   })

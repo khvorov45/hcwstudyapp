@@ -61,7 +61,7 @@ export default function Tables({ token }: { token: string | null }) {
     () =>
       apiReq({
         method: "GET",
-        url: "http://localhost:7001/participants",
+        path: "participants",
         token: token,
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],

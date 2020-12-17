@@ -58,7 +58,7 @@ export default function App() {
     () =>
       apiReq({
         method: "GET",
-        url: "http://localhost:7001/auth/token/verify",
+        path: "auth/token/verify",
         token: token,
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],
