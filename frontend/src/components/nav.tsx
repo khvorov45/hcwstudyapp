@@ -33,6 +33,9 @@ const useStyles = makeStyles((theme: Theme) =>
       "&>*": {
         flexShrink: 0,
       },
+      "& .forward": {
+        marginLeft: "auto",
+      },
     },
   })
 )
@@ -151,7 +154,7 @@ export function SimpleNav({
         </Button>
       ))}
       {end < links.length ? (
-        <IconButton onClick={(_) => setStart(start + 1)}>
+        <IconButton onClick={(_) => setStart(start + 1)} className="forward">
           <ArrowForwardIosIcon />
         </IconButton>
       ) : (
