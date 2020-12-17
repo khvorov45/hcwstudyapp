@@ -17,6 +17,7 @@ import { Column, useBlockLayout, useTable } from "react-table"
 import { FixedSizeList } from "react-window"
 import { makeStyles, Theme, createStyles } from "@material-ui/core"
 import detectScrollbarWidth from "../lib/scrollbar-width"
+import { useWindowSize } from "../lib/hooks"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -27,6 +28,7 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       overflow: "auto",
       "& .header": {
+        height: 35,
         whiteSpace: "nowrap",
         borderBottom: `1px solid ${theme.palette.divider}`,
         "&>*": {
@@ -337,6 +339,7 @@ function Table<T extends object>({
   }
   const classes = useStyles()
   const scrollbarWidth = useMemo(() => detectScrollbarWidth(), [])
+  const windowSize = useWindowSize()
   return (
     <div className={classes.tableContainer}>
       <div {...table.getTableProps()} className={classes.table}>
@@ -351,7 +354,7 @@ function Table<T extends object>({
         {/*Body*/}
         <div {...table.getTableBodyProps()} className="body">
           <FixedSizeList
-            height={500}
+            height={windowSize.height - 140}
             itemCount={table.rows.length}
             itemSize={35}
             width={table.totalColumnsWidth + scrollbarWidth}
