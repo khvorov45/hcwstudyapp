@@ -65,15 +65,17 @@ CREATE TABLE "Vaccination" (
 CREATE TABLE "Schedule" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE,
     "day" integer,
+    "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
-    PRIMARY KEY ("pid", "day")
+    PRIMARY KEY ("pid", "day", "redcapProjectYear")
 );
 
 CREATE TABLE "WeeklySurvey" (
     "pid" text REFERENCES "Participant"("pid"),
     "index" integer NOT NULL,
+    "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
     "ari" boolean NOT NULL,
     "swabCollection" boolean,
-    PRIMARY KEY ("pid", "index")
+    PRIMARY KEY ("pid", "index", "redcapProjectYear")
 );

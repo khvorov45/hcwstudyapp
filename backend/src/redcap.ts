@@ -270,6 +270,7 @@ export async function exportSchedule(
       scheduleLongCurrent.push({
         pid: processRedcapString(r.pid),
         day: day,
+        redcapProjectYear: r.redcapProjectYear,
         date: processRedcapString(r[`scheduled_date_v${day}`]),
       })
       return scheduleLongCurrent

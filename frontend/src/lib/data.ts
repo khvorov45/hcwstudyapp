@@ -81,6 +81,7 @@ export type Vaccination = t.TypeOf<typeof VaccinationV>
 export const ScheduleV = t.type({
   pid: t.string,
   day: t.number,
+  redcapProjectYear: t.number,
   date: t.union([DateFromISOString, t.null]),
 })
 export type Schedule = t.TypeOf<typeof ScheduleV>
@@ -88,6 +89,7 @@ export type Schedule = t.TypeOf<typeof ScheduleV>
 export const WeeklySurveyV = t.type({
   pid: t.string,
   index: t.number,
+  redcapProjectYear: t.number,
   date: t.union([DateFromISOString, t.null]),
   ari: t.boolean,
   swabCollection: t.union([t.boolean, t.null]),

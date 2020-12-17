@@ -376,7 +376,13 @@ export async function getScheduleSubset(
 }
 
 async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
-  await db.any(pgpInit.helpers.insert(v, ["pid", "day", "date"], "Schedule"))
+  await db.any(
+    pgpInit.helpers.insert(
+      v,
+      ["pid", "day", "redcapProjectYear", "date"],
+      "Schedule"
+    )
+  )
 }
 
 // Weekly survey ==============================================================
@@ -392,7 +398,7 @@ async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
   await db.any(
     pgpInit.helpers.insert(
       s,
-      ["pid", "index", "date", "ari", "swabCollection"],
+      ["pid", "index", "date", "redcapProjectYear", "ari", "swabCollection"],
       "WeeklySurvey"
     )
   )
