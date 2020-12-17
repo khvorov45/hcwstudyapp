@@ -120,11 +120,11 @@ function findEnd(
   start: number,
   end: number
 ): number {
-  if (
-    start === end ||
-    getApproximateTextNavWidth(links.slice(start, end)) < desiredWidth ||
-    desiredWidth === 0
-  ) {
+  const fullNavWidth =
+    getApproximateTextNavWidth(links.slice(start, end)) +
+    (start > 0 ? 48 : 0) +
+    (end < links.length ? 48 : 0)
+  if (start === end || fullNavWidth < desiredWidth || desiredWidth === 0) {
     return end
   }
   return findEnd(links, desiredWidth, start, end - 1)
