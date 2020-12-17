@@ -138,6 +138,13 @@ export function SimpleNav({
   const windowSize = useWindowSize()
   const [start, setStart] = useState(0)
   const end = findEnd(links, windowSize.width, start, links.length)
+  if (
+    end === links.length &&
+    start > 0 &&
+    findEnd(links, windowSize.width, start - 1, links.length) === links.length
+  ) {
+    setStart(start - 1)
+  }
   const classes = useStyles()
   return (
     <div className={classes.simpleNav}>
