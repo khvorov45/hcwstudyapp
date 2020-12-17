@@ -16,8 +16,9 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       "& .header": {
         whiteSpace: "nowrap",
-        "& :nth-child(even)": {
-          background: theme.palette.background.alt,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        "&>*": {
+          borderRight: `1px solid ${theme.palette.divider}`,
         },
       },
       "& .body": {
@@ -196,7 +197,7 @@ function Table<T extends object>({
   return (
     <div {...table.getTableProps()} className={classes.table}>
       {/*Headers*/}
-      <div className="tr header">
+      <div className="tr header" style={{ width: table.totalColumnsWidth }}>
         {table.headers.map((h) => (
           <div {...h.getHeaderProps()} className="th">
             {h.render("Header")}
