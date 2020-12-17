@@ -109,6 +109,7 @@ export default function App() {
               <Tables token={token} />
             </AuthRoute>
             <AuthRoute
+              exact
               authStatus={auth.status}
               user={auth.result}
               path="/plots"

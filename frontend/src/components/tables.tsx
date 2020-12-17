@@ -114,7 +114,7 @@ export default function Tables({ token }: { token: string | null }) {
   return (
     <>
       <SimpleNav links={tableNamedLinks} />
-      <Route path={"/tables"}>
+      <Route exact path={"/tables"}>
         <Redirect to={tableLinks[0]} />
       </Route>
       <Route path={tablePaths[0]}>
