@@ -8,6 +8,11 @@
   --font: black;
 }
 
+body {
+  color: var(--font);
+  background-color: var(--bg00);
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 7px;
