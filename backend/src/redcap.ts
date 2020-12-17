@@ -303,7 +303,7 @@ export async function exportWeeklySurvey(
         "swab_collection",
       ].toString(),
       events: Array.from(Array(50).keys())
-        .map((n) => `weekly_survey_${n}_arm_1`)
+        .map((n) => `weekly_survey_${n + 1}_arm_1`)
         .toString(),
       type: "flat",
       rawOrLabel: "raw",
