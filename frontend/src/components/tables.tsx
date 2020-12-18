@@ -225,6 +225,11 @@ function ScheduleTable({ schedule }: { schedule: Schedule[] }) {
         width: 75,
       },
       {
+        Header: "Year",
+        accessor: (p: Schedule) => p.redcapProjectYear,
+        width: 75,
+      },
+      {
         Header: "Day",
         accessor: (p: Schedule) => p.day,
         width: 75,
