@@ -323,6 +323,8 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
     return abbr
   }
 
+  const weeksAbbr = weeklyCompletion.map((w) => w.weeks).map(abbreviateSequence)
+
   const columns = useMemo(() => {
     return [
       {
@@ -332,11 +334,13 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
       },
       {
         Header: "Weeks",
-        accessor: (p: WeeklyCompletion) => abbreviateSequence(p.weeks),
-        width: 250,
+        accessor: (p: WeeklyCompletion, i: number) => weeksAbbr[i],
+        width:
+          weeksAbbr.map((w) => w.length).reduce((p, c) => (p > c ? p : c), 0) *
+          7,
       },
     ]
-  }, [])
+  }, [weeksAbbr])
 
   return <Table columns={columns} data={weeklyCompletion} />
 }
