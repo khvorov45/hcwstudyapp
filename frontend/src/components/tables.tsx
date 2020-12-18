@@ -278,6 +278,7 @@ function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
 function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
   type WeeklyCompletion = {
     pid: string
+    year: number
     weeks: number[]
   }
 
@@ -288,7 +289,7 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
       if (a[a.length - 1]?.pid === s.pid) {
         a[a.length - 1].weeks.push(s.index)
       } else {
-        a.push({ pid: s.pid, weeks: [s.index] })
+        a.push({ pid: s.pid, year: s.redcapProjectYear, weeks: [s.index] })
       }
       return a
     }, weeklyCompletion)
@@ -331,6 +332,11 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
         Header: "PID",
         accessor: (p: WeeklyCompletion) => p.pid,
         width: 75,
+      },
+      {
+        Header: "Year",
+        accessor: (p: WeeklyCompletion) => p.year,
+        width: 50,
       },
       {
         Header: "Completed",
