@@ -8,6 +8,7 @@ import {
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
+import GitHubIcon from "@material-ui/icons/GitHub"
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos"
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos"
 import React, { ReactNode, useState } from "react"
@@ -84,6 +85,11 @@ export default function Nav({
             <People />
           </IconButton>
         </AuthOnly>
+        <a href="https://github.com/khvorov45/hcwstudyapp">
+          <IconButton>
+            <GitHubIcon />
+          </IconButton>
+        </a>
         <IconButton onClick={(_) => togglePalette()}>
           <BrightnessMediumIcon />
         </IconButton>
