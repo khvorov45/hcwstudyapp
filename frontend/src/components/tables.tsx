@@ -254,6 +254,11 @@ function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
         width: 75,
       },
       {
+        Header: "Year",
+        accessor: (p: WeeklySurvey) => p.redcapProjectYear,
+        width: 75,
+      },
+      {
         Header: "Date",
         accessor: (p: WeeklySurvey) => formatDate(p.date),
         width: 100,
