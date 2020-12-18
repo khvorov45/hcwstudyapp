@@ -1,21 +1,23 @@
 # Data for the NIH HCW flu study
 
-## Contact
+## Tables
+
+### Contact
 
 Participant contact information.
 
-## Baseline
+### Baseline
 
 Information from the baseline survey.
 
-## Schedule
+### Schedule
 
 Scheduled dates as per the REDCap scheduling instrument.
 
-## Weekly survey
+### Weekly survey
 
 Information from the weekly surveys.
 
-## Weekly completion
+### Weekly completion
 
 Completion of weekly surveys.
