@@ -1,4 +1,11 @@
-import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core"
+import {
+  createMuiTheme,
+  createStyles,
+  CssBaseline,
+  makeStyles,
+  Theme,
+  ThemeProvider,
+} from "@material-ui/core"
 import React, { ReactNode, useState } from "react"
 import StatusCodes from "http-status-codes"
 import { AsyncStateStatus, useAsync } from "react-async-hook"
@@ -14,6 +21,14 @@ import { User, UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    home: {
+      paddingLeft: 20,
+    },
+  })
+)
 
 function themeInit(): "dark" | "light" {
   let localtheme = localStorage.getItem("theme")
@@ -74,6 +89,7 @@ export default function App() {
     .then((d) => d.text())
     .then((t) => setHomePageContent(t))
 
+  const classes = useStyles()
   return (
     <div>
       <ThemeProvider theme={theme}>
@@ -90,7 +106,9 @@ export default function App() {
               user={auth.result}
               path="/"
             >
-              <ReactMarkdown>{homePageContent ?? ""}</ReactMarkdown>
+              <ReactMarkdown className={classes.home}>
+                {homePageContent ?? ""}
+              </ReactMarkdown>
             </AuthRoute>
             <AuthRoute
               exact
