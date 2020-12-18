@@ -276,22 +276,10 @@ function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
 }
 
 function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
-  type WeeklyCompletion = { pid: string; weeks: number[] }
-
-  const columns = useMemo(() => {
-    return [
-      {
-        Header: "PID",
-        accessor: (p: WeeklyCompletion) => p.pid,
-        width: 75,
-      },
-      {
-        Header: "Weeks",
-        accessor: (p: WeeklyCompletion) => p.weeks.join(" "),
-        width: 550,
-      },
-    ]
-  }, [])
+  type WeeklyCompletion = {
+    pid: string
+    weeks: number[]
+  }
 
   const weeklyCompletion: WeeklyCompletion[] = []
   weeklySurvey
@@ -304,6 +292,51 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
       }
       return a
     }, weeklyCompletion)
+
+  function abbreviateSequence(s: number[]): string {
+    const startEnds: string = ""
+    const abbr = s
+      .sort((a, b) => (a > b ? 1 : b > a ? -1 : 0))
+      .reduce((cur, n, i, a) => {
+        // First element
+        if (i === 0) {
+          return `${n}`
+        }
+        const inSeq = a[i - 1] + 1 === n
+        // Last element
+        if (i === a.length - 1) {
+          if (inSeq) {
+            return cur + `-${n}`
+          } else {
+            return cur + ` ${n}`
+          }
+        }
+        // Middle element
+        if (!inSeq) {
+          return cur + ` ${n}`
+        }
+        if (inSeq && a[i + 1] !== n + 1) {
+          return cur + `-${n}`
+        }
+        return cur
+      }, startEnds)
+    return abbr
+  }
+
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: WeeklyCompletion) => p.pid,
+        width: 75,
+      },
+      {
+        Header: "Weeks",
+        accessor: (p: WeeklyCompletion) => abbreviateSequence(p.weeks),
+        width: 250,
+      },
+    ]
+  }, [])
 
   return <Table columns={columns} data={weeklyCompletion} />
 }
