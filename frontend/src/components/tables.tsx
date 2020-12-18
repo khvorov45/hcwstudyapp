@@ -333,7 +333,7 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
         width: 75,
       },
       {
-        Header: "Weeks",
+        Header: "Completed",
         accessor: (p: WeeklyCompletion, i: number) => weeksAbbr[i],
         width:
           weeksAbbr.map((w) => w.length).reduce((p, c) => (p > c ? p : c), 0) *
