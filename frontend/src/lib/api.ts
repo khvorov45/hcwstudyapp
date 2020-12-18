@@ -11,6 +11,8 @@ type ApiRequestConfig<T, O, I> = {
     | "auth/token/verify"
     | "schedule"
     | "weekly-survey"
+    | "auth/token/send"
+  query?: Record<string, string>
   token?: string | null
   success: number
   failure: number[]
@@ -23,6 +25,7 @@ export async function apiReq<T, O, I>(
   const res = await axios.request({
     method: c.method,
     url: `${API_ROOT}/${c.path}`,
+    params: c.query,
     headers: c.token ? { Authorization: `Bearer ${c.token}` } : undefined,
     validateStatus: (s) => [c.success, ...c.failure].includes(s),
   })

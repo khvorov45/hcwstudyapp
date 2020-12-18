@@ -21,6 +21,7 @@ import { User, UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
+import GetLink from "./components/get-link"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -98,7 +99,7 @@ export default function App() {
           <Nav togglePalette={togglePalette} user={auth.result} token={token} />
           <Switch>
             <Route exact path="/get-link">
-              Get link
+              <GetLink token={token} />
             </Route>
             <AuthRoute
               exact
