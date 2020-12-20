@@ -121,6 +121,52 @@ async function getTableSubset(
     : await db.any(`SELECT * FROM "${t}"`)
 }
 
+async function insertIntoTable<T>(
+  db: DB,
+  e: T[],
+  t:
+    | "User"
+    | "Token"
+    | "Vaccination"
+    | "RedcapId"
+    | "Withdrawn"
+    | "Schedule"
+    | "WeeklySurvey"
+    | "Participant"
+) {
+  if (e.length === 0) {
+    return
+  }
+  const cols: Record<typeof t, string[]> = {
+    User: ["email", "accessGroup"],
+    Token: ["user", "hash", "expires"],
+    Vaccination: ["pid", "year", "status"],
+    RedcapId: ["pid", "redcapRecordId", "redcapProjectYear"],
+    Withdrawn: ["pid", "date"],
+    Schedule: ["pid", "day", "redcapProjectYear", "date"],
+    WeeklySurvey: [
+      "pid",
+      "index",
+      "redcapProjectYear",
+      "date",
+      "ari",
+      "swabCollection",
+    ],
+    Participant: [
+      "pid",
+      "site",
+      "dateScreening",
+      "email",
+      "mobile",
+      "addBleed",
+      "dob",
+      "gender",
+      "baselineQuestComplete",
+    ],
+  }
+  await db.any(pgpInit.helpers.insert(e, cols[t], t))
+}
+
 // Users ======================================================================
 
 export async function getUsers(db: DB): Promise<User[]> {
@@ -140,12 +186,7 @@ export async function getUserByToken(db: DB, token: string): Promise<User> {
 }
 
 export async function insertUsers(db: DB, us: User[]): Promise<void> {
-  if (us.length === 0) {
-    return
-  }
-  // Best not to use Object.keys here because there may be more fields in the
-  // actual object that's passed
-  await db.any(pgpInit.helpers.insert(us, ["email", "accessGroup"], "User"))
+  await insertIntoTable(db, us, "User")
 }
 
 export async function deleteUser(db: DB, email: string): Promise<void> {
@@ -192,17 +233,12 @@ export async function updateUserToken(db: DB, et: EmailToken) {
 // Tokens =====================================================================
 
 export async function insertTokens(db: DB, tokens: Token[]) {
-  if (tokens.length === 0) {
-    return
-  }
   const tokensHashed = tokens.map((t) => ({
     user: t.user,
     hash: hash(t.token),
     expires: t.expires,
   }))
-  await db.any(
-    pgpInit.helpers.insert(tokensHashed, ["email", "hash", "expires"], "Token")
-  )
+  await insertIntoTable(db, tokensHashed, "Token")
 }
 
 // Particpants ================================================================
@@ -224,23 +260,7 @@ export async function insertParticipants(
   if (isSite(a) && ps.find((p) => p.site !== a)) {
     throw Error("UNAUTHORIZED: participants with invalid site")
   }
-  await db.any(
-    pgpInit.helpers.insert(
-      ps,
-      [
-        "pid",
-        "site",
-        "dateScreening",
-        "email",
-        "mobile",
-        "addBleed",
-        "dob",
-        "gender",
-        "baselineQuestComplete",
-      ],
-      "Participant"
-    )
-  )
+  await insertIntoTable(db, ps, "Participant")
 }
 
 export async function deleteParticipant(
@@ -340,13 +360,7 @@ export async function getRedcapIdSubset(
 }
 
 async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
-  await db.any(
-    pgpInit.helpers.insert(
-      ids,
-      ["redcapRecordId", "redcapProjectYear", "pid"],
-      "RedcapId"
-    )
-  )
+  await insertIntoTable(db, ids, "RedcapId")
 }
 
 // Withdrawn =================================================================
@@ -359,7 +373,7 @@ export async function getWithdrawnSubset(
 }
 
 async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
-  await db.any(pgpInit.helpers.insert(w, ["pid", "date"], "Withdrawn"))
+  await insertIntoTable(db, w, "Withdrawn")
 }
 
 // Vaccination history ========================================================
@@ -372,9 +386,7 @@ export async function getVaccinationSubset(
 }
 
 async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
-  await db.any(
-    pgpInit.helpers.insert(v, ["pid", "year", "status"], "Vaccination")
-  )
+  await insertIntoTable(db, v, "Vaccination")
 }
 
 // Schedule ===================================================================
@@ -387,13 +399,7 @@ export async function getScheduleSubset(
 }
 
 async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
-  await db.any(
-    pgpInit.helpers.insert(
-      v,
-      ["pid", "day", "redcapProjectYear", "date"],
-      "Schedule"
-    )
-  )
+  await insertIntoTable(db, v, "Schedule")
 }
 
 // Weekly survey ==============================================================
@@ -406,11 +412,5 @@ export async function getWeeklySurveySubset(
 }
 
 async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
-  await db.any(
-    pgpInit.helpers.insert(
-      s,
-      ["pid", "index", "date", "redcapProjectYear", "ari", "swabCollection"],
-      "WeeklySurvey"
-    )
-  )
+  await insertIntoTable(db, s, "WeeklySurvey")
 }
