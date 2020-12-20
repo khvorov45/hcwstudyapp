@@ -68,7 +68,7 @@ export default function GetLink({ token }: { token: string | null }) {
               sendEmail.execute()
             }}
             type="submit"
-            disabled={email.length === 0}
+            disabled={email.length === 0 || sendEmail.loading}
           >
             <Send />
           </IconButton>
