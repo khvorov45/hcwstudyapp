@@ -13,7 +13,6 @@ import {
   getParticipantsSubset,
   deleteParticipant,
   syncRedcapUsers,
-  updateUserToken,
   syncRedcapParticipants,
   getLastUserUpdate,
   getVaccinationSubset,
@@ -21,10 +20,11 @@ import {
   getWithdrawnSubset,
   getScheduleSubset,
   getWeeklySurveySubset,
+  insertTokens,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
-import { generateToken } from "./auth"
+import { createToken, generateToken } from "./auth"
 import { RedcapConfig } from "./redcap"
 import { Emailer, emailToken } from "./email"
 
@@ -34,7 +34,8 @@ export function getRoutes(
   emailConfig: {
     emailer: Emailer
     linkPrefix: string
-  }
+  },
+  tokenDaysToLive: number
 ) {
   const routes = Router()
 
@@ -68,11 +69,11 @@ export function getRoutes(
   // Auth
   routes.post("/auth/token/send", async (req: Request, res: Response) => {
     const email = decode(t.string, req.query.email)
-    const token = generateToken()
-    await updateUserToken(db, { email, token })
+    const token = createToken(email, tokenDaysToLive)
+    await insertTokens(db, [token])
     await emailToken(emailConfig.emailer, {
       email,
-      token,
+      token: token.token,
       linkPrefix: emailConfig.linkPrefix,
     })
     res.status(StatusCodes.NO_CONTENT).end()

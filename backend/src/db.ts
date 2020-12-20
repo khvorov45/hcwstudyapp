@@ -216,16 +216,6 @@ export async function getLastUserUpdate(db: DB): Promise<Date | null> {
   return await db.one('SELECT "user" FROM "LastRedcapSync";', [], (v) => v.user)
 }
 
-export async function updateUserToken(db: DB, et: EmailToken) {
-  const res = await db.result(
-    'UPDATE "User" SET tokenhash = $1 WHERE email = $2',
-    [hash(et.token), et.email]
-  )
-  if (res.rowCount === 0) {
-    throw Error("NOT FOUND: no such email " + et.email)
-  }
-}
-
 // Tokens =====================================================================
 
 export async function insertTokens(db: DB, tokens: Token[]) {

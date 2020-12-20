@@ -58,7 +58,8 @@ async function main() {
       {
         emailer: createTransport(args.emailConnectionString),
         linkPrefix: args.linkPrefix,
-      }
+      },
+      args.tokenDaysToLive
     )
   )
 
