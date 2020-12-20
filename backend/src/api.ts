@@ -173,7 +173,7 @@ async function validateUser(req: Request, db: DB): Promise<User> {
     u = await getUserByToken(db, token)
   } catch (e) {
     if (e.message === "No data returned from the query.") {
-      throw Error("UNAUTHORIZED: no user with the supplied token")
+      throw Error("UNAUTHORIZED: no user with the supplied valid token")
     }
     throw Error("UNAUTHORIZED: " + e.message)
   }
