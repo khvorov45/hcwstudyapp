@@ -23,9 +23,9 @@ import {
   insertTokens,
   refreshToken,
 } from "./db"
-import { ParticipantV, Token, TokenHashed, User, UserV } from "./data"
+import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
-import { createToken, generateToken } from "./auth"
+import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
 import { Emailer, emailToken } from "./email"
 

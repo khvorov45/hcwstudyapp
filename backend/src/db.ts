@@ -10,13 +10,12 @@ import {
   Schedule,
   SiteV,
   Token,
-  TokenHashed,
   User,
   Vaccination,
   WeeklySurvey,
   Withdrawn,
 } from "./data"
-import { createToken, generateToken, hash } from "./auth"
+import { generateToken, hash } from "./auth"
 import {
   exportUsers,
   RedcapConfig,
