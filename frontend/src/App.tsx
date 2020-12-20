@@ -69,7 +69,9 @@ export default function App() {
 
   // Auth ---------------------------------------------------------------------
 
-  const token = new URLSearchParams(window.location.search).get("token")
+  const token =
+    new URLSearchParams(window.location.search).get("token") ||
+    localStorage.getItem("token")
   const auth = useAsync(
     () =>
       apiReq({
@@ -82,6 +84,9 @@ export default function App() {
       }),
     []
   )
+  if (token && auth.status === "success") {
+    localStorage.setItem("token", token)
+  }
 
   // Home page md -------------------------------------------------------------
 
