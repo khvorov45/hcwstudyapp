@@ -60,6 +60,8 @@ export default function GetLink({ token }: { token: string | null }) {
           type="email"
           placeholder="name@example.org"
           id="email"
+          error={sendEmail.status === "error"}
+          helperText={sendEmail.error?.message}
         />
         <IconButtonContainer status={sendEmail.status}>
           <IconButton
