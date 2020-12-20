@@ -227,6 +227,14 @@ export async function insertTokens(db: DB, tokens: Token[]) {
   await insertIntoTable(db, tokensHashed, "Token")
 }
 
+async function deleteToken(db: DB, token: string) {
+  await db.any('DELETE FROM "Token" WHERE "hash" = $1', [hash(token)])
+}
+
+export async function refreshToken(db: DB, oldToken: string, newToken: Token) {
+  await Promise.all([deleteToken(db, oldToken), insertTokens(db, [newToken])])
+}
+
 // Particpants ================================================================
 
 export async function getParticipantsSubset(
