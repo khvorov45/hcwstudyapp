@@ -11,6 +11,7 @@ import { apiReq } from "../lib/api"
 import * as t from "io-ts"
 import StatusCodes from "http-status-codes"
 import { useAsyncCallback } from "react-async-hook"
+import { IconButtonContainer } from "./loading"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -60,16 +61,18 @@ export default function GetLink({ token }: { token: string | null }) {
           placeholder="name@example.org"
           id="email"
         />
-        <IconButton
-          onClick={(e) => {
-            e.preventDefault()
-            sendEmail.execute()
-          }}
-          type="submit"
-          disabled={email.length === 0}
-        >
-          <Send />
-        </IconButton>
+        <IconButtonContainer>
+          <IconButton
+            onClick={(e) => {
+              e.preventDefault()
+              sendEmail.execute()
+            }}
+            type="submit"
+            disabled={email.length === 0}
+          >
+            <Send />
+          </IconButton>
+        </IconButtonContainer>
       </form>
     </div>
   )
