@@ -168,7 +168,7 @@ export async function syncRedcapUsers(
 ): Promise<void> {
   const [redcapUsers, dbUsers] = await Promise.all([
     exportUsers(redcapConfig),
-    await db.any('SELECT * FROM "User"'),
+    getUsers(db),
   ])
   const dbNonAdminUsers = dbUsers.filter((u) => u.accessGroup !== "admin")
   const dbNonAdminEmails = dbNonAdminUsers.map((u) => u.email)
