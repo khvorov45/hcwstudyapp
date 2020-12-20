@@ -84,8 +84,7 @@ export function getRoutes(
     res.json({ email: u.email, accessGroup: u.accessGroup })
   })
   routes.put("/auth/token", async (req: Request, res: Response) => {
-    await refreshToken(db, extractToken(req), tokenDaysToLive)
-    res.status(StatusCodes.NO_CONTENT).end()
+    res.json(await refreshToken(db, extractToken(req), tokenDaysToLive))
   })
 
   // Participants
