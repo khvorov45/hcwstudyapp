@@ -176,8 +176,8 @@ export async function getUserByEmail(db: DB, email: string): Promise<User> {
 export async function getUserByToken(db: DB, token: string): Promise<User> {
   return await db.one(
     `SELECT * FROM "User" WHERE "email" =
-    (SELECT "email" FROM "Token" WHERE "hash" = $1 AND "expires" > $2)`,
-    [hash(token), new Date()]
+    (SELECT "email" FROM "Token" WHERE "hash" = $1 AND "expires" > now())`,
+    [hash(token)]
   )
 }
 
@@ -237,16 +237,14 @@ export async function refreshToken(
   oldToken: string,
   tokenDayesToLive: number
 ): Promise<string> {
-  const currentDate = new Date()
   const newToken = generateToken()
   const res = await db.result(
     `UPDATE "Token" SET "hash"=$(newHash), "expires"=$(newExpiration)
-    WHERE hash = $(oldHash) AND "expires" > $(currentDate)`,
+    WHERE hash = $(oldHash) AND "expires" > now()`,
     {
       newHash: hash(newToken),
       oldHash: hash(oldToken),
-      newExpiration: addDays(currentDate, tokenDayesToLive),
-      currentDate,
+      newExpiration: addDays(new Date(), tokenDayesToLive),
     }
   )
   if (res.rowCount === 0) {
