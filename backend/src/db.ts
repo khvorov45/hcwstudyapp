@@ -9,6 +9,7 @@ import {
   RedcapId,
   Schedule,
   SiteV,
+  Token,
   User,
   Vaccination,
   WeeklySurvey,
@@ -189,6 +190,22 @@ export async function updateUserToken(db: DB, et: EmailToken) {
   if (res.rowCount === 0) {
     throw Error("NOT FOUND: no such email " + et.email)
   }
+}
+
+// Tokens =====================================================================
+
+export async function insertTokens(db: DB, tokens: Token[]) {
+  if (tokens.length === 0) {
+    return
+  }
+  const tokensHashed = tokens.map((t) => ({
+    user: t.user,
+    hash: hash(t.token),
+    expires: t.expires,
+  }))
+  await db.any(
+    pgpInit.helpers.insert(tokensHashed, ["email", "hash", "expires"], "Token")
+  )
 }
 
 // Particpants ================================================================
