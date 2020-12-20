@@ -41,7 +41,6 @@ export type VaccinationStatus = t.TypeOf<typeof VaccinationStatusV>
 export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
-  tokenhash: t.union([t.string, t.null, t.undefined]),
 })
 export type User = t.TypeOf<typeof UserV>
 
