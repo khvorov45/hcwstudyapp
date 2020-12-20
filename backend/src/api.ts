@@ -21,8 +21,9 @@ import {
   getScheduleSubset,
   getWeeklySurveySubset,
   insertTokens,
+  refreshToken,
 } from "./db"
-import { ParticipantV, User, UserV } from "./data"
+import { ParticipantV, Token, TokenHashed, User, UserV } from "./data"
 import { decode } from "./io"
 import { createToken, generateToken } from "./auth"
 import { RedcapConfig } from "./redcap"
@@ -81,6 +82,10 @@ export function getRoutes(
   routes.get("/auth/token/verify", async (req: Request, res: Response) => {
     const u = await validateUser(req, db)
     res.json({ email: u.email, accessGroup: u.accessGroup })
+  })
+  routes.put("/auth/token", async (req: Request, res: Response) => {
+    await refreshToken(db, extractToken(req), tokenDaysToLive)
+    res.status(StatusCodes.NO_CONTENT).end()
   })
 
   // Participants
@@ -158,6 +163,17 @@ export function getRoutes(
     }
   })
   return routes
+}
+
+function extractToken(req: Request): string {
+  let token: string
+  try {
+    const header = decode(t.string, req.header("Authorization")).split(" ")
+    token = decode(t.string, header[1])
+  } catch (e) {
+    throw Error("UNAUTHORIZED: failed to parse auth header")
+  }
+  return token
 }
 
 async function validateUser(req: Request, db: DB): Promise<User> {
