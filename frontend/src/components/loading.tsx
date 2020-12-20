@@ -10,7 +10,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export function IconButtonContainer({ children }: { children: ReactNode }) {
+export function IconButtonContainer({
+  loading,
+  children,
+}: {
+  loading: boolean
+  children: ReactNode
+}) {
   const classes = useStyles()
   return <div className={classes.iconButtonContainer}>{children}</div>
 }

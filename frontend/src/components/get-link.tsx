@@ -61,7 +61,7 @@ export default function GetLink({ token }: { token: string | null }) {
           placeholder="name@example.org"
           id="email"
         />
-        <IconButtonContainer>
+        <IconButtonContainer loading={sendEmail.loading}>
           <IconButton
             onClick={(e) => {
               e.preventDefault()
