@@ -25,8 +25,8 @@ CREATE TABLE "User" (
     "email" text PRIMARY KEY CHECK ("email" = lower("email")),
     "accessGroup" hfs_access_group NOT NULL
 );
-INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
-    (${firstAdminEmail}, 'admin', ${firstAdminTokenHash});
+INSERT INTO "User" ("email", "accessGroup") VALUES
+    (${firstAdminEmail}, 'admin');
 
 CREATE TABLE "Token" (
     "user" text REFERENCES "User"("email"),
