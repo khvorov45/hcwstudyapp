@@ -39,10 +39,16 @@ export default function GetLink({ token }: { token: string | null }) {
       query: { email: email },
       token: token,
       success: StatusCodes.NO_CONTENT,
-      failure: [],
+      failure: [StatusCodes.NOT_FOUND],
       validator: t.unknown,
     })
   })
+
+  let errMsg = sendEmail.error?.message
+  if (errMsg?.startsWith("NOT FOUND")) {
+    errMsg = `No user with the given email.
+    Make sure it's the one associated with the REDCap account`
+  }
 
   const classes = useStyles()
   return (
@@ -56,12 +62,15 @@ export default function GetLink({ token }: { token: string | null }) {
         <TextField
           label="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            sendEmail.reset()
+          }}
           type="email"
           placeholder="name@example.org"
           id="email"
           error={sendEmail.status === "error"}
-          helperText={sendEmail.error?.message}
+          helperText={errMsg}
         />
         <IconButtonContainer status={sendEmail.status}>
           <IconButton
