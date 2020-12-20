@@ -177,13 +177,7 @@ function extractToken(req: Request): string {
 }
 
 async function validateUser(req: Request, db: DB): Promise<User> {
-  let token: string
-  try {
-    const header = decode(t.string, req.header("Authorization")).split(" ")
-    token = decode(t.string, header[1])
-  } catch (e) {
-    throw Error("UNAUTHORIZED: failed to parse auth header")
-  }
+  const token = extractToken(req)
   let u: User
   try {
     u = await getUserByToken(db, token)
