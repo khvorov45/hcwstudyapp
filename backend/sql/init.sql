@@ -31,7 +31,7 @@ INSERT INTO "User" ("email", "accessGroup") VALUES
 CREATE TABLE "Token" (
     "user" text REFERENCES "User"("email"),
     -- Attempt to prevent insertion of actual tokens with a length check
-    "hash" text UNIQUE CHECK (length("tokenhash") = 128),
+    "hash" text UNIQUE CHECK (length("hash") = 128),
     "expires" timestamptz NOT NULL
 );
 INSERT INTO "Token" ("user", "hash", "expires") VALUES
