@@ -236,13 +236,14 @@ export async function refreshToken(
   db: DB,
   oldToken: string,
   tokenDayesToLive: number
-): Promise<void> {
+): Promise<string> {
   const currentDate = new Date()
+  const newToken = generateToken()
   const res = await db.result(
     `UPDATE "Token" SET "hash"=$(newHash), "expires"=$(newExpiration)
     WHERE hash = $(oldHash) AND "expires" > $(currentDate)`,
     {
-      newHash: hash(generateToken()),
+      newHash: hash(newToken),
       oldHash: hash(oldToken),
       newExpiration: addDays(currentDate, tokenDayesToLive),
       currentDate,
@@ -251,6 +252,7 @@ export async function refreshToken(
   if (res.rowCount === 0) {
     throw Error("UNAUTHORIZED: valid token to be refreshed not found")
   }
+  return newToken
 }
 
 // Particpants ================================================================
