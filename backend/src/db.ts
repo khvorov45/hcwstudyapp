@@ -134,7 +134,11 @@ export async function getUserByTokenhash(
   db: DB,
   tokenhash: string
 ): Promise<User> {
-  return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
+  return await db.one(
+    `SELECT * FROM "User" WHERE "email" =
+    (SELECT "email" FROM "Token" WHERE "hash" = $1)`,
+    [tokenhash]
+  )
 }
 
 export async function insertUsers(db: DB, us: User[]): Promise<void> {
