@@ -20,7 +20,7 @@ async function main() {
       "linkPrefix",
     ])
     .boolean(["clean", "cors"])
-    .number("backendPort")
+    .number(["backendPort", "tokenDaysToLive"])
     .default("config", "hsa-config.json")
     .default(
       "dbConnectionString",
@@ -37,6 +37,7 @@ async function main() {
     .default("linkPrefix", "https://reports.hcwflustudy.com/?token=")
     .default("clean", false)
     .default("cors", false)
+    .default("tokenDaysToLive", 30)
     .default("backendPort", 7001).argv
 
   // Create the server
