@@ -29,7 +29,7 @@ INSERT INTO "User" ("email", "accessGroup") VALUES
     (${firstAdminEmail}, 'admin');
 
 CREATE TABLE "Token" (
-    "user" text REFERENCES "User"("email"),
+    "user" text REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE,
     -- Attempt to prevent insertion of actual tokens with a length check
     "hash" text UNIQUE CHECK (length("hash") = 128),
     "expires" timestamptz NOT NULL
