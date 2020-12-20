@@ -38,7 +38,7 @@ export default function GetLink({ token }: { token: string | null }) {
       path: `auth/token/send`,
       query: { email: email },
       token: token,
-      success: StatusCodes.OK,
+      success: StatusCodes.NO_CONTENT,
       failure: [],
       validator: t.unknown,
     })
