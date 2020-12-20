@@ -51,6 +51,12 @@ export const TokenV = t.type({
 })
 export type Token = t.TypeOf<typeof TokenV>
 
+export const TokenHashedV = t.type({
+  user: t.string,
+  expires: DateFromISOString,
+})
+export type TokenHashed = t.TypeOf<typeof TokenHashedV>
+
 export const ParticipantV = t.type({
   pid: t.string,
   site: SiteV,
