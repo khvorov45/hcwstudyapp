@@ -131,14 +131,11 @@ export async function getUserByEmail(db: DB, email: string): Promise<User> {
   return await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
 }
 
-export async function getUserByTokenhash(
-  db: DB,
-  tokenhash: string
-): Promise<User> {
+export async function getUserByToken(db: DB, token: string): Promise<User> {
   return await db.one(
     `SELECT * FROM "User" WHERE "email" =
     (SELECT "email" FROM "Token" WHERE "hash" = $1)`,
-    [tokenhash]
+    [hash(token)]
   )
 }
 

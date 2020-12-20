@@ -8,7 +8,7 @@ import {
   getLastParticipantUpdate,
   insertUsers,
   deleteUser,
-  getUserByTokenhash,
+  getUserByToken,
   insertParticipants,
   getParticipantsSubset,
   deleteParticipant,
@@ -24,7 +24,7 @@ import {
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
-import { generateToken, hash } from "./auth"
+import { generateToken } from "./auth"
 import { RedcapConfig } from "./redcap"
 import { Emailer, emailToken } from "./email"
 
@@ -169,7 +169,7 @@ async function validateUser(req: Request, db: DB): Promise<User> {
   }
   let u: User
   try {
-    u = await getUserByTokenhash(db, hash(token))
+    u = await getUserByToken(db, token)
   } catch (e) {
     if (e.message === "No data returned from the query.") {
       throw Error("UNAUTHORIZED: no user with the supplied token")
