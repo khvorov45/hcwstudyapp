@@ -23,12 +23,19 @@ INSERT INTO "Site" ("siteShort", "siteLong") VALUES
 
 CREATE TABLE "User" (
     "email" text PRIMARY KEY CHECK ("email" = lower("email")),
-    "accessGroup" hfs_access_group NOT NULL,
-    -- Attempt to prevent insertion of actual tokens with a length check
-    "tokenhash" text UNIQUE CHECK (length("tokenhash") = 128)
+    "accessGroup" hfs_access_group NOT NULL
 );
 INSERT INTO "User" ("email", "accessGroup", "tokenhash") VALUES
     (${firstAdminEmail}, 'admin', ${firstAdminTokenHash});
+
+CREATE TABLE "Token" (
+    "user" text REFERENCES "User"("email"),
+    -- Attempt to prevent insertion of actual tokens with a length check
+    "hash" text UNIQUE CHECK (length("tokenhash") = 128),
+    "expires" timestamptz NOT NULL
+);
+INSERT INTO "Token" ("user", "hash", "expires") VALUES
+    (${firstAdminEmail}, ${firstAdminTokenHash}, ${firstAdminTokenExpires});
 
 -- Every participant is recruited at a site
 CREATE TABLE "Participant" (
