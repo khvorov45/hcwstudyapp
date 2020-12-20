@@ -37,11 +37,13 @@ export async function create({
   clean,
   firstAdminEmail,
   firstAdminToken,
+  tokenDaysToLive,
 }: {
   dbConnectionString: string
   clean: boolean
   firstAdminEmail: string
   firstAdminToken: string
+  tokenDaysToLive: number
 }): Promise<DB> {
   console.log(`connecting to ${dbConnectionString}`)
   const db = pgpInit(dbConnectionString)
@@ -58,12 +60,17 @@ export async function create({
   if (clean) {
     console.log("cleaning db")
     await resetSchema(db)
-    await init(db, firstAdmin)
+    await init(db, firstAdmin, tokenDaysToLive)
   } else if (await isEmpty(db)) {
     console.log("database empty, initializing")
-    await init(db, firstAdmin)
+    await init(db, firstAdmin, tokenDaysToLive)
   }
   return db
+}
+
+function addDays(date: Date, days: number): Date {
+  date.setDate(date.getDate() + days)
+  return date
 }
 
 async function getTableNames(db: DB): Promise<string[]> {
@@ -78,12 +85,17 @@ async function isEmpty(db: DB): Promise<boolean> {
   return (await getTableNames(db)).length === 0
 }
 
-async function init(db: DB, firstAdmin: EmailToken): Promise<void> {
+async function init(
+  db: DB,
+  firstAdmin: EmailToken,
+  tokenDaysToLive: number
+): Promise<void> {
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
     genders: Object.keys(GenderV.keys),
     firstAdminEmail: firstAdmin.email,
     firstAdminTokenHash: hash(firstAdmin.token),
+    firstAdminTokenExpires: addDays(new Date(), tokenDaysToLive),
     sites: Object.keys(SiteV.keys),
   })
 }
