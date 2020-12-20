@@ -1,4 +1,9 @@
-import { createStyles, makeStyles, Theme } from "@material-ui/core"
+import {
+  CircularProgress,
+  createStyles,
+  makeStyles,
+  Theme,
+} from "@material-ui/core"
 import { ReactNode } from "react"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -18,5 +23,9 @@ export function IconButtonContainer({
   children: ReactNode
 }) {
   const classes = useStyles()
-  return <div className={classes.iconButtonContainer}>{children}</div>
+  return (
+    <div className={classes.iconButtonContainer}>
+      {loading ? <CircularProgress /> : children}
+    </div>
+  )
 }
