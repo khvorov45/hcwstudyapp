@@ -70,7 +70,7 @@ export default function App() {
   // Auth ---------------------------------------------------------------------
 
   const token =
-    new URLSearchParams(window.location.search).get("token") ||
+    new URLSearchParams(window.location.search).get("token") ??
     localStorage.getItem("token")
   const auth = useAsync(
     () =>
