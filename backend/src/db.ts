@@ -26,6 +26,7 @@ import {
   exportSchedule,
   exportWeeklySurvey,
 } from "./redcap"
+import { addDays } from "./util"
 
 const pgpInit = pgp()
 
@@ -67,11 +68,6 @@ export async function create({
     await init(db, firstAdmin, tokenDaysToLive)
   }
   return db
-}
-
-function addDays(date: Date, days: number): Date {
-  date.setDate(date.getDate() + days)
-  return date
 }
 
 async function getTableNames(db: DB): Promise<string[]> {

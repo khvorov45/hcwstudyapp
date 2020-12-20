@@ -1,11 +1,7 @@
 import randomString from "crypto-random-string"
 import SHA512 from "crypto-js/sha512"
 import { Token } from "./data"
-
-function addDays(date: Date, days: number): Date {
-  date.setDate(date.getDate() + days)
-  return date
-}
+import { addDays } from "./util"
 
 export function createToken(user: string, tokenDaysToLive: number): Token {
   return {
