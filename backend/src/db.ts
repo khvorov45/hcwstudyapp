@@ -176,12 +176,6 @@ export async function syncRedcapUsers(
     await deleteUsers(db, dbNonAdminEmails)
   }
   await insertUsers(db, redcapUsers)
-  // Restore hashes
-  await Promise.all(
-    dbNonAdminUsers
-      .filter((u) => u.tokenhash)
-      .map((u) => restoreUserTokenHash(db, u))
-  )
   await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
 
@@ -197,13 +191,6 @@ export async function updateUserToken(db: DB, et: EmailToken) {
   if (res.rowCount === 0) {
     throw Error("NOT FOUND: no such email " + et.email)
   }
-}
-
-async function restoreUserTokenHash(db: DB, u: User): Promise<void> {
-  await db.result('UPDATE "User" SET tokenhash = $1 WHERE email = $2', [
-    u.tokenhash,
-    u.email,
-  ])
 }
 
 // Particpants ================================================================
