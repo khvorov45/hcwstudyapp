@@ -123,24 +123,18 @@ async function getTableSubset(
 // Users ======================================================================
 
 export async function getUsers(db: DB): Promise<User[]> {
-  return await db.any('SELECT "email", "accessGroup" FROM "User"')
+  return await db.any('SELECT * FROM "User"')
 }
 
 export async function getUserByEmail(db: DB, email: string): Promise<User> {
-  return await db.one(
-    'SELECT "email", "accessGroup" FROM "User" WHERE "email"=$1',
-    [email]
-  )
+  return await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
 }
 
 export async function getUserByTokenhash(
   db: DB,
   tokenhash: string
 ): Promise<User> {
-  return await db.one(
-    'SELECT "email", "accessGroup" FROM "User" WHERE "tokenhash"=$1',
-    [tokenhash]
-  )
+  return await db.one('SELECT * FROM "User" WHERE "tokenhash"=$1', [tokenhash])
 }
 
 export async function insertUsers(db: DB, us: User[]): Promise<void> {
