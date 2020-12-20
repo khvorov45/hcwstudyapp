@@ -10,12 +10,13 @@ import {
   Schedule,
   SiteV,
   Token,
+  TokenHashed,
   User,
   Vaccination,
   WeeklySurvey,
   Withdrawn,
 } from "./data"
-import { hash } from "./auth"
+import { createToken, generateToken, hash } from "./auth"
 import {
   exportUsers,
   RedcapConfig,
@@ -231,8 +232,26 @@ async function deleteToken(db: DB, token: string) {
   await db.any('DELETE FROM "Token" WHERE "hash" = $1', [hash(token)])
 }
 
-export async function refreshToken(db: DB, oldToken: string, newToken: Token) {
-  await Promise.all([deleteToken(db, oldToken), insertTokens(db, [newToken])])
+/**Will only update a valid token */
+export async function refreshToken(
+  db: DB,
+  oldToken: string,
+  tokenDayesToLive: number
+): Promise<void> {
+  const currentDate = new Date()
+  const res = await db.result(
+    `UPDATE "Token" SET "hash"=$(newHash), "expires"=$(newExpiration)
+    WHERE hash = $(oldHash) AND "expires" > $(currentDate)`,
+    {
+      newHash: hash(generateToken()),
+      oldHash: hash(oldToken),
+      newExpiration: addDays(currentDate, tokenDayesToLive),
+      currentDate,
+    }
+  )
+  if (res.rowCount === 0) {
+    throw Error("UNAUTHORIZED: valid token to be refreshed not found")
+  }
 }
 
 // Particpants ================================================================
