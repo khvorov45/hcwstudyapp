@@ -78,7 +78,7 @@ CREATE TABLE "Schedule" (
 );
 
 CREATE TABLE "WeeklySurvey" (
-    "pid" text REFERENCES "Participant"("pid"),
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE,
     "index" integer NOT NULL CHECK ("index" >= 1 AND "index" <= 32),
     "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
