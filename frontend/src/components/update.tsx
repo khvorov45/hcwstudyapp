@@ -5,7 +5,6 @@ import { DateFromISOString } from "io-ts-types"
 import StatusCodes from "http-status-codes"
 import { apiReq } from "../lib/api"
 import { BeatLoader } from "react-spinners"
-import { useState } from "react"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
