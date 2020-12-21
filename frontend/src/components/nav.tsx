@@ -13,6 +13,7 @@ import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos"
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos"
 import Send from "@material-ui/icons/Send"
 import Update from "@material-ui/icons/Update"
+import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
 import React, { ReactNode, useState } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
@@ -95,6 +96,11 @@ export default function Nav({
         <IconButton component={Link} to={`/get-link`}>
           <Send />
         </IconButton>
+        <AuthOnly user={user}>
+          <IconButton>
+            <PowerSettingsNewIcon />
+          </IconButton>
+        </AuthOnly>
         <a href="https://github.com/khvorov45/hcwstudyapp">
           <IconButton>
             <GitHubIcon />
