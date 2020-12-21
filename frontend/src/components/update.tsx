@@ -86,7 +86,14 @@ function UpdateCard({
       <div>{formatDate(lastUpdateTimestamp.result)}</div>
       <Button
         variant="outlined"
-        onClick={syncFunctionResult.execute}
+        onClick={() =>
+          syncFunctionResult
+            .execute()
+            .then((_) => lastUpdateTimestamp.execute())
+            // These errors should be on syncFunctionResult object, no need
+            // to handle them here
+            .catch((e) => {})
+        }
         disabled={syncFunctionResult.loading}
         className="syncButton"
       >
