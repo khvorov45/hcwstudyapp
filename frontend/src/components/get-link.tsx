@@ -20,11 +20,17 @@ const useStyles = makeStyles((theme: Theme) =>
       flexDirection: "column",
       padding: 20,
       fontSize: "large",
+      alignItems: "center",
       "&>*": {
         padding: 10,
         display: "flex",
         justifyContent: "center",
       },
+    },
+    info: {
+      maxWidth: 500,
+      textAlign: "center",
+      fontSize: "medium",
     },
   })
 )
@@ -52,11 +58,7 @@ export default function GetLink() {
   const classes = useStyles()
   return (
     <div className={classes.getLink}>
-      <div>Please use the given link for access</div>
-      <div>
-        If you don't have a link, enter your email below and a new one will be
-        sent to you
-      </div>
+      <div>Enter email below to generate access link</div>
       <form>
         <TextField
           label="Email"
@@ -84,6 +86,11 @@ export default function GetLink() {
           </IconButton>
         </IconButtonContainer>
       </form>
+      <div className={classes.info}>
+        Access links are single-use. They log you in on one device. You can
+        generate multiple links for multiple devices and stay logged in on all
+        of them.
+      </div>
     </div>
   )
 }

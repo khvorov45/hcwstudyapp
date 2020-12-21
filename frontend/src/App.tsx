@@ -169,7 +169,7 @@ export default function App() {
               )}
             </Route>
             <Route exact path="/get-link">
-              {auth.status === "success" ? <Redirect to="/" /> : <GetLink />}
+              <GetLink />
             </Route>
             <AuthRoute
               exact
