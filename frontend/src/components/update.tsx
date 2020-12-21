@@ -4,6 +4,8 @@ import * as t from "io-ts"
 import { DateFromISOString } from "io-ts-types"
 import StatusCodes from "http-status-codes"
 import { apiReq } from "../lib/api"
+import { BeatLoader } from "react-spinners"
+import { useState } from "react"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -18,7 +20,9 @@ const useStyles = makeStyles((theme: Theme) =>
       flexDirection: "column",
       alignItems: "center",
       "& .syncButton": {
-        paddingTop: 5,
+        marginTop: 5,
+        width: 110,
+        height: 40,
       },
     },
   })
@@ -81,15 +85,18 @@ function UpdateCard({
     <div className={classes.updateCard}>
       <div>{title}</div>
       <div>{formatDate(lastUpdateTimestamp.result)}</div>
-      <div className="syncButton">
-        <Button
-          variant="outlined"
-          onClick={syncFunctionResult.execute}
-          disabled={syncFunctionResult.loading}
-        >
-          sync
-        </Button>
-      </div>
+      <Button
+        variant="outlined"
+        onClick={syncFunctionResult.execute}
+        disabled={syncFunctionResult.loading}
+        className="syncButton"
+      >
+        {syncFunctionResult.loading ? (
+          <BeatLoader color="gray" css={"display: flex"} />
+        ) : (
+          "sync now"
+        )}
+      </Button>
     </div>
   )
 }
