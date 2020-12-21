@@ -23,6 +23,7 @@ import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
 import GetLink from "./components/get-link"
+import Update from "./components/update"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -207,7 +208,7 @@ export default function App() {
               user={auth.result}
               path="/update"
             >
-              Update
+              <Update token={token?.token} />
             </AuthRoute>
           </Switch>
         </Router>
