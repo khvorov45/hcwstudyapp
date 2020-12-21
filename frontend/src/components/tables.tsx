@@ -21,6 +21,10 @@ import { useWindowSize } from "../lib/hooks"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    nav: {
+      overflowX: "scroll",
+      overflowY: "hidden",
+    },
     tableContainer: {
       display: "flex",
       justifyContent: "center",
@@ -115,10 +119,11 @@ export default function Tables({ token }: { token?: string }) {
   // Figure out active link
   const matchRes = useRouteMatch<{ table: string }>({ path: "/tables/:table" })
   const currentTable = matchRes?.params.table
-
+  const classes = useStyles()
   return (
     <>
       <SimpleNav
+        className={classes.nav}
         links={tableNamedLinks}
         active={(name) => name === currentTable}
       />

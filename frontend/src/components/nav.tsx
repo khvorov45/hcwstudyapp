@@ -32,11 +32,9 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     simpleNav: {
-      overflowX: "scroll",
-      overflowY: "hidden",
       height: 50,
       display: "flex",
-      alignItems: "end",
+      alignItems: "center",
       borderBottom: `1px solid ${theme.palette.divider}`,
       "&>*": {
         flexShrink: 0,
@@ -130,13 +128,15 @@ function AuthOnly({
 export function SimpleNav({
   links,
   active,
+  className,
 }: {
   links: { name: string; link: string }[]
   active: (name: string) => boolean
+  className?: string
 }) {
   const classes = useStyles()
   return (
-    <div className={classes.simpleNav}>
+    <div className={`${classes.simpleNav} ${className ?? ""}`}>
       {links.map(({ name, link }) => (
         <Button
           key={name}
