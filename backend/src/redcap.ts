@@ -24,6 +24,7 @@ export type RedcapConfig = {
 type RedcapRequestData = {
   [index: string]: string | undefined
   content: "record" | "user"
+  desc: string
   type?: "flat" | "eav"
   rawOrLabel?: "raw" | "label"
   fields?: string
@@ -50,10 +51,13 @@ async function redcapApiReq(
       bodyNonEmpty2021[k] = v
     }
   })
+  const before = new Date()
   const [year2020, year2021] = await Promise.all([
     axios.post(config.url, new URLSearchParams(bodyNonEmpty2020)),
     axios.post(config.url, new URLSearchParams(bodyNonEmpty2021)),
   ])
+  const after = new Date()
+  console.log(`REDCap ${body.desc} - ${after.getTime() - before.getTime()} ms`)
   return year2020.data
     .map((r: any) => {
       r.redcapProjectYear = 2020
@@ -98,7 +102,9 @@ function processRedcapDataAccessGroup(s: string | null | undefined): string {
 }
 
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
-  const users = (await redcapApiReq(config, { content: "user" })).map((u) => ({
+  const users = (
+    await redcapApiReq(config, { content: "user", desc: "users" })
+  ).map((u) => ({
     email: processRedcapStringLower(u.email),
     accessGroup: processRedcapDataAccessGroup(u.data_access_group),
     redcapProjectYear: u.redcapProjectYear,
@@ -120,6 +126,7 @@ export async function exportParticipants(
   const records = (
     await redcapApiReq(config, {
       content: "record",
+      desc: "participants",
       fields: [
         "redcap_data_access_group",
         "pid",
@@ -163,6 +170,7 @@ export async function exportRedcapIds(
   const redcapIds = (
     await redcapApiReq(config, {
       content: "record",
+      desc: "redcap ids",
       fields: ["record_id", "pid"].toString(),
       events: "baseline_arm_1",
       type: "flat",
@@ -193,6 +201,7 @@ export async function exportWithdrawn(
   const withdrawn = (
     await redcapApiReq(config, {
       content: "record",
+      desc: "withdrawn",
       fields: ["record_id", "withdrawn", "withdrawal_date"].toString(),
       events: "withdrawal_arm_1",
       type: "flat",
@@ -221,6 +230,7 @@ export async function exportVaccination(
   const _ = (
     await redcapApiReq(config, {
       content: "record",
+      desc: "vaccination",
       fields: ["pid", ...varNames].toString(),
       events: "baseline_arm_1",
       type: "flat",
@@ -256,6 +266,7 @@ export async function exportSchedule(
   const _ = (
     await redcapApiReq(config, {
       content: "record",
+      desc: "schedule",
       fields: ["pid", ...varNames].toString(),
       events: "baseline_arm_1",
       type: "flat",
@@ -296,6 +307,7 @@ export async function exportWeeklySurvey(
   const surv = (
     await redcapApiReq(config, {
       content: "record",
+      desc: "weekly survey",
       fields: [
         "record_id",
         "ari_definition",
