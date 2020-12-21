@@ -11,6 +11,7 @@ import Home from "@material-ui/icons/Home"
 import GitHubIcon from "@material-ui/icons/GitHub"
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos"
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos"
+import Send from "@material-ui/icons/Send"
 import React, { ReactNode, useState } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
@@ -85,6 +86,9 @@ export default function Nav({
             <People />
           </IconButton>
         </AuthOnly>
+        <IconButton component={Link} to={`/get-link`}>
+          <Send />
+        </IconButton>
         <a href="https://github.com/khvorov45/hcwstudyapp">
           <IconButton>
             <GitHubIcon />
