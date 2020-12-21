@@ -1,4 +1,5 @@
 import axios from "axios"
+import { StatusCodes } from "http-status-codes"
 import * as t from "io-ts"
 import { API_ROOT } from "./config"
 import { decode } from "./io"
@@ -33,6 +34,9 @@ export async function apiReq<T, O, I>(
   })
   if (res.status !== c.success) {
     throw Error(res.data)
+  }
+  if (res.status === StatusCodes.NO_CONTENT) {
+    res.data = undefined
   }
   return decode(c.validator, res.data)
 }
