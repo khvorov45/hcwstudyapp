@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function Tables({ token }: { token: string | null }) {
+export default function Tables({ token }: { token?: string }) {
   const tableNames = [
     "contact",
     "baseline",

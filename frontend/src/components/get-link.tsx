@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function GetLink({ token }: { token: string | null }) {
+export default function GetLink() {
   const [email, setEmail] = useState("")
 
   const sendEmail = useAsyncCallback(async () => {
@@ -37,7 +37,6 @@ export default function GetLink({ token }: { token: string | null }) {
       method: "POST",
       path: `auth/token/send`,
       query: { email: email },
-      token: token,
       success: StatusCodes.NO_CONTENT,
       failure: [StatusCodes.NOT_FOUND],
       validator: t.unknown,

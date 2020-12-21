@@ -47,6 +47,50 @@ function themeInit(): "dark" | "light" {
   }
 }
 
+type AppToken = {
+  token: string
+  lastRefresh: Date | null
+}
+
+function tokenInit(): AppToken | null {
+  const lastRefreshString = localStorage.getItem("last-refresh")
+  const lastRefresh = lastRefreshString ? new Date(lastRefreshString) : null
+  const localToken = localStorage.getItem("token")
+  if (localToken) {
+    return { token: localToken, lastRefresh }
+  }
+  return null
+}
+
+function conditionalTokenRefresh(
+  token: AppToken,
+  setToken: (t: AppToken) => void
+) {
+  const noLastRefresh = token.lastRefresh === null
+  let lastRefreshTooOld = false
+  if (token.lastRefresh !== null) {
+    lastRefreshTooOld =
+      new Date().getTime() - token.lastRefresh.getTime() > 24 * 60 * 60 * 1000
+  }
+  if (noLastRefresh || lastRefreshTooOld) {
+    apiReq({
+      method: "PUT",
+      path: "auth/token",
+      token: token.token,
+      success: StatusCodes.OK,
+      failure: [StatusCodes.UNAUTHORIZED],
+      validator: t.string,
+    })
+      .then((t) => {
+        const now = new Date()
+        localStorage.setItem("token", t)
+        localStorage.setItem("last-refresh", now.toISOString())
+        setToken({ token: t, lastRefresh: now })
+      })
+      .catch((e) => console.error(e.message))
+  }
+}
+
 export default function App() {
   // Theme --------------------------------------------------------------------
 
@@ -70,30 +114,20 @@ export default function App() {
 
   // Auth ---------------------------------------------------------------------
 
-  const [token, setToken] = useState({
-    token:
-      new URLSearchParams(window.location.search).get("token") ??
-      localStorage.getItem("token"),
-    lastRefresh: new Date(localStorage.getItem("last-refresh") ?? 0),
-  })
-  function updateToken(token: string) {
-    const now = new Date()
-    localStorage.setItem("token", token)
-    localStorage.setItem("last-refresh", now.toISOString())
-    setToken({ token: token, lastRefresh: now })
-  }
+  const [token, setToken] = useState(tokenInit())
 
   const auth = useAsync(
-    () =>
-      apiReq({
+    async (token: AppToken | null) => {
+      return await apiReq({
         method: "GET",
         path: "auth/token/verify",
-        token: token.token,
+        token: token?.token,
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],
         validator: UserV,
-      }),
-    []
+      })
+    },
+    [token]
   )
 
   useEffect(() => {
@@ -102,21 +136,7 @@ export default function App() {
       if (auth.status !== "success" || !token) {
         return
       }
-      if (
-        new Date().getTime() - token.lastRefresh.getTime() >
-        24 * 60 * 60 * 1000
-      ) {
-        apiReq({
-          method: "PUT",
-          path: "auth/token",
-          token: token.token,
-          success: StatusCodes.OK,
-          failure: [StatusCodes.UNAUTHORIZED],
-          validator: t.string,
-        })
-          .then(updateToken)
-          .catch((e) => console.error(e.message))
-      }
+      conditionalTokenRefresh(token, setToken)
     }
     conditionalRefresh()
     const interval = setInterval(conditionalRefresh, 60 * 60 * 1000)
@@ -139,15 +159,18 @@ export default function App() {
           <Nav
             togglePalette={togglePalette}
             user={auth.result}
-            token={token.token}
+            token={token?.token}
           />
           <Switch>
-            <Route exact path="/get-link">
+            <Route exact path="/login">
               {auth.status === "success" ? (
                 <Redirect to="/" />
               ) : (
-                <GetLink token={token.token} />
+                <Login setToken={setToken} />
               )}
+            </Route>
+            <Route exact path="/get-link">
+              {auth.status === "success" ? <Redirect to="/" /> : <GetLink />}
             </Route>
             <AuthRoute
               exact
@@ -173,7 +196,7 @@ export default function App() {
               user={auth.result}
               path="/tables"
             >
-              <Tables token={token.token} />
+              <Tables token={token?.token} />
             </AuthRoute>
             <AuthRoute
               exact
@@ -219,4 +242,18 @@ function AuthRoute({
       {children}
     </Route>
   )
+}
+
+function Login({ setToken }: { setToken: (t: AppToken) => void }) {
+  const queryToken = new URLSearchParams(window.location.search).get("token")
+  useEffect(() => {
+    if (!queryToken) {
+      return
+    }
+    conditionalTokenRefresh({ token: queryToken, lastRefresh: null }, setToken)
+  }, [queryToken, setToken])
+  if (!queryToken) {
+    return <Redirect to="/" />
+  }
+  return <></>
 }

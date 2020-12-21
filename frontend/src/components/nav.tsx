@@ -55,7 +55,7 @@ export default function Nav({
 }: {
   togglePalette: () => void
   user: User | null | undefined
-  token: string | null
+  token?: string
 }) {
   const classes = useStyles()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
