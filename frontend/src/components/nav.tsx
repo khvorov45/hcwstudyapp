@@ -54,11 +54,9 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Nav({
   togglePalette,
   user,
-  token,
 }: {
   togglePalette: () => void
   user: User | null | undefined
-  token?: string
 }) {
   const classes = useStyles()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })

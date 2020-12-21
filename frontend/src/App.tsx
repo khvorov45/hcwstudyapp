@@ -155,11 +155,7 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Nav
-            togglePalette={togglePalette}
-            user={auth.result}
-            token={token?.token}
-          />
+          <Nav togglePalette={togglePalette} user={auth.result} />
           <Switch>
             <Route exact path="/login">
               {auth.status === "success" ? (
