@@ -43,7 +43,7 @@ export default function Update({ token }: { token?: string }) {
       method: "PUT",
       path: "participants/redcap/sync",
       token: token,
-      success: StatusCodes.OK,
+      success: StatusCodes.NO_CONTENT,
       failure: [StatusCodes.UNAUTHORIZED],
       validator: t.void,
     })
