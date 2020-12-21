@@ -62,8 +62,8 @@ function tokenInit(): AppToken | null {
   return null
 }
 
-function tokenRefresh(token: AppToken, setToken: (t: AppToken) => void) {
-  apiReq({
+async function tokenRefresh(token: AppToken, setToken: (t: AppToken) => void) {
+  const newToken = await apiReq({
     method: "PUT",
     path: "auth/token",
     token: token.token,
@@ -71,13 +71,10 @@ function tokenRefresh(token: AppToken, setToken: (t: AppToken) => void) {
     failure: [StatusCodes.UNAUTHORIZED],
     validator: t.string,
   })
-    .then((t) => {
-      const now = new Date()
-      localStorage.setItem("token", t)
-      localStorage.setItem("last-refresh", now.toISOString())
-      setToken({ token: t, lastRefresh: now })
-    })
-    .catch((e) => console.error(e.message))
+  const now = new Date()
+  localStorage.setItem("token", newToken)
+  localStorage.setItem("last-refresh", now.toISOString())
+  setToken({ token: newToken, lastRefresh: now })
 }
 
 export default function App() {
@@ -118,10 +115,9 @@ export default function App() {
     },
     [token]
   )
-  console.log(auth.status)
 
   useEffect(() => {
-    function conditionalRefresh() {
+    async function conditionalRefresh() {
       // Gotta wait until we actually get a good token from somewhere
       if (auth.status !== "success" || !token) {
         return
@@ -134,7 +130,11 @@ export default function App() {
           24 * 60 * 60 * 1000
       }
       if (noLastRefresh || lastRefreshTooOld) {
-        tokenRefresh(token, setToken)
+        try {
+          await tokenRefresh(token, setToken)
+        } catch (e) {
+          console.error("token refresh failed: " + e.message)
+        }
       }
     }
     conditionalRefresh()
@@ -245,14 +245,16 @@ function AuthRoute({
 
 function Login({ setToken }: { setToken: (t: AppToken) => void }) {
   const queryToken = new URLSearchParams(window.location.search).get("token")
-  useEffect(() => {
+  const refresh = useAsync(async () => {
     if (!queryToken) {
       return
     }
-    tokenRefresh({ token: queryToken, lastRefresh: null }, setToken)
-  }, [queryToken, setToken])
-  if (!queryToken) {
-    return <Redirect to="/" />
+    await tokenRefresh({ token: queryToken, lastRefresh: null }, setToken)
+  }, [])
+  if (refresh.loading) {
+    return <></>
   }
-  return <></>
+  // Let the rest of the app figure out where to go when this attempted refresh
+  // completes
+  return <Redirect to="/" />
 }
