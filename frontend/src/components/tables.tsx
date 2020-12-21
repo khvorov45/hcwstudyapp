@@ -60,10 +60,9 @@ export default function Tables({ token }: { token?: string }) {
     "summary",
   ]
   const tablePaths = tableNames.map((n) => `/tables/${n}`)
-  const tableLinks = tablePaths.map((n) => `${n}?token=${token}`)
   const tableNamedLinks = tableNames.map((n, i) => ({
     name: n,
-    link: tableLinks[i],
+    link: tablePaths[i],
   }))
 
   const participantsFetch = useAsync(
@@ -124,7 +123,7 @@ export default function Tables({ token }: { token?: string }) {
         active={(name) => name === currentTable}
       />
       <Route exact path={"/tables"}>
-        <Redirect to={tableLinks[0]} />
+        <Redirect to={tablePaths[0]} />
       </Route>
       <Route path={tablePaths[0]}>
         <Contact participants={participants} />
