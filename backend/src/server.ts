@@ -4,6 +4,7 @@ import cors from "cors"
 import { getRoutes } from "./api"
 import { create as createDB } from "./db"
 import { createTransport } from "./email"
+import morgan from "morgan"
 
 async function main() {
   const args = yargs(process.argv)
@@ -43,6 +44,7 @@ async function main() {
   // Create the server
   const app = express()
   app.use(express.json())
+  app.use(morgan("tiny"))
   if (args.cors) {
     app.use(cors())
   }
