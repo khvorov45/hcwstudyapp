@@ -65,13 +65,13 @@ export default function Nav({
       {/* LEFT */}
       <div>
         <AuthOnly user={user}>
-          <IconButton component={Link} to={`/?token=${token}`}>
+          <IconButton component={Link} to={`/`}>
             <Home />
           </IconButton>
           <SimpleNav
             links={["tables", "plots"].map((l) => ({
               name: l,
-              link: `/${l}?token=${token}`,
+              link: `/${l}`,
             }))}
             active={(l) => matchRes?.params.location === l}
           />
@@ -82,7 +82,7 @@ export default function Nav({
       {/* RIGHT */}
       <div>
         <AuthOnly user={user} admin>
-          <IconButton component={Link} to={`/users?token=${token}`}>
+          <IconButton component={Link} to={`/users`}>
             <People />
           </IconButton>
         </AuthOnly>
