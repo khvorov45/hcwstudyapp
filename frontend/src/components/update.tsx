@@ -90,6 +90,9 @@ function UpdateCard({
     <div className={classes.updateCard}>
       <div>{title}</div>
       <div>{formatDate(lastUpdateTimestamp.result)}</div>
+      <FormHelperText error>
+        {lastUpdateTimestamp.error?.message}
+      </FormHelperText>
       <Button
         variant="outlined"
         onClick={() =>
