@@ -12,6 +12,7 @@ type ApiRequestConfig<T, O, I> = {
     | "schedule"
     | "weekly-survey"
     | "auth/token/send"
+    | "auth/token"
   query?: Record<string, string>
   token?: string | null
   success: number

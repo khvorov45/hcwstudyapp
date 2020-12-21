@@ -6,7 +6,7 @@ import {
   Theme,
   ThemeProvider,
 } from "@material-ui/core"
-import React, { ReactNode, useState } from "react"
+import React, { ReactNode, useEffect, useState } from "react"
 import StatusCodes from "http-status-codes"
 import { AsyncStateStatus, useAsync } from "react-async-hook"
 import {
@@ -15,6 +15,7 @@ import {
   Route,
   Redirect,
 } from "react-router-dom"
+import * as t from "io-ts"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
 import { User, UserV } from "./lib/data"
@@ -69,24 +70,58 @@ export default function App() {
 
   // Auth ---------------------------------------------------------------------
 
-  const token =
-    new URLSearchParams(window.location.search).get("token") ??
-    localStorage.getItem("token")
+  const [token, setToken] = useState({
+    token:
+      new URLSearchParams(window.location.search).get("token") ??
+      localStorage.getItem("token"),
+    lastRefresh: new Date(localStorage.getItem("last-refresh") ?? 0),
+  })
+  function updateToken(token: string) {
+    const now = new Date()
+    localStorage.setItem("token", token)
+    localStorage.setItem("last-refresh", now.toISOString())
+    setToken({ token: token, lastRefresh: now })
+  }
+
   const auth = useAsync(
     () =>
       apiReq({
         method: "GET",
         path: "auth/token/verify",
-        token: token,
+        token: token.token,
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],
         validator: UserV,
       }),
     []
   )
-  if (token && auth.status === "success") {
-    localStorage.setItem("token", token)
-  }
+
+  useEffect(() => {
+    function conditionalRefresh() {
+      // Gotta wait until we actually get a good token from somewhere
+      if (auth.status !== "success" || !token) {
+        return
+      }
+      if (
+        new Date().getTime() - token.lastRefresh.getTime() >
+        24 * 60 * 60 * 1000
+      ) {
+        apiReq({
+          method: "PUT",
+          path: "auth/token",
+          token: token.token,
+          success: StatusCodes.OK,
+          failure: [StatusCodes.UNAUTHORIZED],
+          validator: t.string,
+        })
+          .then(updateToken)
+          .catch((e) => console.error(e.message))
+      }
+    }
+    conditionalRefresh()
+    const interval = setInterval(conditionalRefresh, 60 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [token, auth])
 
   // Home page md -------------------------------------------------------------
 
@@ -101,10 +136,18 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Nav togglePalette={togglePalette} user={auth.result} token={token} />
+          <Nav
+            togglePalette={togglePalette}
+            user={auth.result}
+            token={token.token}
+          />
           <Switch>
             <Route exact path="/get-link">
-              <GetLink token={token} />
+              {auth.status === "success" ? (
+                <Redirect to="/" />
+              ) : (
+                <GetLink token={token.token} />
+              )}
             </Route>
             <AuthRoute
               exact
@@ -130,7 +173,7 @@ export default function App() {
               user={auth.result}
               path="/tables"
             >
-              <Tables token={token} />
+              <Tables token={token.token} />
             </AuthRoute>
             <AuthRoute
               exact
