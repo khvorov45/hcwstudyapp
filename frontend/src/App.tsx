@@ -62,33 +62,22 @@ function tokenInit(): AppToken | null {
   return null
 }
 
-function conditionalTokenRefresh(
-  token: AppToken,
-  setToken: (t: AppToken) => void
-) {
-  const noLastRefresh = token.lastRefresh === null
-  let lastRefreshTooOld = false
-  if (token.lastRefresh !== null) {
-    lastRefreshTooOld =
-      new Date().getTime() - token.lastRefresh.getTime() > 24 * 60 * 60 * 1000
-  }
-  if (noLastRefresh || lastRefreshTooOld) {
-    apiReq({
-      method: "PUT",
-      path: "auth/token",
-      token: token.token,
-      success: StatusCodes.OK,
-      failure: [StatusCodes.UNAUTHORIZED],
-      validator: t.string,
+function tokenRefresh(token: AppToken, setToken: (t: AppToken) => void) {
+  apiReq({
+    method: "PUT",
+    path: "auth/token",
+    token: token.token,
+    success: StatusCodes.OK,
+    failure: [StatusCodes.UNAUTHORIZED],
+    validator: t.string,
+  })
+    .then((t) => {
+      const now = new Date()
+      localStorage.setItem("token", t)
+      localStorage.setItem("last-refresh", now.toISOString())
+      setToken({ token: t, lastRefresh: now })
     })
-      .then((t) => {
-        const now = new Date()
-        localStorage.setItem("token", t)
-        localStorage.setItem("last-refresh", now.toISOString())
-        setToken({ token: t, lastRefresh: now })
-      })
-      .catch((e) => console.error(e.message))
-  }
+    .catch((e) => console.error(e.message))
 }
 
 export default function App() {
@@ -129,6 +118,7 @@ export default function App() {
     },
     [token]
   )
+  console.log(auth.status)
 
   useEffect(() => {
     function conditionalRefresh() {
@@ -136,7 +126,16 @@ export default function App() {
       if (auth.status !== "success" || !token) {
         return
       }
-      conditionalTokenRefresh(token, setToken)
+      const noLastRefresh = token.lastRefresh === null
+      let lastRefreshTooOld = false
+      if (token.lastRefresh !== null) {
+        lastRefreshTooOld =
+          new Date().getTime() - token.lastRefresh.getTime() >
+          24 * 60 * 60 * 1000
+      }
+      if (noLastRefresh || lastRefreshTooOld) {
+        tokenRefresh(token, setToken)
+      }
     }
     conditionalRefresh()
     const interval = setInterval(conditionalRefresh, 60 * 60 * 1000)
@@ -250,7 +249,7 @@ function Login({ setToken }: { setToken: (t: AppToken) => void }) {
     if (!queryToken) {
       return
     }
-    conditionalTokenRefresh({ token: queryToken, lastRefresh: null }, setToken)
+    tokenRefresh({ token: queryToken, lastRefresh: null }, setToken)
   }, [queryToken, setToken])
   if (!queryToken) {
     return <Redirect to="/" />
