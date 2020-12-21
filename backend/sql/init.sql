@@ -53,24 +53,24 @@ CREATE TABLE "Participant" (
 CREATE TABLE "RedcapId" (
     "redcapRecordId" text,
     "redcapProjectYear" int CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
-    "pid" text NOT NULL REFERENCES "Participant"("pid") ON DELETE CASCADE,
+    "pid" text NOT NULL REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
 );
 
 CREATE TABLE "Withdrawn" (
-    "pid" text PRIMARY KEY REFERENCES "Participant"("pid") ON DELETE CASCADE,
+    "pid" text PRIMARY KEY REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "date" timestamptz NOT NULL
 );
 
 CREATE TABLE "Vaccination" (
-    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE,
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "year" integer CHECK ("year" >= 2015 and "year" <= 2020),
     "status" hfs_vaccination_status,
     PRIMARY KEY ("pid", "year")
 );
 
 CREATE TABLE "Schedule" (
-    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE,
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "day" integer,
     "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
@@ -78,7 +78,7 @@ CREATE TABLE "Schedule" (
 );
 
 CREATE TABLE "WeeklySurvey" (
-    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE,
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "index" integer NOT NULL CHECK ("index" >= 1 AND "index" <= 32),
     "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
