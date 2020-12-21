@@ -205,6 +205,14 @@ export default function App() {
             >
               Plots
             </AuthRoute>
+            <AuthRoute
+              exact
+              authStatus={auth.status}
+              user={auth.result}
+              path="/update"
+            >
+              Update
+            </AuthRoute>
           </Switch>
         </Router>
       </ThemeProvider>

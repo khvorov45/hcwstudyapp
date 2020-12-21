@@ -12,6 +12,7 @@ import GitHubIcon from "@material-ui/icons/GitHub"
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos"
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos"
 import Send from "@material-ui/icons/Send"
+import Update from "@material-ui/icons/Update"
 import React, { ReactNode, useState } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
@@ -84,6 +85,11 @@ export default function Nav({
         <AuthOnly user={user} admin>
           <IconButton component={Link} to={`/users`}>
             <People />
+          </IconButton>
+        </AuthOnly>
+        <AuthOnly user={user}>
+          <IconButton component={Link} to={`/update`}>
+            <Update />
           </IconButton>
         </AuthOnly>
         <IconButton component={Link} to={`/get-link`}>
