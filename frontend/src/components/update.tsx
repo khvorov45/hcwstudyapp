@@ -1,4 +1,10 @@
-import { makeStyles, Theme, createStyles, Button } from "@material-ui/core"
+import {
+  makeStyles,
+  Theme,
+  createStyles,
+  Button,
+  FormHelperText,
+} from "@material-ui/core"
 import { useAsync, useAsyncCallback } from "react-async-hook"
 import * as t from "io-ts"
 import { DateFromISOString } from "io-ts-types"
@@ -103,6 +109,7 @@ function UpdateCard({
           "sync now"
         )}
       </Button>
+      <FormHelperText error>{syncFunctionResult.error?.message}</FormHelperText>
     </div>
   )
 }
