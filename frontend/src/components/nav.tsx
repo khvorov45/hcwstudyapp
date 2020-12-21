@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     nav: {
       height: 50,
-      overflow: "auto",
+      overflowX: "scroll",
+      overflowY: "hidden",
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
