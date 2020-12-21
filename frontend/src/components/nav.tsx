@@ -38,6 +38,9 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "end",
       borderBottom: `1px solid ${theme.palette.divider}`,
+      "&>*": {
+        flexShrink: 0,
+      },
       "& .active": {
         backgroundColor: theme.palette.primary[theme.palette.type],
       },
