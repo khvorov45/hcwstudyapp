@@ -198,7 +198,9 @@ function stringifySchema(schema: any, indentLevel: number): string {
   return `${
     schema.type === "array"
       ? stringifyArray(schema.items, indentLevel)
-      : stringifyObject(schema.properties, indentLevel)
+      : schema.type === "object"
+      ? stringifyObject(schema.properties, indentLevel)
+      : schema.type
   }`
 }
 
