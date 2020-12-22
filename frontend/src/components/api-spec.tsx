@@ -118,11 +118,18 @@ function Path({
 }
 
 function Security({ security }: { security: any }) {
+  console.log(security)
   const classes = useStyles()
   return (
     <div className={classes.security}>
-      <span className={classes.responsesTitle}>Security:</span>
-      <span>{security.map((s: Object) => Object.keys(s).map((k) => k))}</span>
+      <span className={classes.responsesTitle}>Authorization header:</span>
+      <span>
+        <code>
+          {security.map((s: Object) =>
+            Object.keys(s).map((k) => `Bearer <${k} token>`)
+          )}
+        </code>
+      </span>
     </div>
   )
 }
