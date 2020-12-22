@@ -47,7 +47,17 @@ components:
         email:
           type: string
         accessGroup:
-          enum: [admin, unrestricted]
+          enum:
+            [
+              admin,
+              unrestricted,
+              melbourne,
+              sydney,
+              adelaide,
+              brisbane,
+              newcastle,
+              perth,
+            ]
     Users:
       type: array
       items:
