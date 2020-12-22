@@ -203,6 +203,12 @@ components:
       required:
         - pid
         - site
+        - dateScreening
+        - email
+        - mobile
+        - addBleed
+        - dob
+        - gender
         - baselineQuestComplete
       properties:
         pid:
@@ -212,17 +218,23 @@ components:
         dateScreening:
           type: string
           format: date-time
+          nullable: true
         email:
           type: string
+          nullable: true
         mobile:
           type: string
+          nullable: true
         addBleed:
           type: boolean
+          nullable: true
         dob:
           type: string
           format: date-time
+          nullable: true
         gender:
           enum: [female, male, other]
+          nullable: true
         baselineQuestComplete:
           type: boolean
     Participants:
