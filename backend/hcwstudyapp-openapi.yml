@@ -49,6 +49,16 @@ paths:
           description: Successful deletion
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /users/redcap/sync:
+    put:
+      summary: Sync users with REDCap
+      security:
+        - Admin: []
+      responses:
+        "204":
+          description: Successful sync
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
