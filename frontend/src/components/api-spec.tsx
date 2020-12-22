@@ -227,6 +227,8 @@ function stringifyProperty(
 ): string {
   const sep = "  ".repeat(indentLevel)
   return `${sep}${name}: ${
-    params.type ?? params.enum.map((e: string) => `"${e}"`).join(`\n${sep} | `)
+    params.enum
+      ? params.enum.map((e: string) => `"${e}"`).join(`\n${sep} | `)
+      : params.type
   }`
 }
