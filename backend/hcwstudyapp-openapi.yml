@@ -47,6 +47,8 @@ paths:
       responses:
         "204":
           description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
