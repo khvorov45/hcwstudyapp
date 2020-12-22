@@ -209,8 +209,20 @@ components:
           type: string
         site:
           enum: [melbourne, sydney, adelaide, brisbane, newcastle, perth]
+        dateScreening:
+          type: string
+          format: date-time
         email:
           type: string
+        mobile:
+          type: string
+        addBleed:
+          type: boolean
+        dob:
+          type: string
+          format: date-time
+        gender:
+          enum: [female, male, other]
         baselineQuestComplete:
           type: boolean
     Participants:
