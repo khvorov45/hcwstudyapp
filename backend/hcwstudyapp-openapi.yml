@@ -127,6 +127,50 @@ paths:
             application/json:
               schema:
                 type: string
+  /participants:
+    get:
+      summary: List all participants
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Array of participants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participants"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Add participants
+      security:
+        - User: []
+      requestBody:
+        description: Participants to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Participants"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a participant
+      security:
+        - User: []
+      parameters:
+        - in: query
+          name: pid
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -154,6 +198,25 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/User"
+    Participant:
+      type: object
+      required:
+        - pid
+        - site
+        - baselineQuestComplete
+      properties:
+        pid:
+          type: string
+        site:
+          enum: [melbourne, sydney, adelaide, brisbane, newcastle, perth]
+        email:
+          type: string
+        baselineQuestComplete:
+          type: boolean
+    Participants:
+      type: array
+      items:
+        $ref: "#/components/schemas/Participant"
   securitySchemes:
     User:
       type: http
