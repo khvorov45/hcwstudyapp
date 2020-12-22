@@ -186,6 +186,9 @@ export default function App() {
             <Route exact path="/get-link">
               <GetLink />
             </Route>
+            <Route exact path="/api-spec">
+              API
+            </Route>
             <AuthRoute
               exact
               authStatus={auth.status}

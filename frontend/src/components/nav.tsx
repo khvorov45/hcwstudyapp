@@ -13,6 +13,8 @@ import GitHubIcon from "@material-ui/icons/GitHub"
 import Send from "@material-ui/icons/Send"
 import Update from "@material-ui/icons/Update"
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
+import { Icon } from "@iconify/react"
+import apiIcon from "@iconify/icons-mdi/api"
 import React, { ReactNode } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
@@ -115,6 +117,13 @@ export default function Nav({
           className={matchRes?.params.location === "get-link" ? "active" : ""}
         >
           <Send />
+        </IconButton>
+        <IconButton
+          component={Link}
+          to={`/api-spec`}
+          className={matchRes?.params.location === "api-spec" ? "active" : ""}
+        >
+          <Icon icon={apiIcon} />
         </IconButton>
         <Divider orientation="vertical" flexItem className={classes.divider} />
         <AuthOnly user={user}>
