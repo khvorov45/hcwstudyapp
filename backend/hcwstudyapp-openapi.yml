@@ -19,6 +19,8 @@ paths:
                 $ref: "#/components/schemas/Users"
     post:
       summary: Add users
+      security:
+        - Admin: []
       requestBody:
         description: Users to add
         required: true
