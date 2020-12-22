@@ -58,9 +58,11 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Nav({
   togglePalette,
   user,
+  logout,
 }: {
   togglePalette: () => void
   user: User | null | undefined
+  logout: () => Promise<void>
 }) {
   const classes = useStyles()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
@@ -116,7 +118,7 @@ export default function Nav({
         </IconButton>
         <Divider orientation="vertical" flexItem className={classes.divider} />
         <AuthOnly user={user}>
-          <IconButton>
+          <IconButton onClick={logout}>
             <PowerSettingsNewIcon />
           </IconButton>
         </AuthOnly>

@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core"
 import React, { ReactNode, useEffect, useState } from "react"
 import StatusCodes from "http-status-codes"
-import { AsyncStateStatus, useAsync } from "react-async-hook"
+import { AsyncStateStatus, useAsync, useAsyncCallback } from "react-async-hook"
 import {
   BrowserRouter as Router,
   Switch,
@@ -143,6 +143,20 @@ export default function App() {
     return () => clearInterval(interval)
   }, [token, auth])
 
+  const logout = useAsyncCallback(async () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("last-refresh")
+    setToken(null)
+    await apiReq({
+      method: "DELETE",
+      path: "auth/token",
+      token: token?.token,
+      success: StatusCodes.NO_CONTENT,
+      failure: [],
+      validator: t.void,
+    })
+  })
+
   // Home page md -------------------------------------------------------------
 
   const [homePageContent, setHomePageContent] = useState<string>()
@@ -156,7 +170,11 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Nav togglePalette={togglePalette} user={auth.result} />
+          <Nav
+            togglePalette={togglePalette}
+            user={auth.result}
+            logout={logout.execute}
+          />
           <Switch>
             <Route exact path="/login">
               {auth.status === "success" ? (

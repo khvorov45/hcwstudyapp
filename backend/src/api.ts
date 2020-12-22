@@ -88,7 +88,7 @@ export function getRoutes(
   routes.put("/auth/token", async (req: Request, res: Response) => {
     res.json(await refreshToken(db, extractToken(req), tokenDaysToLive))
   })
-  routes.delete("/auth/token/self", async (req: Request, res: Response) => {
+  routes.delete("/auth/token", async (req: Request, res: Response) => {
     await deleteToken(db, extractToken(req))
     res.status(StatusCodes.NO_CONTENT).end()
   })
