@@ -110,7 +110,6 @@ function Path({
 
 function RequestBody({ body }: { body: any }) {
   const classes = useStyles()
-  console.log(body)
   return (
     <div>
       <div className={classes.responsesTitle}>Request body:</div>
