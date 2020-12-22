@@ -146,7 +146,6 @@ function stringifyProperty(
   params: any,
   indentLevel: number
 ): string {
-  console.log(params)
   const sep = "  ".repeat(indentLevel)
   return `${sep}${name}: ${
     params.type ?? params.enum.map((e: string) => `"${e}"`).join(" | ")
