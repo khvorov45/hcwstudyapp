@@ -9,7 +9,7 @@ paths:
     get:
       summary: List all users
       security:
-        - BearerAuth: []
+        - Admin: []
       responses:
         "200":
           description: Array of users
@@ -47,6 +47,9 @@ components:
       items:
         $ref: "#/components/schemas/User"
   securitySchemes:
-    BearerAuth:
+    User:
+      type: http
+      scheme: bearer
+    Admin:
       type: http
       scheme: bearer
