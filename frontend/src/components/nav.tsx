@@ -15,6 +15,8 @@ import Update from "@material-ui/icons/Update"
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
 import { Icon } from "@iconify/react"
 import apiIcon from "@iconify/icons-mdi/api"
+import tableOutlined from "@iconify/icons-ant-design/table-outlined"
+import bxBarChart from "@iconify/icons-bx/bx-bar-chart"
 import React, { ReactNode } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
@@ -80,13 +82,20 @@ export default function Nav({
           >
             <Home />
           </IconButton>
-          <SimpleNav
-            links={["tables", "plots"].map((l) => ({
-              name: l,
-              link: `/${l}`,
-            }))}
-            active={(l) => matchRes?.params.location === l}
-          />
+          <IconButton
+            component={Link}
+            to={`/tables`}
+            className={matchRes?.params.location === "tables" ? "active" : ""}
+          >
+            <Icon icon={tableOutlined} />
+          </IconButton>
+          <IconButton
+            component={Link}
+            to={`/plots`}
+            className={matchRes?.params.location === "plots" ? "active" : ""}
+          >
+            <Icon icon={bxBarChart} />
+          </IconButton>
         </AuthOnly>
       </div>
       {/* CENTER */}
