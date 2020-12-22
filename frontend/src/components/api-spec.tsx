@@ -120,7 +120,6 @@ function Path({
 }
 
 function Parameters({ parameters }: { parameters: any }) {
-  console.log(parameters)
   const classes = useStyles()
   return (
     <div>
