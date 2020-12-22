@@ -53,6 +53,16 @@ paths:
           description: Token deleted
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /auth/token/user:
+    delete:
+      summary: Delete all user's tokens
+      security:
+        - User: []
+      responses:
+        "204":
+          description: Tokens deleted
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
   /users:
     get:
