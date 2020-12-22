@@ -118,7 +118,6 @@ function Path({
 }
 
 function Security({ security }: { security: any }) {
-  console.log(security)
   const classes = useStyles()
   return (
     <div className={classes.security}>
