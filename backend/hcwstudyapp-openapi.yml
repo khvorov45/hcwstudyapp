@@ -35,6 +35,18 @@ paths:
           description: Successful addition
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a user
+      security:
+        - Admin: []
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successful deletion
 
 components:
   schemas:
