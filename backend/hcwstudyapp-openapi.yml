@@ -44,6 +44,15 @@ paths:
                 type: string
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a token
+      security:
+        - User: []
+      responses:
+        "204":
+          description: Token deleted
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
   /users:
     get:
