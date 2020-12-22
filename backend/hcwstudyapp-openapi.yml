@@ -5,6 +5,18 @@ info:
 servers:
   - url: https://reports.hcwflustudy.com/api
 paths:
+  /auth/token/send:
+    post:
+      summary: Email a new token
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successfully sent
+
   /users:
     get:
       summary: List all users
