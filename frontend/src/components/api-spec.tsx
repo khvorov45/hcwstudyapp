@@ -13,9 +13,11 @@ const useStyles = makeStyles((theme: Theme) =>
     pathHeader: {
       fontSize: "large",
       "&>span": {
-        paddingLeft: 5,
-        paddingRight: 5,
+        paddingRight: 10,
       },
+    },
+    pathContent: {
+      paddingLeft: 10,
     },
     method: {
       fontWeight: "bold",
@@ -93,12 +95,14 @@ function Path({
         <span className={classes.path}>{path}</span>
         <span className={classes.summary}>{params.summary}</span>
       </div>
-      {params.requestBody && <RequestBody body={params.requestBody} />}
-      <div className={classes.responsesTitle}>Responses:</div>
-      <div>
-        {Object.entries(params.responses).map(([code, codeParams]) => (
-          <ResponseCode key={code} code={code} params={codeParams} />
-        ))}
+      <div className={classes.pathContent}>
+        {params.requestBody && <RequestBody body={params.requestBody} />}
+        <div className={classes.responsesTitle}>Responses:</div>
+        <div>
+          {Object.entries(params.responses).map(([code, codeParams]) => (
+            <ResponseCode key={code} code={code} params={codeParams} />
+          ))}
+        </div>
       </div>
     </div>
   )
