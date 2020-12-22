@@ -24,6 +24,7 @@ import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
 import GetLink from "./components/get-link"
 import Update from "./components/update"
+import ApiSpec from "./components/api-spec"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -187,7 +188,7 @@ export default function App() {
               <GetLink />
             </Route>
             <Route exact path="/api-spec">
-              API
+              <ApiSpec />
             </Route>
             <AuthRoute
               exact
