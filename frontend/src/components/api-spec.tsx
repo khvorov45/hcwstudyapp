@@ -9,6 +9,9 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     pathCard: {
       padding: 10,
+      "& pre": {
+        marginTop: 0,
+      },
     },
     pathHeader: {
       fontSize: "large",
