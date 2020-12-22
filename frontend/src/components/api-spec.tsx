@@ -93,12 +93,26 @@ function Path({
         <span className={classes.path}>{path}</span>
         <span className={classes.summary}>{params.summary}</span>
       </div>
+      {params.requestBody && <RequestBody body={params.requestBody} />}
       <div className={classes.responsesTitle}>Responses:</div>
       <div>
         {Object.entries(params.responses).map(([code, codeParams]) => (
           <ResponseCode key={code} code={code} params={codeParams} />
         ))}
       </div>
+    </div>
+  )
+}
+
+function RequestBody({ body }: { body: any }) {
+  const classes = useStyles()
+  console.log(body)
+  return (
+    <div>
+      <div className={classes.responsesTitle}>Request body:</div>
+      {Object.entries(body.content).map(([type, params]) => (
+        <Content key={type} type={type} params={params} />
+      ))}
     </div>
   )
 }
@@ -115,7 +129,7 @@ function ResponseCode({ code, params }: { code: string; params: any }) {
       </div>
       {params.content &&
         Object.entries(params.content).map(([type, typeParams]) => (
-          <Content type={type} params={typeParams} />
+          <Content key={type} type={type} params={typeParams} />
         ))}
     </div>
   )
