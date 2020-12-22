@@ -7,6 +7,26 @@ const useStyles = makeStyles((theme: Theme) =>
     api: {
       padding: 20,
     },
+    pathCard: {
+      padding: 10,
+    },
+    pathHeader: {
+      fontSize: "large",
+      "&>span": {
+        paddingLeft: 5,
+        paddingRight: 5,
+      },
+    },
+    method: {
+      fontWeight: "bold",
+    },
+    path: {
+      fontFamily: "monospace",
+      fontSize: "x-large",
+    },
+    summary: {
+      color: theme.palette.text.secondary,
+    },
   })
 )
 
@@ -50,9 +70,14 @@ function Path({
   path: string
   params: any
 }) {
+  const classes = useStyles()
   return (
-    <div>
-      <h2>{`${method.toUpperCase()} ${path}`}</h2>
+    <div className={classes.pathCard}>
+      <div className={classes.pathHeader}>
+        <span className={classes.method}>{method.toUpperCase()}</span>
+        <span className={classes.path}>{path}</span>
+        <span className={classes.summary}>{params.summary}</span>
+      </div>
     </div>
   )
 }
