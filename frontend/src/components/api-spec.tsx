@@ -16,9 +16,6 @@ const useStyles = makeStyles((theme: Theme) =>
         paddingRight: 10,
       },
     },
-    pathContent: {
-      paddingLeft: 10,
-    },
     method: {
       fontWeight: "bold",
     },
@@ -46,12 +43,6 @@ const useStyles = makeStyles((theme: Theme) =>
       "&>span": {
         paddingRight: 5,
       },
-    },
-    responsesContent: {
-      paddingLeft: 10,
-    },
-    responseContent: {
-      paddingLeft: 10,
     },
     responseCode: {
       fontFamily: "monospace",
@@ -113,12 +104,12 @@ function Path({
         <span className={classes.path}>{path}</span>
         <span className={classes.summary}>{params.summary}</span>
       </div>
-      <div className={classes.pathContent}>
+      <div className={classes.subContent}>
         {params.security && <Security security={params.security} />}
         {params.requestBody && <RequestBody body={params.requestBody} />}
         {params.parameters && <Parameters parameters={params.parameters} />}
         <div className={classes.responsesTitle}>Responses:</div>
-        <div className={classes.responsesContent}>
+        <div className={classes.subContent}>
           {Object.entries(params.responses).map(([code, codeParams]) => (
             <ResponseCode key={code} code={code} params={codeParams} />
           ))}
@@ -134,7 +125,7 @@ function Parameters({ parameters }: { parameters: any }) {
   return (
     <div>
       <span className={classes.subtitle}>Query:</span>
-      <span className={classes.responseContent}>
+      <span className={classes.subContent}>
         <code>
           {parameters.map((p: any) => `${p.name}=${p.schema.type}`).join("&")}
         </code>
@@ -147,7 +138,7 @@ function Security({ security }: { security: any }) {
   const classes = useStyles()
   return (
     <div className={classes.security}>
-      <span className={classes.responsesTitle}>Authorization header:</span>
+      <span className={classes.subtitle}>Authorization header:</span>
       <span>
         <code>
           {security.map((s: Object) =>
@@ -163,8 +154,8 @@ function RequestBody({ body }: { body: any }) {
   const classes = useStyles()
   return (
     <div>
-      <div className={classes.responsesTitle}>Request body:</div>
-      <div className={classes.responsesContent}>
+      <div className={classes.subtitle}>Request body:</div>
+      <div className={classes.subContent}>
         {Object.entries(body.content).map(([type, params]) => (
           <Content key={type} type={type} params={params} />
         ))}
@@ -183,7 +174,7 @@ function ResponseCode({ code, params }: { code: string; params: any }) {
           {params.description}
         </span>
       </div>
-      <div className={classes.responseContent}>
+      <div className={classes.subContent}>
         {params.content &&
           Object.entries(params.content).map(([type, typeParams]) => (
             <Content key={type} type={type} params={typeParams} />
