@@ -40,6 +40,9 @@ const useStyles = makeStyles((theme: Theme) =>
         paddingRight: 5,
       },
     },
+    responsesContent: {
+      paddingLeft: 10,
+    },
     responseCode: {
       fontFamily: "monospace",
     },
@@ -98,7 +101,7 @@ function Path({
       <div className={classes.pathContent}>
         {params.requestBody && <RequestBody body={params.requestBody} />}
         <div className={classes.responsesTitle}>Responses:</div>
-        <div>
+        <div className={classes.responsesContent}>
           {Object.entries(params.responses).map(([code, codeParams]) => (
             <ResponseCode key={code} code={code} params={codeParams} />
           ))}
@@ -113,9 +116,11 @@ function RequestBody({ body }: { body: any }) {
   return (
     <div>
       <div className={classes.responsesTitle}>Request body:</div>
-      {Object.entries(body.content).map(([type, params]) => (
-        <Content key={type} type={type} params={params} />
-      ))}
+      <div className={classes.responsesContent}>
+        {Object.entries(body.content).map(([type, params]) => (
+          <Content key={type} type={type} params={params} />
+        ))}
+      </div>
     </div>
   )
 }
