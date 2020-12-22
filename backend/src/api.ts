@@ -22,6 +22,8 @@ import {
   getWeeklySurveySubset,
   insertTokens,
   refreshToken,
+  deleteUserTokens,
+  deleteToken,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -85,6 +87,14 @@ export function getRoutes(
   })
   routes.put("/auth/token", async (req: Request, res: Response) => {
     res.json(await refreshToken(db, extractToken(req), tokenDaysToLive))
+  })
+  routes.delete("/auth/token/self", async (req: Request, res: Response) => {
+    await deleteToken(db, extractToken(req))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.delete("/auth/token/user", async (req: Request, res: Response) => {
+    await deleteUserTokens(db, extractToken(req))
+    res.status(StatusCodes.NO_CONTENT).end()
   })
 
   // Participants

@@ -227,7 +227,7 @@ export async function insertTokens(db: DB, tokens: Token[]) {
   await insertIntoTable(db, tokensHashed, "Token")
 }
 
-async function deleteToken(db: DB, token: string) {
+export async function deleteToken(db: DB, token: string) {
   await db.any('DELETE FROM "Token" WHERE "hash" = $1', [hash(token)])
 }
 
@@ -251,6 +251,17 @@ export async function refreshToken(
     throw Error("UNAUTHORIZED: valid token to be refreshed not found")
   }
   return newToken
+}
+
+export async function deleteUserTokens(db: DB, token: string): Promise<void> {
+  const res = await db.result(
+    `DELETE FROM "Token" WHERE "user" =
+    (SELECT "user" FROM "Token" WHERE "hash" = $1)`,
+    [hash(token)]
+  )
+  if (res.rowCount === 0) {
+    throw Error("UNAUTHORIZED: no such token")
+  }
 }
 
 // Particpants ================================================================
