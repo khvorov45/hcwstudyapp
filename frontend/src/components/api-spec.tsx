@@ -27,6 +27,11 @@ const useStyles = makeStyles((theme: Theme) =>
     summary: {
       color: theme.palette.text.secondary,
     },
+    response: {
+      "&>*": {
+        paddingRight: 5,
+      },
+    },
   })
 )
 
@@ -78,6 +83,21 @@ function Path({
         <span className={classes.path}>{path}</span>
         <span className={classes.summary}>{params.summary}</span>
       </div>
+      <div>
+        {Object.entries(params.responses).map(([code, codeParams]) => (
+          <ResponseCode key={code} code={code} params={codeParams} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ResponseCode({ code, params }: { code: string; params: any }) {
+  const classes = useStyles()
+  return (
+    <div className={classes.response}>
+      <span>{code}:</span>
+      <span>{params.description}</span>
     </div>
   )
 }
