@@ -43,6 +43,9 @@ const useStyles = makeStyles((theme: Theme) =>
     responsesContent: {
       paddingLeft: 10,
     },
+    responseContent: {
+      paddingLeft: 10,
+    },
     responseCode: {
       fontFamily: "monospace",
     },
@@ -157,10 +160,12 @@ function ResponseCode({ code, params }: { code: string; params: any }) {
           {params.description}
         </span>
       </div>
-      {params.content &&
-        Object.entries(params.content).map(([type, typeParams]) => (
-          <Content key={type} type={type} params={typeParams} />
-        ))}
+      <div className={classes.responseContent}>
+        {params.content &&
+          Object.entries(params.content).map(([type, typeParams]) => (
+            <Content key={type} type={type} params={typeParams} />
+          ))}
+      </div>
     </div>
   )
 }
