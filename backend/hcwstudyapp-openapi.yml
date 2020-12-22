@@ -16,6 +16,20 @@ paths:
       responses:
         "204":
           description: Successfully sent
+  /auth/token/verify:
+    get:
+      summary: Verify a token
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Token validated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
   /users:
     get:
