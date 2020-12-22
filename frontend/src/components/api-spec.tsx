@@ -27,10 +27,22 @@ const useStyles = makeStyles((theme: Theme) =>
     summary: {
       color: theme.palette.text.secondary,
     },
-    response: {
-      "&>*": {
+    responsesTitle: {
+      fontSize: "medium",
+      fontWeight: "bold",
+      paddingBottom: 5,
+    },
+    responseHeader: {
+      paddingBottom: 5,
+      "&>span": {
         paddingRight: 5,
       },
+    },
+    responseCode: {
+      fontFamily: "monospace",
+    },
+    responseDescription: {
+      color: theme.palette.text.secondary,
     },
   })
 )
@@ -81,7 +93,7 @@ function Path({
         <span className={classes.path}>{path}</span>
         <span className={classes.summary}>{params.summary}</span>
       </div>
-      <div>Responses</div>
+      <div className={classes.responsesTitle}>Responses:</div>
       <div>
         {Object.entries(params.responses).map(([code, codeParams]) => (
           <ResponseCode key={code} code={code} params={codeParams} />
@@ -94,10 +106,13 @@ function Path({
 function ResponseCode({ code, params }: { code: string; params: any }) {
   const classes = useStyles()
   return (
-    <div className={classes.response}>
-      <span>{code}:</span>
-      <span>{params.description}</span>
-      <div>{params.content && "Returns"}</div>
+    <div>
+      <div className={classes.responseHeader}>
+        <span className={classes.responseCode}>{code}</span>
+        <span className={classes.responseDescription}>
+          {params.description}
+        </span>
+      </div>
       {params.content &&
         Object.entries(params.content).map(([type, typeParams]) => (
           <Content type={type} params={typeParams} />
@@ -109,13 +124,10 @@ function ResponseCode({ code, params }: { code: string; params: any }) {
 function Content({ type, params }: { type: string; params: any }) {
   return (
     <div>
-      <div>Type: {type}</div>
-      <div>Schema:</div>
-      <div>
-        <pre>
-          <code>{stringifySchema(params.schema, 0)}</code>
-        </pre>
-      </div>
+      <code>{type}</code>
+      <pre>
+        <code>{stringifySchema(params.schema, 0)}</code>
+      </pre>
     </div>
   )
 }
