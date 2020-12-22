@@ -60,10 +60,10 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
     get:
-      summary: Get time of last successful user sync
+      summary: Last successful user sync
       responses:
         "200":
-          description: Datetime stamp of last successful sync
+          description: Datetime stamp
           content:
             application/json:
               schema:
