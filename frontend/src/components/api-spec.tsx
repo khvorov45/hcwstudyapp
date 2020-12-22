@@ -29,6 +29,13 @@ const useStyles = makeStyles((theme: Theme) =>
     summary: {
       color: theme.palette.text.secondary,
     },
+    subtitle: {
+      fontSize: "medium",
+      fontWeight: "bold",
+    },
+    subContent: {
+      paddingLeft: 10,
+    },
     responsesTitle: {
       fontSize: "medium",
       fontWeight: "bold",
@@ -109,6 +116,7 @@ function Path({
       <div className={classes.pathContent}>
         {params.security && <Security security={params.security} />}
         {params.requestBody && <RequestBody body={params.requestBody} />}
+        {params.parameters && <Parameters parameters={params.parameters} />}
         <div className={classes.responsesTitle}>Responses:</div>
         <div className={classes.responsesContent}>
           {Object.entries(params.responses).map(([code, codeParams]) => (
@@ -116,6 +124,21 @@ function Path({
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function Parameters({ parameters }: { parameters: any }) {
+  console.log(parameters)
+  const classes = useStyles()
+  return (
+    <div>
+      <span className={classes.subtitle}>Query:</span>
+      <span className={classes.responseContent}>
+        <code>
+          {parameters.map((p: any) => `${p.name}=${p.schema.type}`).join("&")}
+        </code>
+      </span>
     </div>
   )
 }
