@@ -49,6 +49,11 @@ const useStyles = makeStyles((theme: Theme) =>
     responseDescription: {
       color: theme.palette.text.secondary,
     },
+    security: {
+      "&>span": {
+        paddingRight: 5,
+      },
+    },
   })
 )
 
@@ -99,6 +104,7 @@ function Path({
         <span className={classes.summary}>{params.summary}</span>
       </div>
       <div className={classes.pathContent}>
+        {params.security && <Security security={params.security} />}
         {params.requestBody && <RequestBody body={params.requestBody} />}
         <div className={classes.responsesTitle}>Responses:</div>
         <div className={classes.responsesContent}>
@@ -107,6 +113,16 @@ function Path({
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function Security({ security }: { security: any }) {
+  const classes = useStyles()
+  return (
+    <div className={classes.security}>
+      <span className={classes.responsesTitle}>Security:</span>
+      <span>{security.map((s: Object) => Object.keys(s).map((k) => k))}</span>
     </div>
   )
 }
