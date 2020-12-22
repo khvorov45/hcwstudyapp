@@ -1,6 +1,7 @@
 import {
   Button,
   createStyles,
+  Divider,
   IconButton,
   makeStyles,
   Theme,
@@ -30,6 +31,9 @@ const useStyles = makeStyles((theme: Theme) =>
         display: "flex",
         alignItems: "center",
       },
+      "& .active": {
+        backgroundColor: theme.palette.primary[theme.palette.type],
+      },
     },
     simpleNav: {
       height: 50,
@@ -42,6 +46,11 @@ const useStyles = makeStyles((theme: Theme) =>
       "& .active": {
         backgroundColor: theme.palette.primary[theme.palette.type],
       },
+    },
+    divider: {
+      marginLeft: 5,
+      color: theme.palette.divider,
+      width: 2,
     },
   })
 )
@@ -60,7 +69,11 @@ export default function Nav({
       {/* LEFT */}
       <div>
         <AuthOnly user={user}>
-          <IconButton component={Link} to={`/`}>
+          <IconButton
+            component={Link}
+            to={`/`}
+            className={matchRes === null ? "active" : ""}
+          >
             <Home />
           </IconButton>
           <SimpleNav
@@ -77,18 +90,31 @@ export default function Nav({
       {/* RIGHT */}
       <div>
         <AuthOnly user={user} admin>
-          <IconButton component={Link} to={`/users`}>
+          <IconButton
+            component={Link}
+            to={`/users`}
+            className={matchRes?.params.location === "users" ? "active" : ""}
+          >
             <People />
           </IconButton>
         </AuthOnly>
         <AuthOnly user={user}>
-          <IconButton component={Link} to={`/update`}>
+          <IconButton
+            component={Link}
+            to={`/update`}
+            className={matchRes?.params.location === "update" ? "active" : ""}
+          >
             <Update />
           </IconButton>
         </AuthOnly>
-        <IconButton component={Link} to={`/get-link`}>
+        <IconButton
+          component={Link}
+          to={`/get-link`}
+          className={matchRes?.params.location === "get-link" ? "active" : ""}
+        >
           <Send />
         </IconButton>
+        <Divider orientation="vertical" flexItem className={classes.divider} />
         <AuthOnly user={user}>
           <IconButton>
             <PowerSettingsNewIcon />
