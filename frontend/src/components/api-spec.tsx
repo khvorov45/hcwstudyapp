@@ -226,7 +226,7 @@ function stringifySchema(schema: any, indentLevel: number): string {
       ? stringifyArray(schema.items, indentLevel)
       : schema.type === "object"
       ? stringifyObject(schema.properties, indentLevel)
-      : schema.type
+      : stringifyType(schema, indentLevel)
   }`
 }
 
@@ -249,7 +249,20 @@ function stringifyProperty(
   indentLevel: number
 ): string {
   const sep = "  ".repeat(indentLevel)
-  return `${sep}${name}: ${
+  return `${sep}${name}: ${stringifyType(params, indentLevel)}`
+}
+
+function stringifyType(
+  params: {
+    type: string
+    enum?: string[]
+    nullable?: boolean
+    format?: string
+  },
+  indentLevel: number
+): string {
+  const sep = "  ".repeat(indentLevel)
+  return `${
     params.enum
       ? params.enum.map((e: string) => `"${e}"`).join(`\n${sep} | `)
       : params.type
