@@ -1,6 +1,7 @@
 import { useAsync } from "react-async-hook"
 import swagger from "@apidevtools/swagger-parser"
 import { makeStyles, Theme, createStyles } from "@material-ui/core"
+import { NamedDivider } from "./divider"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -67,6 +68,11 @@ export default function ApiSpec() {
       "https://raw.githubusercontent.com/khvorov45/hcwstudyapp/split-backend-frontend/backend/hcwstudyapp-openapi.yml"
     )
   }, [])
+  const breaks = [
+    { path: "/auth/token/send", title: "Auth" },
+    { path: "/users", title: "Users" },
+    { path: "/participants", title: "Participants" },
+  ]
   const classes = useStyles()
   if (!apiSpec.result) {
     return <></>
@@ -76,14 +82,20 @@ export default function ApiSpec() {
       <h1>{apiSpec.result.info.title}</h1>
       {Object.entries(apiSpec.result.paths).map(
         ([path, pathEntries]: [path: string, pathEntries: any]) => {
-          return Object.entries(pathEntries).map(([method, methodEntries]) => (
-            <Path
-              key={path + method}
-              method={method}
-              path={path}
-              params={methodEntries}
-            />
-          ))
+          const title = breaks.find((b) => b.path === path)?.title
+          return (
+            <div key={path}>
+              {title && <NamedDivider key={title} name={title} />}
+              {Object.entries(pathEntries).map(([method, methodEntries]) => (
+                <Path
+                  key={method}
+                  method={method}
+                  path={path}
+                  params={methodEntries}
+                />
+              ))}
+            </div>
+          )
         }
       )}
     </div>
