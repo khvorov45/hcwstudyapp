@@ -16,7 +16,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export function NamedDivider({ name }: { name: string }) {
+export function NamedDivider({
+  name,
+  className,
+}: {
+  name: string
+  className: string
+}) {
   const classes = useStyles()
-  return <div className={classes.namedDivider}>{name}</div>
+  return <div className={`${classes.namedDivider} ${className}`}>{name}</div>
 }

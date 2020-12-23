@@ -59,6 +59,11 @@ const useStyles = makeStyles((theme: Theme) =>
         paddingRight: 5,
       },
     },
+    sectionSep: {
+      fontSize: "large",
+      textTransform: "uppercase",
+      fontWeight: "bold",
+    },
   })
 )
 
@@ -85,7 +90,13 @@ export default function ApiSpec() {
           const title = breaks.find((b) => b.path === path)?.title
           return (
             <div key={path}>
-              {title && <NamedDivider key={title} name={title} />}
+              {title && (
+                <NamedDivider
+                  className={classes.sectionSep}
+                  key={title}
+                  name={title}
+                />
+              )}
               {Object.entries(pathEntries).map(([method, methodEntries]) => (
                 <Path
                   key={method}
