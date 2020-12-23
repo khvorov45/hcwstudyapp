@@ -230,5 +230,7 @@ function stringifyProperty(
     params.enum
       ? params.enum.map((e: string) => `"${e}"`).join(`\n${sep} | `)
       : params.type
-  }${params.nullable ? " | null" : ""}`
+  }${params.nullable ? " | null" : ""}${
+    params.format ? ` [${params.format}]` : ""
+  }`
 }
