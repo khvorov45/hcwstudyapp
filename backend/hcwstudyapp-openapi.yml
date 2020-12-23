@@ -249,6 +249,20 @@ paths:
                 $ref: "#/components/schemas/Schedules"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /weekly-survey:
+    get:
+      summary: Weekly surveys
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Weekly surveys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklySurveys"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -389,6 +403,33 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Schedule"
+    WeeklySurvey:
+      type: object
+      required:
+        - pid
+        - index
+        - redcapProjectYear
+        - date
+        - ari
+        - swabCollection
+      properties:
+        pid:
+          type: string
+        index:
+          type: number
+        redcapProjectYear:
+          type: number
+        date:
+          type: string
+          format: date-time
+        ari:
+          type: boolean
+        swabCollection:
+          type: boolean
+    WeeklySurveys:
+      type: array
+      items:
+        $ref: "#/components/schemas/WeeklySurvey"
   securitySchemes:
     User:
       type: http
