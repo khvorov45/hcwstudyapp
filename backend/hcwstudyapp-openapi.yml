@@ -127,6 +127,7 @@ paths:
             application/json:
               schema:
                 type: string
+
   /participants:
     get:
       summary: List all participants
@@ -171,6 +172,26 @@ paths:
           description: Successful deletion
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /participants/redcap/sync:
+    put:
+      summary: Sync participants with REDCap
+      security:
+        - User: []
+      responses:
+        "204":
+          description: Successful sync
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Last successful participant sync
+      responses:
+        "200":
+          description: Datetime stamp
+          content:
+            application/json:
+              schema:
+                type: string
+                format: date-time
 
 components:
   schemas:
