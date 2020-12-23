@@ -35,7 +35,7 @@ async function main() {
     .default("redcapToken2021", "")
     .default("emailConnectionString", "smtp://user:password@smtp.hostname.com")
     .default("prefix", "")
-    .default("linkPrefix", "https://reports.hcwflustudy.com/?token=")
+    .default("linkPrefix", "http://localhost:3000/login?token=")
     .default("clean", false)
     .default("cors", false)
     .default("tokenDaysToLive", 30)

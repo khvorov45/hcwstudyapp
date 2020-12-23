@@ -31,7 +31,7 @@ export async function emailToken(
     linkPrefix: string
   }
 ): Promise<void> {
-  const content = `Access link:\n\n${linkPrefix}${token}\n\nToken:\n\n${token}`
+  const content = `Login link:\n\n${linkPrefix}${token}`
   await t.transporter.sendMail({
     from: t.from,
     to: email,
