@@ -418,7 +418,7 @@ function Table<T extends object>({
         {/*Body*/}
         <div {...table.getTableBodyProps()} className="body">
           <FixedSizeList
-            height={windowSize.height - 150}
+            height={windowSize.height - 160}
             itemCount={table.rows.length}
             itemSize={35}
             width={table.totalColumnsWidth + scrollbarWidth}
