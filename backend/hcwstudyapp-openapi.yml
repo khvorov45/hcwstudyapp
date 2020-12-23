@@ -207,6 +207,20 @@ paths:
                 $ref: "#/components/schemas/RedcapIds"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /withdrawn:
+    get:
+      summary: Withdrawn participants
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Withdrawn participants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Withdrawns"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -294,6 +308,21 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/RedcapId"
+    Withdrawn:
+      type: object
+      required:
+        - pid
+        - date
+      properties:
+        pid:
+          type: string
+        date:
+          type: string
+          format: date-time
+    Withdrawns:
+      type: array
+      items:
+        $ref: "#/components/schemas/Withdrawn"
   securitySchemes:
     User:
       type: http
