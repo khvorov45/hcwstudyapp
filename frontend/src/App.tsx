@@ -28,6 +28,10 @@ import ApiSpec from "./components/api-spec"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    belowNav: {
+      overflow: "scroll",
+      height: "calc(100vh - 50px)",
+    },
     home: {
       paddingLeft: 20,
     },
@@ -176,63 +180,65 @@ export default function App() {
             user={auth.result}
             logout={logout.execute}
           />
-          <Switch>
-            <Route exact path="/login">
-              {auth.status === "success" ? (
-                <Redirect to="/" />
-              ) : (
-                <Login setToken={setToken} />
-              )}
-            </Route>
-            <Route exact path="/get-link">
-              <GetLink />
-            </Route>
-            <Route exact path="/api-spec">
-              <ApiSpec />
-            </Route>
-            <AuthRoute
-              exact
-              authStatus={auth.status}
-              user={auth.result}
-              path="/"
-            >
-              <ReactMarkdown className={classes.home}>
-                {homePageContent ?? ""}
-              </ReactMarkdown>
-            </AuthRoute>
-            <AuthRoute
-              exact
-              admin
-              authStatus={auth.status}
-              user={auth.result}
-              path="/users"
-            >
-              Users
-            </AuthRoute>
-            <AuthRoute
-              authStatus={auth.status}
-              user={auth.result}
-              path="/tables"
-            >
-              <Tables token={token?.token} />
-            </AuthRoute>
-            <AuthRoute
-              exact
-              authStatus={auth.status}
-              user={auth.result}
-              path="/plots"
-            >
-              Plots
-            </AuthRoute>
-            <AuthRoute
-              exact
-              authStatus={auth.status}
-              user={auth.result}
-              path="/update"
-            >
-              <Update token={token?.token} />
-            </AuthRoute>
-          </Switch>
+          <div className={classes.belowNav}>
+            <Switch>
+              <Route exact path="/login">
+                {auth.status === "success" ? (
+                  <Redirect to="/" />
+                ) : (
+                  <Login setToken={setToken} />
+                )}
+              </Route>
+              <Route exact path="/get-link">
+                <GetLink />
+              </Route>
+              <Route exact path="/api-spec">
+                <ApiSpec />
+              </Route>
+              <AuthRoute
+                exact
+                authStatus={auth.status}
+                user={auth.result}
+                path="/"
+              >
+                <ReactMarkdown className={classes.home}>
+                  {homePageContent ?? ""}
+                </ReactMarkdown>
+              </AuthRoute>
+              <AuthRoute
+                exact
+                admin
+                authStatus={auth.status}
+                user={auth.result}
+                path="/users"
+              >
+                Users
+              </AuthRoute>
+              <AuthRoute
+                authStatus={auth.status}
+                user={auth.result}
+                path="/tables"
+              >
+                <Tables token={token?.token} />
+              </AuthRoute>
+              <AuthRoute
+                exact
+                authStatus={auth.status}
+                user={auth.result}
+                path="/plots"
+              >
+                Plots
+              </AuthRoute>
+              <AuthRoute
+                exact
+                authStatus={auth.status}
+                user={auth.result}
+                path="/update"
+              >
+                <Update token={token?.token} />
+              </AuthRoute>
+            </Switch>
+          </div>
         </Router>
       </ThemeProvider>
     </div>
