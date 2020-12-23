@@ -399,6 +399,7 @@ components:
         date:
           type: string
           format: date-time
+          nullable: true
     Schedules:
       type: array
       items:
@@ -422,10 +423,12 @@ components:
         date:
           type: string
           format: date-time
+          nullable: true
         ari:
           type: boolean
         swabCollection:
           type: boolean
+          nullable: true
     WeeklySurveys:
       type: array
       items:
