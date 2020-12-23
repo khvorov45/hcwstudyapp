@@ -235,6 +235,20 @@ paths:
                 $ref: "#/components/schemas/Vaccinations"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /schedule:
+    get:
+      summary: Schedules
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Schedules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedules"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -354,6 +368,27 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Vaccination"
+    Schedule:
+      type: object
+      required:
+        - pid
+        - day
+        - redcapProjectYear
+        - date
+      properties:
+        pid:
+          type: string
+        day:
+          type: number
+        redcapProjectYear:
+          type: number
+        date:
+          type: string
+          format: date-time
+    Schedules:
+      type: array
+      items:
+        $ref: "#/components/schemas/Schedule"
   securitySchemes:
     User:
       type: http
