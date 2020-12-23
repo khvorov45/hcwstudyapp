@@ -127,6 +127,7 @@ paths:
             application/json:
               schema:
                 type: string
+                format: date-time
 
   /participants:
     get:
