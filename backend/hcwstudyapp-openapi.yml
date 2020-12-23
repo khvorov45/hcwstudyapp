@@ -221,6 +221,20 @@ paths:
                 $ref: "#/components/schemas/Withdrawns"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /vaccination:
+    get:
+      summary: Vaccination history
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Vaccination histories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vaccinations"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -323,6 +337,23 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Withdrawn"
+    Vaccination:
+      type: object
+      required:
+        - pid
+        - date
+      properties:
+        pid:
+          type: string
+        year:
+          type: number
+        status:
+          enum: [australia, overseas, "no", unknown]
+          nullable: true
+    Vaccinations:
+      type: array
+      items:
+        $ref: "#/components/schemas/Vaccination"
   securitySchemes:
     User:
       type: http
