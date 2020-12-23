@@ -193,6 +193,20 @@ paths:
               schema:
                 type: string
                 format: date-time
+  /redcap-id:
+    get:
+      summary: Redcap IDs
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Redcap IDs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedcapIds"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -263,6 +277,23 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Participant"
+    RedcapId:
+      type: object
+      required:
+        - redcapRecordId
+        - redcapProjectYear
+        - pid
+      properties:
+        redcapRecordId:
+          type: string
+        redcapProjectYear:
+          type: string
+        pid:
+          type: string
+    RedcapIds:
+      type: array
+      items:
+        $ref: "#/components/schemas/RedcapId"
   securitySchemes:
     User:
       type: http
