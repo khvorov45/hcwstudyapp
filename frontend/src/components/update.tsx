@@ -109,7 +109,12 @@ function UpdateCard({
     if (!d) {
       return "never"
     }
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}
+    function formatDoubleDigit(d: number): string {
+      return d.toString().padStart(2, "0")
+    }
+    return `${d.getFullYear()}-${formatDoubleDigit(
+      d.getMonth() + 1
+    )}-${formatDoubleDigit(d.getDate())}
     ${d.getHours()}:${d.getMinutes()}`
   }
   return (
