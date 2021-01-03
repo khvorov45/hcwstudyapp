@@ -15,6 +15,7 @@ type ApiRequestConfig<T, O, I> = {
     | "auth/token/send"
     | "auth/token"
     | "participants/redcap/sync"
+    | "users/redcap/sync"
   query?: Record<string, string>
   token?: string | null
   success: number

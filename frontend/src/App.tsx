@@ -235,7 +235,7 @@ export default function App() {
                 user={auth.result}
                 path="/update"
               >
-                <Update token={token?.token} />
+                <Update token={token?.token} user={auth.result} />
               </AuthRoute>
             </Switch>
           </div>

@@ -11,6 +11,8 @@ import { DateFromISOString } from "io-ts-types"
 import StatusCodes from "http-status-codes"
 import { apiReq } from "../lib/api"
 import { BeatLoader } from "react-spinners"
+import { AuthOnly } from "./auth"
+import { User } from "../lib/data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -19,6 +21,10 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: "large",
       display: "flex",
       justifyContent: "center",
+      flexWrap: "wrap",
+      "&>*": {
+        margin: 10,
+      },
     },
     updateCard: {
       display: "flex",
@@ -33,21 +39,33 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function Update({ token }: { token?: string }) {
+export default function Update({
+  token,
+  user,
+}: {
+  token?: string
+  user?: User
+}) {
   const classes = useStyles()
-  async function participantsUpdateTimeFetcher() {
+  async function updateTimeFetcher(path: "participants" | "users") {
     return await apiReq({
       method: "GET",
-      path: "participants/redcap/sync",
+      path:
+        path === "participants"
+          ? "participants/redcap/sync"
+          : "users/redcap/sync",
       success: StatusCodes.OK,
       failure: [],
       validator: t.union([DateFromISOString, t.null]),
     })
   }
-  async function participantsSync() {
+  async function dataSync(path: "participants" | "users") {
     return await apiReq({
       method: "PUT",
-      path: "participants/redcap/sync",
+      path:
+        path === "participants"
+          ? "participants/redcap/sync"
+          : "users/redcap/sync",
       token: token,
       success: StatusCodes.NO_CONTENT,
       failure: [StatusCodes.UNAUTHORIZED],
@@ -59,9 +77,17 @@ export default function Update({ token }: { token?: string }) {
       <UpdateCard
         title="Last REDCap participants sync"
         token={token}
-        timestampFetcher={participantsUpdateTimeFetcher}
-        syncFunction={participantsSync}
+        timestampFetcher={async () => await updateTimeFetcher("participants")}
+        syncFunction={async () => await dataSync("participants")}
       />
+      <AuthOnly admin user={user}>
+        <UpdateCard
+          title="Last REDCap users sync"
+          token={token}
+          timestampFetcher={async () => await updateTimeFetcher("users")}
+          syncFunction={async () => await dataSync("users")}
+        />
+      </AuthOnly>
     </div>
   )
 }
