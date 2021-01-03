@@ -25,6 +25,7 @@ import Tables from "./components/tables"
 import GetLink from "./components/get-link"
 import Update from "./components/update"
 import ApiSpec from "./components/api-spec"
+import Users from "./components/users"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -212,7 +213,7 @@ export default function App() {
                 user={auth.result}
                 path="/users"
               >
-                Users
+                <Users token={token?.token} />
               </AuthRoute>
               <AuthRoute
                 authStatus={auth.status}

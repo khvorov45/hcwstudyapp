@@ -365,7 +365,7 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
   return <Table columns={columns} data={weeklyCompletion} />
 }
 
-function Table<T extends object>({
+export function Table<T extends object>({
   columns,
   data,
 }: {
