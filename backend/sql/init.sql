@@ -30,8 +30,7 @@ INSERT INTO "User" ("email", "accessGroup") VALUES
 
 CREATE TABLE "Token" (
     "user" text REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE,
-    -- Attempt to prevent insertion of actual tokens with a length check
-    "hash" text UNIQUE CHECK (length("hash") = 128),
+    "hash" char(128) UNIQUE,
     "expires" timestamptz NOT NULL
 );
 INSERT INTO "Token" ("user", "hash", "expires") VALUES
