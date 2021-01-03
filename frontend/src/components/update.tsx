@@ -115,7 +115,7 @@ function UpdateCard({
     return `${d.getFullYear()}-${formatDoubleDigit(
       d.getMonth() + 1
     )}-${formatDoubleDigit(d.getDate())}
-    ${d.getHours()}:${d.getMinutes()}`
+    ${formatDoubleDigit(d.getHours())}:${formatDoubleDigit(d.getMinutes())}`
   }
   return (
     <div className={classes.updateCard}>
