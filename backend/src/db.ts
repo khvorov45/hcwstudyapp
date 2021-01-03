@@ -10,6 +10,7 @@ import {
   Schedule,
   SiteV,
   Token,
+  TokenHashed,
   User,
   Vaccination,
   WeeklySurvey,
@@ -199,16 +200,30 @@ export async function syncRedcapUsers(
   db: DB,
   redcapConfig: RedcapConfig
 ): Promise<void> {
-  const [redcapUsers, dbUsers] = await Promise.all([
+  const [redcapUsers, dbUsers, tokens] = await Promise.all([
     exportUsers(redcapConfig),
     getUsers(db),
+    getTokens(db),
   ])
-  const dbNonAdminUsers = dbUsers.filter((u) => u.accessGroup !== "admin")
-  const dbNonAdminEmails = dbNonAdminUsers.map((u) => u.email)
+  const dbNonAdminEmails = dbUsers
+    .filter((u) => u.accessGroup !== "admin")
+    .map((u) => u.email)
   if (dbNonAdminEmails.length > 0) {
     await deleteUsers(db, dbNonAdminEmails)
   }
   await insertUsers(db, redcapUsers)
+  // Restore tokens
+  const redcapEmails = redcapUsers.map((r) => r.email)
+  const dbAdminEmails = dbUsers
+    .filter((u) => u.accessGroup === "admin")
+    .map((u) => u.email)
+  await insertIntoTable(
+    db,
+    tokens.filter(
+      (t) => !dbAdminEmails.includes(t.user) && redcapEmails.includes(t.user)
+    ),
+    "Token"
+  )
   await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
 
@@ -217,6 +232,12 @@ export async function getLastUserUpdate(db: DB): Promise<Date | null> {
 }
 
 // Tokens =====================================================================
+
+async function getTokens(
+  db: DB
+): Promise<{ user: string; hash: string; expires: Date }[]> {
+  return await db.any('SELECT * FROM "Token"')
+}
 
 export async function insertTokens(db: DB, tokens: Token[]) {
   const tokensHashed = tokens.map((t) => ({
