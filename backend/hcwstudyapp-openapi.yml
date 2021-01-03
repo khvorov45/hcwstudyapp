@@ -108,6 +108,22 @@ paths:
           description: Successful deletion
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+    put:
+      summary: Update a user
+      security:
+        - Admin: []
+      requestBody:
+        description: New user, email will be used to locate the entry to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "204":
+          description: Successful update
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
   /users/redcap/sync:
     put:
       summary: Sync users with REDCap
