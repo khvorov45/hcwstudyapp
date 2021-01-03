@@ -17,9 +17,10 @@ import { Icon } from "@iconify/react"
 import apiIcon from "@iconify/icons-mdi/api"
 import tableOutlined from "@iconify/icons-ant-design/table-outlined"
 import bxBarChart from "@iconify/icons-bx/bx-bar-chart"
-import React, { ReactNode } from "react"
+import React from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
+import { AuthOnly } from "./auth"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -151,24 +152,6 @@ export default function Nav({
       </div>
     </div>
   )
-}
-
-function AuthOnly({
-  user,
-  admin,
-  children,
-}: {
-  user: User | null | undefined
-  admin?: boolean
-  children: ReactNode
-}) {
-  if (!user) {
-    return <></>
-  }
-  if (admin && user.accessGroup !== "admin") {
-    return <></>
-  }
-  return <>{children}</>
 }
 
 export function SimpleNav({
