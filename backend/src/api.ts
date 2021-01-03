@@ -24,6 +24,7 @@ import {
   refreshToken,
   deleteUserTokens,
   deleteToken,
+  updateUser,
 } from "./db"
 import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
@@ -58,6 +59,11 @@ export function getRoutes(
   routes.delete("/users", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await deleteUser(db, decode(t.string, req.query.email))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.put("/users", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await updateUser(db, decode(UserV, req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users/redcap/sync", async (req: Request, res: Response) => {

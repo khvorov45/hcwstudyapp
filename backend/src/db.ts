@@ -194,6 +194,16 @@ export async function deleteUsers(db: DB, emails: string[]): Promise<void> {
   await db.any('DELETE FROM "User" WHERE email IN ($1:csv)', [emails])
 }
 
+export async function updateUser(db: DB, u: User): Promise<void> {
+  const res = await db.result(
+    pgpInit.helpers.update(u, ["accessGroup"], "User") + " WHERE email = $1",
+    [u.email]
+  )
+  if (res.rowCount === 0) {
+    throw Error("no such user email: " + u.email)
+  }
+}
+
 /** Will not touch the admins, drop everyone else and replace with redcap users
  */
 export async function syncRedcapUsers(
