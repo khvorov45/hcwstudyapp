@@ -68,21 +68,6 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export default function Tables({ token }: { token?: string }) {
-  const tableNames = [
-    "contact",
-    "baseline",
-    "vaccination",
-    "schedule",
-    "weekly-survey",
-    "weekly-completion",
-    "summary",
-  ]
-  const tablePaths = tableNames.map((n) => `/tables/${n}`)
-  const tableNamedLinks = tableNames.map((n, i) => ({
-    name: n,
-    link: tablePaths[i],
-  }))
-
   async function tableFetch(name: any, validator: any) {
     return await apiReq({
       method: "GET",
@@ -113,6 +98,27 @@ export default function Tables({ token }: { token?: string }) {
     vaccinationFetch,
   ])
 
+  const tables = [
+    { name: "contact", element: <Contact participants={participants} /> },
+    { name: "baseline", element: <Baseline participants={participants} /> },
+    {
+      name: "vaccination",
+      element: <VaccinationTable vaccination={vaccination} />,
+    },
+    { name: "schedule", element: <ScheduleTable schedule={schedule} /> },
+    {
+      name: "weekly-survey",
+      element: <WeeklySurveyTable weeklySurvey={weeklySurvey} />,
+    },
+    {
+      name: "weekly-completion",
+      element: <WeeklyCompletion weeklySurvey={weeklySurvey} />,
+    },
+    { name: "summary", element: <Summary participants={participants} /> },
+  ].map((t) =>
+    Object.assign(t, { path: `/tables/${t.name}`, link: `/tables/${t.name}` })
+  )
+
   // Figure out active link
   const matchRes = useRouteMatch<{ table: string }>({ path: "/tables/:table" })
   const currentTable = matchRes?.params.table
@@ -121,33 +127,15 @@ export default function Tables({ token }: { token?: string }) {
     <>
       <SimpleNav
         className={classes.nav}
-        links={tableNamedLinks}
+        links={tables}
         active={(name) => name === currentTable}
       />
       <Route exact path={"/tables"}>
-        <Redirect to={tablePaths[0]} />
+        <Redirect to={tables[0].path} />
       </Route>
-      <Route path={tablePaths[0]}>
-        <Contact participants={participants} />
-      </Route>
-      <Route path={tablePaths[1]}>
-        <Baseline participants={participants} />
-      </Route>
-      <Route path={tablePaths[2]}>
-        <VaccinationTable vaccination={vaccination} />
-      </Route>
-      <Route path={tablePaths[3]}>
-        <ScheduleTable schedule={schedule} />
-      </Route>
-      <Route path={tablePaths[4]}>
-        <WeeklySurveyTable weeklySurvey={weeklySurvey} />
-      </Route>
-      <Route path={tablePaths[5]}>
-        <WeeklyCompletion weeklySurvey={weeklySurvey} />
-      </Route>
-      <Route path={tablePaths[6]}>
-        <Summary participants={participants} />
-      </Route>
+      {tables.map((t) => (
+        <Route path={t.path}>{t.element}</Route>
+      ))}
     </>
   )
 }
