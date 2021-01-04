@@ -134,7 +134,9 @@ export default function Tables({ token }: { token?: string }) {
         <Redirect to={tables[0].path} />
       </Route>
       {tables.map((t) => (
-        <Route path={t.path}>{t.element}</Route>
+        <Route key={t.name} path={t.path}>
+          {t.element}
+        </Route>
       ))}
     </>
   )
