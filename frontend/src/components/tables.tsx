@@ -163,7 +163,7 @@ function Contact({ participants }: { participants: Participant[] }) {
       {
         Header: "PID",
         accessor: (p: Participant) => p.pid,
-        width: 75,
+        width: 100,
       },
       {
         Header: "Email",
@@ -197,7 +197,7 @@ function Baseline({ participants }: { participants: Participant[] }) {
       {
         Header: "PID",
         accessor: (p: Participant) => p.pid,
-        width: 75,
+        width: 100,
       },
       {
         Header: "DoB",
@@ -226,7 +226,7 @@ function ScheduleTable({ schedule }: { schedule: Schedule[] }) {
       {
         Header: "PID",
         accessor: (p: Schedule) => p.pid,
-        width: 75,
+        width: 100,
       },
       {
         Header: "Year",
@@ -255,7 +255,7 @@ function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
       {
         Header: "PID",
         accessor: (p: WeeklySurvey) => p.pid,
-        width: 75,
+        width: 100,
       },
       {
         Header: "Week",
@@ -345,7 +345,7 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
       {
         Header: "PID",
         accessor: (p: WeeklyCompletion) => p.pid,
-        width: 75,
+        width: 100,
       },
       {
         Header: "Year",
