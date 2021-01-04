@@ -15,7 +15,13 @@ import {
   WeeklySurveyV,
 } from "../lib/data"
 import React, { CSSProperties, useMemo } from "react"
-import { Column, useBlockLayout, useTable } from "react-table"
+import {
+  Column,
+  FilterProps,
+  useBlockLayout,
+  useFilters,
+  useTable,
+} from "react-table"
 import { FixedSizeList } from "react-window"
 import {
   makeStyles,
@@ -27,6 +33,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  TextField,
 } from "@material-ui/core"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { useWindowSize } from "../lib/hooks"
@@ -45,7 +52,7 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       overflow: "auto",
       "& .header": {
-        height: 35,
+        height: 60,
         whiteSpace: "nowrap",
         borderBottom: `1px solid ${theme.palette.divider}`,
         "&>*": {
@@ -62,6 +69,10 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       "& .th, & .td": {
         padding: "0.5rem",
+      },
+      "& .header-content": {
+        display: "flex",
+        flexDirection: "column",
       },
     },
   })
@@ -489,12 +500,20 @@ function Table<T extends object>({
   columns: Column<T>[]
   data: T[]
 }) {
+  const defaultColumn = useMemo(
+    () => ({
+      Filter: DefaultColumnFilter,
+    }),
+    []
+  )
   const table = useTable<T>(
     {
-      columns: columns,
-      data: data,
+      columns,
+      data,
+      defaultColumn,
     },
-    useBlockLayout
+    useBlockLayout,
+    useFilters
   )
   function renderRow({
     index,
@@ -528,14 +547,17 @@ function Table<T extends object>({
         <div className="tr header" style={{ width: table.totalColumnsWidth }}>
           {table.headers.map((h) => (
             <div {...h.getHeaderProps()} className="th">
-              {h.render("Header")}
+              <div className="header-content">
+                {h.render("Header")}
+                {h.render("Filter")}
+              </div>
             </div>
           ))}
         </div>
         {/*Body*/}
         <div {...table.getTableBodyProps()} className="body">
           <FixedSizeList
-            height={windowSize.height - 160}
+            height={windowSize.height - 185}
             itemCount={table.rows.length}
             itemSize={35}
             width={table.totalColumnsWidth + scrollbarWidth}
@@ -545,5 +567,21 @@ function Table<T extends object>({
         </div>
       </div>
     </div>
+  )
+}
+
+function DefaultColumnFilter<T extends Object>({
+  column: { filterValue, preFilteredRows, setFilter },
+}: FilterProps<T>) {
+  const count = preFilteredRows.length
+
+  return (
+    <TextField
+      value={filterValue || ""}
+      onChange={(e) => {
+        setFilter(e.target.value || undefined)
+      }}
+      placeholder={`Search ${count} records...`}
+    />
   )
 }
