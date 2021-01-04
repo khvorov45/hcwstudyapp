@@ -98,21 +98,50 @@ export default function Tables({ token }: { token?: string }) {
     vaccinationFetch,
   ])
 
+  const commonCols = useMemo(
+    () => ({
+      pid: {
+        Header: "PID",
+        accessor: (p: any) => p.pid,
+        width: 100,
+      },
+    }),
+    []
+  )
+
   const tables = [
-    { name: "contact", element: <Contact participants={participants} /> },
-    { name: "baseline", element: <Baseline participants={participants} /> },
+    {
+      name: "contact",
+      element: <Contact participants={participants} commonCols={commonCols} />,
+    },
+    {
+      name: "baseline",
+      element: <Baseline participants={participants} commonCols={commonCols} />,
+    },
     {
       name: "vaccination",
-      element: <VaccinationTable vaccination={vaccination} />,
+      element: (
+        <VaccinationTable vaccination={vaccination} commonCols={commonCols} />
+      ),
     },
-    { name: "schedule", element: <ScheduleTable schedule={schedule} /> },
+    {
+      name: "schedule",
+      element: <ScheduleTable schedule={schedule} commonCols={commonCols} />,
+    },
     {
       name: "weekly-survey",
-      element: <WeeklySurveyTable weeklySurvey={weeklySurvey} />,
+      element: (
+        <WeeklySurveyTable
+          weeklySurvey={weeklySurvey}
+          commonCols={commonCols}
+        />
+      ),
     },
     {
       name: "weekly-completion",
-      element: <WeeklyCompletion weeklySurvey={weeklySurvey} />,
+      element: (
+        <WeeklyCompletion weeklySurvey={weeklySurvey} commonCols={commonCols} />
+      ),
     },
     { name: "summary", element: <Summary participants={participants} /> },
   ].map((t) =>
@@ -149,14 +178,16 @@ function formatDate(d: Date | null | undefined): string {
   return d.toISOString().split("T")[0]
 }
 
-function Contact({ participants }: { participants: Participant[] }) {
+function Contact({
+  participants,
+  commonCols,
+}: {
+  participants: Participant[]
+  commonCols: any
+}) {
   const columns = useMemo(() => {
     return [
-      {
-        Header: "PID",
-        accessor: (p: Participant) => p.pid,
-        width: 100,
-      },
+      commonCols.pid,
       {
         Header: "Email",
         accessor: (p: Participant) => p.email,
@@ -178,19 +209,21 @@ function Contact({ participants }: { participants: Participant[] }) {
         width: 100,
       },
     ]
-  }, [])
+  }, [commonCols])
 
   return <Table columns={columns} data={participants} />
 }
 
-function Baseline({ participants }: { participants: Participant[] }) {
+function Baseline({
+  participants,
+  commonCols,
+}: {
+  participants: Participant[]
+  commonCols: any
+}) {
   const columns = useMemo(() => {
     return [
-      {
-        Header: "PID",
-        accessor: (p: Participant) => p.pid,
-        width: 100,
-      },
+      commonCols.pid,
       {
         Header: "DoB",
         accessor: (p: Participant) => formatDate(p.dob),
@@ -207,19 +240,21 @@ function Baseline({ participants }: { participants: Participant[] }) {
         width: 100,
       },
     ]
-  }, [])
+  }, [commonCols])
 
   return <Table columns={columns} data={participants} />
 }
 
-function ScheduleTable({ schedule }: { schedule: Schedule[] }) {
+function ScheduleTable({
+  schedule,
+  commonCols,
+}: {
+  schedule: Schedule[]
+  commonCols: any
+}) {
   const columns = useMemo(() => {
     return [
-      {
-        Header: "PID",
-        accessor: (p: Schedule) => p.pid,
-        width: 100,
-      },
+      commonCols.pid,
       {
         Header: "Year",
         accessor: (p: Schedule) => p.redcapProjectYear,
@@ -236,19 +271,21 @@ function ScheduleTable({ schedule }: { schedule: Schedule[] }) {
         width: 100,
       },
     ]
-  }, [])
+  }, [commonCols])
 
   return <Table columns={columns} data={schedule} />
 }
 
-function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
+function WeeklySurveyTable({
+  weeklySurvey,
+  commonCols,
+}: {
+  weeklySurvey: WeeklySurvey[]
+  commonCols: any
+}) {
   const columns = useMemo(() => {
     return [
-      {
-        Header: "PID",
-        accessor: (p: WeeklySurvey) => p.pid,
-        width: 100,
-      },
+      commonCols.pid,
       {
         Header: "Week",
         accessor: (p: WeeklySurvey) => p.index,
@@ -276,12 +313,18 @@ function WeeklySurveyTable({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
         width: 75,
       },
     ]
-  }, [])
+  }, [commonCols])
 
   return <Table columns={columns} data={weeklySurvey} />
 }
 
-function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
+function WeeklyCompletion({
+  weeklySurvey,
+  commonCols,
+}: {
+  weeklySurvey: WeeklySurvey[]
+  commonCols: any
+}) {
   type WeeklyCompletion = {
     pid: string
     year: number
@@ -334,11 +377,7 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
 
   const columns = useMemo(() => {
     return [
-      {
-        Header: "PID",
-        accessor: (p: WeeklyCompletion) => p.pid,
-        width: 100,
-      },
+      commonCols.pid,
       {
         Header: "Year",
         accessor: (p: WeeklyCompletion) => p.year,
@@ -352,19 +391,21 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
           7,
       },
     ]
-  }, [weeksAbbr])
+  }, [weeksAbbr, commonCols])
 
   return <Table columns={columns} data={weeklyCompletion} />
 }
 
-function VaccinationTable({ vaccination }: { vaccination: Vaccination[] }) {
+function VaccinationTable({
+  vaccination,
+  commonCols,
+}: {
+  vaccination: Vaccination[]
+  commonCols: any
+}) {
   const columns = useMemo(() => {
     return [
-      {
-        Header: "PID",
-        accessor: (p: Vaccination) => p.pid,
-        width: 100,
-      },
+      commonCols.pid,
       {
         Header: "Year",
         accessor: (p: Vaccination) => p.year,
@@ -376,7 +417,7 @@ function VaccinationTable({ vaccination }: { vaccination: Vaccination[] }) {
         width: 100,
       },
     ]
-  }, [])
+  }, [commonCols])
 
   return <Table columns={columns} data={vaccination} />
 }
