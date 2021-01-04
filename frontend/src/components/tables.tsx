@@ -110,6 +110,11 @@ export default function Tables({ token }: { token?: string }) {
         accessor: (p: any) => p.site,
         width: 100,
       },
+      date: (name: string, header: string) => ({
+        Header: header,
+        accessor: (p: any) => formatDate(p[name]),
+        width: 100,
+      }),
     }),
     []
   )
@@ -225,11 +230,7 @@ function Baseline({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      {
-        Header: "DoB",
-        accessor: (p: Participant) => formatDate(p.dob),
-        width: 100,
-      },
+      commonCols.date("dob", "DoB"),
       {
         Header: "Gender",
         accessor: (p: Participant) => p.gender,
@@ -262,11 +263,7 @@ function ScheduleTable({
         accessor: (p: Schedule) => p.day,
         width: 75,
       },
-      {
-        Header: "Date",
-        accessor: (p: Schedule) => formatDate(p.date),
-        width: 100,
-      },
+      commonCols.date("date", "Date"),
     ]
   }, [commonCols])
 
@@ -293,11 +290,7 @@ function WeeklySurveyTable({
         accessor: (p: WeeklySurvey) => p.redcapProjectYear,
         width: 75,
       },
-      {
-        Header: "Date",
-        accessor: (p: WeeklySurvey) => formatDate(p.date),
-        width: 100,
-      },
+      commonCols.date("date", "Date"),
       {
         Header: "ARI",
         accessor: (p: WeeklySurvey) => p.ari.toString(),
