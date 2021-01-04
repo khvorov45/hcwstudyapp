@@ -12,12 +12,23 @@ import {
   WeeklySurvey,
   WeeklySurveyV,
 } from "../lib/data"
-import { CSSProperties, useMemo } from "react"
+import React, { CSSProperties, useMemo } from "react"
 import { Column, useBlockLayout, useTable } from "react-table"
 import { FixedSizeList } from "react-window"
-import { makeStyles, Theme, createStyles } from "@material-ui/core"
+import {
+  makeStyles,
+  Theme,
+  createStyles,
+  TableContainer,
+  Table as MaterialTable,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@material-ui/core"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { useWindowSize } from "../lib/hooks"
+import * as d3 from "d3-array"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -145,7 +156,9 @@ export default function Tables({ token }: { token?: string }) {
       <Route path={tablePaths[4]}>
         <WeeklyCompletion weeklySurvey={weeklySurvey} />
       </Route>
-      <Route path={tablePaths[5]}>Summary</Route>
+      <Route path={tablePaths[5]}>
+        <Summary participants={participants} />
+      </Route>
     </>
   )
 }
@@ -363,6 +376,83 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
   }, [weeksAbbr])
 
   return <Table columns={columns} data={weeklyCompletion} />
+}
+
+function Summary({ participants }: { participants: Participant[] }) {
+  const countsBySite = useMemo(
+    () =>
+      d3.rollup(
+        participants,
+        (v) => v.length,
+        (d) => d.site
+      ),
+    [participants]
+  )
+
+  const counts = Array.from(countsBySite, ([k, v]) => ({
+    key: k as string,
+    value: v.toString(),
+  }))
+    .concat([
+      { key: "prevVac", value: "Total" },
+      { key: "total", value: participants.length.toString() },
+    ])
+    .reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
+
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "Previous vaccinations",
+        accessor: (p: any) => p.prevVac,
+      },
+      {
+        Header: "Site",
+        columns: Array.from(countsBySite.keys()).map((s) => ({
+          Header: s,
+          accessor: (p: any) => p[s],
+        })),
+      },
+      {
+        Header: "Total",
+        accessor: (p: any) => p.total,
+        width: 100,
+      },
+    ]
+  }, [countsBySite])
+
+  const table = useTable({ columns: columns, data: [counts] })
+
+  return (
+    <TableContainer>
+      <MaterialTable {...table.getTableProps()}>
+        <TableHead>
+          {table.headerGroups.map((headerGroup) => (
+            <TableRow {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((h) => (
+                <TableCell {...h.getHeaderProps()}>
+                  {h.render("Header")}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableHead>
+        <TableBody {...table.getTableBodyProps()}>
+          {table.rows.map((r) => {
+            table.prepareRow(r)
+            return (
+              <TableRow {...r.getRowProps()}>
+                {r.cells.map((c) => (
+                  <TableCell {...c.getCellProps()}>
+                    {c.render("Cell")}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </MaterialTable>
+    </TableContainer>
+  )
 }
 
 function Table<T extends object>({
