@@ -2,6 +2,7 @@ import axios from "axios"
 import { StatusCodes } from "http-status-codes"
 import * as t from "io-ts"
 import { API_ROOT } from "./config"
+import { User } from "./data"
 import { decode } from "./io"
 
 type ApiRequestConfig<T, O, I> = {
@@ -17,6 +18,7 @@ type ApiRequestConfig<T, O, I> = {
     | "participants/redcap/sync"
     | "users/redcap/sync"
   query?: Record<string, string>
+  body?: User
   token?: string | null
   success: number
   failure: number[]
@@ -32,6 +34,7 @@ export async function apiReq<T, O, I>(
     params: c.query,
     headers: c.token ? { Authorization: `Bearer ${c.token}` } : undefined,
     validateStatus: (s) => [c.success, ...c.failure].includes(s),
+    data: c.body,
   })
   if (res.status !== c.success) {
     throw Error(res.data)
