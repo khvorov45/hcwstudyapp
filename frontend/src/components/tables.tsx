@@ -105,6 +105,11 @@ export default function Tables({ token }: { token?: string }) {
         accessor: (p: any) => p.pid,
         width: 100,
       },
+      site: {
+        Header: "Site",
+        accessor: (p: any) => p.site,
+        width: 100,
+      },
     }),
     []
   )
@@ -203,11 +208,7 @@ function Contact({
         accessor: (p: Participant) => formatDate(p.dateScreening),
         width: 100,
       },
-      {
-        Header: "Site",
-        accessor: (p: Participant) => p.site,
-        width: 100,
-      },
+      commonCols.site,
     ]
   }, [commonCols])
 
@@ -234,11 +235,7 @@ function Baseline({
         accessor: (p: Participant) => p.gender,
         width: 75,
       },
-      {
-        Header: "Site",
-        accessor: (p: Participant) => p.site,
-        width: 100,
-      },
+      commonCols.site,
     ]
   }, [commonCols])
 
