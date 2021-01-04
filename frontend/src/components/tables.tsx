@@ -224,11 +224,7 @@ function Contact({
         accessor: (p: Participant) => p.mobile,
         width: 120,
       },
-      {
-        Header: "Screened",
-        accessor: (p: Participant) => formatDate(p.dateScreening),
-        width: 100,
-      },
+      commonCols.date("dateScreening", "Screened"),
       commonCols.site,
     ]
   }, [commonCols])
