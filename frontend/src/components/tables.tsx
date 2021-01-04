@@ -296,17 +296,20 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
     weeks: number[]
   }
 
-  const weeklyCompletion: WeeklyCompletion[] = []
-  weeklySurvey
-    .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
-    .reduce((a, s) => {
-      if (a[a.length - 1]?.pid === s.pid) {
-        a[a.length - 1].weeks.push(s.index)
-      } else {
-        a.push({ pid: s.pid, year: s.redcapProjectYear, weeks: [s.index] })
-      }
-      return a
-    }, weeklyCompletion)
+  const weeklyCompletion = useMemo(() => {
+    const weeklyCompletion: WeeklyCompletion[] = []
+    weeklySurvey
+      .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
+      .reduce((a, s) => {
+        if (a[a.length - 1]?.pid === s.pid) {
+          a[a.length - 1].weeks.push(s.index)
+        } else {
+          a.push({ pid: s.pid, year: s.redcapProjectYear, weeks: [s.index] })
+        }
+        return a
+      }, weeklyCompletion)
+    return weeklyCompletion
+  }, [weeklySurvey])
 
   function abbreviateSequence(s: number[]): string {
     const startEnds: string = ""
@@ -338,7 +341,10 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
     return abbr
   }
 
-  const weeksAbbr = weeklyCompletion.map((w) => w.weeks).map(abbreviateSequence)
+  const weeksAbbr = useMemo(
+    () => weeklyCompletion.map((w) => w.weeks).map(abbreviateSequence),
+    [weeklyCompletion]
+  )
 
   const columns = useMemo(() => {
     return [
