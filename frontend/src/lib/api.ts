@@ -17,6 +17,7 @@ type ApiRequestConfig<T, O, I> = {
     | "auth/token"
     | "participants/redcap/sync"
     | "users/redcap/sync"
+    | "vaccination"
   query?: Record<string, string>
   body?: User
   token?: string | null

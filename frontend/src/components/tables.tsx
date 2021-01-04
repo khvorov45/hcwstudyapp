@@ -9,6 +9,8 @@ import {
   ParticipantV,
   Schedule,
   ScheduleV,
+  Vaccination,
+  VaccinationV,
   WeeklySurvey,
   WeeklySurveyV,
 } from "../lib/data"
@@ -69,6 +71,7 @@ export default function Tables({ token }: { token?: string }) {
   const tableNames = [
     "contact",
     "baseline",
+    "vaccination",
     "schedule",
     "weekly-survey",
     "weekly-completion",
@@ -119,12 +122,28 @@ export default function Tables({ token }: { token?: string }) {
     []
   )
 
+  const vaccinationFetch = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        path: "vaccination",
+        token: token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(VaccinationV),
+      }),
+    []
+  )
+
   const participants = useMemo(() => participantsFetch.result ?? [], [
     participantsFetch,
   ])
   const schedule = useMemo(() => scheduleFetch.result ?? [], [scheduleFetch])
   const weeklySurvey = useMemo(() => weeklySurveyFetch.result ?? [], [
     weeklySurveyFetch,
+  ])
+  const vaccination = useMemo(() => vaccinationFetch.result ?? [], [
+    vaccinationFetch,
   ])
 
   // Figure out active link
@@ -148,15 +167,18 @@ export default function Tables({ token }: { token?: string }) {
         <Baseline participants={participants} />
       </Route>
       <Route path={tablePaths[2]}>
-        <ScheduleTable schedule={schedule} />
+        <VaccinationTable vaccination={vaccination} />
       </Route>
       <Route path={tablePaths[3]}>
-        <WeeklySurveyTable weeklySurvey={weeklySurvey} />
+        <ScheduleTable schedule={schedule} />
       </Route>
       <Route path={tablePaths[4]}>
-        <WeeklyCompletion weeklySurvey={weeklySurvey} />
+        <WeeklySurveyTable weeklySurvey={weeklySurvey} />
       </Route>
       <Route path={tablePaths[5]}>
+        <WeeklyCompletion weeklySurvey={weeklySurvey} />
+      </Route>
+      <Route path={tablePaths[6]}>
         <Summary participants={participants} />
       </Route>
     </>
@@ -376,6 +398,30 @@ function WeeklyCompletion({ weeklySurvey }: { weeklySurvey: WeeklySurvey[] }) {
   }, [weeksAbbr])
 
   return <Table columns={columns} data={weeklyCompletion} />
+}
+
+function VaccinationTable({ vaccination }: { vaccination: Vaccination[] }) {
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "PID",
+        accessor: (p: Vaccination) => p.pid,
+        width: 100,
+      },
+      {
+        Header: "Year",
+        accessor: (p: Vaccination) => p.year,
+        width: 100,
+      },
+      {
+        Header: "Status",
+        accessor: (p: Vaccination) => p.status,
+        width: 100,
+      },
+    ]
+  }, [])
+
+  return <Table columns={columns} data={vaccination} />
 }
 
 function Summary({ participants }: { participants: Participant[] }) {
