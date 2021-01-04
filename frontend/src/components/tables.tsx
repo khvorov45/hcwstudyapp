@@ -83,57 +83,24 @@ export default function Tables({ token }: { token?: string }) {
     link: tablePaths[i],
   }))
 
-  const participantsFetch = useAsync(
-    () =>
-      apiReq({
-        method: "GET",
-        path: "participants",
-        token: token,
-        success: StatusCodes.OK,
-        failure: [StatusCodes.UNAUTHORIZED],
-        validator: t.array(ParticipantV),
-      }),
-    []
-  )
+  async function tableFetch(name: any, validator: any) {
+    return await apiReq({
+      method: "GET",
+      path: name,
+      token: token,
+      success: StatusCodes.OK,
+      failure: [StatusCodes.UNAUTHORIZED],
+      validator: t.array(validator),
+    })
+  }
 
-  const scheduleFetch = useAsync(
-    () =>
-      apiReq({
-        method: "GET",
-        path: "schedule",
-        token: token,
-        success: StatusCodes.OK,
-        failure: [StatusCodes.UNAUTHORIZED],
-        validator: t.array(ScheduleV),
-      }),
-    []
-  )
-
-  const weeklySurveyFetch = useAsync(
-    () =>
-      apiReq({
-        method: "GET",
-        path: "weekly-survey",
-        token: token,
-        success: StatusCodes.OK,
-        failure: [StatusCodes.UNAUTHORIZED],
-        validator: t.array(WeeklySurveyV),
-      }),
-    []
-  )
-
-  const vaccinationFetch = useAsync(
-    () =>
-      apiReq({
-        method: "GET",
-        path: "vaccination",
-        token: token,
-        success: StatusCodes.OK,
-        failure: [StatusCodes.UNAUTHORIZED],
-        validator: t.array(VaccinationV),
-      }),
-    []
-  )
+  const participantsFetch = useAsync(tableFetch, ["participants", ParticipantV])
+  const scheduleFetch = useAsync(tableFetch, ["schedule", ScheduleV])
+  const weeklySurveyFetch = useAsync(tableFetch, [
+    "weekly-survey",
+    WeeklySurveyV,
+  ])
+  const vaccinationFetch = useAsync(tableFetch, ["vaccination", VaccinationV])
 
   const participants = useMemo(() => participantsFetch.result ?? [], [
     participantsFetch,
