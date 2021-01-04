@@ -115,6 +115,11 @@ export default function Tables({ token }: { token?: string }) {
         accessor: (p: any) => formatDate(p[name]),
         width: 100,
       }),
+      year: (name: string) => ({
+        Header: "Year",
+        accessor: (p: any) => p[name],
+        width: 75,
+      }),
     }),
     []
   )
@@ -285,11 +290,7 @@ function WeeklySurveyTable({
         accessor: (p: WeeklySurvey) => p.index,
         width: 75,
       },
-      {
-        Header: "Year",
-        accessor: (p: WeeklySurvey) => p.redcapProjectYear,
-        width: 75,
-      },
+      commonCols.year("redcapProjectYear"),
       commonCols.date("date", "Date"),
       {
         Header: "ARI",
@@ -368,11 +369,7 @@ function WeeklyCompletion({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      {
-        Header: "Year",
-        accessor: (p: WeeklyCompletion) => p.year,
-        width: 50,
-      },
+      commonCols.year("year"),
       {
         Header: "Completed",
         accessor: (p: WeeklyCompletion, i: number) => weeksAbbr[i],
@@ -396,11 +393,7 @@ function VaccinationTable({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      {
-        Header: "Year",
-        accessor: (p: Vaccination) => p.year,
-        width: 100,
-      },
+      commonCols.year("year"),
       {
         Header: "Status",
         accessor: (p: Vaccination) => p.status,
