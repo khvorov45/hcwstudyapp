@@ -37,6 +37,8 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       "& td": {
         borderBottom: "none",
+        paddingTop: 0,
+        paddingBottom: 0,
       },
       "& tr:nth-child(even)": {
         background: theme.palette.background.alt,
