@@ -293,6 +293,10 @@ function formatDate(d: Date | null | undefined): string {
   return d.toISOString().split("T")[0]
 }
 
+function toTitleCase(s: string): string {
+  return s[0].toUpperCase() + s.slice(1)
+}
+
 function Contact({
   participants,
   commonCols,
@@ -584,7 +588,7 @@ function Summary({
       {
         Header: "Site",
         columns: Array.from(countsBySite.keys()).map((s) => ({
-          Header: s,
+          Header: toTitleCase(s),
           accessor: (p: any) => p[s],
         })),
       },
