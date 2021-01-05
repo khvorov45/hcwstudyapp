@@ -89,6 +89,10 @@ const useStyles = makeStyles((theme: Theme) =>
     datePicker: {
       maxWidth: 145,
     },
+    columnName: {
+      margin: "auto",
+      fontWeight: "bold",
+    },
   })
 )
 
@@ -591,7 +595,7 @@ function Table<T extends object>({
           {table.headers.map((h) => (
             <div {...h.getHeaderProps()} className="th">
               <div className="header-content">
-                {h.render("Header")}
+                <div className={classes.columnName}>{h.render("Header")}</div>
                 {h.render("Filter")}
               </div>
             </div>
