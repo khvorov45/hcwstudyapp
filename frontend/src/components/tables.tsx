@@ -112,6 +112,13 @@ const useStyles = makeStyles((theme: Theme) =>
       "& td": {
         borderBottom: 0,
       },
+      "& th": {
+        borderRight: `1px solid ${theme.palette.divider}`,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+      },
+      "& th:first-child": {
+        borderLeft: `1px solid ${theme.palette.divider}`,
+      },
       "& .data-row:nth-child(even)": {
         background: theme.palette.background.alt,
       },
