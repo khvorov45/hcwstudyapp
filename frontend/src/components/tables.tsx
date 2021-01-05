@@ -98,6 +98,10 @@ const useStyles = makeStyles((theme: Theme) =>
       margin: "auto",
       fontWeight: "bold",
     },
+    summaryTable: {
+      margin: "auto",
+      maxWidth: 800,
+    },
   })
 )
 
@@ -590,9 +594,9 @@ function Summary({
   }, [countsBySite])
 
   const table = useTable({ columns: columns, data: counts })
-
+  const classes = useStyles()
   return (
-    <TableContainer>
+    <TableContainer className={classes.summaryTable}>
       <MaterialTable {...table.getTableProps()}>
         <TableHead>
           {table.headerGroups.map((headerGroup) => (
