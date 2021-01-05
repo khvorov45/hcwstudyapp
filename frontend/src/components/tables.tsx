@@ -38,6 +38,12 @@ import {
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { useWindowSize } from "../lib/hooks"
 import * as d3 from "d3-array"
+import {
+  KeyboardDatePicker,
+  MuiPickersUtilsProvider,
+} from "@material-ui/pickers"
+import DateFnsUtils from "@date-io/moment"
+import { Moment } from "moment"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -79,6 +85,9 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
+    },
+    datePicker: {
+      maxWidth: 145,
     },
   })
 )
@@ -129,7 +138,7 @@ export default function Tables({ token }: { token?: string }) {
       date: (name: string, header: string) => ({
         Header: header,
         accessor: (p: any) => formatDate(p[name]),
-        width: 300,
+        width: 330,
         filter: "betweenDates",
         Filter: DateRangeColumnFilter,
       }),
@@ -623,36 +632,42 @@ function DefaultColumnFilter<T extends Object>({
 export function DateRangeColumnFilter<T extends Object>({
   column: { setFilter },
 }: FilterProps<T>) {
-  const [lowvalue, setLowvalue] = useState("")
-  const [highvalue, setHighvalue] = useState("")
+  const [lowvalue, setLowvalue] = useState<Moment | null>(null)
+  const [highvalue, setHighvalue] = useState<Moment | null>(null)
   const classes = useStyles()
   return (
-    <div className={classes.numberFilter}>
-      <TextField
-        value={lowvalue}
-        onChange={(e) => {
-          const val = e.target.value
-          setLowvalue(val)
-          setFilter((old = []) => [
-            val !== "" ? new Date(val) : undefined,
-            old[1],
-          ])
-        }}
-        type="date"
-      />
-      -
-      <TextField
-        value={highvalue}
-        onChange={(e) => {
-          const val = e.target.value
-          setHighvalue(val)
-          setFilter((old = []) => [
-            old[0],
-            val !== "" ? new Date(val) : undefined,
-          ])
-        }}
-        type="date"
-      />
-    </div>
+    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <div className={classes.numberFilter}>
+        <KeyboardDatePicker
+          value={lowvalue}
+          onChange={(d) => {
+            setLowvalue(d)
+            setFilter((old = []) => [
+              d?.isValid() ? d.toDate() : undefined,
+              old[1],
+            ])
+          }}
+          format="yyyy-MM-DD"
+          placeholder="yyyy-mm-dd"
+          className={classes.datePicker}
+          helperText=""
+        />
+        -
+        <KeyboardDatePicker
+          value={highvalue}
+          onChange={(d) => {
+            setHighvalue(d)
+            setFilter((old = []) => [
+              old[0],
+              d?.isValid() ? d.toDate() : undefined,
+            ])
+          }}
+          format="yyyy-MM-DD"
+          placeholder="yyyy-mm-dd"
+          className={classes.datePicker}
+          helperText=""
+        />
+      </div>
+    </MuiPickersUtilsProvider>
   )
 }
