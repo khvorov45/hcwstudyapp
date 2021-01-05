@@ -162,6 +162,13 @@ export default function Tables({ token }: { token?: string }) {
             .map((a) => a.toString())
         ),
       }),
+      bool: (name: string, header: string) => ({
+        Header: header,
+        accessor: (p: any) =>
+          p[name] !== null && p[name] !== undefined ? p[name].toString() : "",
+        width: 75,
+        Filter: getSelectColumnFilter(["true", "false"]),
+      }),
     }),
     []
   )
@@ -332,17 +339,8 @@ function WeeklySurveyTable({
       },
       commonCols.year("redcapProjectYear", 2020, 2021),
       commonCols.date("date", "Date"),
-      {
-        Header: "ARI",
-        accessor: (p: WeeklySurvey) => p.ari.toString(),
-        width: 75,
-      },
-      {
-        Header: "Swab",
-        accessor: (p: WeeklySurvey) =>
-          p.swabCollection ? p.swabCollection.toString() : "",
-        width: 75,
-      },
+      commonCols.bool("ari", "ARI"),
+      commonCols.bool("swabCollection", "Swab"),
     ]
   }, [commonCols])
 
