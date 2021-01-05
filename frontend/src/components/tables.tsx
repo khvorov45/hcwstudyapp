@@ -101,6 +101,9 @@ const useStyles = makeStyles((theme: Theme) =>
     summaryTable: {
       margin: "auto",
       maxWidth: 800,
+      "& th, & td": {
+        textAlign: "center",
+      },
     },
   })
 )
