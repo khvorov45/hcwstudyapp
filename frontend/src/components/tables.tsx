@@ -620,15 +620,13 @@ function Table<T extends object>({
 function DefaultColumnFilter<T extends Object>({
   column: { filterValue, preFilteredRows, setFilter },
 }: FilterProps<T>) {
-  const count = preFilteredRows.length
-
   return (
     <TextField
       value={filterValue || ""}
       onChange={(e) => {
         setFilter(e.target.value || undefined)
       }}
-      placeholder={`Search ${count} records...`}
+      placeholder={`Search...`}
     />
   )
 }
