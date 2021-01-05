@@ -104,6 +104,9 @@ const useStyles = makeStyles((theme: Theme) =>
       "& th, & td": {
         textAlign: "center",
       },
+      "& .site-overhead": {
+        background: theme.palette.background.alt,
+      },
     },
   })
 )
@@ -609,7 +612,10 @@ function Summary({
           {table.headerGroups.map((headerGroup) => (
             <TableRow {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((h) => (
-                <TableCell {...h.getHeaderProps()}>
+                <TableCell
+                  {...h.getHeaderProps()}
+                  className={h.id === "Site_1" ? "site-overhead" : ""}
+                >
                   {h.render("Header")}
                 </TableCell>
               ))}
