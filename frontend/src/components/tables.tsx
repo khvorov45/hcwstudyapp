@@ -103,6 +103,8 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: 800,
       "& th, & td": {
         textAlign: "center",
+        paddingTop: 5,
+        paddingBottom: 5,
       },
       "& .site-overhead": {
         background: theme.palette.background.alt,
