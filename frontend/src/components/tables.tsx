@@ -131,6 +131,17 @@ export default function Tables({ token }: { token?: string }) {
   const vaccination = useMemo(() => vaccinationFetch.result ?? [], [
     vaccinationFetch,
   ])
+  const vaccinationCounts = useMemo(() => {
+    const counts = d3.rollup(
+      vaccination,
+      (v) =>
+        d3.sum(v, (v) =>
+          ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
+        ),
+      (d) => d.pid
+    )
+    return Array.from(counts, ([k, v]) => ({ pid: k, count: v }))
+  }, [vaccination])
 
   const commonCols = useMemo(
     () => ({
@@ -232,7 +243,15 @@ export default function Tables({ token }: { token?: string }) {
         <WeeklyCompletion weeklySurvey={weeklySurvey} commonCols={commonCols} />
       ),
     },
-    { name: "summary", element: <Summary participants={participants} /> },
+    {
+      name: "summary",
+      element: (
+        <Summary
+          participants={participants}
+          vaccinationCounts={vaccinationCounts}
+        />
+      ),
+    },
   ].map((t) =>
     Object.assign(t, { path: `/tables/${t.name}`, link: `/tables/${t.name}` })
   )
@@ -477,7 +496,13 @@ function VaccinationTable({
   return <Table columns={columns} data={vaccination} />
 }
 
-function Summary({ participants }: { participants: Participant[] }) {
+function Summary({
+  participants,
+  vaccinationCounts,
+}: {
+  participants: Participant[]
+  vaccinationCounts: { pid: string; count: number }[]
+}) {
   const countsBySite = useMemo(
     () =>
       d3.rollup(
@@ -488,15 +513,56 @@ function Summary({ participants }: { participants: Participant[] }) {
     [participants]
   )
 
-  const counts = Array.from(countsBySite, ([k, v]) => ({
-    key: k as string,
-    value: v.toString(),
-  }))
-    .concat([
-      { key: "prevVac", value: "Total" },
-      { key: "total", value: participants.length.toString() },
-    ])
-    .reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
+  const countsByVac = useMemo(
+    () =>
+      d3.rollup(
+        vaccinationCounts,
+        (v) => v.length,
+        (d) => d.count
+      ),
+    [vaccinationCounts]
+  )
+
+  const partJoinVac = useMemo(
+    () =>
+      participants.map((p) => ({
+        ...p,
+        ...vaccinationCounts.find((v) => v.pid === p.pid),
+      })),
+    [participants, vaccinationCounts]
+  )
+
+  const countsByVacSite = useMemo(
+    () =>
+      d3.rollup(
+        partJoinVac,
+        (v) => v.length,
+        (d) => d.count,
+        (d) => d.site
+      ),
+    [partJoinVac]
+  )
+
+  // Convert the counts above to the appropriate table
+
+  function toWide(v: Map<string, number>) {
+    return Array.from(v, ([k, v]) => ({
+      key: k,
+      value: v,
+    })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
+  }
+
+  const bottomRow = {
+    prevVac: "Total",
+    total: participants.length,
+    ...toWide(countsBySite),
+  }
+
+  const counts = Array.from(countsByVacSite, ([k, v]) => ({
+    prevVac: k ? k.toString() : k,
+    ...toWide(v),
+    total: countsByVac.get(k),
+  })).concat(bottomRow)
 
   const columns = useMemo(() => {
     return [
@@ -519,7 +585,7 @@ function Summary({ participants }: { participants: Participant[] }) {
     ]
   }, [countsBySite])
 
-  const table = useTable({ columns: columns, data: [counts] })
+  const table = useTable({ columns: columns, data: counts })
 
   return (
     <TableContainer>
