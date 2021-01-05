@@ -296,11 +296,7 @@ function ScheduleTable({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      {
-        Header: "Year",
-        accessor: (p: Schedule) => p.redcapProjectYear,
-        width: 75,
-      },
+      commonCols.year("redcapProjectYear", 2020, 2021),
       {
         Header: "Day",
         accessor: (p: Schedule) => p.day,
