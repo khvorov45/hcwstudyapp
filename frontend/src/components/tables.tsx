@@ -14,7 +14,7 @@ import {
   WeeklySurvey,
   WeeklySurveyV,
 } from "../lib/data"
-import React, { CSSProperties, useMemo } from "react"
+import React, { CSSProperties, useMemo, useState } from "react"
 import {
   Column,
   FilterProps,
@@ -75,6 +75,11 @@ const useStyles = makeStyles((theme: Theme) =>
         flexDirection: "column",
       },
     },
+    numberFilter: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
   })
 )
 
@@ -124,7 +129,9 @@ export default function Tables({ token }: { token?: string }) {
       date: (name: string, header: string) => ({
         Header: header,
         accessor: (p: any) => formatDate(p[name]),
-        width: 100,
+        width: 300,
+        filter: "betweenDates",
+        Filter: DateRangeColumnFilter,
       }),
       year: (name: string) => ({
         Header: "Year",
@@ -496,6 +503,36 @@ function Table<T extends object>({
   columns: Column<T>[]
   data: T[]
 }) {
+  const filterTypes = useMemo(
+    () => ({
+      betweenDates: (
+        rows: any[],
+        ids: any[],
+        filterValue?: [Date | undefined, Date | undefined]
+      ) => {
+        const [min, max] = filterValue || []
+        if (min === undefined && max === undefined) {
+          return rows
+        }
+
+        let minTime = min instanceof Date ? min.getTime() : -Infinity
+        let maxTime = max instanceof Date ? max.getTime() : Infinity
+
+        if (minTime > maxTime) {
+          const temp = minTime
+          minTime = maxTime
+          maxTime = temp
+        }
+        return rows.filter((row) => {
+          return ids.some((id) => {
+            const rowValue = new Date(row.values[id]).getTime()
+            return rowValue >= minTime && rowValue <= maxTime
+          })
+        })
+      },
+    }),
+    []
+  )
   const defaultColumn = useMemo(
     () => ({
       Filter: DefaultColumnFilter,
@@ -507,6 +544,7 @@ function Table<T extends object>({
       columns,
       data,
       defaultColumn,
+      filterTypes,
     },
     useBlockLayout,
     useFilters
@@ -579,5 +617,42 @@ function DefaultColumnFilter<T extends Object>({
       }}
       placeholder={`Search ${count} records...`}
     />
+  )
+}
+
+export function DateRangeColumnFilter<T extends Object>({
+  column: { setFilter },
+}: FilterProps<T>) {
+  const [lowvalue, setLowvalue] = useState("")
+  const [highvalue, setHighvalue] = useState("")
+  const classes = useStyles()
+  return (
+    <div className={classes.numberFilter}>
+      <TextField
+        value={lowvalue}
+        onChange={(e) => {
+          const val = e.target.value
+          setLowvalue(val)
+          setFilter((old = []) => [
+            val !== "" ? new Date(val) : undefined,
+            old[1],
+          ])
+        }}
+        type="date"
+      />
+      -
+      <TextField
+        value={highvalue}
+        onChange={(e) => {
+          const val = e.target.value
+          setHighvalue(val)
+          setFilter((old = []) => [
+            old[0],
+            val !== "" ? new Date(val) : undefined,
+          ])
+        }}
+        type="date"
+      />
+    </div>
   )
 }
