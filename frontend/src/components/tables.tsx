@@ -145,14 +145,22 @@ export default function Tables({ token }: { token?: string }) {
         width: 100,
         Filter: getSelectColumnFilter(Object.keys(SiteV.keys)),
       },
-      date: (name: string, header: string) => ({
+      date: ({ name, header }: { name: string; header: string }) => ({
         Header: header,
         accessor: (p: any) => formatDate(p[name]),
         width: 330,
         filter: "betweenDates",
         Filter: DateRangeColumnFilter,
       }),
-      year: (name: string, start: number, end: number) => ({
+      year: ({
+        name,
+        start,
+        end,
+      }: {
+        name: string
+        start: number
+        end: number
+      }) => ({
         Header: "Year",
         accessor: (p: any) => p[name],
         width: 75,
@@ -279,7 +287,7 @@ function Contact({
         accessor: (p: Participant) => p.mobile,
         width: 120,
       },
-      commonCols.date("dateScreening", "Screened"),
+      commonCols.date({ name: "dateScreening", header: "Screened" }),
       commonCols.site,
     ]
   }, [commonCols])
@@ -297,7 +305,7 @@ function Baseline({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      commonCols.date("dob", "DoB"),
+      commonCols.date({ name: "dob", header: "DoB" }),
       {
         Header: "Gender",
         accessor: (p: Participant) => p.gender ?? "(missing)",
@@ -323,14 +331,14 @@ function ScheduleTable({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      commonCols.year("redcapProjectYear", 2020, 2021),
+      commonCols.year({ name: "redcapProjectYear", start: 2020, end: 2021 }),
       {
         Header: "Day",
         accessor: (p: Schedule) => p.day,
         width: 75,
         Filter: getSelectColumnFilter(["0", "7", "14", "280"]),
       },
-      commonCols.date("date", "Date"),
+      commonCols.date({ name: "date", header: "Date" }),
     ]
   }, [commonCols])
 
@@ -356,8 +364,8 @@ function WeeklySurveyTable({
           Array.from(Array(32).keys()).map((a) => (a + 1).toString())
         ),
       },
-      commonCols.year("redcapProjectYear", 2020, 2021),
-      commonCols.date("date", "Date"),
+      commonCols.year({ name: "redcapProjectYear", start: 2020, end: 2021 }),
+      commonCols.date({ name: "date", header: "Date" }),
       commonCols.bool({ name: "ari", header: "ARI", missing: false }),
       commonCols.bool({
         name: "swabCollection",
@@ -430,7 +438,7 @@ function WeeklyCompletion({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      commonCols.year("year", 2020, 2021),
+      commonCols.year({ name: "year", start: 2020, end: 2021 }),
       {
         Header: "Completed",
         accessor: (p: WeeklyCompletion, i: number) => weeksAbbr[i],
@@ -454,7 +462,7 @@ function VaccinationTable({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      commonCols.year("year", 2015, 2020),
+      commonCols.year({ name: "year", start: 2015, end: 2020 }),
       {
         Header: "Status",
         accessor: (p: Vaccination) => p.status ?? "(missing)",
