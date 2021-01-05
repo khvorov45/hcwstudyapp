@@ -708,7 +708,6 @@ function getSelectColumnFilter(opts: string[]) {
         }}
       >
         <MenuItem value={"any"}>Any</MenuItem>
-        <MenuItem value={"(missing)"}>Missing</MenuItem>
         {opts.map((o) => (
           <MenuItem key={o} value={o}>
             {o}
