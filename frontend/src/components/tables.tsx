@@ -567,7 +567,7 @@ function Summary({
   const columns = useMemo(() => {
     return [
       {
-        Header: "Previous vaccinations",
+        Header: "Vaccinations",
         accessor: (p: any) => p.prevVac,
       },
       {
