@@ -165,7 +165,9 @@ export default function Tables({ token }: { token?: string }) {
       bool: (name: string, header: string) => ({
         Header: header,
         accessor: (p: any) =>
-          p[name] !== null && p[name] !== undefined ? p[name].toString() : "",
+          p[name] !== null && p[name] !== undefined
+            ? p[name].toString()
+            : "(missing)",
         width: 75,
         Filter: getSelectColumnFilter(["true", "false"]),
       }),
@@ -704,6 +706,7 @@ function getSelectColumnFilter(opts: string[]) {
         }}
       >
         <MenuItem value={"any"}>Any</MenuItem>
+        <MenuItem value={"(missing)"}>Missing</MenuItem>
         {opts.map((o) => (
           <MenuItem key={o} value={o}>
             {o}
