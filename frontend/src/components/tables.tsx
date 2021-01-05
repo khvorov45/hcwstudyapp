@@ -155,6 +155,7 @@ export default function Tables({ token }: { token?: string }) {
         Header: "Year",
         accessor: (p: any) => p[name],
         width: 75,
+        filter: "exactText",
         Filter: getSelectColumnFilter(
           Array.from(Array(end - start + 1).keys())
             .map((a) => a + start)
@@ -324,6 +325,7 @@ function WeeklySurveyTable({
         Header: "Week",
         accessor: (p: WeeklySurvey) => p.index,
         width: 75,
+        filter: "exactText",
         Filter: getSelectColumnFilter(
           Array.from(Array(32).keys()).map((a) => (a + 1).toString())
         ),
