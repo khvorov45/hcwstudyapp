@@ -151,10 +151,15 @@ export default function Tables({ token }: { token?: string }) {
         filter: "betweenDates",
         Filter: DateRangeColumnFilter,
       }),
-      year: (name: string) => ({
+      year: (name: string, start: number, end: number) => ({
         Header: "Year",
         accessor: (p: any) => p[name],
         width: 75,
+        Filter: getSelectColumnFilter(
+          Array.from(Array(end - start + 1).keys())
+            .map((a) => a + start)
+            .map((a) => a.toString())
+        ),
       }),
     }),
     []
@@ -323,7 +328,7 @@ function WeeklySurveyTable({
         accessor: (p: WeeklySurvey) => p.index,
         width: 75,
       },
-      commonCols.year("redcapProjectYear"),
+      commonCols.year("redcapProjectYear", 2020, 2021),
       commonCols.date("date", "Date"),
       {
         Header: "ARI",
@@ -402,7 +407,7 @@ function WeeklyCompletion({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      commonCols.year("year"),
+      commonCols.year("year", 2020, 2021),
       {
         Header: "Completed",
         accessor: (p: WeeklyCompletion, i: number) => weeksAbbr[i],
@@ -426,7 +431,7 @@ function VaccinationTable({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
-      commonCols.year("year"),
+      commonCols.year("year", 2015, 2020),
       {
         Header: "Status",
         accessor: (p: Vaccination) => p.status,
