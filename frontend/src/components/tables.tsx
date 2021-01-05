@@ -49,6 +49,7 @@ import {
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
 import { Moment } from "moment"
+import { pseudoRandomBytes } from "crypto"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -439,9 +440,11 @@ function VaccinationTable({
       commonCols.year("year", 2015, 2020),
       {
         Header: "Status",
-        accessor: (p: Vaccination) => p.status,
+        accessor: (p: Vaccination) => p.status ?? "(missing)",
         width: 100,
-        Filter: getSelectColumnFilter(Object.keys(VaccinationStatusV.keys)),
+        Filter: getSelectColumnFilter(
+          Object.keys(VaccinationStatusV.keys).concat(["(missing)"])
+        ),
       },
     ]
   }, [commonCols])
