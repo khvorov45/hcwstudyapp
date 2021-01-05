@@ -163,14 +163,28 @@ export default function Tables({ token }: { token?: string }) {
             .map((a) => a.toString())
         ),
       }),
-      bool: (name: string, header: string) => ({
+      bool: ({
+        name,
+        header,
+        missing,
+      }: {
+        name: string
+        header: string
+        missing: boolean
+      }) => ({
         Header: header,
-        accessor: (p: any) =>
-          p[name] !== null && p[name] !== undefined
-            ? p[name].toString()
-            : "(missing)",
+        accessor: (p: any) => {
+          if (missing) {
+            return p[name] !== null && p[name] !== undefined
+              ? p[name].toString()
+              : "(missing)"
+          }
+          return p[name].toString()
+        },
         width: 75,
-        Filter: getSelectColumnFilter(["true", "false"]),
+        Filter: getSelectColumnFilter(
+          missing ? ["true", "false", "(missing)"] : ["true", "false"]
+        ),
       }),
     }),
     []
@@ -344,8 +358,12 @@ function WeeklySurveyTable({
       },
       commonCols.year("redcapProjectYear", 2020, 2021),
       commonCols.date("date", "Date"),
-      commonCols.bool("ari", "ARI"),
-      commonCols.bool("swabCollection", "Swab"),
+      commonCols.bool({ name: "ari", header: "ARI", missing: false }),
+      commonCols.bool({
+        name: "swabCollection",
+        header: "Swab",
+        missing: true,
+      }),
     ]
   }, [commonCols])
 
