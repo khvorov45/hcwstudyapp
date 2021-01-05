@@ -301,6 +301,7 @@ function ScheduleTable({
         Header: "Day",
         accessor: (p: Schedule) => p.day,
         width: 75,
+        Filter: getSelectColumnFilter(["0", "7", "14", "280"]),
       },
       commonCols.date("date", "Date"),
     ]
