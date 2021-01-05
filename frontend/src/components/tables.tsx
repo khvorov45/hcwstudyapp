@@ -324,6 +324,9 @@ function WeeklySurveyTable({
         Header: "Week",
         accessor: (p: WeeklySurvey) => p.index,
         width: 75,
+        Filter: getSelectColumnFilter(
+          Array.from(Array(32).keys()).map((a) => (a + 1).toString())
+        ),
       },
       commonCols.year("redcapProjectYear", 2020, 2021),
       commonCols.date("date", "Date"),
