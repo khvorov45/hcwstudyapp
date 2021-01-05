@@ -107,6 +107,12 @@ const useStyles = makeStyles((theme: Theme) =>
       "& .site-overhead": {
         background: theme.palette.background.alt,
       },
+      "& td": {
+        borderBottom: 0,
+      },
+      "& .data-row:nth-child(even)": {
+        background: theme.palette.background.alt,
+      },
     },
   })
 )
@@ -626,7 +632,7 @@ function Summary({
           {table.rows.map((r) => {
             table.prepareRow(r)
             return (
-              <TableRow {...r.getRowProps()}>
+              <TableRow {...r.getRowProps()} className={"data-row"}>
                 {r.cells.map((c) => (
                   <TableCell {...c.getCellProps()}>
                     {c.render("Cell")}
