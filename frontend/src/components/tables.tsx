@@ -12,6 +12,7 @@ import {
   ScheduleV,
   SiteV,
   Vaccination,
+  VaccinationStatusV,
   VaccinationV,
   WeeklySurvey,
   WeeklySurveyV,
@@ -438,6 +439,7 @@ function VaccinationTable({
         Header: "Status",
         accessor: (p: Vaccination) => p.status,
         width: 100,
+        Filter: getSelectColumnFilter(Object.keys(VaccinationStatusV.keys)),
       },
     ]
   }, [commonCols])
