@@ -9,6 +9,7 @@ import {
   ParticipantV,
   Schedule,
   ScheduleV,
+  SiteV,
   Vaccination,
   VaccinationV,
   WeeklySurvey,
@@ -34,6 +35,8 @@ import {
   TableCell,
   TableBody,
   TextField,
+  Select,
+  MenuItem,
 } from "@material-ui/core"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { useWindowSize } from "../lib/hooks"
@@ -138,6 +141,7 @@ export default function Tables({ token }: { token?: string }) {
         Header: "Site",
         accessor: (p: any) => p.site,
         width: 100,
+        Filter: getSelectColumnFilter(Object.keys(SiteV.keys)),
       },
       date: (name: string, header: string) => ({
         Header: header,
@@ -672,4 +676,34 @@ export function DateRangeColumnFilter<T extends Object>({
       </div>
     </MuiPickersUtilsProvider>
   )
+}
+
+function getSelectColumnFilter(opts: string[]) {
+  function SelectColumnFilter<T extends Object>({
+    column: { setFilter },
+  }: FilterProps<T>) {
+    const [val, setVal] = useState("any")
+    return (
+      <Select
+        value={val}
+        onChange={(e) => {
+          const v = e.target.value as string
+          setVal(v)
+          if (v === "any") {
+            setFilter(undefined)
+          } else {
+            setFilter(v)
+          }
+        }}
+      >
+        <MenuItem value={"any"}>Any</MenuItem>
+        {opts.map((o) => (
+          <MenuItem key={o} value={o}>
+            {o}
+          </MenuItem>
+        ))}
+      </Select>
+    )
+  }
+  return SelectColumnFilter
 }
