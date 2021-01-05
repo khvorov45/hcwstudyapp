@@ -286,9 +286,11 @@ function Baseline({
       commonCols.date("dob", "DoB"),
       {
         Header: "Gender",
-        accessor: (p: Participant) => p.gender,
+        accessor: (p: Participant) => p.gender ?? "(missing)",
         width: 75,
-        Filter: getSelectColumnFilter(Object.keys(GenderV.keys)),
+        Filter: getSelectColumnFilter(
+          Object.keys(GenderV.keys).concat(["(missing)"])
+        ),
       },
       commonCols.site,
     ]
