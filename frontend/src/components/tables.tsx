@@ -562,7 +562,11 @@ function Summary({
     prevVac: k ? k.toString() : k,
     ...toWide(v),
     total: countsByVac.get(k),
-  })).concat(bottomRow)
+  }))
+    .sort((a, b) =>
+      a.prevVac > b.prevVac ? 1 : a.prevVac < b.prevVac ? -1 : 0
+    )
+    .concat(bottomRow)
 
   const columns = useMemo(() => {
     return [
