@@ -5,6 +5,7 @@ import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
 import { apiReq } from "../lib/api"
 import {
+  GenderV,
   Participant,
   ParticipantV,
   Schedule,
@@ -271,6 +272,7 @@ function Baseline({
         Header: "Gender",
         accessor: (p: Participant) => p.gender,
         width: 75,
+        Filter: getSelectColumnFilter(Object.keys(GenderV.keys)),
       },
       commonCols.site,
     ]
