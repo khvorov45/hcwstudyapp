@@ -11,7 +11,7 @@ import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
 import GitHubIcon from "@material-ui/icons/GitHub"
 import Send from "@material-ui/icons/Send"
-import Update from "@material-ui/icons/Update"
+import Settings from "@material-ui/icons/Settings"
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
 import { Icon } from "@iconify/react"
 import apiIcon from "@iconify/icons-mdi/api"
@@ -115,10 +115,10 @@ export default function Nav({
         <AuthOnly user={user}>
           <IconButton
             component={Link}
-            to={`/update`}
-            className={matchRes?.params.location === "update" ? "active" : ""}
+            to={`/settings`}
+            className={matchRes?.params.location === "settings" ? "active" : ""}
           >
-            <Update />
+            <Settings />
           </IconButton>
         </AuthOnly>
         <IconButton

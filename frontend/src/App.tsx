@@ -23,7 +23,7 @@ import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
 import GetLink from "./components/get-link"
-import Update from "./components/update"
+import Settings from "./components/settings"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 
@@ -247,9 +247,9 @@ export default function App() {
                 exact
                 authStatus={auth.status}
                 user={auth.result}
-                path="/update"
+                path="/settings"
               >
-                <Update token={token?.token} user={auth.result} />
+                <Settings token={token?.token} user={auth.result} />
               </AuthRoute>
             </Switch>
           </div>

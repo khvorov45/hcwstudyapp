@@ -39,13 +39,17 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function Update({
+export default function Settings({
   token,
   user,
 }: {
   token?: string
   user?: User
 }) {
+  return <Update token={token} user={user} />
+}
+
+function Update({ token, user }: { token?: string; user?: User }) {
   const classes = useStyles()
   async function updateTimeFetcher(path: "participants" | "users") {
     return await apiReq({
