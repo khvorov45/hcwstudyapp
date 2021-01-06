@@ -54,6 +54,15 @@ function themeInit(): "dark" | "light" {
   }
 }
 
+function withdrawnInit(): "yes" | "no" | "any" {
+  let withdrawnSetting = localStorage.getItem("withdrawn")
+  if (!withdrawnSetting || !["yes", "no", "any"].includes(withdrawnSetting)) {
+    localStorage.setItem("withdrawn", "no")
+    return "no"
+  }
+  return withdrawnSetting as "yes" | "no" | "any"
+}
+
 type AppToken = {
   token: string
   lastRefresh: Date | null
@@ -162,6 +171,10 @@ export default function App() {
       validator: t.void,
     })
   })
+
+  // Withdrawn ----------------------------------------------------------------
+
+  const [withdrawn, setWithdrawn] = useState(withdrawnInit())
 
   // Home page md -------------------------------------------------------------
 
