@@ -128,8 +128,23 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-function useTableData<T>(data: T[] | undefined) {
-  return useMemo(() => data ?? [], [data])
+type TableSettings = {
+  withdrawn?: { setting: "yes" | "no" | "any"; ids: string[] }
+}
+
+function useTableData<T extends { pid: string }>(
+  data: T[] | undefined,
+  settings: TableSettings
+) {
+  const dataMemo = useMemo(() => data ?? [], [data])
+  if (settings.withdrawn && settings.withdrawn.setting !== "any") {
+    return dataMemo.filter(
+      (r) =>
+        settings.withdrawn?.ids.includes(r.pid) ===
+        (settings.withdrawn?.setting === "yes")
+    )
+  }
+  return dataMemo
 }
 
 export default function Tables({
@@ -162,11 +177,15 @@ export default function Tables({
   const vaccinationFetch = useAsync(tableFetch, ["vaccination", VaccinationV])
   const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV])
 
-  const participants = useTableData(participantsFetch.result)
-  const schedule = useTableData(scheduleFetch.result)
-  const weeklySurvey = useTableData(weeklySurveyFetch.result)
-  const vaccination = useTableData(vaccinationFetch.result)
-  const withdrawn = useTableData(withdrawnFetch.result)
+  const withdrawn = useTableData(withdrawnFetch.result, {})
+  const tableSettings = {
+    withdrawn: { setting: withdrawnSetting, ids: withdrawn.map((w) => w.pid) },
+  }
+
+  const participants = useTableData(participantsFetch.result, tableSettings)
+  const schedule = useTableData(scheduleFetch.result, tableSettings)
+  const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
+  const vaccination = useTableData(vaccinationFetch.result, tableSettings)
 
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(
