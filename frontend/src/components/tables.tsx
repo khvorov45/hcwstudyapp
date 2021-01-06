@@ -16,6 +16,8 @@ import {
   VaccinationV,
   WeeklySurvey,
   WeeklySurveyV,
+  Withdrawn,
+  WithdrawnV,
 } from "../lib/data"
 import React, { CSSProperties, useMemo, useState } from "react"
 import {
@@ -145,6 +147,7 @@ export default function Tables({ token }: { token?: string }) {
     WeeklySurveyV,
   ])
   const vaccinationFetch = useAsync(tableFetch, ["vaccination", VaccinationV])
+  const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV])
 
   const participants = useMemo(() => participantsFetch.result ?? [], [
     participantsFetch,
@@ -156,6 +159,8 @@ export default function Tables({ token }: { token?: string }) {
   const vaccination = useMemo(() => vaccinationFetch.result ?? [], [
     vaccinationFetch,
   ])
+  const withdrawn = useMemo(() => withdrawnFetch.result ?? [], [withdrawnFetch])
+
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(
       vaccination,
@@ -267,6 +272,10 @@ export default function Tables({ token }: { token?: string }) {
       element: (
         <WeeklyCompletion weeklySurvey={weeklySurvey} commonCols={commonCols} />
       ),
+    },
+    {
+      name: "withdrawn",
+      element: <WithdrawnTable withdrawn={withdrawn} commonCols={commonCols} />,
     },
     {
       name: "summary",
@@ -523,6 +532,20 @@ function VaccinationTable({
   }, [commonCols])
 
   return <Table columns={columns} data={vaccination} />
+}
+
+function WithdrawnTable({
+  withdrawn,
+  commonCols,
+}: {
+  withdrawn: Withdrawn[]
+  commonCols: any
+}) {
+  const columns = useMemo(() => {
+    return [commonCols.pid, commonCols.date({ name: "date", header: "Date" })]
+  }, [commonCols])
+
+  return <Table columns={columns} data={withdrawn} />
 }
 
 function Summary({
