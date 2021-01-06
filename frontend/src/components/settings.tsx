@@ -20,41 +20,48 @@ const useStyles = makeStyles((theme: Theme) =>
     settings: {
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
+      marginLeft: 10,
+      marginTop: 10,
+      "&>*": {
+        marginBottom: 10,
+      },
     },
     selector: {
       width: 200,
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       "& .active": {
         background: theme.palette.primary[theme.palette.type],
       },
-      "& .title": {
-        textAlign: "center",
-        fontWeight: "bold",
-        fontSize: "large",
-      },
     },
     update: {
-      padding: 20,
-      fontSize: "large",
       display: "flex",
+      flexDirection: "column",
       justifyContent: "center",
       flexWrap: "wrap",
+    },
+    updateCards: {
+      display: "flex",
       "&>*": {
-        margin: 10,
+        paddingRight: 20,
       },
     },
     updateCard: {
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       "& .syncButton": {
         marginTop: 5,
         width: 110,
         height: 40,
       },
+    },
+    title: {
+      fontWeight: "bold",
+      fontSize: "large",
+    },
+    subtitle: {
+      fontWeight: "bold",
+      fontSize: "medium",
     },
   })
 )
@@ -98,7 +105,7 @@ function Selector<T>({
   const classes = useStyles()
   return (
     <div className={classes.selector}>
-      <div className="title">{title}</div>
+      <div className={classes.subtitle}>{title}</div>
       <ButtonGroup>
         {opts.map((o) => (
           <Button
@@ -142,20 +149,23 @@ function Update({ token, user }: { token?: string; user?: User }) {
   }
   return (
     <div className={classes.update}>
-      <UpdateCard
-        title="Last REDCap participants sync"
-        token={token}
-        timestampFetcher={async () => await updateTimeFetcher("participants")}
-        syncFunction={async () => await dataSync("participants")}
-      />
-      <AuthOnly admin user={user}>
+      <div className={classes.title}>REDCap sync</div>
+      <div className={classes.updateCards}>
         <UpdateCard
-          title="Last REDCap users sync"
+          title="Participants"
           token={token}
-          timestampFetcher={async () => await updateTimeFetcher("users")}
-          syncFunction={async () => await dataSync("users")}
+          timestampFetcher={async () => await updateTimeFetcher("participants")}
+          syncFunction={async () => await dataSync("participants")}
         />
-      </AuthOnly>
+        <AuthOnly admin user={user}>
+          <UpdateCard
+            title="Users"
+            token={token}
+            timestampFetcher={async () => await updateTimeFetcher("users")}
+            syncFunction={async () => await dataSync("users")}
+          />
+        </AuthOnly>
+      </div>
     </div>
   )
 }
@@ -187,8 +197,8 @@ function UpdateCard({
   }
   return (
     <div className={classes.updateCard}>
-      <div>{title}</div>
-      <div>{formatDate(lastUpdateTimestamp.result)}</div>
+      <div className={classes.subtitle}>{title}</div>
+      <div>{"Last: " + formatDate(lastUpdateTimestamp.result)}</div>
       <FormHelperText error>
         {lastUpdateTimestamp.error?.message}
       </FormHelperText>
