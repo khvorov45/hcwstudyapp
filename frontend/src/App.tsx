@@ -249,7 +249,15 @@ export default function App() {
                 user={auth.result}
                 path="/settings"
               >
-                <Settings token={token?.token} user={auth.result} />
+                <Settings
+                  token={token?.token}
+                  user={auth.result}
+                  withdrawn={withdrawn}
+                  onWithdrawnChange={(v) => {
+                    setWithdrawn(v)
+                    localStorage.setItem("withdrawn", v)
+                  }}
+                />
               </AuthRoute>
             </Switch>
           </div>

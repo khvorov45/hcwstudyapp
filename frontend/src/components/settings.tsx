@@ -4,6 +4,7 @@ import {
   createStyles,
   Button,
   FormHelperText,
+  ButtonGroup,
 } from "@material-ui/core"
 import { useAsync, useAsyncCallback } from "react-async-hook"
 import * as t from "io-ts"
@@ -16,6 +17,25 @@ import { User } from "../lib/data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    settings: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    selector: {
+      width: 200,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      "& .active": {
+        background: theme.palette.primary[theme.palette.type],
+      },
+      "& .title": {
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "large",
+      },
+    },
     update: {
       padding: 20,
       fontSize: "large",
@@ -42,11 +62,55 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Settings({
   token,
   user,
+  withdrawn,
+  onWithdrawnChange,
 }: {
   token?: string
   user?: User
+  withdrawn: "yes" | "no" | "any"
+  onWithdrawnChange: (n: "yes" | "no" | "any") => void
 }) {
-  return <Update token={token} user={user} />
+  const classes = useStyles()
+  return (
+    <div className={classes.settings}>
+      <Update token={token} user={user} />
+      <Selector
+        title="Withdrawn"
+        value={withdrawn}
+        opts={["yes", "no", "any"]}
+        onChange={onWithdrawnChange}
+      />
+    </div>
+  )
+}
+
+function Selector<T>({
+  title,
+  value,
+  opts,
+  onChange,
+}: {
+  title: string
+  value: T
+  opts: T[]
+  onChange: (a: T) => void
+}) {
+  const classes = useStyles()
+  return (
+    <div className={classes.selector}>
+      <div className="title">{title}</div>
+      <ButtonGroup>
+        {opts.map((o) => (
+          <Button
+            className={value === o ? "active" : ""}
+            onClick={(_) => onChange(o)}
+          >
+            {o}
+          </Button>
+        ))}
+      </ButtonGroup>
+    </div>
+  )
 }
 
 function Update({ token, user }: { token?: string; user?: User }) {
