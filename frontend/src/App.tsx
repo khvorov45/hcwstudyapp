@@ -233,7 +233,7 @@ export default function App() {
                 user={auth.result}
                 path="/tables"
               >
-                <Tables token={token?.token} />
+                <Tables token={token?.token} withdrawnSetting={withdrawn} />
               </AuthRoute>
               <AuthRoute
                 exact
