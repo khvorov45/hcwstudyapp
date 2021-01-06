@@ -5,6 +5,7 @@ import {
   Divider,
   IconButton,
   makeStyles,
+  Popover,
   Theme,
 } from "@material-ui/core"
 import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
@@ -59,6 +60,21 @@ const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.divider,
       width: 2,
     },
+    logout: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      "& .title": {
+        fontSize: "medium",
+        fontWeight: "bold",
+      },
+      "& .button": {
+        backgroundColor: theme.palette.error[theme.palette.type],
+      },
+      "&>*": {
+        margin: 5,
+      },
+    },
   })
 )
 
@@ -78,6 +94,9 @@ export default function Nav({
   onWithdrawnChange: (a: "yes" | "no" | "any") => void
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [logoutAnchor, setLogoutAnchor] = useState<HTMLButtonElement | null>(
+    null
+  )
   const classes = useStyles()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
   return (
@@ -145,9 +164,28 @@ export default function Nav({
           </IconButton>
         </AuthOnly>
         <AuthOnly user={user}>
-          <IconButton onClick={logout}>
+          <IconButton
+            aria-describedby="logout"
+            onClick={(e) => setLogoutAnchor(e.currentTarget)}
+          >
             <PowerSettingsNewIcon />
           </IconButton>
+          <Popover
+            id="logout"
+            open={logoutAnchor !== null}
+            onClose={() => setLogoutAnchor(null)}
+            anchorEl={logoutAnchor}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+          >
+            <Logout thisDeviceLogout={logout} />
+          </Popover>
         </AuthOnly>
         <a href="https://github.com/khvorov45/hcwstudyapp">
           <IconButton>
@@ -192,6 +230,18 @@ export function SimpleNav({
           {name}
         </Button>
       ))}
+    </div>
+  )
+}
+
+function Logout({ thisDeviceLogout }: { thisDeviceLogout: () => void }) {
+  const classes = useStyles()
+  return (
+    <div className={classes.logout}>
+      <div className="title">Logout</div>
+      <Button className="button" onClick={thisDeviceLogout}>
+        This device
+      </Button>
     </div>
   )
 }
