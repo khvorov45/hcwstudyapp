@@ -3,7 +3,7 @@ import StatusCodes from "http-status-codes"
 import * as t from "io-ts"
 import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
-import { apiReq } from "../lib/api"
+import { ApiPath, apiReq } from "../lib/api"
 import {
   GenderV,
   Participant,
@@ -135,7 +135,10 @@ export default function Tables({
   token?: string
   withdrawnSetting: "yes" | "no" | "any"
 }) {
-  async function tableFetch(name: any, validator: any) {
+  async function tableFetch<T>(
+    name: ApiPath,
+    validator: t.Type<T, unknown, any>
+  ) {
     return await apiReq({
       method: "GET",
       path: name,

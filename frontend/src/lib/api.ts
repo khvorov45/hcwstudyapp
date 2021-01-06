@@ -5,19 +5,22 @@ import { API_ROOT } from "./config"
 import { User } from "./data"
 import { decode } from "./io"
 
+export type ApiPath =
+  | "participants"
+  | "users"
+  | "auth/token/verify"
+  | "schedule"
+  | "weekly-survey"
+  | "auth/token/send"
+  | "auth/token"
+  | "participants/redcap/sync"
+  | "users/redcap/sync"
+  | "vaccination"
+  | "withdrawn"
+
 type ApiRequestConfig<T, O, I> = {
   method: "GET" | "POST" | "PUT" | "DELETE"
-  path:
-    | "participants"
-    | "users"
-    | "auth/token/verify"
-    | "schedule"
-    | "weekly-survey"
-    | "auth/token/send"
-    | "auth/token"
-    | "participants/redcap/sync"
-    | "users/redcap/sync"
-    | "vaccination"
+  path: ApiPath
   query?: Record<string, string>
   body?: User
   token?: string | null
