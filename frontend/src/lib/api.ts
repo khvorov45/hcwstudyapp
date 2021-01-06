@@ -13,6 +13,7 @@ export type ApiPath =
   | "weekly-survey"
   | "auth/token/send"
   | "auth/token"
+  | "auth/token/user"
   | "participants/redcap/sync"
   | "users/redcap/sync"
   | "vaccination"

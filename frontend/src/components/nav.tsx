@@ -81,14 +81,16 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Nav({
   togglePalette,
   user,
-  logout,
+  thisDeviceLogout,
+  allDevicesLogout,
   token,
   withdrawn,
   onWithdrawnChange,
 }: {
   togglePalette: () => void
   user?: User
-  logout: () => Promise<void>
+  thisDeviceLogout: () => Promise<void>
+  allDevicesLogout: () => Promise<void>
   token?: string
   withdrawn: "yes" | "no" | "any"
   onWithdrawnChange: (a: "yes" | "no" | "any") => void
@@ -184,7 +186,10 @@ export default function Nav({
               horizontal: "center",
             }}
           >
-            <Logout thisDeviceLogout={logout} />
+            <Logout
+              thisDeviceLogout={thisDeviceLogout}
+              allDevicesLogout={allDevicesLogout}
+            />
           </Popover>
         </AuthOnly>
         <a href="https://github.com/khvorov45/hcwstudyapp">
@@ -234,13 +239,22 @@ export function SimpleNav({
   )
 }
 
-function Logout({ thisDeviceLogout }: { thisDeviceLogout: () => void }) {
+function Logout({
+  thisDeviceLogout,
+  allDevicesLogout,
+}: {
+  thisDeviceLogout: () => void
+  allDevicesLogout: () => void
+}) {
   const classes = useStyles()
   return (
     <div className={classes.logout}>
       <div className="title">Logout</div>
       <Button className="button" onClick={thisDeviceLogout}>
         This device
+      </Button>
+      <Button className="button" onClick={allDevicesLogout}>
+        All devices
       </Button>
     </div>
   )

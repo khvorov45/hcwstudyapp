@@ -157,19 +157,21 @@ export default function App() {
     return () => clearInterval(interval)
   }, [token, auth])
 
-  const logout = useAsyncCallback(async () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("last-refresh")
-    setToken(null)
-    await apiReq({
-      method: "DELETE",
-      path: "auth/token",
-      token: token?.token,
-      success: StatusCodes.NO_CONTENT,
-      failure: [],
-      validator: t.void,
-    })
-  })
+  const logout = useAsyncCallback(
+    async ({ allDevices }: { allDevices: boolean }) => {
+      localStorage.removeItem("token")
+      localStorage.removeItem("last-refresh")
+      setToken(null)
+      await apiReq({
+        method: "DELETE",
+        path: allDevices ? "auth/token/user" : "auth/token",
+        token: token?.token,
+        success: StatusCodes.NO_CONTENT,
+        failure: [],
+        validator: t.void,
+      })
+    }
+  )
 
   // Withdrawn ----------------------------------------------------------------
 
@@ -191,7 +193,8 @@ export default function App() {
           <Nav
             togglePalette={togglePalette}
             user={auth.result}
-            logout={logout.execute}
+            thisDeviceLogout={() => logout.execute({ allDevices: false })}
+            allDevicesLogout={() => logout.execute({ allDevices: true })}
             token={token?.token}
             withdrawn={withdrawn}
             onWithdrawnChange={(v) => {
