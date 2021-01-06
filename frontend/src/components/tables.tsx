@@ -128,6 +128,10 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
+function useTableData<T>(data: T[] | undefined) {
+  return useMemo(() => data ?? [], [data])
+}
+
 export default function Tables({
   token,
   withdrawnSetting,
@@ -158,17 +162,11 @@ export default function Tables({
   const vaccinationFetch = useAsync(tableFetch, ["vaccination", VaccinationV])
   const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV])
 
-  const participants = useMemo(() => participantsFetch.result ?? [], [
-    participantsFetch,
-  ])
-  const schedule = useMemo(() => scheduleFetch.result ?? [], [scheduleFetch])
-  const weeklySurvey = useMemo(() => weeklySurveyFetch.result ?? [], [
-    weeklySurveyFetch,
-  ])
-  const vaccination = useMemo(() => vaccinationFetch.result ?? [], [
-    vaccinationFetch,
-  ])
-  const withdrawn = useMemo(() => withdrawnFetch.result ?? [], [withdrawnFetch])
+  const participants = useTableData(participantsFetch.result)
+  const schedule = useTableData(scheduleFetch.result)
+  const weeklySurvey = useTableData(weeklySurveyFetch.result)
+  const vaccination = useTableData(vaccinationFetch.result)
+  const withdrawn = useTableData(withdrawnFetch.result)
 
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(
