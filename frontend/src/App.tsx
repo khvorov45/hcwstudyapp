@@ -23,7 +23,6 @@ import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
 import GetLink from "./components/get-link"
-import Settings from "./components/settings"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 
