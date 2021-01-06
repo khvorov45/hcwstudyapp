@@ -1,6 +1,7 @@
 import {
   Button,
   createStyles,
+  Dialog,
   Divider,
   IconButton,
   makeStyles,
@@ -11,16 +12,17 @@ import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
 import GitHubIcon from "@material-ui/icons/GitHub"
 import Send from "@material-ui/icons/Send"
-import Settings from "@material-ui/icons/Settings"
+import SettingsIcon from "@material-ui/icons/Settings"
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
 import { Icon } from "@iconify/react"
 import apiIcon from "@iconify/icons-mdi/api"
 import tableOutlined from "@iconify/icons-ant-design/table-outlined"
 import bxBarChart from "@iconify/icons-bx/bx-bar-chart"
-import React from "react"
+import React, { useState } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
 import { AuthOnly } from "./auth"
+import Settings from "./settings"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -64,11 +66,18 @@ export default function Nav({
   togglePalette,
   user,
   logout,
+  token,
+  withdrawn,
+  onWithdrawnChange,
 }: {
   togglePalette: () => void
-  user: User | null | undefined
+  user?: User
   logout: () => Promise<void>
+  token?: string
+  withdrawn: "yes" | "no" | "any"
+  onWithdrawnChange: (a: "yes" | "no" | "any") => void
 }) {
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const classes = useStyles()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
   return (
@@ -112,15 +121,6 @@ export default function Nav({
             <People />
           </IconButton>
         </AuthOnly>
-        <AuthOnly user={user}>
-          <IconButton
-            component={Link}
-            to={`/settings`}
-            className={matchRes?.params.location === "settings" ? "active" : ""}
-          >
-            <Settings />
-          </IconButton>
-        </AuthOnly>
         <IconButton
           component={Link}
           to={`/get-link`}
@@ -137,6 +137,14 @@ export default function Nav({
         </IconButton>
         <Divider orientation="vertical" flexItem className={classes.divider} />
         <AuthOnly user={user}>
+          <IconButton
+            onClick={() => setSettingsOpen((old) => !old)}
+            className={matchRes?.params.location === "settings" ? "active" : ""}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </AuthOnly>
+        <AuthOnly user={user}>
           <IconButton onClick={logout}>
             <PowerSettingsNewIcon />
           </IconButton>
@@ -150,6 +158,14 @@ export default function Nav({
           <BrightnessMediumIcon />
         </IconButton>
       </div>
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <Settings
+          token={token}
+          user={user}
+          withdrawn={withdrawn}
+          onWithdrawnChange={onWithdrawnChange}
+        />
+      </Dialog>
     </div>
   )
 }

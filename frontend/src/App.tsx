@@ -193,6 +193,12 @@ export default function App() {
             togglePalette={togglePalette}
             user={auth.result}
             logout={logout.execute}
+            token={token?.token}
+            withdrawn={withdrawn}
+            onWithdrawnChange={(v) => {
+              setWithdrawn(v)
+              localStorage.setItem("withdrawn", v)
+            }}
           />
           <div className={classes.belowNav}>
             <Switch>
@@ -242,22 +248,6 @@ export default function App() {
                 path="/plots"
               >
                 Plots
-              </AuthRoute>
-              <AuthRoute
-                exact
-                authStatus={auth.status}
-                user={auth.result}
-                path="/settings"
-              >
-                <Settings
-                  token={token?.token}
-                  user={auth.result}
-                  withdrawn={withdrawn}
-                  onWithdrawnChange={(v) => {
-                    setWithdrawn(v)
-                    localStorage.setItem("withdrawn", v)
-                  }}
-                />
               </AuthRoute>
             </Switch>
           </div>
