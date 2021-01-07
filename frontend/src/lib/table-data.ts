@@ -27,6 +27,9 @@ export async function tableFetch<T>(
   validator: t.Type<T, unknown, any>,
   token?: string
 ) {
+  if (!token) {
+    return []
+  }
   return await apiReq({
     method: "GET",
     path: name,
