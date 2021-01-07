@@ -152,7 +152,9 @@ function Parameters({ parameters }: { parameters: any }) {
       <span className={classes.subtitle}>Query:</span>
       <span className={classes.subContent}>
         <code>
-          {parameters.map((p: any) => `${p.name}=${p.schema.type}`).join("&")}
+          {parameters
+            .map((p: any) => `${p.name}=${stringifySchema(p.schema, 0)}`)
+            .join(" ")}
         </code>
       </span>
     </div>
