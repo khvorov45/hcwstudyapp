@@ -177,7 +177,8 @@ export async function getUserByEmail(db: DB, email: string): Promise<User> {
 export async function getUserByToken(db: DB, token: string): Promise<User> {
   return await db.one(
     `SELECT * FROM "User" WHERE "email" =
-    (SELECT "user" FROM "Token" WHERE "hash" = $1 AND "expires" > now())`,
+    (SELECT "user" FROM "Token"
+    WHERE "hash" = $1 AND ("expires" > now() OR "type" = 'api'))`,
     [hash(token)]
   )
 }
