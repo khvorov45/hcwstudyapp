@@ -2,6 +2,7 @@ import { useAsync } from "react-async-hook"
 import swagger from "@apidevtools/swagger-parser"
 import { makeStyles, Theme, createStyles } from "@material-ui/core"
 import { NamedDivider } from "./divider"
+import { API_SPEC_FILEPATH } from "../lib/config"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -69,9 +70,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ApiSpec() {
   const apiSpec = useAsync(async () => {
-    return await swagger.dereference(
-      "https://raw.githubusercontent.com/khvorov45/hcwstudyapp/split-backend-frontend/backend/hcwstudyapp-openapi.yml"
-    )
+    return await swagger.dereference(API_SPEC_FILEPATH)
   }, [])
   const breaks = [
     { path: "/auth/token/send", title: "Auth" },
