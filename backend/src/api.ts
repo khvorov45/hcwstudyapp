@@ -78,7 +78,7 @@ export function getRoutes(
   // Auth
   routes.post("/auth/token/send/login", async (req: Request, res: Response) => {
     const email = decode(t.string, req.query.email)
-    const token = createToken(email, tokenDaysToLive)
+    const token = createToken(email, tokenDaysToLive, "session")
     await insertTokens(db, [token])
     await emailLoginLink(emailConfig.emailer, {
       email,
