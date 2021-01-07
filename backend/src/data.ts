@@ -54,7 +54,7 @@ export const TokenV = t.type({
   user: t.string,
   token: t.string,
   type: TokenTypeV,
-  expires: DateFromISOString,
+  expires: t.union([DateFromISOString, t.null]),
 })
 export type Token = t.TypeOf<typeof TokenV>
 

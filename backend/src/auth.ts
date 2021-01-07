@@ -12,7 +12,7 @@ export function createToken(
     user,
     token: generateToken(),
     type,
-    expires: addDays(new Date(), tokenDaysToLive),
+    expires: type === "session" ? addDays(new Date(), tokenDaysToLive) : null,
   }
 }
 
