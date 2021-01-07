@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import * as t from "io-ts"
-import { ApiPath, apiReq } from "./api"
+import { apiReq, TableNames } from "./api"
 import { StatusCodes } from "http-status-codes"
 
 export type TableSettings = {
@@ -23,7 +23,7 @@ export function useTableData<T extends { pid: string }>(
 }
 
 export async function tableFetch<T>(
-  name: ApiPath,
+  name: TableNames,
   validator: t.Type<T, unknown, any>,
   token?: string
 ) {
