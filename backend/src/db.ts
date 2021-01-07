@@ -264,7 +264,7 @@ export async function deleteToken(db: DB, token: string) {
 }
 
 /**Will only update a valid token */
-export async function refreshToken(
+export async function refreshSessionToken(
   db: DB,
   oldToken: string,
   tokenDayesToLive: number

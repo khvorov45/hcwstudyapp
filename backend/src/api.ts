@@ -21,7 +21,7 @@ import {
   getScheduleSubset,
   getWeeklySurveySubset,
   insertTokens,
-  refreshToken,
+  refreshSessionToken,
   deleteUserTokens,
   deleteToken,
   updateUser,
@@ -92,7 +92,7 @@ export function getRoutes(
     res.json({ email: u.email, accessGroup: u.accessGroup })
   })
   routes.put("/auth/token", async (req: Request, res: Response) => {
-    res.json(await refreshToken(db, extractToken(req), tokenDaysToLive))
+    res.json(await refreshSessionToken(db, extractToken(req), tokenDaysToLive))
   })
   routes.delete("/auth/token", async (req: Request, res: Response) => {
     await deleteToken(db, extractToken(req))
