@@ -5,8 +5,10 @@ import * as d3 from "d3-array"
 
 export default function Plots({
   participants,
+  vaccinationCounts,
 }: {
   participants: Participant[]
+  vaccinationCounts: { pid: string; count: number }[]
 }) {
   const genderCounts = d3.rollup(
     participants,
@@ -14,16 +16,34 @@ export default function Plots({
     (p) => p.gender
   )
 
+  const priorVaccinationCounts = d3.rollup(
+    vaccinationCounts,
+    (v) => v.length,
+    (p) => p.count
+  )
+
   return (
-    <GenericBar
-      data={Array.from(genderCounts, ([k, v]) => ({
-        gender: k ?? "(missing)",
-        count: v,
-      }))}
-      xLab="Gender"
-      xKey="gender"
-      yKey="count"
-    />
+    <>
+      {" "}
+      <GenericBar
+        data={Array.from(genderCounts, ([k, v]) => ({
+          gender: k ?? "(missing)",
+          count: v,
+        }))}
+        xLab="Gender"
+        xKey="gender"
+        yKey="count"
+      />
+      <GenericBar
+        data={Array.from(priorVaccinationCounts, ([k, v]) => ({
+          priorVaccinations: k ?? "(missing)",
+          count: v,
+        }))}
+        xLab="Known prior vaccinations"
+        xKey="priorVaccinations"
+        yKey="count"
+      />
+    </>
   )
 }
 

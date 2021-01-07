@@ -261,7 +261,9 @@ export default function App() {
         ),
       (d) => d.pid
     )
-    return Array.from(counts, ([k, v]) => ({ pid: k, count: v }))
+    return Array.from(counts, ([k, v]) => ({ pid: k, count: v })).sort((a, b) =>
+      a.count > b.count ? 1 : a.count < b.count ? -1 : 0
+    )
   }, [vaccination])
 
   // Home page md -------------------------------------------------------------
@@ -343,7 +345,10 @@ export default function App() {
                 user={auth.result}
                 path="/plots"
               >
-                <Plots participants={participants} />
+                <Plots
+                  participants={participants}
+                  vaccinationCounts={vaccinationCounts}
+                />
               </AuthRoute>
             </Switch>
           </div>
