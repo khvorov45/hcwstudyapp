@@ -5,19 +5,22 @@ import { API_ROOT } from "./config"
 import { User } from "./data"
 import { decode } from "./io"
 
-export type ApiPath =
+export type TableNames =
   | "participants"
-  | "users"
-  | "auth/token/verify"
   | "schedule"
   | "weekly-survey"
+  | "vaccination"
+  | "withdrawn"
+
+export type ApiPath =
+  | TableNames
+  | "users"
+  | "auth/token/verify"
   | "auth/token/send"
   | "auth/token"
   | "auth/token/user/session"
   | "participants/redcap/sync"
   | "users/redcap/sync"
-  | "vaccination"
-  | "withdrawn"
 
 type ApiRequestConfig<T, O, I> = {
   method: "GET" | "POST" | "PUT" | "DELETE"
