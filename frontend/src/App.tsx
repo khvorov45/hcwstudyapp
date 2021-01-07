@@ -250,7 +250,7 @@ export default function App() {
                 user={auth.result}
                 path="/plots"
               >
-                <Plots />
+                <Plots token={token?.token} withdrawnSetting={withdrawn} />
               </AuthRoute>
             </Switch>
           </div>

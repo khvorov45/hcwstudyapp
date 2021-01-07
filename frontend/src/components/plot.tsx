@@ -1,14 +1,43 @@
 import { BarChart, XAxis, YAxis, Tooltip, Bar, Label } from "recharts"
 import { useTheme } from "@material-ui/core"
+import { useAsync } from "react-async-hook"
+import { ParticipantV, WithdrawnV } from "../lib/data"
+import { tableFetch, useTableData } from "../lib/table-data"
+import * as d3 from "d3-array"
 
-export default function Plots() {
+export default function Plots({
+  token,
+  withdrawnSetting,
+}: {
+  token?: string
+  withdrawnSetting: "yes" | "no" | "any"
+}) {
+  const participantsFetch = useAsync(tableFetch, [
+    "participants",
+    ParticipantV,
+    token,
+  ])
+  const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV, token])
+
+  const withdrawn = useTableData(withdrawnFetch.result, {})
+  const tableSettings = {
+    withdrawn: { setting: withdrawnSetting, ids: withdrawn.map((w) => w.pid) },
+  }
+  const participants = useTableData(participantsFetch.result, tableSettings)
+
+  const genderCounts = d3.rollup(
+    participants,
+    (v) => v.length,
+    (p) => p.gender
+  )
+
   return (
     <GenericBar
-      data={[
-        { gender: "male", count: 20 },
-        { gender: "female", count: 30 },
-      ]}
-      xLab="gender"
+      data={Array.from(genderCounts, ([k, v]) => ({
+        gender: k ?? "(missing)",
+        count: v,
+      }))}
+      xLab="Gender"
       xKey="gender"
       yKey="count"
     />
