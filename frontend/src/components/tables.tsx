@@ -1,9 +1,6 @@
 import { Redirect, Route, useRouteMatch } from "react-router-dom"
-import StatusCodes from "http-status-codes"
-import * as t from "io-ts"
 import { SimpleNav } from "./nav"
 import { useAsync } from "react-async-hook"
-import { ApiPath, apiReq } from "../lib/api"
 import {
   GenderV,
   Participant,
@@ -51,6 +48,7 @@ import {
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
 import { Moment } from "moment"
+import { tableFetch, useTableData } from "../lib/table-data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -128,25 +126,6 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-type TableSettings = {
-  withdrawn?: { setting: "yes" | "no" | "any"; ids: string[] }
-}
-
-function useTableData<T extends { pid: string }>(
-  data: T[] | undefined,
-  settings: TableSettings
-) {
-  const dataMemo = useMemo(() => data ?? [], [data])
-  if (settings.withdrawn && settings.withdrawn.setting !== "any") {
-    return dataMemo.filter(
-      (r) =>
-        settings.withdrawn?.ids.includes(r.pid) ===
-        (settings.withdrawn?.setting === "yes")
-    )
-  }
-  return dataMemo
-}
-
 export default function Tables({
   token,
   withdrawnSetting,
@@ -154,28 +133,23 @@ export default function Tables({
   token?: string
   withdrawnSetting: "yes" | "no" | "any"
 }) {
-  async function tableFetch<T>(
-    name: ApiPath,
-    validator: t.Type<T, unknown, any>
-  ) {
-    return await apiReq({
-      method: "GET",
-      path: name,
-      token: token,
-      success: StatusCodes.OK,
-      failure: [StatusCodes.UNAUTHORIZED],
-      validator: t.array(validator),
-    })
-  }
-
-  const participantsFetch = useAsync(tableFetch, ["participants", ParticipantV])
-  const scheduleFetch = useAsync(tableFetch, ["schedule", ScheduleV])
+  const participantsFetch = useAsync(tableFetch, [
+    "participants",
+    ParticipantV,
+    token,
+  ])
+  const scheduleFetch = useAsync(tableFetch, ["schedule", ScheduleV, token])
   const weeklySurveyFetch = useAsync(tableFetch, [
     "weekly-survey",
     WeeklySurveyV,
+    token,
   ])
-  const vaccinationFetch = useAsync(tableFetch, ["vaccination", VaccinationV])
-  const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV])
+  const vaccinationFetch = useAsync(tableFetch, [
+    "vaccination",
+    VaccinationV,
+    token,
+  ])
+  const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV, token])
 
   const withdrawn = useTableData(withdrawnFetch.result, {})
   const tableSettings = {
