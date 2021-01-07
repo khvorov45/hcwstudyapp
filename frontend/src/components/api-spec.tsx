@@ -3,6 +3,7 @@ import swagger from "@apidevtools/swagger-parser"
 import { makeStyles, Theme, createStyles } from "@material-ui/core"
 import { NamedDivider } from "./divider"
 import { API_SPEC_FILEPATH } from "../lib/config"
+import { Link } from "react-router-dom"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -168,7 +169,11 @@ function Security({ security }: { security: any }) {
       <span>
         <code>
           {security.map((s: Object) =>
-            Object.keys(s).map((k) => `Bearer <${k} token>`)
+            Object.keys(s).map((k) => (
+              <span>
+                Bearer <Link to="get-link">token ({k})</Link>
+              </span>
+            ))
           )}
         </code>
       </span>
