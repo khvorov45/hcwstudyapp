@@ -10,6 +10,8 @@ import { NamedDivider } from "./divider"
 import { API_SPEC_FILEPATH } from "../lib/config"
 import { Link, useRouteMatch, Switch, Route } from "react-router-dom"
 import { SimpleNav } from "./nav"
+import SyntaxHighlighter from "react-syntax-highlighter"
+import { tomorrowNightBright } from "react-syntax-highlighter/dist/esm/styles/hljs"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -98,9 +100,28 @@ export default function ApiSpec() {
           <FullSpec />
         </Route>
         <Route exact path="/api-spec/r-code">
-          R code
+          <RCode />
         </Route>
       </Switch>
+    </div>
+  )
+}
+
+function RCode() {
+  const classes = useStyles()
+  return (
+    <div className={classes.api}>
+      <h1>R code to pull data</h1>
+      <SyntaxHighlighter language="r" style={tomorrowNightBright}>
+        {`library(tidyverse)
+
+# \`table_name\` is one of
+pull_table = function(table_name) {
+
+}
+
+pull_table("participants")`}
+      </SyntaxHighlighter>
     </div>
   )
 }
