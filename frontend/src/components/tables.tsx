@@ -1,20 +1,14 @@
 import { Redirect, Route, useRouteMatch } from "react-router-dom"
 import { SimpleNav } from "./nav"
-import { useAsync } from "react-async-hook"
 import {
   GenderV,
   Participant,
-  ParticipantV,
   Schedule,
-  ScheduleV,
   SiteV,
   Vaccination,
   VaccinationStatusV,
-  VaccinationV,
   WeeklySurvey,
-  WeeklySurveyV,
   Withdrawn,
-  WithdrawnV,
 } from "../lib/data"
 import React, { CSSProperties, useMemo, useState } from "react"
 import {
@@ -48,7 +42,6 @@ import {
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
 import { Moment } from "moment"
-import { tableFetch, useTableData } from "../lib/table-data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -127,52 +120,20 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export default function Tables({
-  token,
-  withdrawnSetting,
+  participants,
+  vaccination,
+  schedule,
+  weeklySurvey,
+  withdrawn,
+  vaccinationCounts,
 }: {
-  token?: string
-  withdrawnSetting: "yes" | "no" | "any"
+  participants: Participant[]
+  vaccination: Vaccination[]
+  schedule: Schedule[]
+  weeklySurvey: WeeklySurvey[]
+  withdrawn: Withdrawn[]
+  vaccinationCounts: { pid: string; count: number }[]
 }) {
-  const participantsFetch = useAsync(tableFetch, [
-    "participants",
-    ParticipantV,
-    token,
-  ])
-  const scheduleFetch = useAsync(tableFetch, ["schedule", ScheduleV, token])
-  const weeklySurveyFetch = useAsync(tableFetch, [
-    "weekly-survey",
-    WeeklySurveyV,
-    token,
-  ])
-  const vaccinationFetch = useAsync(tableFetch, [
-    "vaccination",
-    VaccinationV,
-    token,
-  ])
-  const withdrawnFetch = useAsync(tableFetch, ["withdrawn", WithdrawnV, token])
-
-  const withdrawn = useTableData(withdrawnFetch.result, {})
-  const tableSettings = {
-    withdrawn: { setting: withdrawnSetting, ids: withdrawn.map((w) => w.pid) },
-  }
-
-  const participants = useTableData(participantsFetch.result, tableSettings)
-  const schedule = useTableData(scheduleFetch.result, tableSettings)
-  const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
-  const vaccination = useTableData(vaccinationFetch.result, tableSettings)
-
-  const vaccinationCounts = useMemo(() => {
-    const counts = d3.rollup(
-      vaccination,
-      (v) =>
-        d3.sum(v, (v) =>
-          ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
-        ),
-      (d) => d.pid
-    )
-    return Array.from(counts, ([k, v]) => ({ pid: k, count: v }))
-  }, [vaccination])
-
   const commonCols = useMemo(
     () => ({
       pid: {

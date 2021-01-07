@@ -6,7 +6,7 @@ import {
   Theme,
   ThemeProvider,
 } from "@material-ui/core"
-import React, { ReactNode, useEffect, useState } from "react"
+import React, { ReactNode, useEffect, useMemo, useState } from "react"
 import StatusCodes from "http-status-codes"
 import { AsyncStateStatus, useAsync, useAsyncCallback } from "react-async-hook"
 import {
@@ -18,7 +18,15 @@ import {
 import * as t from "io-ts"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
-import { User, UserV } from "./lib/data"
+import {
+  ParticipantV,
+  ScheduleV,
+  User,
+  UserV,
+  VaccinationV,
+  WeeklySurveyV,
+  WithdrawnV,
+} from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
@@ -26,6 +34,8 @@ import GetLink from "./components/get-link"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 import Plots from "./components/plot"
+import * as d3 from "d3-array"
+import { tableFetch, useTableData } from "./lib/table-data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -202,7 +212,57 @@ export default function App() {
 
   // Withdrawn ----------------------------------------------------------------
 
-  const [withdrawn, setWithdrawn] = useState(withdrawnInit())
+  const [withdrawnSetting, setWithdrawnSetting] = useState(withdrawnInit())
+
+  // Table data ---------------------------------------------------------------
+
+  const participantsFetch = useAsync(tableFetch, [
+    "participants",
+    ParticipantV,
+    token?.token,
+  ])
+  const scheduleFetch = useAsync(tableFetch, [
+    "schedule",
+    ScheduleV,
+    token?.token,
+  ])
+  const weeklySurveyFetch = useAsync(tableFetch, [
+    "weekly-survey",
+    WeeklySurveyV,
+    token?.token,
+  ])
+  const vaccinationFetch = useAsync(tableFetch, [
+    "vaccination",
+    VaccinationV,
+    token?.token,
+  ])
+  const withdrawnFetch = useAsync(tableFetch, [
+    "withdrawn",
+    WithdrawnV,
+    token?.token,
+  ])
+
+  const withdrawn = useTableData(withdrawnFetch.result, {})
+  const tableSettings = {
+    withdrawn: { setting: withdrawnSetting, ids: withdrawn.map((w) => w.pid) },
+  }
+
+  const participants = useTableData(participantsFetch.result, tableSettings)
+  const schedule = useTableData(scheduleFetch.result, tableSettings)
+  const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
+  const vaccination = useTableData(vaccinationFetch.result, tableSettings)
+
+  const vaccinationCounts = useMemo(() => {
+    const counts = d3.rollup(
+      vaccination,
+      (v) =>
+        d3.sum(v, (v) =>
+          ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
+        ),
+      (d) => d.pid
+    )
+    return Array.from(counts, ([k, v]) => ({ pid: k, count: v }))
+  }, [vaccination])
 
   // Home page md -------------------------------------------------------------
 
@@ -223,9 +283,9 @@ export default function App() {
             thisDeviceLogout={() => logout.execute({ allDevices: false })}
             allDevicesLogout={() => logout.execute({ allDevices: true })}
             token={token?.token}
-            withdrawn={withdrawn}
+            withdrawn={withdrawnSetting}
             onWithdrawnChange={(v) => {
-              setWithdrawn(v)
+              setWithdrawnSetting(v)
               localStorage.setItem("withdrawn", v)
             }}
           />
@@ -268,7 +328,14 @@ export default function App() {
                 user={auth.result}
                 path="/tables"
               >
-                <Tables token={token?.token} withdrawnSetting={withdrawn} />
+                <Tables
+                  participants={participants}
+                  vaccination={vaccination}
+                  schedule={schedule}
+                  weeklySurvey={weeklySurvey}
+                  withdrawn={withdrawn}
+                  vaccinationCounts={vaccinationCounts}
+                />
               </AuthRoute>
               <AuthRoute
                 exact
@@ -276,7 +343,7 @@ export default function App() {
                 user={auth.result}
                 path="/plots"
               >
-                <Plots token={token?.token} withdrawnSetting={withdrawn} />
+                <Plots participants={participants} />
               </AuthRoute>
             </Switch>
           </div>
