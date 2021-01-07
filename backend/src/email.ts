@@ -40,3 +40,23 @@ export async function emailLoginLink(
     html: content.replace(/\n/g, "<br/>"),
   })
 }
+
+export async function emailApiToken(
+  t: Emailer,
+  {
+    email,
+    token,
+  }: {
+    email: string
+    token: string
+  }
+): Promise<void> {
+  const content = `API token:\n\n${token}`
+  await t.transporter.sendMail({
+    from: t.from,
+    to: email,
+    subject: "token",
+    text: content,
+    html: content.replace(/\n/g, "<br/>"),
+  })
+}

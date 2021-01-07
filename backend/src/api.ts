@@ -30,7 +30,7 @@ import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
-import { Emailer, emailLoginLink } from "./email"
+import { emailApiToken, Emailer, emailLoginLink } from "./email"
 
 export function getRoutes(
   db: DB,
