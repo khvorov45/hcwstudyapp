@@ -253,7 +253,7 @@ export async function insertTokens(db: DB, tokens: Token[]) {
   const tokensHashed = tokens.map((t) => ({
     user: t.user,
     hash: hash(t.token),
-    type: "session",
+    type: t.type,
     expires: t.expires,
   }))
   await insertIntoTable(db, tokensHashed, "Token")
