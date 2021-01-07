@@ -23,7 +23,7 @@ export default function Plots({
   )
 
   return (
-    <>
+    <div style={{ display: "flex", flexWrap: "wrap" }}>
       {" "}
       <GenericBar
         data={Array.from(genderCounts, ([k, v]) => ({
@@ -43,7 +43,7 @@ export default function Plots({
         xKey="priorVaccinations"
         yKey="count"
       />
-    </>
+    </div>
   )
 }
 
