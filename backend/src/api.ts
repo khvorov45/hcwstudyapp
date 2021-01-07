@@ -98,10 +98,13 @@ export function getRoutes(
     await deleteToken(db, extractToken(req))
     res.status(StatusCodes.NO_CONTENT).end()
   })
-  routes.delete("/auth/token/user", async (req: Request, res: Response) => {
-    await deleteUserTokens(db, extractToken(req))
-    res.status(StatusCodes.NO_CONTENT).end()
-  })
+  routes.delete(
+    "/auth/token/user/session",
+    async (req: Request, res: Response) => {
+      await deleteUserTokens(db, extractToken(req))
+      res.status(StatusCodes.NO_CONTENT).end()
+    }
+  )
 
   // Participants
   routes.get("/participants", async (req: Request, res: Response) => {

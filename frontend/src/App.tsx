@@ -201,7 +201,7 @@ export default function App() {
       setToken(null)
       await apiReq({
         method: "DELETE",
-        path: allDevices ? "auth/token/user" : "auth/token",
+        path: allDevices ? "auth/token/user/session" : "auth/token",
         token: token?.token,
         success: StatusCodes.NO_CONTENT,
         failure: [],
