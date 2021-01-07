@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core"
 import { NamedDivider } from "./divider"
 import { API_SPEC_FILEPATH } from "../lib/config"
-import { Link, useRouteMatch } from "react-router-dom"
+import { Link, useRouteMatch, Switch, Route } from "react-router-dom"
 import { SimpleNav } from "./nav"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -93,7 +93,14 @@ export default function ApiSpec() {
           (name === "Spec" && !subpage) || link === `/api-spec/${subpage}`
         }
       />
-      <FullSpec />
+      <Switch>
+        <Route exact path="/api-spec">
+          <FullSpec />
+        </Route>
+        <Route exact path="/api-spec/r-code">
+          R code
+        </Route>
+      </Switch>
     </div>
   )
 }
