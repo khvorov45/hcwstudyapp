@@ -76,7 +76,7 @@ function GenericBar<T extends Record<string, string | number>>({
   yKey: keyof T
 }) {
   const theme = useTheme()
-  if (data.length === 0) return <></>
+  if (data.length === 0 || !data.some((r) => r[yKey] > 0)) return <></>
   return (
     <BarChart
       width={450}
