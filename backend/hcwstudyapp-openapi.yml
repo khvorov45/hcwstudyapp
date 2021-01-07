@@ -5,9 +5,9 @@ info:
 servers:
   - url: https://reports.hcwflustudy.com/api
 paths:
-  /auth/token/send:
+  /auth/token/send/login:
     post:
-      summary: Email a new token
+      summary: Email a login link
       parameters:
         - in: query
           name: email

@@ -41,7 +41,7 @@ export default function GetLink() {
   const sendEmail = useAsyncCallback(async () => {
     return await apiReq({
       method: "POST",
-      path: `auth/token/send`,
+      path: `auth/token/send/login`,
       query: { email: email },
       success: StatusCodes.NO_CONTENT,
       failure: [StatusCodes.NOT_FOUND],
