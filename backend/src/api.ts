@@ -26,7 +26,7 @@ import {
   deleteToken,
   updateUser,
 } from "./db"
-import { ParticipantV, User, UserV } from "./data"
+import { ParticipantV, TokenTypeV, User, UserV } from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
@@ -76,15 +76,20 @@ export function getRoutes(
   })
 
   // Auth
-  routes.post("/auth/token/send/login", async (req: Request, res: Response) => {
+  routes.post("/auth/token/send", async (req: Request, res: Response) => {
     const email = decode(t.string, req.query.email)
-    const token = createToken(email, tokenDaysToLive, "session")
+    const type = decode(TokenTypeV, req.query.type)
+    const token = createToken(email, tokenDaysToLive, type)
     await insertTokens(db, [token])
-    await emailLoginLink(emailConfig.emailer, {
-      email,
-      token: token.token,
-      linkPrefix: emailConfig.linkPrefix,
-    })
+    if (type === "session") {
+      await emailLoginLink(emailConfig.emailer, {
+        email,
+        token: token.token,
+        linkPrefix: emailConfig.linkPrefix,
+      })
+    } else {
+      await emailApiToken(emailConfig.emailer, { email, token: token.token })
+    }
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.get("/auth/token/verify", async (req: Request, res: Response) => {

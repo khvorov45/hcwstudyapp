@@ -11,7 +11,7 @@ export type ApiPath =
   | "auth/token/verify"
   | "schedule"
   | "weekly-survey"
-  | "auth/token/send/login"
+  | "auth/token/send"
   | "auth/token"
   | "auth/token/user/session"
   | "participants/redcap/sync"

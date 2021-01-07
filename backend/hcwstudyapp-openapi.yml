@@ -5,7 +5,7 @@ info:
 servers:
   - url: https://reports.hcwflustudy.com/api
 paths:
-  /auth/token/send/login:
+  /auth/token/send:
     post:
       summary: Email a login link
       parameters:
@@ -13,6 +13,10 @@ paths:
           name: email
           schema:
             type: string
+        - in: query
+          name: type
+          schema:
+            enum: [session, api]
       responses:
         "204":
           description: Successfully sent
