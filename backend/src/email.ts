@@ -19,7 +19,7 @@ export function createTransport(con: string): Emailer {
   }
 }
 
-export async function emailToken(
+export async function emailLoginLink(
   t: Emailer,
   {
     email,

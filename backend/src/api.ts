@@ -30,7 +30,7 @@ import { ParticipantV, User, UserV } from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
-import { Emailer, emailToken } from "./email"
+import { Emailer, emailLoginLink } from "./email"
 
 export function getRoutes(
   db: DB,
@@ -80,7 +80,7 @@ export function getRoutes(
     const email = decode(t.string, req.query.email)
     const token = createToken(email, tokenDaysToLive)
     await insertTokens(db, [token])
-    await emailToken(emailConfig.emailer, {
+    await emailLoginLink(emailConfig.emailer, {
       email,
       token: token.token,
       linkPrefix: emailConfig.linkPrefix,
