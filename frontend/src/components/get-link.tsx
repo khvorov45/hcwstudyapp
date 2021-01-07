@@ -12,37 +12,44 @@ import * as t from "io-ts"
 import StatusCodes from "http-status-codes"
 import { useAsyncCallback } from "react-async-hook"
 import { IconButtonContainer } from "./loading"
+import { TokenType } from "../lib/data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    getLink: {
+    emailForm: {
       display: "flex",
       flexDirection: "column",
       padding: 20,
       fontSize: "large",
-      alignItems: "center",
       "&>*": {
         padding: 10,
         display: "flex",
-        justifyContent: "center",
       },
     },
     info: {
       maxWidth: 500,
-      textAlign: "center",
       fontSize: "medium",
     },
   })
 )
 
 export default function GetLink() {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap" }}>
+      <EmailForm tokenType="session" />
+      <EmailForm tokenType="api" />
+    </div>
+  )
+}
+
+function EmailForm({ tokenType }: { tokenType: TokenType }) {
   const [email, setEmail] = useState("")
 
   const sendEmail = useAsyncCallback(async () => {
     return await apiReq({
       method: "POST",
       path: `auth/token/send`,
-      query: { email: email, type: "session" },
+      query: { email: email, type: tokenType },
       success: StatusCodes.NO_CONTENT,
       failure: [StatusCodes.NOT_FOUND],
       validator: t.unknown,
@@ -57,8 +64,11 @@ export default function GetLink() {
 
   const classes = useStyles()
   return (
-    <div className={classes.getLink}>
-      <div>Enter email below to generate access link</div>
+    <div className={classes.emailForm}>
+      <div>
+        Enter email below to generate{" "}
+        {tokenType === "session" ? "access link" : "API token"}
+      </div>
       <form>
         <TextField
           label="Email"
@@ -87,9 +97,11 @@ export default function GetLink() {
         </IconButtonContainer>
       </form>
       <div className={classes.info}>
-        Access links are single-use. They log you in on one device. You can
-        generate multiple links for multiple devices and stay logged in on all
-        of them.
+        {tokenType === "session"
+          ? `Access links are single-use. They log you in on one device. You can
+          generate multiple links for multiple devices and stay logged in on all
+          of them.`
+          : "API Tokens don't expire."}
       </div>
     </div>
   )
