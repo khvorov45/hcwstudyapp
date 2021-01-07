@@ -219,20 +219,20 @@ export function SimpleNav({
   className,
 }: {
   links: { name: string; link: string }[]
-  active: (name: string) => boolean
+  active: (link: { name: string; link: string }) => boolean
   className?: string
 }) {
   const classes = useStyles()
   return (
     <div className={`${classes.simpleNav} ${className ?? ""}`}>
-      {links.map(({ name, link }) => (
+      {links.map((l) => (
         <Button
-          key={name}
+          key={l.name}
           component={Link}
-          to={`${link}`}
-          className={active(name) ? "active" : ""}
+          to={l.link}
+          className={active(l) ? "active" : ""}
         >
-          {name}
+          {l.name}
         </Button>
       ))}
     </div>

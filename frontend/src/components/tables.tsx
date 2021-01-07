@@ -260,7 +260,7 @@ export default function Tables({
       <SimpleNav
         className={classes.nav}
         links={tables}
-        active={(name) => name === currentTable}
+        active={({ name }) => name === currentTable}
       />
       <Route exact path={"/tables"}>
         <Redirect to={tables[0].path} />
