@@ -38,6 +38,12 @@ export const VaccinationStatusV = t.keyof({
 })
 export type VaccinationStatus = t.TypeOf<typeof VaccinationStatusV>
 
+export const TokenTypeV = t.keyof({
+  session: null,
+  api: null,
+})
+export type TokenType = t.TypeOf<typeof TokenTypeV>
+
 export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
@@ -47,15 +53,10 @@ export type User = t.TypeOf<typeof UserV>
 export const TokenV = t.type({
   user: t.string,
   token: t.string,
+  type: TokenTypeV,
   expires: DateFromISOString,
 })
 export type Token = t.TypeOf<typeof TokenV>
-
-export const TokenHashedV = t.type({
-  user: t.string,
-  expires: DateFromISOString,
-})
-export type TokenHashed = t.TypeOf<typeof TokenHashedV>
 
 export const ParticipantV = t.type({
   pid: t.string,
