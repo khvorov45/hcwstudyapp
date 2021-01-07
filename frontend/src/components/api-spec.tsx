@@ -1,6 +1,11 @@
 import { useAsync } from "react-async-hook"
 import swagger from "@apidevtools/swagger-parser"
-import { makeStyles, Theme, createStyles } from "@material-ui/core"
+import {
+  makeStyles,
+  Theme,
+  createStyles,
+  Link as MaterialLink,
+} from "@material-ui/core"
 import { NamedDivider } from "./divider"
 import { API_SPEC_FILEPATH } from "../lib/config"
 import { Link } from "react-router-dom"
@@ -65,6 +70,10 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: "large",
       textTransform: "uppercase",
       fontWeight: "bold",
+    },
+    link: {
+      color:
+        theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"],
     },
   })
 )
@@ -171,7 +180,14 @@ function Security({ security }: { security: any }) {
           {security.map((s: Object) =>
             Object.keys(s).map((k) => (
               <span>
-                Bearer <Link to="get-link">token ({k})</Link>
+                Bearer{" "}
+                <MaterialLink
+                  className={classes.link}
+                  component={Link}
+                  to="get-link"
+                >
+                  token ({k})
+                </MaterialLink>
               </span>
             ))
           )}
