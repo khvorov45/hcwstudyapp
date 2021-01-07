@@ -2,6 +2,7 @@ import { BarChart, XAxis, YAxis, Tooltip, Bar, Label } from "recharts"
 import { useTheme } from "@material-ui/core"
 import { Participant } from "../lib/data"
 import * as d3 from "d3-array"
+import moment from "moment"
 
 export default function Plots({
   participants,
@@ -22,9 +23,25 @@ export default function Plots({
     (p) => p.count
   )
 
+  const now = moment()
+  const ages = participants.map((p) => now.diff(p.dob, "year"))
+
+  const agesBinned = d3
+    .bin()
+    .thresholds([18, 30, 40, 50, 66])(ages)
+    .map((a) => ({
+      range:
+        a.x0! < 18
+          ? `<${a.x1}`
+          : a.x1! > 66
+          ? `>=${a.x0}`
+          : `${a.x0}-${a.x1! - 1}`,
+      count: a.length,
+    }))
+
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {" "}
+      <GenericBar data={agesBinned} xLab="Age" xKey="range" yKey="count" />
       <GenericBar
         data={Array.from(genderCounts, ([k, v]) => ({
           gender: k ?? "(missing)",
