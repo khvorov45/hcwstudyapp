@@ -25,6 +25,7 @@ import Tables from "./components/tables"
 import GetLink from "./components/get-link"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
+import Plots from "./components/plot"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -249,7 +250,7 @@ export default function App() {
                 user={auth.result}
                 path="/plots"
               >
-                Plots
+                <Plots />
               </AuthRoute>
             </Switch>
           </div>
