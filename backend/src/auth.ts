@@ -7,6 +7,7 @@ export function createToken(user: string, tokenDaysToLive: number): Token {
   return {
     user,
     token: generateToken(),
+    type: "session",
     expires: addDays(new Date(), tokenDaysToLive),
   }
 }

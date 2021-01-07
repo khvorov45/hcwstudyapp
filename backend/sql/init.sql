@@ -2,6 +2,7 @@ CREATE TYPE hfs_site AS ENUM (${sites:csv});
 CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
 CREATE TYPE hfs_gender AS ENUM (${genders:csv});
 CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unknown');
+CREATE TYPE hfs_token_type AS ENUM ('session', 'api');
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -31,10 +32,11 @@ INSERT INTO "User" ("email", "accessGroup") VALUES
 CREATE TABLE "Token" (
     "user" text REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE,
     "hash" char(128) UNIQUE,
-    "expires" timestamptz NOT NULL
+    "type" hfs_token_type NOT NULL,
+    "expires" timestamptz CHECK (("type" = 'session' AND "expires" IS NOT NULL) OR ("type" = 'api' AND "expires" IS NULL))
 );
-INSERT INTO "Token" ("user", "hash", "expires") VALUES
-    (${firstAdminEmail}, ${firstAdminTokenHash}, ${firstAdminTokenExpires});
+INSERT INTO "Token" ("user", "hash", "type", "expires") VALUES
+    (${firstAdminEmail}, ${firstAdminTokenHash}, 'session', ${firstAdminTokenExpires});
 
 -- Every participant is recruited at a site
 CREATE TABLE "Participant" (

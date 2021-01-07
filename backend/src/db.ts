@@ -10,7 +10,7 @@ import {
   Schedule,
   SiteV,
   Token,
-  TokenHashed,
+  TokenType,
   User,
   Vaccination,
   WeeklySurvey,
@@ -136,7 +136,7 @@ async function insertIntoTable<T>(
   }
   const cols: Record<typeof t, string[]> = {
     User: ["email", "accessGroup"],
-    Token: ["user", "hash", "expires"],
+    Token: ["user", "hash", "type", "expires"],
     Vaccination: ["pid", "year", "status"],
     RedcapId: ["pid", "redcapRecordId", "redcapProjectYear"],
     Withdrawn: ["pid", "date"],
@@ -245,7 +245,7 @@ export async function getLastUserUpdate(db: DB): Promise<Date | null> {
 
 async function getTokens(
   db: DB
-): Promise<{ user: string; hash: string; expires: Date }[]> {
+): Promise<{ user: string; hash: string; expires: Date; type: TokenType }[]> {
   return await db.any('SELECT * FROM "Token"')
 }
 
@@ -253,6 +253,7 @@ export async function insertTokens(db: DB, tokens: Token[]) {
   const tokensHashed = tokens.map((t) => ({
     user: t.user,
     hash: hash(t.token),
+    type: "session",
     expires: t.expires,
   }))
   await insertIntoTable(db, tokensHashed, "Token")
@@ -271,7 +272,7 @@ export async function refreshToken(
   const newToken = generateToken()
   const res = await db.result(
     `UPDATE "Token" SET "hash"=$(newHash), "expires"=$(newExpiration)
-    WHERE hash = $(oldHash) AND "expires" > now()`,
+    WHERE hash = $(oldHash) AND "expires" > now() AND "type" = 'session'`,
     {
       newHash: hash(newToken),
       oldHash: hash(oldToken),
@@ -286,8 +287,9 @@ export async function refreshToken(
 
 export async function deleteUserTokens(db: DB, token: string): Promise<void> {
   const res = await db.result(
-    `DELETE FROM "Token" WHERE "user" =
-    (SELECT "user" FROM "Token" WHERE "hash" = $1)`,
+    `DELETE FROM "Token"
+    WHERE "user" = (SELECT "user" FROM "Token" WHERE "hash" = $1)
+    AND "type" = 'session'`,
     [hash(token)]
   )
   if (res.rowCount === 0) {
