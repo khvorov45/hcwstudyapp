@@ -303,7 +303,7 @@ export default function App() {
               <Route exact path="/get-link">
                 <GetLink />
               </Route>
-              <Route exact path="/api-spec">
+              <Route path="/api-spec">
                 <ApiSpec />
               </Route>
               <AuthRoute

@@ -9,6 +9,7 @@ import {
 import { NamedDivider } from "./divider"
 import { API_SPEC_FILEPATH } from "../lib/config"
 import { Link } from "react-router-dom"
+import { SimpleNav } from "./nav"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -79,6 +80,21 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export default function ApiSpec() {
+  return (
+    <div>
+      <SimpleNav
+        links={[
+          { name: "Spec", link: "/api-spec" },
+          { name: "R code", link: "r-code" },
+        ]}
+        active={() => true}
+      />
+      <FullSpec />
+    </div>
+  )
+}
+
+function FullSpec() {
   const apiSpec = useAsync(async () => {
     return await swagger.dereference(API_SPEC_FILEPATH)
   }, [])

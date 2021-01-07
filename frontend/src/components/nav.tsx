@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
     simpleNav: {
       height: 50,
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       borderBottom: `1px solid ${theme.palette.divider}`,
       "&>*": {
         flexShrink: 0,
