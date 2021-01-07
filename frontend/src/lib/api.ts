@@ -5,7 +5,7 @@ import { API_ROOT } from "./config"
 import { User } from "./data"
 import { decode } from "./io"
 
-export type TableNames =
+export type TableName =
   | "participants"
   | "schedule"
   | "weekly-survey"
@@ -13,7 +13,7 @@ export type TableNames =
   | "withdrawn"
 
 export type ApiPath =
-  | TableNames
+  | TableName
   | "users"
   | "auth/token/verify"
   | "auth/token/send"
