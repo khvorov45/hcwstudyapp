@@ -144,8 +144,8 @@ export default function Nav({
         </AuthOnly>
         <IconButton
           component={Link}
-          to={`/get-link`}
-          className={matchRes?.params.location === "get-link" ? "active" : ""}
+          to={`/email`}
+          className={matchRes?.params.location === "email" ? "active" : ""}
         >
           <Send />
         </IconButton>

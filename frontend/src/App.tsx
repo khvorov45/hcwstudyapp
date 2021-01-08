@@ -30,7 +30,7 @@ import {
 import ReactMarkdown from "react-markdown"
 import homeMdPath from "./md/home.md"
 import Tables from "./components/tables"
-import GetLink from "./components/get-link"
+import Email from "./components/email"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 import Plots from "./components/plot"
@@ -300,8 +300,8 @@ export default function App() {
                   <Login setToken={setToken} />
                 )}
               </Route>
-              <Route exact path="/get-link">
-                <GetLink />
+              <Route exact path="/email">
+                <Email />
               </Route>
               <Route path="/api-spec">
                 <ApiSpec />
@@ -374,13 +374,13 @@ function AuthRoute({
   children: ReactNode
 }) {
   if (authStatus === "error") {
-    return <Redirect to="/get-link" />
+    return <Redirect to="/email" />
   }
   if (authStatus === "loading" || authStatus === "not-requested" || !user) {
     return <></>
   }
   if (admin && user.accessGroup !== "admin") {
-    return <Redirect to="/get-link" />
+    return <Redirect to="/email" />
   }
   return (
     <Route exact={exact} path={path}>

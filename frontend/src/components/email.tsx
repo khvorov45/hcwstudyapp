@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function GetLink() {
+export default function Email() {
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <EmailForm tokenType="session" />

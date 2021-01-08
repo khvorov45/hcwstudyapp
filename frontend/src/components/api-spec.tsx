@@ -140,11 +140,7 @@ function RCode() {
       <div style={{ marginLeft: 20 }}>
         <div className={classes.description}>
           The token can be obtained on the{" "}
-          <MaterialLink
-            className={classes.link}
-            component={Link}
-            to="/get-link"
-          >
+          <MaterialLink className={classes.link} component={Link} to="/email">
             email page
           </MaterialLink>
         </div>
@@ -282,7 +278,7 @@ function Security({ security }: { security: any }) {
                 <MaterialLink
                   className={classes.link}
                   component={Link}
-                  to="get-link"
+                  to="email"
                 >
                   token ({k})
                 </MaterialLink>
