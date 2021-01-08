@@ -5,13 +5,17 @@ import {
   Theme,
   createStyles,
   Link as MaterialLink,
+  useTheme,
 } from "@material-ui/core"
 import { NamedDivider } from "./divider"
 import { API_ROOT, API_SPEC_FILEPATH } from "../lib/config"
 import { Link, useRouteMatch, Switch, Route } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import SyntaxHighlighter from "react-syntax-highlighter"
-import { tomorrowNightBright } from "react-syntax-highlighter/dist/esm/styles/hljs"
+import {
+  tomorrowNightBright as darkCodeStyle,
+  tomorrow as lightCodeStyle,
+} from "react-syntax-highlighter/dist/esm/styles/hljs"
 import { TableName } from "../lib/api"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -123,6 +127,7 @@ function RCode() {
     "withdrawn",
   ]
   const classes = useStyles()
+  const theme = useTheme()
   return (
     <div>
       <div className={classes.title}>R code to pull data</div>
@@ -137,7 +142,10 @@ function RCode() {
             email page
           </MaterialLink>
         </div>
-        <SyntaxHighlighter language="r" style={tomorrowNightBright}>
+        <SyntaxHighlighter
+          language="r"
+          style={theme.palette.type === "dark" ? darkCodeStyle : lightCodeStyle}
+        >
           {`library(tidyverse)
 
 # \`table_name\` is one of:
