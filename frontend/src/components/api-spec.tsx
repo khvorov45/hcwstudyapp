@@ -271,7 +271,7 @@ function Security({ security }: { security: any }) {
         <code>
           {security.map((s: Object) =>
             Object.keys(s).map((k) => (
-              <span>
+              <span key={k}>
                 Bearer{" "}
                 <MaterialLink
                   className={classes.link}
