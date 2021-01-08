@@ -272,7 +272,6 @@ export default function App() {
     const fetched = await fetch(homeMdPath)
     return await fetched.text()
   }, [])
-  console.log(homePageMd.result)
 
   const classes = useStyles()
   return (
