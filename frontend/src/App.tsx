@@ -268,10 +268,11 @@ export default function App() {
 
   // Home page md -------------------------------------------------------------
 
-  const [homePageContent, setHomePageContent] = useState<string>()
-  fetch(homeMdPath)
-    .then((d) => d.text())
-    .then((t) => setHomePageContent(t))
+  const homePageMd = useAsync(async () => {
+    const fetched = await fetch(homeMdPath)
+    return await fetched.text()
+  }, [])
+  console.log(homePageMd.result)
 
   const classes = useStyles()
   return (
@@ -313,7 +314,7 @@ export default function App() {
                 path="/"
               >
                 <ReactMarkdown className={classes.home}>
-                  {homePageContent ?? ""}
+                  {homePageMd.result ?? ""}
                 </ReactMarkdown>
               </AuthRoute>
               <AuthRoute
