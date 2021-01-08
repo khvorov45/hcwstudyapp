@@ -19,7 +19,7 @@ import { Icon } from "@iconify/react"
 import apiIcon from "@iconify/icons-mdi/api"
 import tableOutlined from "@iconify/icons-ant-design/table-outlined"
 import bxBarChart from "@iconify/icons-bx/bx-bar-chart"
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
 import { AuthOnly } from "./auth"
@@ -48,6 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "flex-start",
       borderBottom: `1px solid ${theme.palette.divider}`,
+      scrollBehavior: "smooth",
       "&>*": {
         flexShrink: 0,
       },
@@ -226,16 +227,38 @@ export function SimpleNav({
   return (
     <div className={`${classes.simpleNav} ${className ?? ""}`}>
       {links.map((l) => (
-        <Button
+        <ButtonLink
           key={l.name}
-          component={Link}
-          to={l.link}
+          name={l.name}
+          link={l.link}
           className={active(l) ? "active" : ""}
-        >
-          {l.name}
-        </Button>
+        />
       ))}
     </div>
+  )
+}
+
+function ButtonLink({
+  name,
+  link,
+  className,
+}: {
+  name: string
+  link: string
+  className: string
+}) {
+  const ref = useRef<HTMLAnchorElement | null>(null)
+  return (
+    <Button
+      ref={ref}
+      key={name}
+      component={Link}
+      to={link}
+      className={className}
+      onClick={() => ref.current?.scrollIntoView()}
+    >
+      {name}
+    </Button>
   )
 }
 
