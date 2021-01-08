@@ -17,6 +17,7 @@ import {
   tomorrow as lightCodeStyle,
 } from "react-syntax-highlighter/dist/esm/styles/hljs"
 import { TableName } from "../lib/api"
+import { useWindowSize } from "../lib/hooks"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -95,6 +96,7 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function ApiSpec() {
   const routeMatch = useRouteMatch<{ subpage: string }>("/api-spec/:subpage")
   const subpage = routeMatch?.params.subpage
+  const windowSize = useWindowSize()
   return (
     <div>
       <SimpleNav
@@ -106,14 +108,18 @@ export default function ApiSpec() {
           (name === "Spec" && !subpage) || link === `/api-spec/${subpage}`
         }
       />
-      <Switch>
-        <Route exact path="/api-spec">
-          <FullSpec />
-        </Route>
-        <Route exact path="/api-spec/r-code">
-          <RCode />
-        </Route>
-      </Switch>
+      <div
+        style={{ height: windowSize.height - 50 - 50 - 15, overflow: "scroll" }}
+      >
+        <Switch>
+          <Route exact path="/api-spec">
+            <FullSpec />
+          </Route>
+          <Route exact path="/api-spec/r-code">
+            <RCode />
+          </Route>
+        </Switch>
+      </div>
     </div>
   )
 }
