@@ -7,16 +7,23 @@ import {
   Link as MaterialLink,
 } from "@material-ui/core"
 import { NamedDivider } from "./divider"
-import { API_SPEC_FILEPATH } from "../lib/config"
+import { API_ROOT, API_SPEC_FILEPATH } from "../lib/config"
 import { Link, useRouteMatch, Switch, Route } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import SyntaxHighlighter from "react-syntax-highlighter"
 import { tomorrowNightBright } from "react-syntax-highlighter/dist/esm/styles/hljs"
+import { TableName } from "../lib/api"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    api: {
-      padding: 20,
+    title: {
+      marginLeft: 20,
+      marginTop: 20,
+      fontSize: "x-large",
+      fontWeight: "bold",
+    },
+    description: {
+      fontSize: "medium",
     },
     pathCard: {
       padding: 10,
@@ -108,20 +115,49 @@ export default function ApiSpec() {
 }
 
 function RCode() {
+  const tableNames: TableName[] = [
+    "participants",
+    "schedule",
+    "vaccination",
+    "weekly-survey",
+    "withdrawn",
+  ]
   const classes = useStyles()
   return (
-    <div className={classes.api}>
-      <h1>R code to pull data</h1>
-      <SyntaxHighlighter language="r" style={tomorrowNightBright}>
-        {`library(tidyverse)
+    <div>
+      <div className={classes.title}>R code to pull data</div>
+      <div style={{ marginLeft: 20 }}>
+        <div className={classes.description}>
+          The token can be obtained on the{" "}
+          <MaterialLink
+            className={classes.link}
+            component={Link}
+            to="/get-link"
+          >
+            email page
+          </MaterialLink>
+        </div>
+        <SyntaxHighlighter language="r" style={tomorrowNightBright}>
+          {`library(tidyverse)
 
-# \`table_name\` is one of
-pull_table = function(table_name) {
-
+# \`table_name\` is one of:
+# ${tableNames.join(", ")}
+pull_table <- function(table_name) {
+  httr::GET(
+    paste0("${API_ROOT}/", table_name),
+    # Replace token with the actual token
+    httr::add_headers(Authorization = "Bearer token")
+  ) %>%
+    httr::content(as = "text") %>%
+    jsonlite::fromJSON() %>%
+    as_tibble()
 }
 
-pull_table("participants")`}
-      </SyntaxHighlighter>
+${tableNames
+  .map((t) => `${t.replace("-", "_")} <- pull_table("${t}")`)
+  .join("\n")}`}
+        </SyntaxHighlighter>
+      </div>
     </div>
   )
 }
@@ -140,8 +176,8 @@ function FullSpec() {
     return <></>
   }
   return (
-    <div className={classes.api}>
-      <h1>{apiSpec.result.info.title}</h1>
+    <div>
+      <div className={classes.title}>{apiSpec.result.info.title}</div>
       {Object.entries(apiSpec.result.paths).map(
         ([path, pathEntries]: [path: string, pathEntries: any]) => {
           const title = breaks.find((b) => b.path === path)?.title
