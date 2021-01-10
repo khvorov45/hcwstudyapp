@@ -1,0 +1,465 @@
+openapi: "3.0.2"
+info:
+  title: HCW flu study app API
+  version: "1.0"
+servers:
+  - url: https://reports.hcwflustudy.com/api
+paths:
+  /auth/token/send:
+    post:
+      summary: Email a login link
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            enum: [session, api]
+      responses:
+        "204":
+          description: Successfully sent
+  /auth/token/verify:
+    get:
+      summary: Verify a token
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Token validated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /auth/token:
+    put:
+      summary: Refresh a token
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Token refreshed (old is no longer valid)
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a token
+      security:
+        - User: []
+      responses:
+        "204":
+          description: Token deleted
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /auth/token/user/session:
+    delete:
+      summary: Delete all user's session tokens
+      security:
+        - User: []
+      responses:
+        "204":
+          description: Tokens deleted
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /users:
+    get:
+      summary: List all users
+      security:
+        - Admin: []
+      responses:
+        "200":
+          description: Array of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Users"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Add users
+      security:
+        - Admin: []
+      requestBody:
+        description: Users to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Users"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a user
+      security:
+        - Admin: []
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      summary: Update a user
+      security:
+        - Admin: []
+      requestBody:
+        description: New user, email will be used to locate the entry to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "204":
+          description: Successful update
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /users/redcap/sync:
+    put:
+      summary: Sync users with REDCap
+      security:
+        - Admin: []
+      responses:
+        "204":
+          description: Successful sync
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Last successful user sync
+      responses:
+        "200":
+          description: Datetime stamp
+          content:
+            application/json:
+              schema:
+                type: string
+                format: date-time
+
+  /participants:
+    get:
+      summary: List all participants
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Array of participants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participants"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Add participants
+      security:
+        - User: []
+      requestBody:
+        description: Participants to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Participants"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a participant
+      security:
+        - User: []
+      parameters:
+        - in: query
+          name: pid
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /participants/redcap/sync:
+    put:
+      summary: Sync participants with REDCap
+      security:
+        - User: []
+      responses:
+        "204":
+          description: Successful sync
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Last successful participant sync
+      responses:
+        "200":
+          description: Datetime stamp
+          content:
+            application/json:
+              schema:
+                type: string
+                format: date-time
+  /redcap-id:
+    get:
+      summary: Redcap IDs
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Redcap IDs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedcapIds"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /withdrawn:
+    get:
+      summary: Withdrawn participants
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Withdrawn participants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Withdrawns"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /vaccination:
+    get:
+      summary: Vaccination history
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Vaccination histories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vaccinations"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /schedule:
+    get:
+      summary: Schedules
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Schedules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedules"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /weekly-survey:
+    get:
+      summary: Weekly surveys
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Weekly surveys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklySurveys"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - accessGroup
+      properties:
+        email:
+          type: string
+        accessGroup:
+          enum:
+            [
+              admin,
+              unrestricted,
+              melbourne,
+              sydney,
+              adelaide,
+              brisbane,
+              newcastle,
+              perth,
+            ]
+    Users:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    Participant:
+      type: object
+      required:
+        - pid
+        - site
+        - dateScreening
+        - email
+        - mobile
+        - addBleed
+        - dob
+        - gender
+        - baselineQuestComplete
+      properties:
+        pid:
+          type: string
+        site:
+          enum: [melbourne, sydney, adelaide, brisbane, newcastle, perth]
+        dateScreening:
+          type: string
+          format: date-time
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        mobile:
+          type: string
+          nullable: true
+        addBleed:
+          type: boolean
+          nullable: true
+        dob:
+          type: string
+          format: date-time
+          nullable: true
+        gender:
+          enum: [female, male, other]
+          nullable: true
+        baselineQuestComplete:
+          type: boolean
+    Participants:
+      type: array
+      items:
+        $ref: "#/components/schemas/Participant"
+    RedcapId:
+      type: object
+      required:
+        - redcapRecordId
+        - redcapProjectYear
+        - pid
+      properties:
+        redcapRecordId:
+          type: string
+        redcapProjectYear:
+          type: number
+        pid:
+          type: string
+    RedcapIds:
+      type: array
+      items:
+        $ref: "#/components/schemas/RedcapId"
+    Withdrawn:
+      type: object
+      required:
+        - pid
+        - date
+      properties:
+        pid:
+          type: string
+        date:
+          type: string
+          format: date-time
+    Withdrawns:
+      type: array
+      items:
+        $ref: "#/components/schemas/Withdrawn"
+    Vaccination:
+      type: object
+      required:
+        - pid
+        - date
+      properties:
+        pid:
+          type: string
+        year:
+          type: number
+        status:
+          enum: [australia, overseas, "no", unknown]
+          nullable: true
+    Vaccinations:
+      type: array
+      items:
+        $ref: "#/components/schemas/Vaccination"
+    Schedule:
+      type: object
+      required:
+        - pid
+        - day
+        - redcapProjectYear
+        - date
+      properties:
+        pid:
+          type: string
+        day:
+          type: number
+        redcapProjectYear:
+          type: number
+        date:
+          type: string
+          format: date-time
+          nullable: true
+    Schedules:
+      type: array
+      items:
+        $ref: "#/components/schemas/Schedule"
+    WeeklySurvey:
+      type: object
+      required:
+        - pid
+        - index
+        - redcapProjectYear
+        - date
+        - ari
+        - swabCollection
+      properties:
+        pid:
+          type: string
+        index:
+          type: number
+        redcapProjectYear:
+          type: number
+        date:
+          type: string
+          format: date-time
+          nullable: true
+        ari:
+          type: boolean
+        swabCollection:
+          type: boolean
+          nullable: true
+    WeeklySurveys:
+      type: array
+      items:
+        $ref: "#/components/schemas/WeeklySurvey"
+  securitySchemes:
+    User:
+      type: http
+      scheme: bearer
+    Admin:
+      type: http
+      scheme: bearer
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
