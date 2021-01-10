@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 6100:5432
+  backend:
+    depends_on:
+      - postgres
+    build: ./backend
+    ports:
+      - 6101:7001
+  frontend:
+    depends_on:
+      - backend
+    build: ./frontend
+    environment:
+      # This variable HAS to change in production since JS runs in browser
+      REACT_APP_ODC_API_ROOT: /api
+    ports:
+      - 6102:5000
