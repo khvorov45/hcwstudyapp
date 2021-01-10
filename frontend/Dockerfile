@@ -1,6 +1,6 @@
 FROM node:latest
 
-WORKDIR /usr/src/hcwstudyapp
+WORKDIR /usr/src/hcwstudyapp-frontend
 COPY . .
 
 RUN npm install
