@@ -154,7 +154,9 @@ function RCode() {
 # ${tableNames.join(", ")}
 pull_table <- function(table_name) {
   httr::GET(
-    paste0("${API_ROOT}/", table_name),
+    paste0("${
+      API_ROOT.startsWith("/") ? window.location.host + "/" : ""
+    }${API_ROOT}/", table_name),
     # Replace token with the actual token
     httr::add_headers(Authorization = "Bearer token")
   ) %>%
