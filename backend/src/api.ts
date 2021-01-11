@@ -37,7 +37,7 @@ export function getRoutes(
   redcapConfig: RedcapConfig,
   emailConfig: {
     emailer: Emailer
-    linkPrefix: string
+    frontendRoot: string
   },
   tokenDaysToLive: number
 ) {
@@ -85,7 +85,7 @@ export function getRoutes(
       await emailLoginLink(emailConfig.emailer, {
         email,
         token: token.token,
-        linkPrefix: emailConfig.linkPrefix,
+        frontendRoot: emailConfig.frontendRoot,
       })
     } else {
       await emailApiToken(emailConfig.emailer, { email, token: token.token })
