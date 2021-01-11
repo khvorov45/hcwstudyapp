@@ -18,7 +18,7 @@ async function main() {
       "redcapToken2020",
       "redcapToken2021",
       "emailConnectionString",
-      "linkPrefix",
+      "frontendRoot",
     ])
     .boolean(["clean", "cors"])
     .number(["backendPort", "tokenDaysToLive"])
@@ -35,7 +35,7 @@ async function main() {
     .default("redcapToken2021", "")
     .default("emailConnectionString", "smtp://user:password@smtp.hostname.com")
     .default("prefix", "")
-    .default("linkPrefix", "http://localhost:3000/login?token=")
+    .default("frontendRoot", "http://localhost:3000")
     .default("clean", false)
     .default("cors", false)
     .default("tokenDaysToLive", 30)
@@ -59,7 +59,7 @@ async function main() {
       },
       {
         emailer: createTransport(args.emailConnectionString),
-        linkPrefix: args.linkPrefix,
+        frontendRoot: args.frontendRoot,
       },
       args.tokenDaysToLive
     )

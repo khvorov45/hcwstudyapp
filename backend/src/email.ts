@@ -24,14 +24,14 @@ export async function emailLoginLink(
   {
     email,
     token,
-    linkPrefix,
+    frontendRoot,
   }: {
     email: string
     token: string
-    linkPrefix: string
+    frontendRoot: string
   }
 ): Promise<void> {
-  const content = `Login link:\n\n${linkPrefix}${token}`
+  const content = `Login link:\n\n${frontendRoot}/login?token=${token}`
   await t.transporter.sendMail({
     from: t.from,
     to: email,
