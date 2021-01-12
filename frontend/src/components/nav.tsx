@@ -125,15 +125,15 @@ export default function Nav({
           </IconButton>
           <IconButton
             component={Link}
-            to={`/tables`}
-            className={matchRes?.params.location === "tables" ? "active" : ""}
+            to="/tables"
+            className={activeIf("tables")}
           >
             <Icon icon={tableOutlined} />
           </IconButton>
           <IconButton
             component={Link}
-            to={`/plots`}
-            className={matchRes?.params.location === "plots" ? "active" : ""}
+            to="/plots"
+            className={activeIf("plots")}
           >
             <Icon icon={bxBarChart} />
           </IconButton>
@@ -146,32 +146,25 @@ export default function Nav({
         <AuthOnly user={user} admin>
           <IconButton
             component={Link}
-            to={`/users`}
-            className={matchRes?.params.location === "users" ? "active" : ""}
+            to="/users"
+            className={activeIf("users")}
           >
             <People />
           </IconButton>
         </AuthOnly>
-        <IconButton
-          component={Link}
-          to={`/email`}
-          className={matchRes?.params.location === "email" ? "active" : ""}
-        >
+        <IconButton component={Link} to="/email" className={activeIf("email")}>
           <Send />
         </IconButton>
         <IconButton
           component={Link}
-          to={`/api-spec`}
-          className={matchRes?.params.location === "api-spec" ? "active" : ""}
+          to="/api-spec"
+          className={activeIf("api-spec")}
         >
           <Icon icon={apiIcon} />
         </IconButton>
         <Divider orientation="vertical" flexItem className={classes.divider} />
         <AuthOnly user={user}>
-          <IconButton
-            onClick={() => setSettingsOpen((old) => !old)}
-            className={matchRes?.params.location === "settings" ? "active" : ""}
-          >
+          <IconButton onClick={() => setSettingsOpen((old) => !old)}>
             <SettingsIcon />
           </IconButton>
         </AuthOnly>
