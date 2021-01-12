@@ -150,6 +150,8 @@ export default function App() {
         default: paletteType === "dark" ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)",
         alt: paletteType === "dark" ? "rgb(40, 40, 40)" : "rgb(220, 220, 220)",
       },
+      divider:
+        paletteType === "dark" ? "rgb(70, 70, 70)" : "rgb(200, 200, 200)",
     },
   })
 
