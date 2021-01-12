@@ -161,7 +161,7 @@ export default function Nav({
         >
           <Icon icon={apiIcon} />
         </IconButton>
-        <Divider orientation="vertical" flexItem className={classes.divider} />
+        <NavDivider />
         <AuthOnly user={user}>
           <IconButton onClick={() => setSettingsOpen((old) => !old)}>
             <SettingsIcon />
@@ -194,6 +194,7 @@ export default function Nav({
             />
           </Popover>
         </AuthOnly>
+        <NavDivider />
         <IconButton onClick={(_) => togglePalette()}>
           <Icon icon={themeLightDark} />
         </IconButton>
@@ -277,4 +278,9 @@ function Logout({
       </Button>
     </div>
   )
+}
+
+function NavDivider() {
+  const classes = useStyles()
+  return <Divider orientation="vertical" flexItem className={classes.divider} />
 }
