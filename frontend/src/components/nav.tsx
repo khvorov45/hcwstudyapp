@@ -22,7 +22,7 @@ import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
 import { AuthOnly } from "./auth"
 import Settings from "./settings"
-import questionCircle from "@iconify/icons-bi/question-circle"
+import reportIcon from "@iconify/icons-carbon/report"
 import themeLightDark from "@iconify/icons-mdi/theme-light-dark"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -120,7 +120,7 @@ export default function Nav({
             to="/about"
             className={activeIf("about")}
           >
-            <Icon icon={questionCircle} />
+            <Icon icon={reportIcon} />
           </IconButton>
           <IconButton
             component={Link}
