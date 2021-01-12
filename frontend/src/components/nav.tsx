@@ -7,6 +7,7 @@ import {
   makeStyles,
   Popover,
   Theme,
+  Tooltip,
 } from "@material-ui/core"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
@@ -115,36 +116,50 @@ export default function Nav({
       {/* LEFT */}
       <div>
         <AuthOnly user={user}>
-          <a href="https://hcwflustudy.com">
-            <IconButton>
-              <Home />
+          <Tooltip title="Main study site">
+            <a href="https://hcwflustudy.com">
+              <IconButton>
+                <Home />
+              </IconButton>
+            </a>
+          </Tooltip>
+          <Tooltip title="Main page (redirects to about)">
+            <IconButton component={Link} to="/" className="activeAlways">
+              <Icon icon={reportIcon} />
             </IconButton>
-          </a>
-          <IconButton component={Link} to="/" className="activeAlways">
-            <Icon icon={reportIcon} />
-          </IconButton>
+          </Tooltip>
+
           <NavDivider />
-          <IconButton
-            component={Link}
-            to="/about"
-            className={activeIf("about")}
-          >
-            <Icon icon={questionCircle} />
-          </IconButton>
-          <IconButton
-            component={Link}
-            to="/tables"
-            className={activeIf("tables")}
-          >
-            <Icon icon={tableOutlined} />
-          </IconButton>
-          <IconButton
-            component={Link}
-            to="/plots"
-            className={activeIf("plots")}
-          >
-            <Icon icon={bxBarChart} />
-          </IconButton>
+
+          <Tooltip title="About">
+            <IconButton
+              component={Link}
+              to="/about"
+              className={activeIf("about")}
+            >
+              <Icon icon={questionCircle} />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Tables">
+            <IconButton
+              component={Link}
+              to="/tables"
+              className={activeIf("tables")}
+            >
+              <Icon icon={tableOutlined} />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Plots">
+            <IconButton
+              component={Link}
+              to="/plots"
+              className={activeIf("plots")}
+            >
+              <Icon icon={bxBarChart} />
+            </IconButton>
+          </Tooltip>
         </AuthOnly>
       </div>
       {/* CENTER */}
@@ -152,37 +167,55 @@ export default function Nav({
       {/* RIGHT */}
       <div>
         <AuthOnly user={user} admin>
+          <Tooltip title="Users">
+            <IconButton
+              component={Link}
+              to="/users"
+              className={activeIf("users")}
+            >
+              <People />
+            </IconButton>
+          </Tooltip>
+        </AuthOnly>
+
+        <Tooltip title="Get access">
           <IconButton
             component={Link}
-            to="/users"
-            className={activeIf("users")}
+            to="/email"
+            className={activeIf("email")}
           >
-            <People />
+            <Send />
           </IconButton>
-        </AuthOnly>
-        <IconButton component={Link} to="/email" className={activeIf("email")}>
-          <Send />
-        </IconButton>
-        <IconButton
-          component={Link}
-          to="/api-spec"
-          className={activeIf("api-spec")}
-        >
-          <Icon icon={apiIcon} />
-        </IconButton>
-        <NavDivider />
-        <AuthOnly user={user}>
-          <IconButton onClick={() => setSettingsOpen((old) => !old)}>
-            <SettingsIcon />
-          </IconButton>
-        </AuthOnly>
-        <AuthOnly user={user}>
+        </Tooltip>
+
+        <Tooltip title="API and R code">
           <IconButton
-            aria-describedby="logout"
-            onClick={(e) => setLogoutAnchor(e.currentTarget)}
+            component={Link}
+            to="/api-spec"
+            className={activeIf("api-spec")}
           >
-            <PowerSettingsNewIcon />
+            <Icon icon={apiIcon} />
           </IconButton>
+        </Tooltip>
+
+        <NavDivider />
+
+        <AuthOnly user={user}>
+          <Tooltip title="Settings">
+            <IconButton onClick={() => setSettingsOpen((old) => !old)}>
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Logout">
+            <IconButton
+              aria-describedby="logout"
+              onClick={(e) => setLogoutAnchor(e.currentTarget)}
+            >
+              <PowerSettingsNewIcon />
+            </IconButton>
+          </Tooltip>
+
           <Popover
             id="logout"
             open={logoutAnchor !== null}
@@ -203,10 +236,13 @@ export default function Nav({
             />
           </Popover>
         </AuthOnly>
+
         <NavDivider />
-        <IconButton onClick={(_) => togglePalette()}>
-          <Icon icon={themeLightDark} />
-        </IconButton>
+        <Tooltip title="Switch theme">
+          <IconButton onClick={(_) => togglePalette()}>
+            <Icon icon={themeLightDark} />
+          </IconButton>
+        </Tooltip>
       </div>
       <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <Settings
