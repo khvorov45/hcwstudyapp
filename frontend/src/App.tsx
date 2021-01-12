@@ -7,6 +7,7 @@ import {
   ThemeProvider,
   withStyles,
   Link as MaterialLink,
+  Divider,
 } from "@material-ui/core"
 import React, { ReactNode, useEffect, useMemo, useState } from "react"
 import StatusCodes from "http-status-codes"
@@ -319,7 +320,7 @@ export default function App() {
               >
                 <ReactMarkdown
                   className={classes.home}
-                  renderers={{ link: Link }}
+                  renderers={{ link: Link, thematicBreak: Divider }}
                 >
                   {aboutPageMd.result ?? ""}
                 </ReactMarkdown>
