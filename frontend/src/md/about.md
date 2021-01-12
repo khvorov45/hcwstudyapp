@@ -4,8 +4,8 @@
 
 Top-left:
 
-- Home (main study site)
-- About (this page)
+- Home (main study site homepage)
+- Reports general info/overview (this page)
 - Tables
 - Plots
 
