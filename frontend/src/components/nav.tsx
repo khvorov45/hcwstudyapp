@@ -24,6 +24,7 @@ import { Link, useRouteMatch } from "react-router-dom"
 import { User } from "../lib/data"
 import { AuthOnly } from "./auth"
 import Settings from "./settings"
+import questionCircle from "@iconify/icons-bi/question-circle"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -102,6 +103,9 @@ export default function Nav({
   )
   const classes = useStyles()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
+  function activeIf(page: string) {
+    return matchRes?.params.location === page ? "active" : ""
+  }
   return (
     <div className={classes.nav}>
       {/* LEFT */}
@@ -112,6 +116,13 @@ export default function Nav({
               <Home />
             </IconButton>
           </a>
+          <IconButton
+            component={Link}
+            to="/about"
+            className={activeIf("about")}
+          >
+            <Icon icon={questionCircle} />
+          </IconButton>
           <IconButton
             component={Link}
             to={`/tables`}
