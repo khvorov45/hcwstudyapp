@@ -107,13 +107,11 @@ export default function Nav({
       {/* LEFT */}
       <div>
         <AuthOnly user={user}>
-          <IconButton
-            component={Link}
-            to={`/`}
-            className={matchRes === null ? "active" : ""}
-          >
-            <Home />
-          </IconButton>
+          <a href="https://hcwflustudy.com">
+            <IconButton component={Link} to={`/`}>
+              <Home />
+            </IconButton>
+          </a>
           <IconButton
             component={Link}
             to={`/tables`}
