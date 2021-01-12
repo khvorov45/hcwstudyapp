@@ -41,4 +41,6 @@ Completion of weekly surveys.
 
 ---
 
+Email: hcwcohortstudy@influenzacentre.org
+
 [Site source](https://github.com/khvorov45/hcwstudyapp)
