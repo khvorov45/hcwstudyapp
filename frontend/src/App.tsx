@@ -5,6 +5,8 @@ import {
   makeStyles,
   Theme,
   ThemeProvider,
+  withStyles,
+  Link as MaterialLink,
 } from "@material-ui/core"
 import React, { ReactNode, useEffect, useMemo, useState } from "react"
 import StatusCodes from "http-status-codes"
@@ -315,7 +317,10 @@ export default function App() {
                 user={auth.result}
                 path="/about"
               >
-                <ReactMarkdown className={classes.home}>
+                <ReactMarkdown
+                  className={classes.home}
+                  renderers={{ link: Link }}
+                >
                   {aboutPageMd.result ?? ""}
                 </ReactMarkdown>
               </AuthRoute>
@@ -407,3 +412,12 @@ function Login({ setToken }: { setToken: (t: AppToken) => void }) {
   // completes
   return <Redirect to="/" />
 }
+
+const Link = withStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      color:
+        theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"],
+    },
+  })
+)(MaterialLink)
