@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     divider: {
       marginLeft: 5,
+      marginRight: 5,
       color: theme.palette.divider,
       width: 2,
     },
@@ -122,6 +123,7 @@ export default function Nav({
           <IconButton component={Link} to="/" className="activeAlways">
             <Icon icon={reportIcon} />
           </IconButton>
+          <NavDivider />
           <IconButton
             component={Link}
             to="/about"
