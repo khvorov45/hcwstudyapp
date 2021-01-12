@@ -28,7 +28,7 @@ import {
   WithdrawnV,
 } from "./lib/data"
 import ReactMarkdown from "react-markdown"
-import homeMdPath from "./md/home.md"
+import aboutMdPath from "./md/about.md"
 import Tables from "./components/tables"
 import Email from "./components/email"
 import ApiSpec from "./components/api-spec"
@@ -266,10 +266,10 @@ export default function App() {
     )
   }, [vaccination])
 
-  // Home page md -------------------------------------------------------------
+  // About page md ------------------------------------------------------------
 
-  const homePageMd = useAsync(async () => {
-    const fetched = await fetch(homeMdPath)
+  const aboutPageMd = useAsync(async () => {
+    const fetched = await fetch(aboutMdPath)
     return await fetched.text()
   }, [])
 
@@ -306,14 +306,17 @@ export default function App() {
               <Route path="/api-spec">
                 <ApiSpec />
               </Route>
+              <Route exact path="/">
+                <Redirect to="/about" />
+              </Route>
               <AuthRoute
                 exact
                 authStatus={auth.status}
                 user={auth.result}
-                path="/"
+                path="/about"
               >
                 <ReactMarkdown className={classes.home}>
-                  {homePageMd.result ?? ""}
+                  {aboutPageMd.result ?? ""}
                 </ReactMarkdown>
               </AuthRoute>
               <AuthRoute
