@@ -24,6 +24,7 @@ import { AuthOnly } from "./auth"
 import Settings from "./settings"
 import reportIcon from "@iconify/icons-carbon/report"
 import themeLightDark from "@iconify/icons-mdi/theme-light-dark"
+import questionCircle from "@iconify/icons-bi/question-circle"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -41,6 +42,9 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       "& .active": {
         backgroundColor: theme.palette.primary[theme.palette.type],
+      },
+      "& .activeAlways": {
+        backgroundColor: theme.palette.secondary[theme.palette.type],
       },
     },
     simpleNav: {
@@ -115,12 +119,15 @@ export default function Nav({
               <Home />
             </IconButton>
           </a>
+          <IconButton component={Link} to="/" className="activeAlways">
+            <Icon icon={reportIcon} />
+          </IconButton>
           <IconButton
             component={Link}
             to="/about"
             className={activeIf("about")}
           >
-            <Icon icon={reportIcon} />
+            <Icon icon={questionCircle} />
           </IconButton>
           <IconButton
             component={Link}
