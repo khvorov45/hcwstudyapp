@@ -10,7 +10,6 @@ import {
 } from "@material-ui/core"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
-import GitHubIcon from "@material-ui/icons/GitHub"
 import Send from "@material-ui/icons/Send"
 import SettingsIcon from "@material-ui/icons/Settings"
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
@@ -195,11 +194,6 @@ export default function Nav({
             />
           </Popover>
         </AuthOnly>
-        <a href="https://github.com/khvorov45/hcwstudyapp">
-          <IconButton>
-            <GitHubIcon />
-          </IconButton>
-        </a>
         <IconButton onClick={(_) => togglePalette()}>
           <Icon icon={themeLightDark} />
         </IconButton>

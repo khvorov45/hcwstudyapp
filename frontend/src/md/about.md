@@ -38,3 +38,7 @@ Information from the weekly surveys.
 ### Weekly completion
 
 Completion of weekly surveys.
+
+---
+
+[Site source](https://github.com/khvorov45/hcwstudyapp)
