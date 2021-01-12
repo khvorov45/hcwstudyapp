@@ -108,7 +108,7 @@ export default function Nav({
       <div>
         <AuthOnly user={user}>
           <a href="https://hcwflustudy.com">
-            <IconButton component={Link} to={`/`}>
+            <IconButton>
               <Home />
             </IconButton>
           </a>
