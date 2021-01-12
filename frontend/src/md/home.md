@@ -1,5 +1,22 @@
 # Data for the NIH HCW flu study
 
+## Navigation
+
+Top-left:
+
+- Home (main study site)
+- About (this page)
+- Tables
+- Plots
+
+Top-right:
+
+- Email login/token
+- API (including R code to access data)
+- Settings (sync/withdrawn filter)
+- Logout
+- Theme switch (light/dark)
+
 ## Tables
 
 ### Contact
