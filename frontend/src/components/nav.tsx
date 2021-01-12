@@ -8,7 +8,6 @@ import {
   Popover,
   Theme,
 } from "@material-ui/core"
-import BrightnessMediumIcon from "@material-ui/icons/BrightnessMedium"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
 import GitHubIcon from "@material-ui/icons/GitHub"
@@ -25,6 +24,7 @@ import { User } from "../lib/data"
 import { AuthOnly } from "./auth"
 import Settings from "./settings"
 import questionCircle from "@iconify/icons-bi/question-circle"
+import themeLightDark from "@iconify/icons-mdi/theme-light-dark"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -201,7 +201,7 @@ export default function Nav({
           </IconButton>
         </a>
         <IconButton onClick={(_) => togglePalette()}>
-          <BrightnessMediumIcon />
+          <Icon icon={themeLightDark} />
         </IconButton>
       </div>
       <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
