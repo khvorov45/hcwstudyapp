@@ -283,6 +283,40 @@ paths:
                 $ref: "#/components/schemas/WeeklySurveys"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /virus:
+    post:
+      summary: Add viruses
+      security:
+        - Admin: []
+      requestBody:
+        description: Viruses to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Viruses"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /serology:
+    post:
+      summary: Add serology
+      security:
+        - Admin: []
+      requestBody:
+        description: Serology results to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Serologies"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -453,6 +487,46 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/WeeklySurvey"
+    Virus:
+      type: object
+      required:
+        - name
+        - shortName
+        - clade
+      properties:
+        name:
+          type: string
+        shortName:
+          type: string
+        clade:
+          type: string
+    Viruses:
+      type: array
+      items:
+        $ref: "#/components/schemas/Virus"
+    Serology:
+      type: object
+      required:
+        - pid
+        - redcapProjectYear
+        - day
+        - virus
+        - titre
+      properties:
+        pid:
+          type: string
+        redcapProjectYear:
+          type: number
+        day:
+          type: number
+        virus:
+          type: string
+        titre:
+          type: number
+    Serologies:
+      type: array
+      items:
+        $ref: "#/components/schemas/Serology"
   securitySchemes:
     User:
       type: http

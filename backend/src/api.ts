@@ -25,8 +25,17 @@ import {
   deleteUserTokens,
   deleteToken,
   updateUser,
+  insertSerology,
+  insertViruses,
 } from "./db"
-import { ParticipantV, TokenTypeV, User, UserV } from "./data"
+import {
+  ParticipantV,
+  SerologyV,
+  TokenTypeV,
+  User,
+  UserV,
+  VirusV,
+} from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
@@ -173,6 +182,20 @@ export function getRoutes(
   routes.get("/weekly-survey", async (req: Request, res: Response) => {
     const u = await validateUser(req, db)
     res.json(await getWeeklySurveySubset(db, u.accessGroup))
+  })
+
+  // Viruses
+  routes.post("/virus", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await insertViruses(db, decode(t.array(VirusV), req.body))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+
+  // Serology
+  routes.post("/serology", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await insertSerology(db, decode(t.array(SerologyV), req.body))
+    res.status(StatusCodes.NO_CONTENT).end()
   })
 
   // Errors
