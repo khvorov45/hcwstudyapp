@@ -43,7 +43,7 @@ async function main() {
 
   // Create the server
   const app = express()
-  app.use(express.json())
+  app.use(express.json({ limit: "100mb" }))
   app.use(morgan("tiny"))
   if (args.cors) {
     app.use(cors())
