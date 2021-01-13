@@ -509,6 +509,22 @@ function WithdrawnTable({
   return <Table columns={columns} data={withdrawn} />
 }
 
+function useCounted<T extends Object, K extends keyof T>(
+  data: Pick<T, K>[],
+  key: K
+) {
+  const counted = useMemo(
+    () =>
+      d3.rollup(
+        data,
+        (v) => v.length,
+        (d) => d[key]
+      ),
+    [data, key]
+  )
+  return counted
+}
+
 function Summary({
   participants,
   vaccinationCounts,
@@ -516,24 +532,19 @@ function Summary({
   participants: Participant[]
   vaccinationCounts: { pid: string; count: number }[]
 }) {
-  const countsBySite = useMemo(
+  const countsBySite = useCounted(participants, "site")
+  const countsByVac = useCounted(vaccinationCounts, "count")
+  const countsByGender = useCounted(participants, "gender")
+
+  const countsByGenderSite = useMemo(
     () =>
       d3.rollup(
         participants,
         (v) => v.length,
+        (d) => d.gender,
         (d) => d.site
       ),
     [participants]
-  )
-
-  const countsByVac = useMemo(
-    () =>
-      d3.rollup(
-        vaccinationCounts,
-        (v) => v.length,
-        (d) => d.count
-      ),
-    [vaccinationCounts]
   )
 
   const partJoinVac = useMemo(
@@ -565,26 +576,46 @@ function Summary({
     })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
   }
 
+  type Row = { prevVac?: string | number; total?: number }
+
   const bottomRow = {
     prevVac: "Total",
     total: participants.length,
     ...toWide(countsBySite),
   }
 
-  const counts = Array.from(countsByVacSite, ([k, v]) => ({
+  const emptyRow: (title?: string | number) => Row[] = (
+    title?: string | number
+  ) => [{ prevVac: title, total: undefined }]
+
+  const countsByVacSiteWithMarginal = Array.from(countsByVacSite, ([k, v]) => ({
     prevVac: k ? k.toString() : k,
     ...toWide(v),
     total: countsByVac.get(k),
-  }))
-    .sort((a, b) =>
-      a.prevVac > b.prevVac ? 1 : a.prevVac < b.prevVac ? -1 : 0
-    )
+  })).sort((a, b) =>
+    a.prevVac > b.prevVac ? 1 : a.prevVac < b.prevVac ? -1 : 0
+  )
+
+  const countsByGenderSiteWithMarginal = Array.from(
+    countsByGenderSite,
+    ([k, v]) => ({
+      prevVac: k ? k.toString() : "(missing)",
+      ...toWide(v),
+      total: countsByGender.get(k),
+    })
+  )
+
+  const counts = emptyRow("Vaccinations")
+    .concat(countsByVacSiteWithMarginal)
+    .concat(emptyRow("Gender"))
+    .concat(countsByGenderSiteWithMarginal)
     .concat(bottomRow)
 
   const columns = useMemo(() => {
     return [
       {
-        Header: "Vaccinations",
+        Header: "",
+        id: "var",
         accessor: (p: any) => p.prevVac,
       },
       {
