@@ -72,7 +72,7 @@ CREATE TABLE "Vaccination" (
 
 CREATE TABLE "Schedule" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
-    "day" integer,
+    "day" integer NOT NULL,
     "redcapProjectYear" integer NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
     PRIMARY KEY ("pid", "day", "redcapProjectYear")
@@ -97,7 +97,7 @@ CREATE TABLE "Virus" (
 CREATE TABLE "Serology" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "redcapProjectYear" integer NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
-    "day" integer,
+    "day" integer NOT NULL,
     "virus" text REFERENCES "Virus"("name") ON DELETE CASCADE ON UPDATE CASCADE,
     "titre" integer
 );
