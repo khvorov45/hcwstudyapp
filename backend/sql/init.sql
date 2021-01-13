@@ -99,5 +99,6 @@ CREATE TABLE "Serology" (
     "redcapProjectYear" integer NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "day" integer NOT NULL,
     "virus" text REFERENCES "Virus"("name") ON DELETE CASCADE ON UPDATE CASCADE,
-    "titre" integer NOT NULL
+    "titre" integer NOT NULL,
+    PRIMARY KEY ("pid", "redcapProjectYear", "day", "virus")
 );
