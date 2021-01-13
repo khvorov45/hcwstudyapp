@@ -87,3 +87,17 @@ CREATE TABLE "WeeklySurvey" (
     "swabCollection" boolean,
     PRIMARY KEY ("pid", "index", "redcapProjectYear")
 );
+
+CREATE TABLE "Virus" (
+    "name" text PRIMARY KEY,
+    "shortName" text NOT NULL UNIQUE,
+    "clade" text NOT NULL
+);
+
+CREATE TABLE "Serology" (
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
+    "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+    "day" integer,
+    "virus" text REFERENCES "Virus"("name") ON DELETE CASCADE ON UPDATE CASCADE,
+    "titre" integer
+);
