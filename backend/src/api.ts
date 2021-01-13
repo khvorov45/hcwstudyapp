@@ -29,6 +29,8 @@ import {
   insertViruses,
   getViruses,
   getSerologySubset,
+  deleteAllViruses,
+  deleteAllSerology,
 } from "./db"
 import {
   ParticipantV,
@@ -196,6 +198,11 @@ export function getRoutes(
     await insertViruses(db, decode(t.array(VirusV), req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
+  routes.delete("/virus/all", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await deleteAllViruses(db)
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
 
   // Serology
   routes.get("/serology", async (req: Request, res: Response) => {
@@ -205,6 +212,11 @@ export function getRoutes(
   routes.post("/serology", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await insertSerology(db, decode(t.array(SerologyV), req.body))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.delete("/serology/all", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await deleteAllSerology(db)
     res.status(StatusCodes.NO_CONTENT).end()
   })
 

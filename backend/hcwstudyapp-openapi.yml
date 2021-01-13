@@ -313,6 +313,16 @@ paths:
           description: Successful addition
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /virus/all:
+    delete:
+      summary: Delete all viruses
+      security:
+        - Admin: []
+      responses:
+        "204":
+          description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
   /serology:
     get:
       summary: Serology
@@ -341,6 +351,16 @@ paths:
       responses:
         "204":
           description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /serology/all:
+    delete:
+      summary: Delete all serology records
+      security:
+        - Admin: []
+      responses:
+        "204":
+          description: Successful deletion
         "401":
           $ref: "#/components/responses/UnauthorizedError"
 

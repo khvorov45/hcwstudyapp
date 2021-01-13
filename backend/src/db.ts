@@ -496,6 +496,10 @@ export async function insertViruses(db: DB, vs: Virus[]): Promise<void> {
   await insertIntoTable(db, vs, "Virus")
 }
 
+export async function deleteAllViruses(db: DB): Promise<void> {
+  await db.any('DELETE FROM "Virus"')
+}
+
 // Serology ===================================================================
 
 export async function getSerologySubset(
@@ -507,4 +511,8 @@ export async function getSerologySubset(
 
 export async function insertSerology(db: DB, ss: Serology[]): Promise<void> {
   await insertIntoTable(db, ss, "Serology")
+}
+
+export async function deleteAllSerology(db: DB): Promise<void> {
+  await db.any('DELETE FROM "Serology"')
 }
