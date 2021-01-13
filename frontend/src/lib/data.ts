@@ -123,3 +123,4 @@ export const SerologyV = t.type({
   virus: t.string,
   titre: t.number,
 })
+export type Serology = t.TypeOf<typeof SerologyV>
