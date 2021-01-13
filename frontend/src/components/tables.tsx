@@ -116,7 +116,7 @@ const useStyles = makeStyles((theme: Theme) =>
         background: theme.palette.background.alt,
       },
       "& .data-row.label-row": {
-        "& td": {
+        "& td:first-child": {
           textAlign: "left",
         },
       },
@@ -645,7 +645,7 @@ function Summary({
       overheadColumnId="Site_1"
       isLabelRow={(r) =>
         r.prevVac && typeof r.prevVac === "string"
-          ? ["Vaccinations", "Gender"].includes(r.prevVac)
+          ? ["Vaccinations", "Gender", "Total"].includes(r.prevVac)
           : false
       }
     />
