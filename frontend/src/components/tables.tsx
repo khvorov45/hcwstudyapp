@@ -602,7 +602,21 @@ function Summary({
     ]
   }, [countsBySite])
 
-  const table = useTable({ columns: columns, data: counts })
+  return (
+    <SummaryTable columns={columns} data={counts} overheadColumnId="Site_1" />
+  )
+}
+
+function SummaryTable<T extends object>({
+  columns,
+  data,
+  overheadColumnId,
+}: {
+  columns: Column<T>[]
+  data: T[]
+  overheadColumnId: string
+}) {
+  const table = useTable({ columns, data })
   const classes = useStyles()
   return (
     <TableContainer className={classes.summaryTable}>
@@ -613,7 +627,7 @@ function Summary({
               {headerGroup.headers.map((h) => (
                 <TableCell
                   {...h.getHeaderProps()}
-                  className={h.id === "Site_1" ? "site-overhead" : ""}
+                  className={h.id === overheadColumnId ? "site-overhead" : ""}
                 >
                   {h.render("Header")}
                 </TableCell>
