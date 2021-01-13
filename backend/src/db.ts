@@ -111,7 +111,13 @@ async function resetSchema(db: DB): Promise<void> {
 async function getTableSubset(
   db: DB,
   a: AccessGroup,
-  t: "Vaccination" | "RedcapId" | "Withdrawn" | "Schedule" | "WeeklySurvey"
+  t:
+    | "Vaccination"
+    | "RedcapId"
+    | "Withdrawn"
+    | "Schedule"
+    | "WeeklySurvey"
+    | "Serology"
 ) {
   return isSite(a)
     ? await db.any(
@@ -482,11 +488,22 @@ async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
 
 // Viruses ====================================================================
 
+export async function getViruses(db: DB): Promise<Virus[]> {
+  return await db.any('SELECT * FROM "Virus"')
+}
+
 export async function insertViruses(db: DB, vs: Virus[]): Promise<void> {
   await insertIntoTable(db, vs, "Virus")
 }
 
 // Serology ===================================================================
+
+export async function getSerologySubset(
+  db: DB,
+  a: AccessGroup
+): Promise<Serology[]> {
+  return await getTableSubset(db, a, "Serology")
+}
 
 export async function insertSerology(db: DB, ss: Serology[]): Promise<void> {
   await insertIntoTable(db, ss, "Serology")

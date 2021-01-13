@@ -27,6 +27,8 @@ import {
   updateUser,
   insertSerology,
   insertViruses,
+  getViruses,
+  getSerologySubset,
 } from "./db"
 import {
   ParticipantV,
@@ -185,6 +187,10 @@ export function getRoutes(
   })
 
   // Viruses
+  routes.get("/virus", async (req: Request, res: Response) => {
+    await validateUser(req, db)
+    res.json(await getViruses(db))
+  })
   routes.post("/virus", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await insertViruses(db, decode(t.array(VirusV), req.body))
@@ -192,6 +198,10 @@ export function getRoutes(
   })
 
   // Serology
+  routes.get("/serology", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json(await getSerologySubset(db, u.accessGroup))
+  })
   routes.post("/serology", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await insertSerology(db, decode(t.array(SerologyV), req.body))

@@ -284,6 +284,19 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
   /virus:
+    get:
+      summary: Viruses
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Viruses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Viruses"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
     post:
       summary: Add viruses
       security:
@@ -301,6 +314,19 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
   /serology:
+    get:
+      summary: Serology
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Serology
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Serologies"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
     post:
       summary: Add serology
       security:
