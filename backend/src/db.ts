@@ -8,11 +8,15 @@ import {
   Participant,
   RedcapId,
   Schedule,
+  Serology,
+  SerologyV,
   SiteV,
   Token,
   TokenType,
   User,
   Vaccination,
+  Virus,
+  VirusV,
   WeeklySurvey,
   Withdrawn,
 } from "./data"
@@ -130,6 +134,8 @@ async function insertIntoTable<T>(
     | "Schedule"
     | "WeeklySurvey"
     | "Participant"
+    | "Virus"
+    | "Serology"
 ) {
   if (e.length === 0) {
     return
@@ -160,6 +166,8 @@ async function insertIntoTable<T>(
       "gender",
       "baselineQuestComplete",
     ],
+    Virus: Object.keys(VirusV.props),
+    Serology: Object.keys(SerologyV.props),
   }
   await db.any(pgpInit.helpers.insert(e, cols[t], t))
 }
@@ -470,4 +478,16 @@ export async function getWeeklySurveySubset(
 
 async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
   await insertIntoTable(db, s, "WeeklySurvey")
+}
+
+// Viruses ====================================================================
+
+export async function insertViruses(db: DB, vs: Virus[]): Promise<void> {
+  await insertIntoTable(db, vs, "Virus")
+}
+
+// Serology ===================================================================
+
+export async function insertSerology(db: DB, ss: Serology[]): Promise<void> {
+  await insertIntoTable(db, ss, "Serology")
 }
