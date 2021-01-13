@@ -115,6 +115,11 @@ const useStyles = makeStyles((theme: Theme) =>
       "& .data-row:nth-child(even)": {
         background: theme.palette.background.alt,
       },
+      "& .data-row.label-row": {
+        "& td": {
+          textAlign: "left",
+        },
+      },
     },
   })
 )
@@ -634,7 +639,16 @@ function Summary({
   }, [countsBySite])
 
   return (
-    <SummaryTable columns={columns} data={counts} overheadColumnId="Site_1" />
+    <SummaryTable
+      columns={columns}
+      data={counts}
+      overheadColumnId="Site_1"
+      isLabelRow={(r) =>
+        r.prevVac && typeof r.prevVac === "string"
+          ? ["Vaccinations", "Gender"].includes(r.prevVac)
+          : false
+      }
+    />
   )
 }
 
@@ -642,10 +656,12 @@ function SummaryTable<T extends object>({
   columns,
   data,
   overheadColumnId,
+  isLabelRow,
 }: {
   columns: Column<T>[]
   data: T[]
   overheadColumnId: string
+  isLabelRow: (t: T) => boolean
 }) {
   const table = useTable({ columns, data })
   const classes = useStyles()
@@ -670,7 +686,12 @@ function SummaryTable<T extends object>({
           {table.rows.map((r) => {
             table.prepareRow(r)
             return (
-              <TableRow {...r.getRowProps()} className={"data-row"}>
+              <TableRow
+                {...r.getRowProps()}
+                className={`data-row ${
+                  isLabelRow(r.original) ? "label-row" : ""
+                }`}
+              >
                 {r.cells.map((c) => (
                   <TableCell {...c.getCellProps()}>
                     {c.render("Cell")}
