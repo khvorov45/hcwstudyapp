@@ -73,16 +73,21 @@ async function redcapApiReq(
 
 function uniqueRows<T extends { redcapProjectYear: number }>(
   a: T[],
-  id: keyof T
+  ids: (keyof T)[]
 ): T[] {
+  function genId(v: T) {
+    return ids.reduce((acc, id) => acc + id, "")
+  }
   const allYears = Array.from(new Set(a.map((e) => e.redcapProjectYear)))
   return allYears.reduce((a, year) => {
     const aKeep = a.filter((e) => e.redcapProjectYear <= year)
     const aDrop = a.filter((e) => e.redcapProjectYear > year)
     const allCurrentYearIds = aKeep
       .filter((e) => e.redcapProjectYear === year)
-      .map((e) => e[id])
-    return aKeep.concat(aDrop.filter((e) => !allCurrentYearIds.includes(e[id])))
+      .map(genId)
+    return aKeep.concat(
+      aDrop.filter((e) => !allCurrentYearIds.includes(genId(e)))
+    )
   }, a)
 }
 
@@ -109,7 +114,7 @@ export async function exportUsers(config: RedcapConfig): Promise<User[]> {
     accessGroup: processRedcapDataAccessGroup(u.data_access_group),
     redcapProjectYear: u.redcapProjectYear,
   }))
-  return decode(t.array(UserV), uniqueRows(users, "email"))
+  return decode(t.array(UserV), uniqueRows(users, ["email"]))
 }
 
 /** Handle special cases for participants
@@ -160,7 +165,7 @@ export async function exportParticipants(
     .filter((r) => r.pid)
 
   return participantsSpecial(
-    decode(t.array(ParticipantV), uniqueRows(records, "pid"))
+    decode(t.array(ParticipantV), uniqueRows(records, ["pid"]))
   )
 }
 
