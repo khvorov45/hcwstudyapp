@@ -71,7 +71,7 @@ export function getRoutes(
   // Reset
   routes.delete("/reset", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
-    await reset(db, {
+    await reset(db, redcapConfig, {
       restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
       tokenDaysToLive,
       firstAdmin: { email: firstAdminEmail, token: firstAdminToken },

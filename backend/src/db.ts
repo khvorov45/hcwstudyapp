@@ -109,6 +109,7 @@ async function resetSchema(db: DB): Promise<void> {
 
 export async function reset(
   db: DB,
+  redcapConfig: RedcapConfig,
   {
     restoreTokens,
     firstAdmin,
@@ -120,7 +121,14 @@ export async function reset(
   await init(db, firstAdmin, tokenDaysToLive)
   if (restoreTokens) {
     await db.any('DELETE FROM "Token"')
-    await insertIntoTable(db, tokens, "Token")
+    await syncRedcapUsers(db, redcapConfig)
+    const users = await getUsers(db)
+    const emails = users.map((u) => u.email)
+    await insertIntoTable(
+      db,
+      tokens.filter((tok) => emails.includes(tok.user)),
+      "Token"
+    )
   }
 }
 
