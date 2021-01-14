@@ -76,7 +76,7 @@ function uniqueRows<T extends { redcapProjectYear: number }>(
   ids: (keyof T)[]
 ): T[] {
   function genId(v: T) {
-    return ids.reduce((acc, id) => acc + id, "")
+    return ids.reduce((acc, id) => acc + v[id], "")
   }
   const allYears = Array.from(new Set(a.map((e) => e.redcapProjectYear)))
   return allYears.reduce((a, year) => {
