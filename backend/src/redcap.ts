@@ -73,16 +73,21 @@ async function redcapApiReq(
 
 function uniqueRows<T extends { redcapProjectYear: number }>(
   a: T[],
-  id: keyof T
+  ids: (keyof T)[]
 ): T[] {
+  function genId(v: T) {
+    return ids.reduce((acc, id) => acc + v[id], "")
+  }
   const allYears = Array.from(new Set(a.map((e) => e.redcapProjectYear)))
   return allYears.reduce((a, year) => {
     const aKeep = a.filter((e) => e.redcapProjectYear <= year)
     const aDrop = a.filter((e) => e.redcapProjectYear > year)
     const allCurrentYearIds = aKeep
       .filter((e) => e.redcapProjectYear === year)
-      .map((e) => e[id])
-    return aKeep.concat(aDrop.filter((e) => !allCurrentYearIds.includes(e[id])))
+      .map(genId)
+    return aKeep.concat(
+      aDrop.filter((e) => !allCurrentYearIds.includes(genId(e)))
+    )
   }, a)
 }
 
@@ -109,7 +114,7 @@ export async function exportUsers(config: RedcapConfig): Promise<User[]> {
     accessGroup: processRedcapDataAccessGroup(u.data_access_group),
     redcapProjectYear: u.redcapProjectYear,
   }))
-  return decode(t.array(UserV), uniqueRows(users, "email"))
+  return decode(t.array(UserV), uniqueRows(users, ["email"]))
 }
 
 /** Handle special cases for participants
@@ -160,7 +165,7 @@ export async function exportParticipants(
     .filter((r) => r.pid)
 
   return participantsSpecial(
-    decode(t.array(ParticipantV), uniqueRows(records, "pid"))
+    decode(t.array(ParticipantV), uniqueRows(records, ["pid"]))
   )
 }
 
@@ -184,7 +189,7 @@ export async function exportRedcapIds(
       redcapProjectYear: r.redcapProjectYear,
     }))
     .filter((r) => r.pid)
-
+  // We should never have the same id-year combination, can trust REDCap on that
   return decode(t.array(RedcapIdV), redcapIds)
 }
 
@@ -216,7 +221,8 @@ export async function exportWithdrawn(
       date: processRedcapString(r.withdrawal_date),
     }))
     .filter((r) => r.withdrawn)
-
+  // The same id can presumably not be withdrawn in different years?
+  // That's what the database assumes at the moment
   return decode(t.array(RedcapWithdrawnV), withdrawn)
 }
 
@@ -248,12 +254,13 @@ export async function exportVaccination(
         status:
           processRedcapStringLower(v[`vac_${year}`])?.replace("yes - ", "") ??
           null,
+        redcapProjectYear: v.redcapProjectYear,
       })
       return vacLongCurrent
     }, vacLong)
   )
 
-  return decode(t.array(VaccinationV), vacLong)
+  return decode(t.array(VaccinationV), uniqueRows(vacLong, ["pid", "year"]))
 }
 
 export async function exportSchedule(
@@ -287,7 +294,7 @@ export async function exportSchedule(
       return scheduleLongCurrent
     }, scheduleLong)
   })
-
+  // Year is part of the key, no need to worry about uniqueness probably
   return decode(t.array(ScheduleV), scheduleLong)
 }
 
@@ -339,6 +346,6 @@ export async function exportWeeklySurvey(
     }))
     // Remove incomplete surveys
     .filter((r) => r.ari !== null)
-
+  // With the year in PK don't need to enforce uniqueness
   return decode(t.array(RedcapWeeklySurveyV), surv)
 }
