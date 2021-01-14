@@ -215,12 +215,12 @@ export function getRoutes(
     res.json(await getViruses(db))
   })
   routes.post("/virus", async (req: Request, res: Response) => {
-    await validateUser(req, db)
+    await validateUnrestricted(req, db)
     await insertViruses(db, decode(t.array(VirusV), req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/virus/all", async (req: Request, res: Response) => {
-    await validateUser(req, db)
+    await validateUnrestricted(req, db)
     await deleteAllViruses(db)
     res.status(StatusCodes.NO_CONTENT).end()
   })
