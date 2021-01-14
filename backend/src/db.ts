@@ -8,11 +8,15 @@ import {
   Participant,
   RedcapId,
   Schedule,
+  Serology,
+  SerologyV,
   SiteV,
   Token,
   TokenType,
   User,
   Vaccination,
+  Virus,
+  VirusV,
   WeeklySurvey,
   Withdrawn,
 } from "./data"
@@ -103,11 +107,34 @@ async function resetSchema(db: DB): Promise<void> {
   await db.any('CREATE SCHEMA "public";')
 }
 
+export async function reset(
+  db: DB,
+  {
+    restoreTokens,
+    firstAdmin,
+    tokenDaysToLive,
+  }: { restoreTokens: boolean; firstAdmin: EmailToken; tokenDaysToLive: number }
+) {
+  const tokens = restoreTokens ? await getTokens(db) : []
+  await resetSchema(db)
+  await init(db, firstAdmin, tokenDaysToLive)
+  if (restoreTokens) {
+    await db.any('DELETE FROM "Token"')
+    await insertIntoTable(db, tokens, "Token")
+  }
+}
+
 /** Get site subset for tables with PID as FK */
 async function getTableSubset(
   db: DB,
   a: AccessGroup,
-  t: "Vaccination" | "RedcapId" | "Withdrawn" | "Schedule" | "WeeklySurvey"
+  t:
+    | "Vaccination"
+    | "RedcapId"
+    | "Withdrawn"
+    | "Schedule"
+    | "WeeklySurvey"
+    | "Serology"
 ) {
   return isSite(a)
     ? await db.any(
@@ -130,6 +157,8 @@ async function insertIntoTable<T>(
     | "Schedule"
     | "WeeklySurvey"
     | "Participant"
+    | "Virus"
+    | "Serology"
 ) {
   if (e.length === 0) {
     return
@@ -160,6 +189,8 @@ async function insertIntoTable<T>(
       "gender",
       "baselineQuestComplete",
     ],
+    Virus: Object.keys(VirusV.props),
+    Serology: Object.keys(SerologyV.props),
   }
   await db.any(pgpInit.helpers.insert(e, cols[t], t))
 }
@@ -470,4 +501,35 @@ export async function getWeeklySurveySubset(
 
 async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
   await insertIntoTable(db, s, "WeeklySurvey")
+}
+
+// Viruses ====================================================================
+
+export async function getViruses(db: DB): Promise<Virus[]> {
+  return await db.any('SELECT * FROM "Virus"')
+}
+
+export async function insertViruses(db: DB, vs: Virus[]): Promise<void> {
+  await insertIntoTable(db, vs, "Virus")
+}
+
+export async function deleteAllViruses(db: DB): Promise<void> {
+  await db.any('DELETE FROM "Virus"')
+}
+
+// Serology ===================================================================
+
+export async function getSerologySubset(
+  db: DB,
+  a: AccessGroup
+): Promise<Serology[]> {
+  return await getTableSubset(db, a, "Serology")
+}
+
+export async function insertSerology(db: DB, ss: Serology[]): Promise<void> {
+  await insertIntoTable(db, ss, "Serology")
+}
+
+export async function deleteAllSerology(db: DB): Promise<void> {
+  await db.any('DELETE FROM "Serology"')
 }

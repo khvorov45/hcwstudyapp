@@ -25,12 +25,27 @@ import {
   deleteUserTokens,
   deleteToken,
   updateUser,
+  insertSerology,
+  insertViruses,
+  getViruses,
+  getSerologySubset,
+  deleteAllViruses,
+  deleteAllSerology,
+  reset,
 } from "./db"
-import { ParticipantV, TokenTypeV, User, UserV } from "./data"
+import {
+  ParticipantV,
+  SerologyV,
+  TokenTypeV,
+  User,
+  UserV,
+  VirusV,
+} from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
+import { BooleanFromString } from "io-ts-types"
 
 export function getRoutes(
   db: DB,
@@ -39,11 +54,30 @@ export function getRoutes(
     emailer: Emailer
     frontendRoot: string
   },
-  tokenDaysToLive: number
+  {
+    tokenDaysToLive,
+    firstAdminEmail,
+    firstAdminToken,
+  }: {
+    tokenDaysToLive: number
+    firstAdminEmail: string
+    firstAdminToken: string
+  }
 ) {
   const routes = Router()
 
   // Routes
+
+  // Reset
+  routes.delete("/reset", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await reset(db, {
+      restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
+      tokenDaysToLive,
+      firstAdmin: { email: firstAdminEmail, token: firstAdminToken },
+    })
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
 
   // Users
   routes.get("/users", async (req: Request, res: Response) => {
@@ -173,6 +207,38 @@ export function getRoutes(
   routes.get("/weekly-survey", async (req: Request, res: Response) => {
     const u = await validateUser(req, db)
     res.json(await getWeeklySurveySubset(db, u.accessGroup))
+  })
+
+  // Viruses
+  routes.get("/virus", async (req: Request, res: Response) => {
+    await validateUser(req, db)
+    res.json(await getViruses(db))
+  })
+  routes.post("/virus", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await insertViruses(db, decode(t.array(VirusV), req.body))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.delete("/virus/all", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await deleteAllViruses(db)
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+
+  // Serology
+  routes.get("/serology", async (req: Request, res: Response) => {
+    const u = await validateUser(req, db)
+    res.json(await getSerologySubset(db, u.accessGroup))
+  })
+  routes.post("/serology", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await insertSerology(db, decode(t.array(SerologyV), req.body))
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
+  routes.delete("/serology/all", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await deleteAllSerology(db)
+    res.status(StatusCodes.NO_CONTENT).end()
   })
 
   // Errors

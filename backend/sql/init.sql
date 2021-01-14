@@ -53,7 +53,7 @@ CREATE TABLE "Participant" (
 
 CREATE TABLE "RedcapId" (
     "redcapRecordId" text,
-    "redcapProjectYear" int CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+    "redcapProjectYear" int NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "pid" text NOT NULL REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
 );
@@ -72,8 +72,8 @@ CREATE TABLE "Vaccination" (
 
 CREATE TABLE "Schedule" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
-    "day" integer,
-    "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+    "day" integer NOT NULL,
+    "redcapProjectYear" integer NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
     PRIMARY KEY ("pid", "day", "redcapProjectYear")
 );
@@ -81,9 +81,24 @@ CREATE TABLE "Schedule" (
 CREATE TABLE "WeeklySurvey" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "index" integer NOT NULL CHECK ("index" >= 1 AND "index" <= 32),
-    "redcapProjectYear" integer CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+    "redcapProjectYear" integer NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "date" timestamptz,
     "ari" boolean NOT NULL,
     "swabCollection" boolean,
     PRIMARY KEY ("pid", "index", "redcapProjectYear")
+);
+
+CREATE TABLE "Virus" (
+    "name" text PRIMARY KEY,
+    "shortName" text NOT NULL UNIQUE,
+    "clade" text NOT NULL
+);
+
+CREATE TABLE "Serology" (
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
+    "redcapProjectYear" integer NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+    "day" integer NOT NULL,
+    "virus" text REFERENCES "Virus"("name") ON DELETE CASCADE ON UPDATE CASCADE,
+    "titre" integer NOT NULL,
+    PRIMARY KEY ("pid", "redcapProjectYear", "day", "virus")
 );

@@ -108,3 +108,19 @@ export const WeeklySurveyV = t.type({
   swabCollection: t.union([t.boolean, t.null]),
 })
 export type WeeklySurvey = t.TypeOf<typeof WeeklySurveyV>
+
+export const VirusV = t.type({
+  name: t.string,
+  shortName: t.string,
+  clade: t.string,
+})
+export type Virus = t.TypeOf<typeof VirusV>
+
+export const SerologyV = t.type({
+  pid: t.string,
+  redcapProjectYear: t.number,
+  day: t.number,
+  virus: t.string,
+  titre: t.number,
+})
+export type Serology = t.TypeOf<typeof SerologyV>

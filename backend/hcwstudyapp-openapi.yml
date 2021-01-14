@@ -5,6 +5,21 @@ info:
 servers:
   - url: https://reports.hcwflustudy.com/api
 paths:
+  /reset:
+    delete:
+      summary: Reset the database
+      security:
+        - Admin: []
+      parameters:
+        - in: query
+          name: restoreTokens
+          schema:
+            type: boolean
+      responses:
+        "204":
+          description: "Successfully reset"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
   /auth/token/send:
     post:
       summary: Email a login link
@@ -283,6 +298,86 @@ paths:
                 $ref: "#/components/schemas/WeeklySurveys"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /virus:
+    get:
+      summary: Viruses
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Viruses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Viruses"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Add viruses
+      security:
+        - Admin: []
+      requestBody:
+        description: Viruses to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Viruses"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /virus/all:
+    delete:
+      summary: Delete all viruses
+      security:
+        - Admin: []
+      responses:
+        "204":
+          description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /serology:
+    get:
+      summary: Serology
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Serology
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Serologies"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Add serology
+      security:
+        - Admin: []
+      requestBody:
+        description: Serology results to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Serologies"
+      responses:
+        "204":
+          description: Successful addition
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /serology/all:
+    delete:
+      summary: Delete all serology records
+      security:
+        - Admin: []
+      responses:
+        "204":
+          description: Successful deletion
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
 components:
   schemas:
@@ -453,6 +548,46 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/WeeklySurvey"
+    Virus:
+      type: object
+      required:
+        - name
+        - shortName
+        - clade
+      properties:
+        name:
+          type: string
+        shortName:
+          type: string
+        clade:
+          type: string
+    Viruses:
+      type: array
+      items:
+        $ref: "#/components/schemas/Virus"
+    Serology:
+      type: object
+      required:
+        - pid
+        - redcapProjectYear
+        - day
+        - virus
+        - titre
+      properties:
+        pid:
+          type: string
+        redcapProjectYear:
+          type: number
+        day:
+          type: number
+        virus:
+          type: string
+        titre:
+          type: number
+    Serologies:
+      type: array
+      items:
+        $ref: "#/components/schemas/Serology"
   securitySchemes:
     User:
       type: http
