@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - docker
+      - master
 
 name: Docker
 
@@ -18,7 +18,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ secrets.DOCKER_BACKEND_REPOSITORY }}
-          tags: latest
+          tag_with_ref: true
           path: backend
 
   frontend:
