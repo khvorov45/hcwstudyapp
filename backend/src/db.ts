@@ -119,7 +119,8 @@ export async function reset(
   await resetSchema(db)
   await init(db, firstAdmin, tokenDaysToLive)
   if (restoreTokens) {
-    insertIntoTable(db, tokens, "Token")
+    await db.any('DELETE FROM "Token"')
+    await insertIntoTable(db, tokens, "Token")
   }
 }
 
