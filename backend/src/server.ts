@@ -61,7 +61,7 @@ async function main() {
         emailer: createTransport(args.emailConnectionString),
         frontendRoot: args.frontendRoot,
       },
-      args.tokenDaysToLive
+      args
     )
   )
 

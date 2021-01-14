@@ -5,6 +5,21 @@ info:
 servers:
   - url: https://reports.hcwflustudy.com/api
 paths:
+  /reset:
+    delete:
+      summary: Reset the database
+      security:
+        - Admin: []
+      parameters:
+        - in: query
+          name: restoreTokens
+          schema:
+            type: boolean
+      responses:
+        "204":
+          description: "Successfully reset"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
   /auth/token/send:
     post:
       summary: Email a login link

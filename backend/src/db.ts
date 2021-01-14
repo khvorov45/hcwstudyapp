@@ -107,6 +107,22 @@ async function resetSchema(db: DB): Promise<void> {
   await db.any('CREATE SCHEMA "public";')
 }
 
+export async function reset(
+  db: DB,
+  {
+    restoreTokens,
+    firstAdmin,
+    tokenDaysToLive,
+  }: { restoreTokens: boolean; firstAdmin: EmailToken; tokenDaysToLive: number }
+) {
+  const tokens = restoreTokens ? await getTokens(db) : []
+  await resetSchema(db)
+  await init(db, firstAdmin, tokenDaysToLive)
+  if (restoreTokens) {
+    insertIntoTable(db, tokens, "Token")
+  }
+}
+
 /** Get site subset for tables with PID as FK */
 async function getTableSubset(
   db: DB,

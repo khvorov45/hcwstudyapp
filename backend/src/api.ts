@@ -31,6 +31,7 @@ import {
   getSerologySubset,
   deleteAllViruses,
   deleteAllSerology,
+  reset,
 } from "./db"
 import {
   ParticipantV,
@@ -52,11 +53,30 @@ export function getRoutes(
     emailer: Emailer
     frontendRoot: string
   },
-  tokenDaysToLive: number
+  {
+    tokenDaysToLive,
+    firstAdminEmail,
+    firstAdminToken,
+  }: {
+    tokenDaysToLive: number
+    firstAdminEmail: string
+    firstAdminToken: string
+  }
 ) {
   const routes = Router()
 
   // Routes
+
+  // Reset
+  routes.delete("/reset", async (req: Request, res: Response) => {
+    await validateAdmin(req, db)
+    await reset(db, {
+      restoreTokens: decode(t.boolean, req.query.restoreTokens),
+      tokenDaysToLive,
+      firstAdmin: { email: firstAdminEmail, token: firstAdminToken },
+    })
+    res.status(StatusCodes.NO_CONTENT).end()
+  })
 
   // Users
   routes.get("/users", async (req: Request, res: Response) => {
