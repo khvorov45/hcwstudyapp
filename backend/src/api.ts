@@ -45,6 +45,7 @@ import { decode } from "./io"
 import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
+import { BooleanFromString } from "io-ts-types"
 
 export function getRoutes(
   db: DB,
@@ -71,7 +72,7 @@ export function getRoutes(
   routes.delete("/reset", async (req: Request, res: Response) => {
     await validateAdmin(req, db)
     await reset(db, {
-      restoreTokens: decode(t.boolean, req.query.restoreTokens),
+      restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
       tokenDaysToLive,
       firstAdmin: { email: firstAdminEmail, token: firstAdminToken },
     })
