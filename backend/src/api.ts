@@ -231,12 +231,12 @@ export function getRoutes(
     res.json(await getSerologySubset(db, u.accessGroup))
   })
   routes.post("/serology", async (req: Request, res: Response) => {
-    await validateAdmin(req, db)
+    await validateUnrestricted(req, db)
     await insertSerology(db, decode(t.array(SerologyV), req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/serology/all", async (req: Request, res: Response) => {
-    await validateAdmin(req, db)
+    await validateUnrestricted(req, db)
     await deleteAllSerology(db)
     res.status(StatusCodes.NO_CONTENT).end()
   })
@@ -282,6 +282,14 @@ async function validateUser(req: Request, db: DB): Promise<User> {
 async function validateAdmin(req: Request, db: DB): Promise<User> {
   const u = await validateUser(req, db)
   if (u.accessGroup !== "admin") {
+    throw Error("UNAUTHORIZED: insufficient access")
+  }
+  return u
+}
+
+async function validateUnrestricted(req: Request, db: DB): Promise<User> {
+  const u = await validateUser(req, db)
+  if (!["admin", "unrestricted"].includes(u.accessGroup)) {
     throw Error("UNAUTHORIZED: insufficient access")
   }
   return u

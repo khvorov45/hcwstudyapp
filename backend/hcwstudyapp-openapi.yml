@@ -355,7 +355,7 @@ paths:
     post:
       summary: Add serology
       security:
-        - Admin: []
+        - Unrestricted: []
       requestBody:
         description: Serology results to add
         required: true
@@ -372,7 +372,7 @@ paths:
     delete:
       summary: Delete all serology records
       security:
-        - Admin: []
+        - Unrestricted: []
       responses:
         "204":
           description: Successful deletion
@@ -593,6 +593,9 @@ components:
       type: http
       scheme: bearer
     Admin:
+      type: http
+      scheme: bearer
+    Unrestricted:
       type: http
       scheme: bearer
   responses:
