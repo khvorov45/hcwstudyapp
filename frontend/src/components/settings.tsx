@@ -71,16 +71,25 @@ export default function Settings({
   user,
   withdrawn,
   onWithdrawnChange,
+  onParticipantUpdate,
+  onUserUpdate,
 }: {
   token?: string
   user?: User
   withdrawn: "yes" | "no" | "any"
   onWithdrawnChange: (n: "yes" | "no" | "any") => void
+  onParticipantUpdate: () => void
+  onUserUpdate: () => void
 }) {
   const classes = useStyles()
   return (
     <div className={classes.settings}>
-      <Update token={token} user={user} />
+      <Update
+        token={token}
+        user={user}
+        onParticipantUpdate={onParticipantUpdate}
+        onUserUpdate={onUserUpdate}
+      />
       <Selector
         title="Withdrawn"
         value={withdrawn}
@@ -121,7 +130,17 @@ function Selector<T extends string>({
   )
 }
 
-function Update({ token, user }: { token?: string; user?: User }) {
+function Update({
+  token,
+  user,
+  onParticipantUpdate,
+  onUserUpdate,
+}: {
+  token?: string
+  user?: User
+  onParticipantUpdate: () => void
+  onUserUpdate: () => void
+}) {
   const classes = useStyles()
   async function updateTimeFetcher(path: "participants" | "users") {
     return await apiReq({
@@ -157,7 +176,7 @@ function Update({ token, user }: { token?: string; user?: User }) {
           token={token}
           timestampFetcher={async () => await updateTimeFetcher("participants")}
           syncFunction={async () => await dataSync("participants")}
-          onUpdate={() => console.log("participants updated")}
+          onUpdate={onParticipantUpdate}
         />
         <AuthOnly admin user={user}>
           <UpdateCard
@@ -165,7 +184,7 @@ function Update({ token, user }: { token?: string; user?: User }) {
             token={token}
             timestampFetcher={async () => await updateTimeFetcher("users")}
             syncFunction={async () => await dataSync("users")}
-            onUpdate={() => console.log("users updated")}
+            onUpdate={onUserUpdate}
           />
         </AuthOnly>
       </div>

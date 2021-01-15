@@ -295,6 +295,8 @@ export default function App() {
               setWithdrawnSetting(v)
               localStorage.setItem("withdrawn", v)
             }}
+            onParticipantUpdate={() => console.log("participant update")}
+            onUserUpdate={() => console.log("user update")}
           />
           <div className={classes.belowNav}>
             <Switch>
