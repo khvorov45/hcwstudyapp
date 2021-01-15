@@ -157,6 +157,7 @@ function Update({ token, user }: { token?: string; user?: User }) {
           token={token}
           timestampFetcher={async () => await updateTimeFetcher("participants")}
           syncFunction={async () => await dataSync("participants")}
+          onUpdate={() => console.log("participants updated")}
         />
         <AuthOnly admin user={user}>
           <UpdateCard
@@ -164,6 +165,7 @@ function Update({ token, user }: { token?: string; user?: User }) {
             token={token}
             timestampFetcher={async () => await updateTimeFetcher("users")}
             syncFunction={async () => await dataSync("users")}
+            onUpdate={() => console.log("users updated")}
           />
         </AuthOnly>
       </div>
@@ -175,11 +177,13 @@ function UpdateCard({
   title,
   timestampFetcher,
   syncFunction,
+  onUpdate,
 }: {
   token?: string
   title: string
   timestampFetcher: () => Promise<Date | null>
   syncFunction: () => Promise<void>
+  onUpdate: () => void
 }) {
   const lastUpdateTimestamp = useAsync(timestampFetcher, [])
   const syncFunctionResult = useAsyncCallback(syncFunction)
@@ -208,7 +212,10 @@ function UpdateCard({
         onClick={() =>
           syncFunctionResult
             .execute()
-            .then((_) => lastUpdateTimestamp.execute())
+            .then((_) => {
+              lastUpdateTimestamp.execute()
+              onUpdate()
+            })
             // These errors should be on syncFunctionResult object, no need
             // to handle them here
             .catch((e) => {})
