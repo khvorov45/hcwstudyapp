@@ -242,6 +242,19 @@ export default function App() {
     []
   )
 
+  const usersFetch = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        path: "users",
+        token: token?.token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(UserV),
+      }),
+    []
+  )
+
   const withdrawn = useTableData(withdrawnFetch.result, {})
   const tableSettings = {
     withdrawn: { setting: withdrawnSetting, ids: withdrawn.map((w) => w.pid) },
@@ -251,6 +264,8 @@ export default function App() {
   const schedule = useTableData(scheduleFetch.result, tableSettings)
   const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
   const vaccination = useTableData(vaccinationFetch.result, tableSettings)
+
+  const users = useMemo(() => usersFetch.result ?? [], [usersFetch.result])
 
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(
@@ -297,7 +312,7 @@ export default function App() {
               vaccinationFetch.execute()
               withdrawnFetch.execute()
             }}
-            onUserUpdate={() => console.log("user update")}
+            onUserUpdate={usersFetch.execute}
           />
           <div className={classes.belowNav}>
             <Switch>
@@ -337,7 +352,11 @@ export default function App() {
                 user={auth.result}
                 path="/users"
               >
-                <Users token={token?.token} />
+                <Users
+                  users={users}
+                  onEdit={usersFetch.execute}
+                  token={token?.token}
+                />
               </AuthRoute>
               <AuthRoute
                 authStatus={auth.status}
