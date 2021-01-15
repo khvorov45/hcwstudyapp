@@ -91,7 +91,7 @@ export default function Settings({
   )
 }
 
-function Selector<T>({
+function Selector<T extends string>({
   title,
   value,
   opts,
@@ -109,6 +109,7 @@ function Selector<T>({
       <ButtonGroup>
         {opts.map((o) => (
           <Button
+            key={o}
             className={value === o ? "active" : ""}
             onClick={(_) => onChange(o)}
           >
