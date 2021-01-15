@@ -221,31 +221,26 @@ export default function App() {
 
   // Table data ---------------------------------------------------------------
 
-  const participantsFetch = useAsync(tableFetch, [
-    "participants",
-    ParticipantV,
-    token?.token,
-  ])
-  const scheduleFetch = useAsync(tableFetch, [
-    "schedule",
-    ScheduleV,
-    token?.token,
-  ])
-  const weeklySurveyFetch = useAsync(tableFetch, [
-    "weekly-survey",
-    WeeklySurveyV,
-    token?.token,
-  ])
-  const vaccinationFetch = useAsync(tableFetch, [
-    "vaccination",
-    VaccinationV,
-    token?.token,
-  ])
-  const withdrawnFetch = useAsync(tableFetch, [
-    "withdrawn",
-    WithdrawnV,
-    token?.token,
-  ])
+  const participantsFetch = useAsync(
+    () => tableFetch("participants", ParticipantV, token?.token),
+    []
+  )
+  const scheduleFetch = useAsync(
+    () => tableFetch("schedule", ScheduleV, token?.token),
+    []
+  )
+  const weeklySurveyFetch = useAsync(
+    () => tableFetch("weekly-survey", WeeklySurveyV, token?.token),
+    []
+  )
+  const vaccinationFetch = useAsync(
+    () => tableFetch("vaccination", VaccinationV, token?.token),
+    []
+  )
+  const withdrawnFetch = useAsync(
+    () => tableFetch("withdrawn", WithdrawnV, token?.token),
+    []
+  )
 
   const withdrawn = useTableData(withdrawnFetch.result, {})
   const tableSettings = {
@@ -295,7 +290,13 @@ export default function App() {
               setWithdrawnSetting(v)
               localStorage.setItem("withdrawn", v)
             }}
-            onParticipantUpdate={() => console.log("participant update")}
+            onParticipantUpdate={() => {
+              participantsFetch.execute()
+              scheduleFetch.execute()
+              weeklySurveyFetch.execute()
+              vaccinationFetch.execute()
+              withdrawnFetch.execute()
+            }}
             onUserUpdate={() => console.log("user update")}
           />
           <div className={classes.belowNav}>
