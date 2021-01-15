@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes"
-import { useAsync, useAsyncCallback } from "react-async-hook"
+import { useAsyncCallback } from "react-async-hook"
 import * as t from "io-ts"
 import { apiReq } from "../lib/api"
-import { AccessGroup, AccessGroupV, User, UserV } from "../lib/data"
+import { AccessGroup, AccessGroupV, User } from "../lib/data"
 import React, { useMemo, useState } from "react"
 import { useTable } from "react-table"
 import {
@@ -47,21 +47,15 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function Users({ token }: { token?: string }) {
-  const usersFetch = useAsync(
-    () =>
-      apiReq({
-        method: "GET",
-        path: "users",
-        token: token,
-        success: StatusCodes.OK,
-        failure: [StatusCodes.UNAUTHORIZED],
-        validator: t.array(UserV),
-      }),
-    []
-  )
-  const users = useMemo(() => usersFetch.result ?? [], [usersFetch])
-
+export default function Users({
+  token,
+  users,
+  onEdit,
+}: {
+  token?: string
+  users: User[]
+  onEdit: () => void
+}) {
   const updateUser = useAsyncCallback(() =>
     apiReq({
       method: "PUT",
@@ -165,8 +159,8 @@ export default function Users({ token }: { token?: string }) {
                         updateUser
                           .execute()
                           .then(() => {
-                            usersFetch.execute()
                             setEditedIndex(null)
+                            onEdit()
                           })
                           .catch((e) => {})
                       }

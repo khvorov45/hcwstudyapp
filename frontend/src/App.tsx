@@ -221,31 +221,39 @@ export default function App() {
 
   // Table data ---------------------------------------------------------------
 
-  const participantsFetch = useAsync(tableFetch, [
-    "participants",
-    ParticipantV,
-    token?.token,
-  ])
-  const scheduleFetch = useAsync(tableFetch, [
-    "schedule",
-    ScheduleV,
-    token?.token,
-  ])
-  const weeklySurveyFetch = useAsync(tableFetch, [
-    "weekly-survey",
-    WeeklySurveyV,
-    token?.token,
-  ])
-  const vaccinationFetch = useAsync(tableFetch, [
-    "vaccination",
-    VaccinationV,
-    token?.token,
-  ])
-  const withdrawnFetch = useAsync(tableFetch, [
-    "withdrawn",
-    WithdrawnV,
-    token?.token,
-  ])
+  const participantsFetch = useAsync(
+    () => tableFetch("participants", ParticipantV, token?.token),
+    []
+  )
+  const scheduleFetch = useAsync(
+    () => tableFetch("schedule", ScheduleV, token?.token),
+    []
+  )
+  const weeklySurveyFetch = useAsync(
+    () => tableFetch("weekly-survey", WeeklySurveyV, token?.token),
+    []
+  )
+  const vaccinationFetch = useAsync(
+    () => tableFetch("vaccination", VaccinationV, token?.token),
+    []
+  )
+  const withdrawnFetch = useAsync(
+    () => tableFetch("withdrawn", WithdrawnV, token?.token),
+    []
+  )
+
+  const usersFetch = useAsync(
+    () =>
+      apiReq({
+        method: "GET",
+        path: "users",
+        token: token?.token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(UserV),
+      }),
+    []
+  )
 
   const withdrawn = useTableData(withdrawnFetch.result, {})
   const tableSettings = {
@@ -256,6 +264,8 @@ export default function App() {
   const schedule = useTableData(scheduleFetch.result, tableSettings)
   const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
   const vaccination = useTableData(vaccinationFetch.result, tableSettings)
+
+  const users = useMemo(() => usersFetch.result ?? [], [usersFetch.result])
 
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(
@@ -295,6 +305,14 @@ export default function App() {
               setWithdrawnSetting(v)
               localStorage.setItem("withdrawn", v)
             }}
+            onParticipantUpdate={() => {
+              participantsFetch.execute()
+              scheduleFetch.execute()
+              weeklySurveyFetch.execute()
+              vaccinationFetch.execute()
+              withdrawnFetch.execute()
+            }}
+            onUserUpdate={usersFetch.execute}
           />
           <div className={classes.belowNav}>
             <Switch>
@@ -334,7 +352,11 @@ export default function App() {
                 user={auth.result}
                 path="/users"
               >
-                <Users token={token?.token} />
+                <Users
+                  users={users}
+                  onEdit={usersFetch.execute}
+                  token={token?.token}
+                />
               </AuthRoute>
               <AuthRoute
                 authStatus={auth.status}

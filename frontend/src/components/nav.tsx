@@ -93,6 +93,8 @@ export default function Nav({
   token,
   withdrawn,
   onWithdrawnChange,
+  onParticipantUpdate,
+  onUserUpdate,
 }: {
   togglePalette: () => void
   user?: User
@@ -101,6 +103,8 @@ export default function Nav({
   token?: string
   withdrawn: "yes" | "no" | "any"
   onWithdrawnChange: (a: "yes" | "no" | "any") => void
+  onParticipantUpdate: () => void
+  onUserUpdate: () => void
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [logoutAnchor, setLogoutAnchor] = useState<HTMLButtonElement | null>(
@@ -250,6 +254,8 @@ export default function Nav({
           user={user}
           withdrawn={withdrawn}
           onWithdrawnChange={onWithdrawnChange}
+          onParticipantUpdate={onParticipantUpdate}
+          onUserUpdate={onUserUpdate}
         />
       </Dialog>
     </div>
