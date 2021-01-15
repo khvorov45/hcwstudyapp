@@ -11,10 +11,10 @@ export type TableName =
   | "weekly-survey"
   | "vaccination"
   | "withdrawn"
+  | "users"
 
 export type ApiPath =
   | TableName
-  | "users"
   | "auth/token/verify"
   | "auth/token/send"
   | "auth/token"

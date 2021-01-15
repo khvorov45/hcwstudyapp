@@ -38,7 +38,7 @@ import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 import Plots from "./components/plot"
 import * as d3 from "d3-array"
-import { tableFetch, useTableData } from "./lib/table-data"
+import { tableFetch, useTableData, useTableDataPlain } from "./lib/table-data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -243,15 +243,7 @@ export default function App() {
   )
 
   const usersFetch = useAsync(
-    () =>
-      apiReq({
-        method: "GET",
-        path: "users",
-        token: token?.token,
-        success: StatusCodes.OK,
-        failure: [StatusCodes.UNAUTHORIZED],
-        validator: t.array(UserV),
-      }),
+    () => tableFetch("users", UserV, token?.token),
     []
   )
 
@@ -265,7 +257,7 @@ export default function App() {
   const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
   const vaccination = useTableData(vaccinationFetch.result, tableSettings)
 
-  const users = useMemo(() => usersFetch.result ?? [], [usersFetch.result])
+  const users = useTableDataPlain(usersFetch.result)
 
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(

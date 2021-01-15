@@ -7,6 +7,10 @@ export type TableSettings = {
   withdrawn?: { setting: "yes" | "no" | "any"; ids: string[] }
 }
 
+export function useTableDataPlain<T>(data: T[] | undefined) {
+  return useMemo(() => data ?? [], [data])
+}
+
 export function useTableData<T extends { pid: string }>(
   data: T[] | undefined,
   settings: TableSettings
