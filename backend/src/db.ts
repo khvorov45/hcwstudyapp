@@ -60,12 +60,6 @@ export function create({
   }
   let firstConnection = true
   async function connect() {
-    try {
-      await db.connect()
-      console.log(`connected successfully to ${dbConnectionString}`)
-    } catch (e) {
-      throw Error(`could not connect to ${dbConnectionString}: ${e.message}`)
-    }
     if (!firstConnection) {
       return db
     }
