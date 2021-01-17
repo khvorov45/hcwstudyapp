@@ -247,6 +247,8 @@ export function getRoutes(
       res.status(StatusCodes.UNAUTHORIZED).json(err.message)
     } else if (err.message.startsWith("NOT FOUND")) {
       res.status(StatusCodes.NOT_FOUND).json(err.message)
+    } else if (err.message.startsWith("connect ECONNREFUSED")) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json("DB connection failed")
     } else {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(err.message)
     }
