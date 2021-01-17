@@ -64,11 +64,12 @@ export function create({
       return db
     }
     if (clean) {
-      console.log("cleaning db")
+      console.log("attempting db clean")
       await resetSchema(db)
+      console.log("clean successful")
       await init(db, firstAdmin, tokenDaysToLive)
     } else if (await isEmpty(db)) {
-      console.log("database empty, initializing")
+      console.log("database empty")
       await init(db, firstAdmin, tokenDaysToLive)
     }
     firstConnection = false
@@ -94,6 +95,7 @@ async function init(
   firstAdmin: EmailToken,
   tokenDaysToLive: number
 ): Promise<void> {
+  console.log("attempting db initialization")
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
     genders: Object.keys(GenderV.keys),
@@ -102,6 +104,7 @@ async function init(
     firstAdminTokenExpires: addDays(new Date(), tokenDaysToLive),
     sites: Object.keys(SiteV.keys),
   })
+  console.log("initialization successful")
 }
 
 async function resetSchema(db: DB): Promise<void> {
