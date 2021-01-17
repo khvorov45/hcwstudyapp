@@ -106,7 +106,7 @@ async function init(
 }
 
 async function resetSchema(db: DB): Promise<void> {
-  await db.tx("reset-database", async (t) => {
+  await db.tx("reset-schema", async (t) => {
     await t.any('DROP SCHEMA "public" CASCADE;')
     await t.any('CREATE SCHEMA "public";')
   })
