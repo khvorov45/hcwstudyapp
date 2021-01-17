@@ -80,7 +80,6 @@ export function create({
     firstConnection = false
     return db
   }
-  connect()
   return connect
 }
 
