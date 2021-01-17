@@ -52,7 +52,7 @@ export function create({
   firstAdminToken: string
   tokenDaysToLive: number
 }): () => Promise<DB> {
-  console.log(`connecting to ${dbConnectionString}`)
+  console.log(`db url: ${dbConnectionString}`)
   const db = pgpInit(dbConnectionString)
   const firstAdmin: EmailToken = {
     email: firstAdminEmail,
