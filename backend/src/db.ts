@@ -36,6 +36,8 @@ import { retryAsync } from "ts-retry"
 
 const pgpInit = pgp()
 
+const INIT_SQL = new pgp.QueryFile("../sql/init.sql")
+
 export type DB = pgp.IDatabase<{}, pg.IClient>
 
 type EmailToken = { email: string; token: string }
@@ -92,7 +94,7 @@ async function init(
   tokenDaysToLive: number
 ): Promise<void> {
   console.log("attempting db initialization")
-  await db.any(new pgp.QueryFile("../sql/init.sql"), {
+  await db.any(INIT_SQL, {
     accessGroupValues: Object.keys(AccessGroupV.keys),
     genders: Object.keys(GenderV.keys),
     firstAdminEmail: firstAdmin.email,
