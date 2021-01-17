@@ -39,6 +39,7 @@ const pgpInit = pgp()
 const INIT_SQL = new pgp.QueryFile("../sql/init.sql")
 
 export type DB = pgp.IDatabase<{}, pg.IClient>
+type Task = pgp.ITask<{}>
 
 type EmailToken = { email: string; token: string }
 
@@ -64,7 +65,7 @@ export async function create({
   async function onFirstConnection() {
     if (clean) {
       console.log("attempting db clean")
-      await resetSchema(db)
+      await db.tx(resetSchema)
       console.log("clean successful")
       await init(db, firstAdmin, tokenDaysToLive)
     } else if (await isEmpty(db)) {
@@ -105,11 +106,9 @@ async function init(
   console.log("initialization successful")
 }
 
-async function resetSchema(db: DB): Promise<void> {
-  await db.tx("reset-schema", async (t) => {
-    await t.any('DROP SCHEMA "public" CASCADE;')
-    await t.any('CREATE SCHEMA "public";')
-  })
+async function resetSchema(db: Task): Promise<void> {
+  await db.any('DROP SCHEMA "public" CASCADE;')
+  await db.any('CREATE SCHEMA "public";')
 }
 
 export async function reset(
@@ -122,7 +121,7 @@ export async function reset(
   }: { restoreTokens: boolean; firstAdmin: EmailToken; tokenDaysToLive: number }
 ) {
   const tokens = restoreTokens ? await getTokens(db) : []
-  await resetSchema(db)
+  await db.tx(resetSchema)
   await init(db, firstAdmin, tokenDaysToLive)
   if (restoreTokens) {
     await db.any('DELETE FROM "Token"')
