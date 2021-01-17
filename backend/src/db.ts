@@ -59,10 +59,7 @@ export function create({
     token: firstAdminToken,
   }
   let firstConnection = true
-  async function connect() {
-    if (!firstConnection) {
-      return db
-    }
+  async function onFirstConnection() {
     if (clean) {
       console.log("attempting db clean")
       await resetSchema(db)
@@ -73,6 +70,12 @@ export function create({
       await init(db, firstAdmin, tokenDaysToLive)
     }
     firstConnection = false
+  }
+  async function connect() {
+    if (!firstConnection) {
+      return db
+    }
+    await onFirstConnection()
     return db
   }
   return connect
