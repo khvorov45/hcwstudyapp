@@ -62,15 +62,16 @@ export async function create({
     email: firstAdminEmail,
     token: firstAdminToken,
   }
+  const initLoaded = (t: Task) => init(t, firstAdmin, tokenDaysToLive)
   async function onFirstConnection() {
     if (clean) {
       console.log("attempting db clean")
       await db.tx(resetSchema)
       console.log("clean successful")
-      await init(db, firstAdmin, tokenDaysToLive)
+      await db.tx(initLoaded)
     } else if (await isEmpty(db)) {
       console.log("database empty")
-      await init(db, firstAdmin, tokenDaysToLive)
+      await db.tx(initLoaded)
     }
   }
   await retryAsync(onFirstConnection, { delay: 1000, maxTry: 5 })
@@ -90,7 +91,7 @@ async function isEmpty(db: DB): Promise<boolean> {
 }
 
 async function init(
-  db: DB,
+  db: Task,
   firstAdmin: EmailToken,
   tokenDaysToLive: number
 ): Promise<void> {
@@ -121,8 +122,10 @@ export async function reset(
   }: { restoreTokens: boolean; firstAdmin: EmailToken; tokenDaysToLive: number }
 ) {
   const tokens = restoreTokens ? await getTokens(db) : []
-  await db.tx(resetSchema)
-  await init(db, firstAdmin, tokenDaysToLive)
+  await db.tx(async (t) => {
+    await resetSchema(t)
+    await init(t, firstAdmin, tokenDaysToLive)
+  })
   if (restoreTokens) {
     await db.any('DELETE FROM "Token"')
     await syncRedcapUsers(db, redcapConfig)
