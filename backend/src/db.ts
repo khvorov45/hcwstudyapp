@@ -39,7 +39,7 @@ export type DB = pgp.IDatabase<{}, pg.IClient>
 
 type EmailToken = { email: string; token: string }
 
-export async function create({
+export function create({
   dbConnectionString,
   clean,
   firstAdminEmail,
@@ -51,28 +51,37 @@ export async function create({
   firstAdminEmail: string
   firstAdminToken: string
   tokenDaysToLive: number
-}): Promise<DB> {
+}): () => Promise<DB> {
   console.log(`connecting to ${dbConnectionString}`)
   const db = pgpInit(dbConnectionString)
   const firstAdmin: EmailToken = {
     email: firstAdminEmail,
     token: firstAdminToken,
   }
-  try {
-    await db.connect()
-    console.log(`connected successfully to ${dbConnectionString}`)
-  } catch (e) {
-    throw Error(`could not connect to ${dbConnectionString}: ${e.message}`)
+  let firstConnection = true
+  async function connect() {
+    try {
+      await db.connect()
+      console.log(`connected successfully to ${dbConnectionString}`)
+    } catch (e) {
+      throw Error(`could not connect to ${dbConnectionString}: ${e.message}`)
+    }
+    if (!firstConnection) {
+      return db
+    }
+    if (clean) {
+      console.log("cleaning db")
+      await resetSchema(db)
+      await init(db, firstAdmin, tokenDaysToLive)
+    } else if (await isEmpty(db)) {
+      console.log("database empty, initializing")
+      await init(db, firstAdmin, tokenDaysToLive)
+    }
+    firstConnection = false
+    return db
   }
-  if (clean) {
-    console.log("cleaning db")
-    await resetSchema(db)
-    await init(db, firstAdmin, tokenDaysToLive)
-  } else if (await isEmpty(db)) {
-    console.log("database empty, initializing")
-    await init(db, firstAdmin, tokenDaysToLive)
-  }
-  return db
+  connect()
+  return connect
 }
 
 async function getTableNames(db: DB): Promise<string[]> {
