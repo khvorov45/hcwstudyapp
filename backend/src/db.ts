@@ -32,6 +32,7 @@ import {
   exportWeeklySurvey,
 } from "./redcap"
 import { addDays } from "./util"
+import { retryAsync } from "ts-retry"
 
 const pgpInit = pgp()
 
@@ -39,7 +40,7 @@ export type DB = pgp.IDatabase<{}, pg.IClient>
 
 type EmailToken = { email: string; token: string }
 
-export function create({
+export async function create({
   dbConnectionString,
   clean,
   firstAdminEmail,
@@ -51,14 +52,13 @@ export function create({
   firstAdminEmail: string
   firstAdminToken: string
   tokenDaysToLive: number
-}): () => Promise<DB> {
+}): Promise<DB> {
   console.log(`db url: ${dbConnectionString}`)
   const db = pgpInit(dbConnectionString)
   const firstAdmin: EmailToken = {
     email: firstAdminEmail,
     token: firstAdminToken,
   }
-  let firstConnection = true
   async function onFirstConnection() {
     if (clean) {
       console.log("attempting db clean")
@@ -69,16 +69,9 @@ export function create({
       console.log("database empty")
       await init(db, firstAdmin, tokenDaysToLive)
     }
-    firstConnection = false
   }
-  async function connect() {
-    if (!firstConnection) {
-      return db
-    }
-    await onFirstConnection()
-    return db
-  }
-  return connect
+  await retryAsync(onFirstConnection, { delay: 1000, maxTry: 5 })
+  return db
 }
 
 async function getTableNames(db: DB): Promise<string[]> {

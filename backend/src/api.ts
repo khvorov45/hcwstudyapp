@@ -48,7 +48,7 @@ import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
 
 export function getRoutes(
-  db: () => Promise<DB>,
+  db: DB,
   redcapConfig: RedcapConfig,
   emailConfig: {
     emailer: Emailer
@@ -70,8 +70,8 @@ export function getRoutes(
 
   // Reset
   routes.delete("/reset", async (req: Request, res: Response) => {
-    await validateAdmin(req, await db())
-    await reset(await db(), redcapConfig, {
+    await validateAdmin(req, db)
+    await reset(db, redcapConfig, {
       restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
       tokenDaysToLive,
       firstAdmin: { email: firstAdminEmail, token: firstAdminToken },
@@ -81,32 +81,32 @@ export function getRoutes(
 
   // Users
   routes.get("/users", async (req: Request, res: Response) => {
-    await validateAdmin(req, await db())
-    res.json(await getUsers(await db()))
+    await validateAdmin(req, db)
+    res.json(await getUsers(db))
   })
   routes.post("/users", async (req: Request, res: Response) => {
-    await validateAdmin(req, await db())
+    await validateAdmin(req, db)
     const us = decode(t.array(UserV), req.body)
-    await insertUsers(await db(), us)
+    await insertUsers(db, us)
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/users", async (req: Request, res: Response) => {
-    await validateAdmin(req, await db())
-    await deleteUser(await db(), decode(t.string, req.query.email))
+    await validateAdmin(req, db)
+    await deleteUser(db, decode(t.string, req.query.email))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users", async (req: Request, res: Response) => {
-    await validateAdmin(req, await db())
-    await updateUser(await db(), decode(UserV, req.body))
+    await validateAdmin(req, db)
+    await updateUser(db, decode(UserV, req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users/redcap/sync", async (req: Request, res: Response) => {
-    await validateAdmin(req, await db())
-    await syncRedcapUsers(await db(), redcapConfig)
+    await validateAdmin(req, db)
+    await syncRedcapUsers(db, redcapConfig)
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.get("/users/redcap/sync", async (req: Request, res: Response) => {
-    res.json(await getLastUserUpdate(await db()))
+    res.json(await getLastUserUpdate(db))
   })
 
   // Auth
@@ -114,7 +114,7 @@ export function getRoutes(
     const email = decode(t.string, req.query.email)
     const type = decode(TokenTypeV, req.query.type)
     const token = createToken(email, tokenDaysToLive, type)
-    await insertTokens(await db(), [token])
+    await insertTokens(db, [token])
     if (type === "session") {
       await emailLoginLink(emailConfig.emailer, {
         email,
@@ -127,123 +127,117 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.get("/auth/token/verify", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
+    const u = await validateUser(req, db)
     res.json({ email: u.email, accessGroup: u.accessGroup })
   })
   routes.put("/auth/token", async (req: Request, res: Response) => {
-    res.json(
-      await refreshSessionToken(await db(), extractToken(req), tokenDaysToLive)
-    )
+    res.json(await refreshSessionToken(db, extractToken(req), tokenDaysToLive))
   })
   routes.delete("/auth/token", async (req: Request, res: Response) => {
-    await deleteToken(await db(), extractToken(req))
+    await deleteToken(db, extractToken(req))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete(
     "/auth/token/user/session",
     async (req: Request, res: Response) => {
-      await deleteUserTokens(await db(), extractToken(req))
+      await deleteUserTokens(db, extractToken(req))
       res.status(StatusCodes.NO_CONTENT).end()
     }
   )
 
   // Participants
   routes.get("/participants", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getParticipantsSubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getParticipantsSubset(db, u.accessGroup))
   })
   routes.post("/participants", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
+    const u = await validateUser(req, db)
     await insertParticipants(
-      await db(),
+      db,
       decode(t.array(ParticipantV), req.body),
       u.accessGroup
     )
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/participants", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    await deleteParticipant(
-      await db(),
-      decode(t.string, req.query.pid),
-      u.accessGroup
-    )
+    const u = await validateUser(req, db)
+    await deleteParticipant(db, decode(t.string, req.query.pid), u.accessGroup)
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put(
     "/participants/redcap/sync",
     async (req: Request, res: Response) => {
-      await validateUser(req, await db())
-      await syncRedcapParticipants(await db(), redcapConfig)
+      await validateUser(req, db)
+      await syncRedcapParticipants(db, redcapConfig)
       res.status(StatusCodes.NO_CONTENT).end()
     }
   )
   routes.get(
     "/participants/redcap/sync",
     async (req: Request, res: Response) => {
-      res.json(await getLastParticipantUpdate(await db()))
+      res.json(await getLastParticipantUpdate(db))
     }
   )
 
   // Redcap IDs
   routes.get("/redcap-id", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getRedcapIdSubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getRedcapIdSubset(db, u.accessGroup))
   })
 
   // Withdrawn
   routes.get("/withdrawn", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getWithdrawnSubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getWithdrawnSubset(db, u.accessGroup))
   })
 
   // Vaccination history
   routes.get("/vaccination", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getVaccinationSubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getVaccinationSubset(db, u.accessGroup))
   })
 
   // Schedule
   routes.get("/schedule", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getScheduleSubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getScheduleSubset(db, u.accessGroup))
   })
 
   // Weekly survey
   routes.get("/weekly-survey", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getWeeklySurveySubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getWeeklySurveySubset(db, u.accessGroup))
   })
 
   // Viruses
   routes.get("/virus", async (req: Request, res: Response) => {
-    await validateUser(req, await db())
-    res.json(await getViruses(await db()))
+    await validateUser(req, db)
+    res.json(await getViruses(db))
   })
   routes.post("/virus", async (req: Request, res: Response) => {
-    await validateUnrestricted(req, await db())
-    await insertViruses(await db(), decode(t.array(VirusV), req.body))
+    await validateUnrestricted(req, db)
+    await insertViruses(db, decode(t.array(VirusV), req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/virus/all", async (req: Request, res: Response) => {
-    await validateUnrestricted(req, await db())
-    await deleteAllViruses(await db())
+    await validateUnrestricted(req, db)
+    await deleteAllViruses(db)
     res.status(StatusCodes.NO_CONTENT).end()
   })
 
   // Serology
   routes.get("/serology", async (req: Request, res: Response) => {
-    const u = await validateUser(req, await db())
-    res.json(await getSerologySubset(await db(), u.accessGroup))
+    const u = await validateUser(req, db)
+    res.json(await getSerologySubset(db, u.accessGroup))
   })
   routes.post("/serology", async (req: Request, res: Response) => {
-    await validateUnrestricted(req, await db())
-    await insertSerology(await db(), decode(t.array(SerologyV), req.body))
+    await validateUnrestricted(req, db)
+    await insertSerology(db, decode(t.array(SerologyV), req.body))
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/serology/all", async (req: Request, res: Response) => {
-    await validateUnrestricted(req, await db())
-    await deleteAllSerology(await db())
+    await validateUnrestricted(req, db)
+    await deleteAllSerology(db)
     res.status(StatusCodes.NO_CONTENT).end()
   })
 
