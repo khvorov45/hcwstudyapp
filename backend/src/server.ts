@@ -51,7 +51,7 @@ async function main() {
   app.use(
     `/${args.prefix}`,
     getRoutes(
-      await createDB(args)(),
+      createDB(args),
       {
         url: args.redcapUrl,
         token2020: args.redcapToken2020,
