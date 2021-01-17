@@ -35,6 +35,7 @@
     "newtype-ts": "^0.3.4",
     "nodemailer": "^6.4.17",
     "pg-promise": "^10.8.6",
+    "ts-retry": "^2.2.1",
     "yargs": "^16.2.0"
   },
   "devDependencies": {

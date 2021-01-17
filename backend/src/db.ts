@@ -32,6 +32,7 @@ import {
   exportWeeklySurvey,
 } from "./redcap"
 import { addDays } from "./util"
+import { retryAsync } from "ts-retry"
 
 const pgpInit = pgp()
 
@@ -52,26 +53,24 @@ export async function create({
   firstAdminToken: string
   tokenDaysToLive: number
 }): Promise<DB> {
-  console.log(`connecting to ${dbConnectionString}`)
+  console.log(`db url: ${dbConnectionString}`)
   const db = pgpInit(dbConnectionString)
   const firstAdmin: EmailToken = {
     email: firstAdminEmail,
     token: firstAdminToken,
   }
-  try {
-    await db.connect()
-    console.log(`connected successfully to ${dbConnectionString}`)
-  } catch (e) {
-    throw Error(`could not connect to ${dbConnectionString}: ${e.message}`)
+  async function onFirstConnection() {
+    if (clean) {
+      console.log("attempting db clean")
+      await resetSchema(db)
+      console.log("clean successful")
+      await init(db, firstAdmin, tokenDaysToLive)
+    } else if (await isEmpty(db)) {
+      console.log("database empty")
+      await init(db, firstAdmin, tokenDaysToLive)
+    }
   }
-  if (clean) {
-    console.log("cleaning db")
-    await resetSchema(db)
-    await init(db, firstAdmin, tokenDaysToLive)
-  } else if (await isEmpty(db)) {
-    console.log("database empty, initializing")
-    await init(db, firstAdmin, tokenDaysToLive)
-  }
+  await retryAsync(onFirstConnection, { delay: 1000, maxTry: 5 })
   return db
 }
 
@@ -92,6 +91,7 @@ async function init(
   firstAdmin: EmailToken,
   tokenDaysToLive: number
 ): Promise<void> {
+  console.log("attempting db initialization")
   await db.any(new pgp.QueryFile("../sql/init.sql"), {
     accessGroupValues: Object.keys(AccessGroupV.keys),
     genders: Object.keys(GenderV.keys),
@@ -100,6 +100,7 @@ async function init(
     firstAdminTokenExpires: addDays(new Date(), tokenDaysToLive),
     sites: Object.keys(SiteV.keys),
   })
+  console.log("initialization successful")
 }
 
 async function resetSchema(db: DB): Promise<void> {
