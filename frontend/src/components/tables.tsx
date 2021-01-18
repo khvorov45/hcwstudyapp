@@ -41,7 +41,7 @@ import {
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
-import { Moment } from "moment"
+import moment, { Moment } from "moment"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -537,9 +537,23 @@ function Summary({
   participants: Participant[]
   vaccinationCounts: { pid: string; count: number }[]
 }) {
+  const now = moment()
+  const participantsWithAge = participants.map((p) => ({
+    age: now.diff(p.dob, "years"),
+    ...p,
+  }))
   const countsBySite = useCounted(participants, "site")
   const countsByVac = useCounted(vaccinationCounts, "count")
   const countsByGender = useCounted(participants, "gender")
+  const ageBySite = useMemo(
+    () =>
+      d3.rollup(
+        participantsWithAge,
+        (v) => Math.round(d3.mean(v.map((v) => v.age)) ?? 0),
+        (d) => d.site
+      ),
+    [participantsWithAge]
+  )
 
   const countsByGenderSite = useMemo(
     () =>
@@ -583,6 +597,12 @@ function Summary({
 
   type Row = { prevVac?: string | number; total?: number }
 
+  const ageRow: Row = {
+    prevVac: "Age: mean",
+    total: Math.round(d3.mean(participantsWithAge, (v) => v.age) ?? 0),
+    ...toWide(ageBySite),
+  }
+
   const bottomRow = {
     prevVac: "Total",
     total: participants.length,
@@ -610,7 +630,8 @@ function Summary({
     })
   )
 
-  const counts = emptyRow("Vaccinations")
+  const counts = [ageRow]
+    .concat(emptyRow("Vaccinations"))
     .concat(countsByVacSiteWithMarginal)
     .concat(emptyRow("Gender"))
     .concat(countsByGenderSiteWithMarginal)
