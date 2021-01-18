@@ -18,9 +18,18 @@ export default function Plots({
     ...p,
   }))
 
+  const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
+
   return (
     <div style={{ display: "flex" }}>
       <PlotColumn title="Overall" participantsExtra={participantsExtra} />
+      {sites.map((s) => (
+        <PlotColumn
+          key={s}
+          title={s[0].toUpperCase() + s.slice(1)}
+          participantsExtra={participantsExtra.filter((p) => p.site === s)}
+        />
+      ))}
     </div>
   )
 }
@@ -82,7 +91,13 @@ function PlotColumn({
           data={Array.from(priorVaccinationCounts, ([k, v]) => ({
             priorVaccinations: k ?? "(missing)",
             count: v,
-          }))}
+          })).sort((a, b) =>
+            a.priorVaccinations > b.priorVaccinations
+              ? 1
+              : a.priorVaccinations < b.priorVaccinations
+              ? -1
+              : 0
+          )}
           xLab="Known prior vaccinations"
           xKey="priorVaccinations"
           yKey="count"
