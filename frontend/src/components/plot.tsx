@@ -11,24 +11,42 @@ export default function Plots({
   participants: Participant[]
   vaccinationCounts: { pid: string; count: number }[]
 }) {
+  const now = moment()
+  const participantsExtra = participants.map((p) => ({
+    age: now.diff(p.dob, "year"),
+    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
+    ...p,
+  }))
+
+  return (
+    <div style={{ display: "flex" }}>
+      <PlotColumn title="Overall" participantsExtra={participantsExtra} />
+    </div>
+  )
+}
+
+function PlotColumn({
+  title,
+  participantsExtra,
+}: {
+  title: string
+  participantsExtra: (Participant & { age: number; prevVac: number })[]
+}) {
   const genderCounts = d3.rollup(
-    participants,
+    participantsExtra,
     (v) => v.length,
     (p) => p.gender
   )
 
   const priorVaccinationCounts = d3.rollup(
-    vaccinationCounts,
+    participantsExtra,
     (v) => v.length,
-    (p) => p.count
+    (p) => p.prevVac
   )
-
-  const now = moment()
-  const ages = participants.map((p) => now.diff(p.dob, "year"))
 
   const agesBinned = d3
     .bin()
-    .thresholds([18, 30, 40, 50, 66])(ages)
+    .thresholds([18, 30, 40, 50, 66])(participantsExtra.map((p) => p.age))
     .map((a) => ({
       range:
         a.x0! < 18
@@ -38,28 +56,38 @@ export default function Plots({
           : `${a.x0}-${a.x1! - 1}`,
       count: a.length,
     }))
-
   return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
-      <GenericBar data={agesBinned} xLab="Age" xKey="range" yKey="count" />
-      <GenericBar
-        data={Array.from(genderCounts, ([k, v]) => ({
-          gender: k ?? "(missing)",
-          count: v,
-        }))}
-        xLab="Gender"
-        xKey="gender"
-        yKey="count"
-      />
-      <GenericBar
-        data={Array.from(priorVaccinationCounts, ([k, v]) => ({
-          priorVaccinations: k ?? "(missing)",
-          count: v,
-        }))}
-        xLab="Known prior vaccinations"
-        xKey="priorVaccinations"
-        yKey="count"
-      />
+    <div>
+      <div
+        style={{
+          fontSize: "large",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
+        {title}
+      </div>
+      <div>
+        <GenericBar data={agesBinned} xLab="Age" xKey="range" yKey="count" />
+        <GenericBar
+          data={Array.from(genderCounts, ([k, v]) => ({
+            gender: k ?? "(missing)",
+            count: v,
+          }))}
+          xLab="Gender"
+          xKey="gender"
+          yKey="count"
+        />
+        <GenericBar
+          data={Array.from(priorVaccinationCounts, ([k, v]) => ({
+            priorVaccinations: k ?? "(missing)",
+            count: v,
+          }))}
+          xLab="Known prior vaccinations"
+          xKey="priorVaccinations"
+          yKey="count"
+        />
+      </div>
     </div>
   )
 }
