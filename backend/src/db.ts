@@ -39,7 +39,7 @@ const pgpInit = pgp()
 const INIT_SQL = new pgp.QueryFile("../sql/init.sql")
 
 export type DB = pgp.IDatabase<{}, pg.IClient>
-type Task = pgp.ITask<{}>
+export type Task = pgp.ITask<{}>
 
 type EmailToken = { email: string; token: string }
 
@@ -65,21 +65,23 @@ export async function create({
   const initLoaded = async (t: Task) =>
     await init(t, firstAdmin, tokenDaysToLive)
   async function onFirstConnection() {
-    if (clean) {
-      console.log("attempting db clean")
-      await db.tx(resetSchema)
-      console.log("clean successful")
-      await db.tx(initLoaded)
-    } else if (await isEmpty(db)) {
-      console.log("database empty")
-      await db.tx(initLoaded)
-    }
+    db.tx(async (t) => {
+      if (clean) {
+        console.log("attempting db clean")
+        await resetSchema(t)
+        console.log("clean successful")
+        await initLoaded(t)
+      } else if (await isEmpty(t)) {
+        console.log("database empty")
+        await initLoaded(t)
+      }
+    })
   }
   await retryAsync(onFirstConnection, { delay: 1000, maxTry: 5 })
   return db
 }
 
-async function getTableNames(db: DB): Promise<string[]> {
+async function getTableNames(db: Task): Promise<string[]> {
   return await db.map(
     "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';",
     [],
@@ -87,7 +89,7 @@ async function getTableNames(db: DB): Promise<string[]> {
   )
 }
 
-async function isEmpty(db: DB): Promise<boolean> {
+async function isEmpty(db: Task): Promise<boolean> {
   return (await getTableNames(db)).length === 0
 }
 
@@ -114,7 +116,7 @@ async function resetSchema(db: Task): Promise<void> {
 }
 
 export async function reset(
-  db: DB,
+  db: Task,
   redcapConfig: RedcapConfig,
   {
     restoreTokens,
@@ -123,28 +125,24 @@ export async function reset(
   }: { restoreTokens: boolean; firstAdmin: EmailToken; tokenDaysToLive: number }
 ) {
   const tokens = restoreTokens ? await getTokens(db) : []
-  await db.tx(async (t) => {
-    await resetSchema(t)
-    await init(t, firstAdmin, tokenDaysToLive)
-  })
+  await resetSchema(db)
+  await init(db, firstAdmin, tokenDaysToLive)
   if (restoreTokens) {
     await db.any('DELETE FROM "Token"')
     await syncRedcapUsers(db, redcapConfig)
     const users = await getUsers(db)
     const emails = users.map((u) => u.email)
-    db.tx(async (t) => {
-      await insertIntoTable(
-        t,
-        tokens.filter((tok) => emails.includes(tok.user)),
-        "Token"
-      )
-    })
+    await insertIntoTable(
+      db,
+      tokens.filter((tok) => emails.includes(tok.user)),
+      "Token"
+    )
   }
 }
 
 /** Get site subset for tables with PID as FK */
 async function getTableSubset(
-  db: DB,
+  db: Task,
   a: AccessGroup,
   t:
     | "Vaccination"
@@ -215,15 +213,15 @@ async function insertIntoTable<T>(
 
 // Users ======================================================================
 
-export async function getUsers(db: DB): Promise<User[]> {
+export async function getUsers(db: Task): Promise<User[]> {
   return await db.any('SELECT * FROM "User"')
 }
 
-export async function getUserByEmail(db: DB, email: string): Promise<User> {
+export async function getUserByEmail(db: Task, email: string): Promise<User> {
   return await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
 }
 
-export async function getUserByToken(db: DB, token: string): Promise<User> {
+export async function getUserByToken(db: Task, token: string): Promise<User> {
   return await db.one(
     `SELECT * FROM "User" WHERE "email" =
     (SELECT "user" FROM "Token"
@@ -232,19 +230,19 @@ export async function getUserByToken(db: DB, token: string): Promise<User> {
   )
 }
 
-export async function insertUsers(db: DB, us: User[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, us, "User"))
+export async function insertUsers(db: Task, us: User[]): Promise<void> {
+  await insertIntoTable(db, us, "User")
 }
 
-export async function deleteUser(db: DB, email: string): Promise<void> {
+export async function deleteUser(db: Task, email: string): Promise<void> {
   await db.any('DELETE FROM "User" WHERE email=$1', [email])
 }
 
-export async function deleteUsers(db: DB, emails: string[]): Promise<void> {
+export async function deleteUsers(db: Task, emails: string[]): Promise<void> {
   await db.any('DELETE FROM "User" WHERE email IN ($1:csv)', [emails])
 }
 
-export async function updateUser(db: DB, u: User): Promise<void> {
+export async function updateUser(db: Task, u: User): Promise<void> {
   const res = await db.result(
     pgpInit.helpers.update(u, ["accessGroup"], "User") + " WHERE email = $1",
     [u.email]
@@ -257,7 +255,7 @@ export async function updateUser(db: DB, u: User): Promise<void> {
 /** Will not touch the admins, drop everyone else and replace with redcap users
  */
 export async function syncRedcapUsers(
-  db: DB,
+  db: Task,
   redcapConfig: RedcapConfig
 ): Promise<void> {
   const [redcapUsers, dbUsers, tokens] = await Promise.all([
@@ -277,49 +275,47 @@ export async function syncRedcapUsers(
   const dbAdminEmails = dbUsers
     .filter((u) => u.accessGroup === "admin")
     .map((u) => u.email)
-  await db.tx(
-    async (t) =>
-      await insertIntoTable(
-        t,
-        tokens.filter(
-          (t) =>
-            !dbAdminEmails.includes(t.user) && redcapEmails.includes(t.user)
-        ),
-        "Token"
-      )
+
+  await insertIntoTable(
+    db,
+    tokens.filter(
+      (t) => !dbAdminEmails.includes(t.user) && redcapEmails.includes(t.user)
+    ),
+    "Token"
   )
+
   await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
 
-export async function getLastUserUpdate(db: DB): Promise<Date | null> {
+export async function getLastUserUpdate(db: Task): Promise<Date | null> {
   return await db.one('SELECT "user" FROM "LastRedcapSync";', [], (v) => v.user)
 }
 
 // Tokens =====================================================================
 
 async function getTokens(
-  db: DB
+  db: Task
 ): Promise<{ user: string; hash: string; expires: Date; type: TokenType }[]> {
   return await db.any('SELECT * FROM "Token"')
 }
 
-export async function insertTokens(db: DB, tokens: Token[]) {
+export async function insertTokens(db: Task, tokens: Token[]) {
   const tokensHashed = tokens.map((t) => ({
     user: t.user,
     hash: hash(t.token),
     type: t.type,
     expires: t.expires,
   }))
-  await db.tx(async (t) => await insertIntoTable(t, tokensHashed, "Token"))
+  await insertIntoTable(db, tokensHashed, "Token")
 }
 
-export async function deleteToken(db: DB, token: string) {
+export async function deleteToken(db: Task, token: string) {
   await db.any('DELETE FROM "Token" WHERE "hash" = $1', [hash(token)])
 }
 
 /**Will only update a valid token */
 export async function refreshSessionToken(
-  db: DB,
+  db: Task,
   oldToken: string,
   tokenDayesToLive: number
 ): Promise<string> {
@@ -339,7 +335,7 @@ export async function refreshSessionToken(
   return newToken
 }
 
-export async function deleteUserTokens(db: DB, token: string): Promise<void> {
+export async function deleteUserTokens(db: Task, token: string): Promise<void> {
   const res = await db.result(
     `DELETE FROM "Token"
     WHERE "user" = (SELECT "user" FROM "Token" WHERE "hash" = $1)
@@ -354,7 +350,7 @@ export async function deleteUserTokens(db: DB, token: string): Promise<void> {
 // Particpants ================================================================
 
 export async function getParticipantsSubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<Participant[]> {
   return isSite(a)
@@ -363,18 +359,18 @@ export async function getParticipantsSubset(
 }
 
 export async function insertParticipants(
-  db: DB,
+  db: Task,
   ps: Participant[],
   a: AccessGroup
 ): Promise<void> {
   if (isSite(a) && ps.find((p) => p.site !== a)) {
     throw Error("UNAUTHORIZED: participants with invalid site")
   }
-  await db.tx(async (t) => await insertIntoTable(t, ps, "Participant"))
+  await insertIntoTable(db, ps, "Participant")
 }
 
 export async function deleteParticipant(
-  db: DB,
+  db: Task,
   pid: string,
   a: AccessGroup
 ): Promise<void> {
@@ -394,7 +390,7 @@ export async function deleteParticipant(
 }
 
 export async function syncRedcapParticipants(
-  db: DB,
+  db: Task,
   redcapConfig: RedcapConfig
 ) {
   // Wait for this to succeed before doing anyting else
@@ -452,7 +448,7 @@ export async function syncRedcapParticipants(
   await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
 }
 
-export async function getLastParticipantUpdate(db: DB): Promise<Date | null> {
+export async function getLastParticipantUpdate(db: Task): Promise<Date | null> {
   return await db.one(
     'SELECT "participant" FROM "LastRedcapSync";',
     [],
@@ -463,95 +459,95 @@ export async function getLastParticipantUpdate(db: DB): Promise<Date | null> {
 // Redcap ids =================================================================
 
 export async function getRedcapIdSubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<RedcapId[]> {
   return await getTableSubset(db, a, "RedcapId")
 }
 
-async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, ids, "RedcapId"))
+async function insertRedcapIds(db: Task, ids: RedcapId[]): Promise<void> {
+  await insertIntoTable(db, ids, "RedcapId")
 }
 
 // Withdrawn =================================================================
 
 export async function getWithdrawnSubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<RedcapId[]> {
   return await getTableSubset(db, a, "Withdrawn")
 }
 
-async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, w, "Withdrawn"))
+async function insertWithdrawn(db: Task, w: Withdrawn[]): Promise<void> {
+  await insertIntoTable(db, w, "Withdrawn")
 }
 
 // Vaccination history ========================================================
 
 export async function getVaccinationSubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<Vaccination[]> {
   return await getTableSubset(db, a, "Vaccination")
 }
 
-async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, v, "Vaccination"))
+async function insertVaccination(db: Task, v: Vaccination[]): Promise<void> {
+  await insertIntoTable(db, v, "Vaccination")
 }
 
 // Schedule ===================================================================
 
 export async function getScheduleSubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<Schedule[]> {
   return await getTableSubset(db, a, "Schedule")
 }
 
-async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, v, "Schedule"))
+async function insertSchedule(db: Task, v: Schedule[]): Promise<void> {
+  await insertIntoTable(db, v, "Schedule")
 }
 
 // Weekly survey ==============================================================
 
 export async function getWeeklySurveySubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<Schedule[]> {
   return await getTableSubset(db, a, "WeeklySurvey")
 }
 
-async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, s, "WeeklySurvey"))
+async function insertWeeklySurvey(db: Task, s: WeeklySurvey[]): Promise<void> {
+  await insertIntoTable(db, s, "WeeklySurvey")
 }
 
 // Viruses ====================================================================
 
-export async function getViruses(db: DB): Promise<Virus[]> {
+export async function getViruses(db: Task): Promise<Virus[]> {
   return await db.any('SELECT * FROM "Virus"')
 }
 
-export async function insertViruses(db: DB, vs: Virus[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, vs, "Virus"))
+export async function insertViruses(db: Task, vs: Virus[]): Promise<void> {
+  await insertIntoTable(db, vs, "Virus")
 }
 
-export async function deleteAllViruses(db: DB): Promise<void> {
+export async function deleteAllViruses(db: Task): Promise<void> {
   await db.any('DELETE FROM "Virus"')
 }
 
 // Serology ===================================================================
 
 export async function getSerologySubset(
-  db: DB,
+  db: Task,
   a: AccessGroup
 ): Promise<Serology[]> {
   return await getTableSubset(db, a, "Serology")
 }
 
-export async function insertSerology(db: DB, ss: Serology[]): Promise<void> {
-  await db.tx(async (t) => await insertIntoTable(t, ss, "Serology"))
+export async function insertSerology(db: Task, ss: Serology[]): Promise<void> {
+  await insertIntoTable(db, ss, "Serology")
 }
 
-export async function deleteAllSerology(db: DB): Promise<void> {
+export async function deleteAllSerology(db: Task): Promise<void> {
   await db.any('DELETE FROM "Serology"')
 }
