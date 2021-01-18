@@ -595,36 +595,34 @@ function Summary({
     })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
   }
 
-  type Row = { prevVac?: string | number; total?: number | string }
+  type Row = { label?: string | number; total?: number | string }
 
   const ageRow: Row = {
-    prevVac: "Age: mean (sd)",
+    label: "Age: mean (sd)",
     total: summariseNumerical(participantsExtra.map((p) => p.age)),
     ...toWide(ageBySite),
   }
 
   const bottomRow = {
-    prevVac: "Total",
+    label: "Total",
     total: participants.length,
     ...toWide(countsBySite),
   }
 
   const emptyRow: (title?: string | number) => Row[] = (
     title?: string | number
-  ) => [{ prevVac: title, total: undefined }]
+  ) => [{ label: title, total: undefined }]
 
   const countsByVacSiteWithMarginal = Array.from(countsByVacSite, ([k, v]) => ({
-    prevVac: k ? k.toString() : k,
+    label: k ? k.toString() : k,
     ...toWide(v),
     total: countsByVac.get(k),
-  })).sort((a, b) =>
-    a.prevVac > b.prevVac ? 1 : a.prevVac < b.prevVac ? -1 : 0
-  )
+  })).sort((a, b) => (a.label > b.label ? 1 : a.label < b.label ? -1 : 0))
 
   const countsByGenderSiteWithMarginal = Array.from(
     countsByGenderSite,
     ([k, v]) => ({
-      prevVac: k ? k.toString() : "(missing)",
+      label: k ? k.toString() : "(missing)",
       ...toWide(v),
       total: countsByGender.get(k),
     })
@@ -642,7 +640,7 @@ function Summary({
       {
         Header: "",
         id: "var",
-        accessor: (p: any) => p.prevVac,
+        accessor: (p: any) => p.label,
       },
       {
         Header: "Site",
@@ -665,8 +663,8 @@ function Summary({
       data={counts}
       overheadColumnId="Site_1"
       isLabelRow={(r) =>
-        r.prevVac && typeof r.prevVac === "string"
-          ? ["Vaccinations", "Gender", "Total"].includes(r.prevVac)
+        r.label && typeof r.label === "string"
+          ? ["Vaccinations", "Gender", "Total"].includes(r.label)
           : false
       }
     />
