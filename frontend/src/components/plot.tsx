@@ -1,15 +1,73 @@
-import { BarChart, XAxis, YAxis, Tooltip, Bar, Label } from "recharts"
+import {
+  BarChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Bar,
+  Label,
+  LineChart,
+  Line,
+} from "recharts"
 import { useTheme } from "@material-ui/core"
-import { Participant } from "../lib/data"
+import { Participant, Serology } from "../lib/data"
 import * as d3 from "d3-array"
+import React from "react"
+import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
+import { SimpleNav } from "./nav"
+import detectScrollbarWidth from "../lib/scrollbar-width"
+import { useWindowSize } from "../lib/hooks"
 
 export default function Plots({
+  participantsExtra,
+  serology,
+}: {
+  participantsExtra: (Participant & { age: number; prevVac: number })[]
+  serology: Serology[]
+}) {
+  const serologyExtra = serology.map((s) => ({
+    site: participantsExtra.find((p) => p.pid === s.pid)?.site,
+    ...s,
+  }))
+  const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
+  const subpage = routeMatch?.params.subpage
+  const windowSize = useWindowSize()
+  return (
+    <div>
+      <SimpleNav
+        links={[
+          { name: "Baseline", link: "/plots/baseline" },
+          { name: "Serology", link: "/plots/serology" },
+        ]}
+        active={({ link }) => link === `/plots/${subpage}`}
+      />
+      <div
+        style={{
+          height: windowSize.height - 50 - 50 - detectScrollbarWidth(),
+          overflow: "scroll",
+        }}
+      >
+        <Switch>
+          <Route exact path="/plots">
+            <Redirect to="/plots/baseline" />
+          </Route>
+          <Route exact path="/plots/baseline">
+            <BaselinePlots participantsExtra={participantsExtra} />
+          </Route>
+          <Route exact path="/plots/serology">
+            {"serology plots"}
+          </Route>
+        </Switch>
+      </div>
+    </div>
+  )
+}
+
+function BaselinePlots({
   participantsExtra,
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
-
   return (
     <div style={{ display: "flex" }}>
       <PlotColumn title="Overall" participantsExtra={participantsExtra} />

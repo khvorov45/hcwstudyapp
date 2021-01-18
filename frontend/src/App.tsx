@@ -379,12 +379,14 @@ export default function App() {
                 />
               </AuthRoute>
               <AuthRoute
-                exact
                 authStatus={auth.status}
                 user={auth.result}
                 path="/plots"
               >
-                <Plots participantsExtra={participantsExtra} />
+                <Plots
+                  participantsExtra={participantsExtra}
+                  serology={serology}
+                />
               </AuthRoute>
             </Switch>
           </div>

@@ -4,6 +4,7 @@
         "hljs",
         "httr",
         "iconify",
+        "pids",
         "tibble"
     ]
 }
