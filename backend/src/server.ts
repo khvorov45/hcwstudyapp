@@ -21,7 +21,12 @@ async function main() {
       "frontendRoot",
     ])
     .boolean(["clean", "cors"])
-    .number(["backendPort", "tokenDaysToLive"])
+    .number([
+      "backendPort",
+      "tokenDaysToLive",
+      "firstConnectionRetryDelayMs",
+      "firstConnectionRetryMaxAttempts",
+    ])
     .default("config", "hsa-config.json")
     .default(
       "dbConnectionString",
@@ -39,6 +44,8 @@ async function main() {
     .default("clean", false)
     .default("cors", false)
     .default("tokenDaysToLive", 30)
+    .default("firstConnectionRetryDelayMs", 1000)
+    .default("firstConnectionRetryMaxAttempts", 5)
     .default("backendPort", 7001).argv
 
   // Create the server

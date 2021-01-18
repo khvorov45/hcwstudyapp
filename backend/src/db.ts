@@ -49,12 +49,16 @@ export async function create({
   firstAdminEmail,
   firstAdminToken,
   tokenDaysToLive,
+  firstConnectionRetryDelayMs,
+  firstConnectionRetryMaxAttempts,
 }: {
   dbConnectionString: string
   clean: boolean
   firstAdminEmail: string
   firstAdminToken: string
   tokenDaysToLive: number
+  firstConnectionRetryDelayMs: number
+  firstConnectionRetryMaxAttempts: number
 }): Promise<DB> {
   console.log(`db url: ${dbConnectionString}`)
   const db = pgpInit(dbConnectionString)
@@ -77,7 +81,10 @@ export async function create({
       }
     })
   }
-  await retryAsync(onFirstConnection, { delay: 1000, maxTry: 5 })
+  await retryAsync(onFirstConnection, {
+    delay: firstConnectionRetryDelayMs,
+    maxTry: firstConnectionRetryMaxAttempts,
+  })
   return db
 }
 
