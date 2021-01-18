@@ -530,6 +530,12 @@ function useCounted<T extends Object, K extends keyof T>(
   return counted
 }
 
+function summariseNumerical(ns: number[]): string {
+  return `${Math.round(d3.mean(ns) ?? 0)} (${Math.round(
+    d3.deviation(ns) ?? 0
+  )})`
+}
+
 function Summary({
   participants,
   vaccinationCounts,
@@ -552,7 +558,7 @@ function Summary({
     () =>
       d3.rollup(
         participantsExtra,
-        (v) => Math.round(d3.mean(v.map((v) => v.age)) ?? 0),
+        (v) => summariseNumerical(v.map((v) => v.age)),
         (d) => d.site
       ),
     [participantsExtra]
@@ -582,18 +588,18 @@ function Summary({
 
   // Convert the counts above to the appropriate table
 
-  function toWide(v: Map<string, number>) {
+  function toWide(v: Map<string, number | string>) {
     return Array.from(v, ([k, v]) => ({
       key: k,
       value: v,
     })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
   }
 
-  type Row = { prevVac?: string | number; total?: number }
+  type Row = { prevVac?: string | number; total?: number | string }
 
   const ageRow: Row = {
-    prevVac: "Age: mean",
-    total: Math.round(d3.mean(participantsExtra, (v) => v.age) ?? 0),
+    prevVac: "Age: mean (sd)",
+    total: summariseNumerical(participantsExtra.map((p) => p.age)),
     ...toWide(ageBySite),
   }
 
