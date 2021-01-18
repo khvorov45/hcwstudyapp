@@ -334,6 +334,10 @@ function Baseline({
           Object.keys(GenderV.keys).concat(["(missing)"])
         ),
       },
+      {
+        Header: "Vaccinations",
+        accessor: (p: any) => p.prevVac,
+      },
       commonCols.site,
     ]
   }, [commonCols])
