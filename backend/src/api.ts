@@ -71,7 +71,7 @@ export function getRoutes(
 
   // Reset
   routes.delete("/reset", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateAdmin(req, db)
       await reset(db, redcapConfig, {
         restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
@@ -84,14 +84,14 @@ export function getRoutes(
 
   // Users
   routes.get("/users", async (req: Request, res: Response) => {
-    const us = await db.tx(async (db) => {
+    const us = await transaction(db, async (db) => {
       await validateAdmin(req, db)
       return await getUsers(db)
     })
     res.json(us)
   })
   routes.post("/users", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateAdmin(req, db)
       const us = decode(t.array(UserV), req.body)
       await insertUsers(db, us)
@@ -99,14 +99,14 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/users", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateAdmin(req, db)
       await deleteUser(db, decode(t.string, req.query.email))
     })
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateAdmin(req, db)
       await updateUser(db, decode(UserV, req.body))
     })
@@ -114,7 +114,7 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.put("/users/redcap/sync", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateAdmin(req, db)
       await syncRedcapUsers(db, redcapConfig)
     })
@@ -122,7 +122,7 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.get("/users/redcap/sync", async (req: Request, res: Response) => {
-    res.json(await db.tx(getLastUserUpdate))
+    res.json(await transaction(db, getLastUserUpdate))
   })
 
   // Auth
@@ -130,7 +130,7 @@ export function getRoutes(
     const email = decode(t.string, req.query.email)
     const type = decode(TokenTypeV, req.query.type)
     const token = createToken(email, tokenDaysToLive, type)
-    await db.tx(async (db) => await insertTokens(db, [token]))
+    await transaction(db, async (db) => await insertTokens(db, [token]))
     if (type === "session") {
       await emailLoginLink(emailConfig.emailer, {
         email,
@@ -143,38 +143,45 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.get("/auth/token/verify", async (req: Request, res: Response) => {
-    const u = await db.tx(async (db) => await validateUser(req, db))
+    const u = await transaction(db, async (db) => await validateUser(req, db))
     res.json(u)
   })
   routes.put("/auth/token", async (req: Request, res: Response) => {
-    const tok = await db.tx(
+    const tok = await transaction(
+      db,
       async (db) =>
         await refreshSessionToken(db, extractToken(req), tokenDaysToLive)
     )
     res.json(tok)
   })
   routes.delete("/auth/token", async (req: Request, res: Response) => {
-    await db.tx(async (db) => await deleteToken(db, extractToken(req)))
+    await transaction(
+      db,
+      async (db) => await deleteToken(db, extractToken(req))
+    )
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete(
     "/auth/token/user/session",
     async (req: Request, res: Response) => {
-      await db.tx(async (db) => await deleteUserTokens(db, extractToken(req)))
+      await transaction(
+        db,
+        async (db) => await deleteUserTokens(db, extractToken(req))
+      )
       res.status(StatusCodes.NO_CONTENT).end()
     }
   )
 
   // Participants
   routes.get("/participants", async (req: Request, res: Response) => {
-    const parts = await db.tx(async (db) => {
+    const parts = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getParticipantsSubset(db, u.accessGroup)
     })
     res.json(parts)
   })
   routes.post("/participants", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       await insertParticipants(
         db,
@@ -185,7 +192,7 @@ export function getRoutes(
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/participants", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       await deleteParticipant(
         db,
@@ -198,7 +205,7 @@ export function getRoutes(
   routes.put(
     "/participants/redcap/sync",
     async (req: Request, res: Response) => {
-      await db.tx(async (db) => {
+      await transaction(db, async (db) => {
         await validateUser(req, db)
         await syncRedcapParticipants(db, redcapConfig)
       })
@@ -208,13 +215,13 @@ export function getRoutes(
   routes.get(
     "/participants/redcap/sync",
     async (req: Request, res: Response) => {
-      res.json(await db.tx(getLastParticipantUpdate))
+      res.json(await transaction(db, getLastParticipantUpdate))
     }
   )
 
   // Redcap IDs
   routes.get("/redcap-id", async (req: Request, res: Response) => {
-    const ids = await db.tx(async (db) => {
+    const ids = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getRedcapIdSubset(db, u.accessGroup)
     })
@@ -223,7 +230,7 @@ export function getRoutes(
 
   // Withdrawn
   routes.get("/withdrawn", async (req: Request, res: Response) => {
-    const withdrawns = await db.tx(async (db) => {
+    const withdrawns = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getWithdrawnSubset(db, u.accessGroup)
     })
@@ -232,7 +239,7 @@ export function getRoutes(
 
   // Vaccination history
   routes.get("/vaccination", async (req: Request, res: Response) => {
-    const vacs = await db.tx(async (db) => {
+    const vacs = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getVaccinationSubset(db, u.accessGroup)
     })
@@ -241,7 +248,7 @@ export function getRoutes(
 
   // Schedule
   routes.get("/schedule", async (req: Request, res: Response) => {
-    const scheds = await db.tx(async (db) => {
+    const scheds = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getScheduleSubset(db, u.accessGroup)
     })
@@ -250,7 +257,7 @@ export function getRoutes(
 
   // Weekly survey
   routes.get("/weekly-survey", async (req: Request, res: Response) => {
-    const weeklySurveys = await db.tx(async (db) => {
+    const weeklySurveys = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getWeeklySurveySubset(db, u.accessGroup)
     })
@@ -259,21 +266,21 @@ export function getRoutes(
 
   // Viruses
   routes.get("/virus", async (req: Request, res: Response) => {
-    const viruses = await db.tx(async (db) => {
+    const viruses = await transaction(db, async (db) => {
       await validateUser(req, db)
       return await getViruses(db)
     })
     res.json(viruses)
   })
   routes.post("/virus", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateUnrestricted(req, db)
       await insertViruses(db, decode(t.array(VirusV), req.body))
     })
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/virus/all", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateUnrestricted(req, db)
       await deleteAllViruses(db)
     })
@@ -282,21 +289,21 @@ export function getRoutes(
 
   // Serology
   routes.get("/serology", async (req: Request, res: Response) => {
-    const serology = await db.tx(async (db) => {
+    const serology = await transaction(db, async (db) => {
       const u = await validateUser(req, db)
       return await getSerologySubset(db, u.accessGroup)
     })
     res.json(serology)
   })
   routes.post("/serology", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateUnrestricted(req, db)
       await insertSerology(db, decode(t.array(SerologyV), req.body))
     })
     res.status(StatusCodes.NO_CONTENT).end()
   })
   routes.delete("/serology/all", async (req: Request, res: Response) => {
-    await db.tx(async (db) => {
+    await transaction(db, async (db) => {
       await validateUnrestricted(req, db)
       await deleteAllSerology(db)
     })
@@ -357,4 +364,8 @@ async function validateUnrestricted(req: Request, db: Task): Promise<User> {
     throw Error("UNAUTHORIZED: insufficient access")
   }
   return u
+}
+
+async function transaction<T>(db: DB, cb: (t: Task) => T): Promise<T> {
+  return await db.tx(cb)
 }
