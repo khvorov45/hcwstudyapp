@@ -41,7 +41,7 @@ import {
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
-import { Moment } from "moment"
+import moment, { Moment } from "moment"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -530,6 +530,12 @@ function useCounted<T extends Object, K extends keyof T>(
   return counted
 }
 
+function summariseNumerical(ns: number[]): string {
+  return `${Math.round(d3.mean(ns) ?? 0)} (${Math.round(
+    d3.deviation(ns) ?? 0
+  )})`
+}
+
 function Summary({
   participants,
   vaccinationCounts,
@@ -537,80 +543,93 @@ function Summary({
   participants: Participant[]
   vaccinationCounts: { pid: string; count: number }[]
 }) {
-  const countsBySite = useCounted(participants, "site")
-  const countsByVac = useCounted(vaccinationCounts, "count")
-  const countsByGender = useCounted(participants, "gender")
+  const now = moment()
+
+  const participantsExtra = participants.map((p) => ({
+    age: now.diff(p.dob, "years"),
+    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
+    ...p,
+  }))
+
+  const countsBySite = useCounted(participantsExtra, "site")
+  const countsByVac = useCounted(participantsExtra, "prevVac")
+  const countsByGender = useCounted(participantsExtra, "gender")
+  const ageBySite = useMemo(
+    () =>
+      d3.rollup(
+        participantsExtra,
+        (v) => summariseNumerical(v.map((v) => v.age)),
+        (d) => d.site
+      ),
+    [participantsExtra]
+  )
 
   const countsByGenderSite = useMemo(
     () =>
       d3.rollup(
-        participants,
+        participantsExtra,
         (v) => v.length,
         (d) => d.gender,
         (d) => d.site
       ),
-    [participants]
-  )
-
-  const partJoinVac = useMemo(
-    () =>
-      participants.map((p) => ({
-        ...p,
-        ...vaccinationCounts.find((v) => v.pid === p.pid),
-      })),
-    [participants, vaccinationCounts]
+    [participantsExtra]
   )
 
   const countsByVacSite = useMemo(
     () =>
       d3.rollup(
-        partJoinVac,
+        participantsExtra,
         (v) => v.length,
-        (d) => d.count,
+        (d) => d.prevVac,
         (d) => d.site
       ),
-    [partJoinVac]
+    [participantsExtra]
   )
 
   // Convert the counts above to the appropriate table
 
-  function toWide(v: Map<string, number>) {
+  function toWide(v: Map<string, number | string>) {
     return Array.from(v, ([k, v]) => ({
       key: k,
       value: v,
     })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
   }
 
-  type Row = { prevVac?: string | number; total?: number }
+  type Row = { label?: string | number; total?: number | string }
+
+  const ageRow: Row = {
+    label: "Age: mean (sd)",
+    total: summariseNumerical(participantsExtra.map((p) => p.age)),
+    ...toWide(ageBySite),
+  }
 
   const bottomRow = {
-    prevVac: "Total",
+    label: "Total",
     total: participants.length,
     ...toWide(countsBySite),
   }
 
   const emptyRow: (title?: string | number) => Row[] = (
     title?: string | number
-  ) => [{ prevVac: title, total: undefined }]
+  ) => [{ label: title, total: undefined }]
 
   const countsByVacSiteWithMarginal = Array.from(countsByVacSite, ([k, v]) => ({
-    prevVac: k ? k.toString() : k,
+    label: k ? k.toString() : k,
     ...toWide(v),
     total: countsByVac.get(k),
-  })).sort((a, b) =>
-    a.prevVac > b.prevVac ? 1 : a.prevVac < b.prevVac ? -1 : 0
-  )
+  })).sort((a, b) => (a.label > b.label ? 1 : a.label < b.label ? -1 : 0))
 
   const countsByGenderSiteWithMarginal = Array.from(
     countsByGenderSite,
     ([k, v]) => ({
-      prevVac: k ? k.toString() : "(missing)",
+      label: k ? k.toString() : "(missing)",
       ...toWide(v),
       total: countsByGender.get(k),
     })
   )
 
-  const counts = emptyRow("Vaccinations")
+  const counts = [ageRow]
+    .concat(emptyRow("Vaccinations"))
     .concat(countsByVacSiteWithMarginal)
     .concat(emptyRow("Gender"))
     .concat(countsByGenderSiteWithMarginal)
@@ -621,7 +640,7 @@ function Summary({
       {
         Header: "",
         id: "var",
-        accessor: (p: any) => p.prevVac,
+        accessor: (p: any) => p.label,
       },
       {
         Header: "Site",
@@ -644,8 +663,8 @@ function Summary({
       data={counts}
       overheadColumnId="Site_1"
       isLabelRow={(r) =>
-        r.prevVac && typeof r.prevVac === "string"
-          ? ["Vaccinations", "Gender", "Total"].includes(r.prevVac)
+        r.label && typeof r.label === "string"
+          ? ["Vaccinations", "Gender", "Total"].includes(r.label)
           : false
       }
     />
