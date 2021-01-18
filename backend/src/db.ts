@@ -62,7 +62,8 @@ export async function create({
     email: firstAdminEmail,
     token: firstAdminToken,
   }
-  const initLoaded = (t: Task) => init(t, firstAdmin, tokenDaysToLive)
+  const initLoaded = async (t: Task) =>
+    await init(t, firstAdmin, tokenDaysToLive)
   async function onFirstConnection() {
     if (clean) {
       console.log("attempting db clean")
