@@ -538,52 +538,46 @@ function Summary({
   vaccinationCounts: { pid: string; count: number }[]
 }) {
   const now = moment()
-  const participantsWithAge = participants.map((p) => ({
+
+  const participantsExtra = participants.map((p) => ({
     age: now.diff(p.dob, "years"),
+    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
     ...p,
   }))
-  const countsBySite = useCounted(participants, "site")
-  const countsByVac = useCounted(vaccinationCounts, "count")
-  const countsByGender = useCounted(participants, "gender")
+
+  const countsBySite = useCounted(participantsExtra, "site")
+  const countsByVac = useCounted(participantsExtra, "prevVac")
+  const countsByGender = useCounted(participantsExtra, "gender")
   const ageBySite = useMemo(
     () =>
       d3.rollup(
-        participantsWithAge,
+        participantsExtra,
         (v) => Math.round(d3.mean(v.map((v) => v.age)) ?? 0),
         (d) => d.site
       ),
-    [participantsWithAge]
+    [participantsExtra]
   )
 
   const countsByGenderSite = useMemo(
     () =>
       d3.rollup(
-        participants,
+        participantsExtra,
         (v) => v.length,
         (d) => d.gender,
         (d) => d.site
       ),
-    [participants]
-  )
-
-  const partJoinVac = useMemo(
-    () =>
-      participants.map((p) => ({
-        ...p,
-        ...vaccinationCounts.find((v) => v.pid === p.pid),
-      })),
-    [participants, vaccinationCounts]
+    [participantsExtra]
   )
 
   const countsByVacSite = useMemo(
     () =>
       d3.rollup(
-        partJoinVac,
+        participantsExtra,
         (v) => v.length,
-        (d) => d.count,
+        (d) => d.prevVac,
         (d) => d.site
       ),
-    [partJoinVac]
+    [participantsExtra]
   )
 
   // Convert the counts above to the appropriate table
@@ -599,7 +593,7 @@ function Summary({
 
   const ageRow: Row = {
     prevVac: "Age: mean",
-    total: Math.round(d3.mean(participantsWithAge, (v) => v.age) ?? 0),
+    total: Math.round(d3.mean(participantsExtra, (v) => v.age) ?? 0),
     ...toWide(ageBySite),
   }
 
