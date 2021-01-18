@@ -131,11 +131,13 @@ export async function reset(
     await syncRedcapUsers(db, redcapConfig)
     const users = await getUsers(db)
     const emails = users.map((u) => u.email)
-    await insertIntoTable(
-      db,
-      tokens.filter((tok) => emails.includes(tok.user)),
-      "Token"
-    )
+    db.tx(async (t) => {
+      await insertIntoTable(
+        t,
+        tokens.filter((tok) => emails.includes(tok.user)),
+        "Token"
+      )
+    })
   }
 }
 
@@ -161,7 +163,7 @@ async function getTableSubset(
 }
 
 async function insertIntoTable<T>(
-  db: DB,
+  db: Task,
   e: T[],
   t:
     | "User"
@@ -230,7 +232,7 @@ export async function getUserByToken(db: DB, token: string): Promise<User> {
 }
 
 export async function insertUsers(db: DB, us: User[]): Promise<void> {
-  await insertIntoTable(db, us, "User")
+  await db.tx(async (t) => await insertIntoTable(t, us, "User"))
 }
 
 export async function deleteUser(db: DB, email: string): Promise<void> {
@@ -274,12 +276,16 @@ export async function syncRedcapUsers(
   const dbAdminEmails = dbUsers
     .filter((u) => u.accessGroup === "admin")
     .map((u) => u.email)
-  await insertIntoTable(
-    db,
-    tokens.filter(
-      (t) => !dbAdminEmails.includes(t.user) && redcapEmails.includes(t.user)
-    ),
-    "Token"
+  await db.tx(
+    async (t) =>
+      await insertIntoTable(
+        t,
+        tokens.filter(
+          (t) =>
+            !dbAdminEmails.includes(t.user) && redcapEmails.includes(t.user)
+        ),
+        "Token"
+      )
   )
   await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [new Date()])
 }
@@ -303,7 +309,7 @@ export async function insertTokens(db: DB, tokens: Token[]) {
     type: t.type,
     expires: t.expires,
   }))
-  await insertIntoTable(db, tokensHashed, "Token")
+  await db.tx(async (t) => await insertIntoTable(t, tokensHashed, "Token"))
 }
 
 export async function deleteToken(db: DB, token: string) {
@@ -363,7 +369,7 @@ export async function insertParticipants(
   if (isSite(a) && ps.find((p) => p.site !== a)) {
     throw Error("UNAUTHORIZED: participants with invalid site")
   }
-  await insertIntoTable(db, ps, "Participant")
+  await db.tx(async (t) => await insertIntoTable(t, ps, "Participant"))
 }
 
 export async function deleteParticipant(
@@ -463,7 +469,7 @@ export async function getRedcapIdSubset(
 }
 
 async function insertRedcapIds(db: DB, ids: RedcapId[]): Promise<void> {
-  await insertIntoTable(db, ids, "RedcapId")
+  await db.tx(async (t) => await insertIntoTable(t, ids, "RedcapId"))
 }
 
 // Withdrawn =================================================================
@@ -476,7 +482,7 @@ export async function getWithdrawnSubset(
 }
 
 async function insertWithdrawn(db: DB, w: Withdrawn[]): Promise<void> {
-  await insertIntoTable(db, w, "Withdrawn")
+  await db.tx(async (t) => await insertIntoTable(t, w, "Withdrawn"))
 }
 
 // Vaccination history ========================================================
@@ -489,7 +495,7 @@ export async function getVaccinationSubset(
 }
 
 async function insertVaccination(db: DB, v: Vaccination[]): Promise<void> {
-  await insertIntoTable(db, v, "Vaccination")
+  await db.tx(async (t) => await insertIntoTable(t, v, "Vaccination"))
 }
 
 // Schedule ===================================================================
@@ -502,7 +508,7 @@ export async function getScheduleSubset(
 }
 
 async function insertSchedule(db: DB, v: Schedule[]): Promise<void> {
-  await insertIntoTable(db, v, "Schedule")
+  await db.tx(async (t) => await insertIntoTable(t, v, "Schedule"))
 }
 
 // Weekly survey ==============================================================
@@ -515,7 +521,7 @@ export async function getWeeklySurveySubset(
 }
 
 async function insertWeeklySurvey(db: DB, s: WeeklySurvey[]): Promise<void> {
-  await insertIntoTable(db, s, "WeeklySurvey")
+  await db.tx(async (t) => await insertIntoTable(t, s, "WeeklySurvey"))
 }
 
 // Viruses ====================================================================
@@ -525,7 +531,7 @@ export async function getViruses(db: DB): Promise<Virus[]> {
 }
 
 export async function insertViruses(db: DB, vs: Virus[]): Promise<void> {
-  await insertIntoTable(db, vs, "Virus")
+  await db.tx(async (t) => await insertIntoTable(t, vs, "Virus"))
 }
 
 export async function deleteAllViruses(db: DB): Promise<void> {
@@ -542,7 +548,7 @@ export async function getSerologySubset(
 }
 
 export async function insertSerology(db: DB, ss: Serology[]): Promise<void> {
-  await insertIntoTable(db, ss, "Serology")
+  await db.tx(async (t) => await insertIntoTable(t, ss, "Serology"))
 }
 
 export async function deleteAllSerology(db: DB): Promise<void> {
