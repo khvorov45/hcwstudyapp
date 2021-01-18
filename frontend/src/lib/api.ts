@@ -11,6 +11,7 @@ export type TableName =
   | "weekly-survey"
   | "vaccination"
   | "withdrawn"
+  | "serology"
   | "users"
 
 export type ApiPath =

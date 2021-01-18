@@ -24,6 +24,7 @@ import { apiReq } from "./lib/api"
 import {
   ParticipantV,
   ScheduleV,
+  SerologyV,
   User,
   UserV,
   VaccinationV,
@@ -242,6 +243,10 @@ export default function App() {
     () => tableFetch("withdrawn", WithdrawnV, token?.token),
     []
   )
+  const serologyFetch = useAsync(
+    () => tableFetch("serology", SerologyV, token?.token),
+    []
+  )
 
   const usersFetch = useAsync(
     () => tableFetch("users", UserV, token?.token),
@@ -257,6 +262,7 @@ export default function App() {
   const schedule = useTableData(scheduleFetch.result, tableSettings)
   const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
   const vaccination = useTableData(vaccinationFetch.result, tableSettings)
+  const serology = useTableData(serologyFetch.result, tableSettings)
 
   const users = useTableDataPlain(usersFetch.result)
 
@@ -369,6 +375,7 @@ export default function App() {
                   schedule={schedule}
                   weeklySurvey={weeklySurvey}
                   withdrawn={withdrawn}
+                  serology={serology}
                 />
               </AuthRoute>
               <AuthRoute
