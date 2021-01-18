@@ -39,6 +39,7 @@ import Users from "./components/users"
 import Plots from "./components/plot"
 import * as d3 from "d3-array"
 import { tableFetch, useTableData, useTableDataPlain } from "./lib/table-data"
+import moment from "moment"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -273,6 +274,13 @@ export default function App() {
     )
   }, [vaccination])
 
+  const now = moment()
+  const participantsExtra = participants.map((p) => ({
+    age: now.diff(p.dob, "year"),
+    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
+    ...p,
+  }))
+
   // About page md ------------------------------------------------------------
 
   const aboutPageMd = useAsync(async () => {
@@ -356,12 +364,11 @@ export default function App() {
                 path="/tables"
               >
                 <Tables
-                  participants={participants}
+                  participantsExtra={participantsExtra}
                   vaccination={vaccination}
                   schedule={schedule}
                   weeklySurvey={weeklySurvey}
                   withdrawn={withdrawn}
-                  vaccinationCounts={vaccinationCounts}
                 />
               </AuthRoute>
               <AuthRoute
@@ -370,10 +377,7 @@ export default function App() {
                 user={auth.result}
                 path="/plots"
               >
-                <Plots
-                  participants={participants}
-                  vaccinationCounts={vaccinationCounts}
-                />
+                <Plots participantsExtra={participantsExtra} />
               </AuthRoute>
             </Switch>
           </div>

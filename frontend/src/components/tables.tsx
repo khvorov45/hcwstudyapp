@@ -41,7 +41,7 @@ import {
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
-import moment, { Moment } from "moment"
+import { Moment } from "moment"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -125,19 +125,17 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export default function Tables({
-  participants,
+  participantsExtra,
   vaccination,
   schedule,
   weeklySurvey,
   withdrawn,
-  vaccinationCounts,
 }: {
-  participants: Participant[]
+  participantsExtra: (Participant & { age: number; prevVac: number })[]
   vaccination: Vaccination[]
   schedule: Schedule[]
   weeklySurvey: WeeklySurvey[]
   withdrawn: Withdrawn[]
-  vaccinationCounts: { pid: string; count: number }[]
 }) {
   const commonCols = useMemo(
     () => ({
@@ -208,11 +206,15 @@ export default function Tables({
   const tables = [
     {
       name: "contact",
-      element: <Contact participants={participants} commonCols={commonCols} />,
+      element: (
+        <Contact participants={participantsExtra} commonCols={commonCols} />
+      ),
     },
     {
       name: "baseline",
-      element: <Baseline participants={participants} commonCols={commonCols} />,
+      element: (
+        <Baseline participants={participantsExtra} commonCols={commonCols} />
+      ),
     },
     {
       name: "vaccination",
@@ -245,12 +247,7 @@ export default function Tables({
     },
     {
       name: "summary",
-      element: (
-        <Summary
-          participants={participants}
-          vaccinationCounts={vaccinationCounts}
-        />
-      ),
+      element: <Summary participantsExtra={participantsExtra} />,
     },
   ].map((t) =>
     Object.assign(t, { path: `/tables/${t.name}`, link: `/tables/${t.name}` })
@@ -537,20 +534,10 @@ function summariseNumerical(ns: number[]): string {
 }
 
 function Summary({
-  participants,
-  vaccinationCounts,
+  participantsExtra,
 }: {
-  participants: Participant[]
-  vaccinationCounts: { pid: string; count: number }[]
+  participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
-  const now = moment()
-
-  const participantsExtra = participants.map((p) => ({
-    age: now.diff(p.dob, "years"),
-    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
-    ...p,
-  }))
-
   const countsBySite = useCounted(participantsExtra, "site")
   const countsByVac = useCounted(participantsExtra, "prevVac")
   const countsByGender = useCounted(participantsExtra, "gender")
@@ -605,7 +592,7 @@ function Summary({
 
   const bottomRow = {
     label: "Total",
-    total: participants.length,
+    total: participantsExtra.length,
     ...toWide(countsBySite),
   }
 

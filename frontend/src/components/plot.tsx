@@ -2,22 +2,12 @@ import { BarChart, XAxis, YAxis, Tooltip, Bar, Label } from "recharts"
 import { useTheme } from "@material-ui/core"
 import { Participant } from "../lib/data"
 import * as d3 from "d3-array"
-import moment from "moment"
 
 export default function Plots({
-  participants,
-  vaccinationCounts,
+  participantsExtra,
 }: {
-  participants: Participant[]
-  vaccinationCounts: { pid: string; count: number }[]
+  participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
-  const now = moment()
-  const participantsExtra = participants.map((p) => ({
-    age: now.diff(p.dob, "year"),
-    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
-    ...p,
-  }))
-
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
 
   return (
