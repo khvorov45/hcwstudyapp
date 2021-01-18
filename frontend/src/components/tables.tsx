@@ -811,7 +811,10 @@ function Table<T extends object>({
         {/*Body*/}
         <div {...table.getTableBodyProps()} className="body">
           <FixedSizeList
-            height={windowSize.height - 185}
+            height={
+              // Times two because of scrollbar space for belowNav
+              windowSize.height - 50 - 50 - 60 - detectScrollbarWidth() * 2
+            }
             itemCount={table.rows.length}
             itemSize={35}
             width={table.totalColumnsWidth + scrollbarWidth}
