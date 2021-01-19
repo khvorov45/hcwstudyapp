@@ -154,7 +154,14 @@ function SerologyPlots({
               connectNulls
             />
           ))}
-          <YAxis ticks={titres} scale="log" domain={["auto", "auto"]}>
+          <YAxis
+            ticks={titres}
+            scale="log"
+            domain={["auto", "auto"]}
+            tick={{
+              fill: theme.palette.text.secondary,
+            }}
+          >
             <Label
               value="Titre"
               angle={-90}
@@ -162,7 +169,12 @@ function SerologyPlots({
               style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
             />
           </YAxis>
-          <XAxis dataKey="day">
+          <XAxis
+            dataKey="day"
+            tick={{
+              fill: theme.palette.text.secondary,
+            }}
+          >
             <Label
               value="Day"
               position="bottom"
