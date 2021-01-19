@@ -182,6 +182,8 @@ function FullSpec() {
     { path: "/auth/token/send", title: "Auth" },
     { path: "/users", title: "Users" },
     { path: "/participants", title: "Participants" },
+    { path: "/virus", title: "Serology" },
+    { path: "/reset", title: "Misc" },
   ]
   const classes = useStyles()
   if (!apiSpec.result) {
