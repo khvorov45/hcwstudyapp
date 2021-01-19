@@ -9,7 +9,7 @@ import {
   Line,
 } from "recharts"
 import { useTheme } from "@material-ui/core"
-import { Participant, Serology } from "../lib/data"
+import { Participant, Serology, Site, SiteV } from "../lib/data"
 import * as d3 from "d3-array"
 import React from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
@@ -54,10 +54,51 @@ export default function Plots({
             <BaselinePlots participantsExtra={participantsExtra} />
           </Route>
           <Route exact path="/plots/serology">
-            {"serology plots"}
+            <SerologyPlots serology={serologyExtra} />
           </Route>
         </Switch>
       </div>
+    </div>
+  )
+}
+
+function SerologyPlots({
+  serology,
+}: {
+  serology: (Serology & { site?: Site })[]
+}) {
+  const sites = Object.keys(SiteV.keys)
+  const pids = Array.from(new Set(serology.map((s) => s.pid)))
+  const viruses = Array.from(new Set(serology.map((s) => s.virus)))
+  const days = Array.from(new Set(serology.map((s) => s.day))).sort(
+    (a, b) => a - b
+  )
+  const testData = serology.filter(
+    (s) => s.virus === viruses[0] && s.site === sites[0]
+  )
+  const serologyWide = days.map((day) =>
+    testData
+      .filter((s) => s.day === day)
+      .reduce((acc, cur) => Object.assign(acc, { [cur.pid]: cur.titre }), {
+        day,
+      })
+  )
+  return (
+    <div>
+      <LineChart width={450} height={250} data={serologyWide}>
+        {pids.map((pid) => (
+          <Line
+            key={pid}
+            dataKey={pid}
+            stroke="#8884d8"
+            dot={true}
+            isAnimationActive={false}
+            connectNulls
+          />
+        ))}
+        <YAxis />
+        <XAxis dataKey="day" />
+      </LineChart>
     </div>
   )
 }
