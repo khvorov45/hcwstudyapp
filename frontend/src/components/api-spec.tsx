@@ -131,6 +131,7 @@ function RCode() {
     "vaccination",
     "weekly-survey",
     "withdrawn",
+    "serology",
   ]
   const classes = useStyles()
   const theme = useTheme()
