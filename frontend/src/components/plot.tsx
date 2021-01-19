@@ -73,6 +73,10 @@ function SerologyPlots({
   const days = Array.from(new Set(serology.map((s) => s.day))).sort(
     (a, b) => a - b
   )
+  const titres = Array.from(new Set(serology.map((s) => s.titre))).sort(
+    (a, b) => a - b
+  )
+
   const testData = serology.filter(
     (s) => s.virus === viruses[0] && s.site === sites[0]
   )
@@ -83,6 +87,7 @@ function SerologyPlots({
         day,
       })
   )
+
   return (
     <div>
       <LineChart width={450} height={250} data={serologyWide}>
@@ -96,7 +101,7 @@ function SerologyPlots({
             connectNulls
           />
         ))}
-        <YAxis />
+        <YAxis ticks={titres} scale="log" domain={["auto", "auto"]} />
         <XAxis dataKey="day" />
       </LineChart>
     </div>
