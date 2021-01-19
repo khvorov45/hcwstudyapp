@@ -98,7 +98,7 @@ function SerologyPlots({
         day,
       })
   )
-
+  const theme = useTheme()
   return (
     <div style={{ display: "flex" }}>
       <div style={{ width: 150, display: "flex", flexDirection: "column" }}>
@@ -135,7 +135,12 @@ function SerologyPlots({
         </FormControl>
       </div>
       <div>
-        <LineChart width={450} height={250} data={serologyWide}>
+        <LineChart
+          width={450}
+          height={250}
+          data={serologyWide}
+          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+        >
           {pids.map((pid) => (
             <Line
               key={pid}
@@ -146,8 +151,26 @@ function SerologyPlots({
               connectNulls
             />
           ))}
-          <YAxis ticks={titres} scale="log" domain={["auto", "auto"]} />
-          <XAxis dataKey="day" />
+          <YAxis
+            ticks={titres}
+            scale="log"
+            domain={["auto", "auto"]}
+            label="Titre"
+          >
+            <Label
+              value="Titre"
+              angle={-90}
+              position="insideLeft"
+              style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+            />
+          </YAxis>
+          <XAxis dataKey="day">
+            <Label
+              value="Day"
+              position="bottom"
+              style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+            />
+          </XAxis>
         </LineChart>
       </div>
     </div>
