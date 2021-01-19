@@ -192,6 +192,15 @@ function FullSpec() {
   return (
     <div>
       <div className={classes.title}>{apiSpec.result.info.title}</div>
+      <div style={{ paddingLeft: 20, paddingTop: 10 }}>
+        Raw YAML can be found{" "}
+        <MaterialLink
+          className={classes.link}
+          href="https://github.com/khvorov45/hcwstudyapp/blob/master/openapi.yaml"
+        >
+          here
+        </MaterialLink>
+      </div>
       {Object.entries(apiSpec.result.paths).map(
         ([path, pathEntries]: [path: string, pathEntries: any]) => {
           const title = breaks.find((b) => b.path === path)?.title
