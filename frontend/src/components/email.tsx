@@ -13,6 +13,7 @@ import StatusCodes from "http-status-codes"
 import { useAsyncCallback } from "react-async-hook"
 import { IconButtonContainer } from "./loading"
 import { TokenType } from "../lib/data"
+import ScreenHeight from "./screen-height"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,10 +36,12 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function Email() {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
-      <EmailForm tokenType="session" />
-      <EmailForm tokenType="api" />
-    </div>
+    <ScreenHeight heightTaken={50}>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        <EmailForm tokenType="session" />
+        <EmailForm tokenType="api" />
+      </div>
+    </ScreenHeight>
   )
 }
 

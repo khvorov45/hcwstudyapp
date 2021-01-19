@@ -41,6 +41,7 @@ import Plots from "./components/plot"
 import * as d3 from "d3-array"
 import { tableFetch, useTableData, useTableDataPlain } from "./lib/table-data"
 import moment from "moment"
+import ScreenHeight from "./components/screen-height"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -320,7 +321,7 @@ export default function App() {
             }}
             onUserUpdate={usersFetch.execute}
           />
-          <div className={classes.belowNav}>
+          <div>
             <Switch>
               <Route exact path="/login">
                 {auth.status === "success" ? (
@@ -344,12 +345,14 @@ export default function App() {
                 user={auth.result}
                 path="/about"
               >
-                <ReactMarkdown
-                  className={classes.home}
-                  renderers={{ link: Link, thematicBreak: Divider }}
-                >
-                  {aboutPageMd.result ?? ""}
-                </ReactMarkdown>
+                <ScreenHeight heightTaken={50}>
+                  <ReactMarkdown
+                    className={classes.home}
+                    renderers={{ link: Link, thematicBreak: Divider }}
+                  >
+                    {aboutPageMd.result ?? ""}
+                  </ReactMarkdown>
+                </ScreenHeight>
               </AuthRoute>
               <AuthRoute
                 exact

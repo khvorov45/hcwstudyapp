@@ -22,6 +22,7 @@ import {
 import Edit from "@material-ui/icons/Edit"
 import Check from "@material-ui/icons/Check"
 import { ButtonArray } from "./button"
+import ScreenHeight from "./screen-height"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -114,68 +115,70 @@ export default function Users({
 
   const classes = useStyles()
   return (
-    <TableContainer className={classes.tableContainer}>
-      <Table {...table.getTableProps()}>
-        <TableHead>
-          <TableRow>
-            {table.headers.map((c) => (
-              <TableCell {...c.getHeaderProps()}>
-                {c.render("Header")}
-              </TableCell>
-            ))}
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody {...table.getTableBodyProps}>
-          {table.rows.map((row, i) => {
-            table.prepareRow(row)
-            return (
-              <TableRow {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return (
-                    <TableCell {...cell.getCellProps()}>
-                      {cell.render("Cell", {
-                        index: i,
-                        editedIndex,
-                        accessGroup: row.original.accessGroup,
-                        editedAccess,
-                      })}
-                    </TableCell>
-                  )
-                })}
-                <TableCell>
-                  <ButtonArray>
-                    <IconButton
-                      onClick={() => {
-                        setEditedIndex((old) => (old === i ? null : i))
-                        setEditedEmail(row.original.email)
-                        setEditedAccess(row.original.accessGroup)
-                      }}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      onClick={() =>
-                        updateUser
-                          .execute()
-                          .then(() => {
-                            setEditedIndex(null)
-                            onEdit()
-                          })
-                          .catch((e) => {})
-                      }
-                      disabled={i !== editedIndex || updateUser.loading}
-                    >
-                      <Check />
-                    </IconButton>
-                  </ButtonArray>
+    <ScreenHeight heightTaken={50}>
+      <TableContainer className={classes.tableContainer}>
+        <Table {...table.getTableProps()}>
+          <TableHead>
+            <TableRow>
+              {table.headers.map((c) => (
+                <TableCell {...c.getHeaderProps()}>
+                  {c.render("Header")}
                 </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+              ))}
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody {...table.getTableBodyProps}>
+            {table.rows.map((row, i) => {
+              table.prepareRow(row)
+              return (
+                <TableRow {...row.getRowProps()}>
+                  {row.cells.map((cell) => {
+                    return (
+                      <TableCell {...cell.getCellProps()}>
+                        {cell.render("Cell", {
+                          index: i,
+                          editedIndex,
+                          accessGroup: row.original.accessGroup,
+                          editedAccess,
+                        })}
+                      </TableCell>
+                    )
+                  })}
+                  <TableCell>
+                    <ButtonArray>
+                      <IconButton
+                        onClick={() => {
+                          setEditedIndex((old) => (old === i ? null : i))
+                          setEditedEmail(row.original.email)
+                          setEditedAccess(row.original.accessGroup)
+                        }}
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        onClick={() =>
+                          updateUser
+                            .execute()
+                            .then(() => {
+                              setEditedIndex(null)
+                              onEdit()
+                            })
+                            .catch((e) => {})
+                        }
+                        disabled={i !== editedIndex || updateUser.loading}
+                      >
+                        <Check />
+                      </IconButton>
+                    </ButtonArray>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </ScreenHeight>
   )
 }
 

@@ -20,8 +20,7 @@ import * as d3 from "d3-array"
 import React, { useEffect, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
-import detectScrollbarWidth from "../lib/scrollbar-width"
-import { useWindowSize } from "../lib/hooks"
+import ScreenHeight from "./screen-height"
 
 export default function Plots({
   participantsExtra,
@@ -36,7 +35,6 @@ export default function Plots({
   }))
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage
-  const windowSize = useWindowSize()
   return (
     <div>
       <SimpleNav
@@ -46,12 +44,7 @@ export default function Plots({
         ]}
         active={({ link }) => link === `/plots/${subpage}`}
       />
-      <div
-        style={{
-          height: windowSize.height - 50 - 50 - detectScrollbarWidth(),
-          overflow: "scroll",
-        }}
-      >
+      <ScreenHeight heightTaken={50 + 50}>
         <Switch>
           <Route exact path="/plots">
             <Redirect to="/plots/baseline" />
@@ -63,7 +56,7 @@ export default function Plots({
             <SerologyPlots serology={serologyExtra} />
           </Route>
         </Switch>
-      </div>
+      </ScreenHeight>
     </div>
   )
 }
