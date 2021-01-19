@@ -8,10 +8,16 @@ import {
   LineChart,
   Line,
 } from "recharts"
-import { useTheme } from "@material-ui/core"
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  useTheme,
+} from "@material-ui/core"
 import { Participant, Serology, Site, SiteV } from "../lib/data"
 import * as d3 from "d3-array"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import detectScrollbarWidth from "../lib/scrollbar-width"
@@ -77,11 +83,16 @@ function SerologyPlots({
     (a, b) => a - b
   )
 
-  const testData = serology.filter(
-    (s) => s.virus === viruses[0] && s.site === sites[0]
+  const [site, setSite] = useState(sites[0])
+  const [virus, setVirus] = useState(viruses[0] ?? "")
+  useEffect(() => setVirus(viruses[0]), [viruses])
+
+  const plotData = serology.filter(
+    (s) => s.virus === virus && (site === "any" || s.site === site)
   )
+
   const serologyWide = days.map((day) =>
-    testData
+    plotData
       .filter((s) => s.day === day)
       .reduce((acc, cur) => Object.assign(acc, { [cur.pid]: cur.titre }), {
         day,
@@ -89,21 +100,56 @@ function SerologyPlots({
   )
 
   return (
-    <div>
-      <LineChart width={450} height={250} data={serologyWide}>
-        {pids.map((pid) => (
-          <Line
-            key={pid}
-            dataKey={pid}
-            stroke="#8884d8"
-            dot={true}
-            isAnimationActive={false}
-            connectNulls
-          />
-        ))}
-        <YAxis ticks={titres} scale="log" domain={["auto", "auto"]} />
-        <XAxis dataKey="day" />
-      </LineChart>
+    <div style={{ display: "flex" }}>
+      <div style={{ width: 150, display: "flex", flexDirection: "column" }}>
+        <FormControl>
+          <InputLabel id="site-select-label">Site</InputLabel>
+          <Select
+            labelId="site-select-label"
+            value={site}
+            id="site-select"
+            onChange={(e) => setSite(e.target.value as string)}
+          >
+            <MenuItem value="any">Any</MenuItem>
+            {sites.map((s) => (
+              <MenuItem key={s} value={s}>
+                {s[0].toUpperCase() + s.slice(1)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl>
+          <InputLabel id="virus-select-label">Virus</InputLabel>
+          <Select
+            labelId="virus-select-label"
+            value={virus}
+            id="virus-select"
+            onChange={(e) => setVirus(e.target.value as string)}
+          >
+            {viruses.map((s) => (
+              <MenuItem key={s} value={s}>
+                {s}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+      <div>
+        <LineChart width={450} height={250} data={serologyWide}>
+          {pids.map((pid) => (
+            <Line
+              key={pid}
+              dataKey={pid}
+              stroke="#8884d8"
+              dot={true}
+              isAnimationActive={false}
+              connectNulls
+            />
+          ))}
+          <YAxis ticks={titres} scale="log" domain={["auto", "auto"]} />
+          <XAxis dataKey="day" />
+        </LineChart>
+      </div>
     </div>
   )
 }
