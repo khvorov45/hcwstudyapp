@@ -9,10 +9,13 @@ import {
   Line,
 } from "recharts"
 import {
+  createStyles,
   FormControl,
   InputLabel,
+  makeStyles,
   MenuItem,
   Select,
+  Theme,
   useTheme,
 } from "@material-ui/core"
 import { Participant, Serology, Site, SiteV } from "../lib/data"
@@ -21,6 +24,18 @@ import React, { useEffect, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    control: {
+      display: "flex",
+      flexWrap: "wrap",
+      "&>*": {
+        marginRight: 10,
+      },
+    },
+  })
+)
 
 export default function Plots({
   participantsExtra,
@@ -95,9 +110,10 @@ function SerologyPlots({
       })
   )
   const theme = useTheme()
+  const classes = useStyles()
   return (
-    <div style={{ display: "flex" }}>
-      <div style={{ width: 150, display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className={classes.control}>
         <FormControl>
           <InputLabel id="site-select-label">Site</InputLabel>
           <Select
@@ -105,6 +121,7 @@ function SerologyPlots({
             value={site}
             id="site-select"
             onChange={(e) => setSite(e.target.value as string)}
+            style={{ width: 125 }}
           >
             <MenuItem value="any">Any</MenuItem>
             {sites.map((s) => (
@@ -121,6 +138,7 @@ function SerologyPlots({
             value={virus}
             id="virus-select"
             onChange={(e) => setVirus(e.target.value as string)}
+            style={{ width: 225 }}
           >
             {viruses.map((s) => (
               <MenuItem key={s} value={s}>
