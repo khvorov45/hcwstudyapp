@@ -85,7 +85,10 @@ function SerologyPlots({
 
   const [site, setSite] = useState(sites[0])
   const [virus, setVirus] = useState(viruses[0] ?? "")
-  useEffect(() => setVirus(viruses[0]), [viruses])
+  // Set the virus to the first value as soon as it's available
+  useEffect(() => {
+    virus === "" && viruses[0] && setVirus(viruses[0])
+  }, [viruses, virus])
 
   const plotData = serology.filter(
     (s) => s.virus === virus && (site === "any" || s.site === site)
