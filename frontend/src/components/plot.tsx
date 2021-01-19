@@ -154,12 +154,7 @@ function SerologyPlots({
               connectNulls
             />
           ))}
-          <YAxis
-            ticks={titres}
-            scale="log"
-            domain={["auto", "auto"]}
-            label="Titre"
-          >
+          <YAxis ticks={titres} scale="log" domain={["auto", "auto"]}>
             <Label
               value="Titre"
               angle={-90}
