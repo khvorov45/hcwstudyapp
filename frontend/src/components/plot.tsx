@@ -15,6 +15,7 @@ import {
   makeStyles,
   MenuItem,
   Select,
+  TextField,
   Theme,
   useTheme,
 } from "@material-ui/core"
@@ -24,6 +25,7 @@ import React, { useEffect, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
+import Autocomplete from "@material-ui/lab/Autocomplete"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -82,7 +84,7 @@ function SerologyPlots({
   serology: (Serology & { site?: Site })[]
 }) {
   const sites = Object.keys(SiteV.keys)
-  const pids = Array.from(new Set(serology.map((s) => s.pid)))
+
   const viruses = Array.from(new Set(serology.map((s) => s.virus)))
   const days = Array.from(new Set(serology.map((s) => s.day))).sort(
     (a, b) => a - b
@@ -93,14 +95,23 @@ function SerologyPlots({
 
   const [site, setSite] = useState(sites[0])
   const [virus, setVirus] = useState(viruses[0] ?? "")
+  const [selectedPid, setSelectedPid] = useState<string | null>(null)
   // Set the virus to the first value as soon as it's available
   useEffect(() => {
     virus === "" && viruses[0] && setVirus(viruses[0])
   }, [viruses, virus])
 
-  const plotData = serology.filter(
+  const filteredData = serology.filter(
     (s) => s.virus === virus && (site === "any" || s.site === site)
   )
+
+  const availablePids = Array.from(new Set(filteredData.map((s) => s.pid)))
+
+  const plotData = filteredData.filter(
+    (s) => !selectedPid || s.pid === selectedPid
+  )
+
+  const plotPids = Array.from(new Set(plotData.map((s) => s.pid)))
 
   const serologyWide = days.map((day) =>
     plotData
@@ -147,6 +158,15 @@ function SerologyPlots({
             ))}
           </Select>
         </FormControl>
+        <Autocomplete
+          id="combo-box-demo"
+          options={availablePids}
+          getOptionLabel={(option) => option}
+          style={{ width: 150 }}
+          renderInput={(params) => <TextField {...params} label="PID" />}
+          value={selectedPid}
+          onChange={(e, n) => setSelectedPid(n)}
+        />
       </div>
       <div>
         <LineChart
@@ -155,7 +175,7 @@ function SerologyPlots({
           data={serologyWide}
           margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
         >
-          {pids.map((pid) => (
+          {plotPids.map((pid) => (
             <Line
               key={pid}
               dataKey={pid}
