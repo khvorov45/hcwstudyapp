@@ -1,15 +1,191 @@
-import { BarChart, XAxis, YAxis, Tooltip, Bar, Label } from "recharts"
-import { useTheme } from "@material-ui/core"
-import { Participant } from "../lib/data"
+import {
+  BarChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Bar,
+  Label,
+  LineChart,
+  Line,
+} from "recharts"
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  useTheme,
+} from "@material-ui/core"
+import { Participant, Serology, Site, SiteV } from "../lib/data"
 import * as d3 from "d3-array"
+import React, { useEffect, useState } from "react"
+import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
+import { SimpleNav } from "./nav"
+import detectScrollbarWidth from "../lib/scrollbar-width"
+import { useWindowSize } from "../lib/hooks"
 
 export default function Plots({
+  participantsExtra,
+  serology,
+}: {
+  participantsExtra: (Participant & { age: number; prevVac: number })[]
+  serology: Serology[]
+}) {
+  const serologyExtra = serology.map((s) => ({
+    site: participantsExtra.find((p) => p.pid === s.pid)?.site,
+    ...s,
+  }))
+  const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
+  const subpage = routeMatch?.params.subpage
+  const windowSize = useWindowSize()
+  return (
+    <div>
+      <SimpleNav
+        links={[
+          { name: "Baseline", link: "/plots/baseline" },
+          { name: "Serology", link: "/plots/serology" },
+        ]}
+        active={({ link }) => link === `/plots/${subpage}`}
+      />
+      <div
+        style={{
+          height: windowSize.height - 50 - 50 - detectScrollbarWidth(),
+          overflow: "scroll",
+        }}
+      >
+        <Switch>
+          <Route exact path="/plots">
+            <Redirect to="/plots/baseline" />
+          </Route>
+          <Route exact path="/plots/baseline">
+            <BaselinePlots participantsExtra={participantsExtra} />
+          </Route>
+          <Route exact path="/plots/serology">
+            <SerologyPlots serology={serologyExtra} />
+          </Route>
+        </Switch>
+      </div>
+    </div>
+  )
+}
+
+function SerologyPlots({
+  serology,
+}: {
+  serology: (Serology & { site?: Site })[]
+}) {
+  const sites = Object.keys(SiteV.keys)
+  const pids = Array.from(new Set(serology.map((s) => s.pid)))
+  const viruses = Array.from(new Set(serology.map((s) => s.virus)))
+  const days = Array.from(new Set(serology.map((s) => s.day))).sort(
+    (a, b) => a - b
+  )
+  const titres = Array.from(new Set(serology.map((s) => s.titre))).sort(
+    (a, b) => a - b
+  )
+
+  const [site, setSite] = useState(sites[0])
+  const [virus, setVirus] = useState(viruses[0] ?? "")
+  // Set the virus to the first value as soon as it's available
+  useEffect(() => {
+    virus === "" && viruses[0] && setVirus(viruses[0])
+  }, [viruses, virus])
+
+  const plotData = serology.filter(
+    (s) => s.virus === virus && (site === "any" || s.site === site)
+  )
+
+  const serologyWide = days.map((day) =>
+    plotData
+      .filter((s) => s.day === day)
+      .reduce((acc, cur) => Object.assign(acc, { [cur.pid]: cur.titre }), {
+        day,
+      })
+  )
+  const theme = useTheme()
+  return (
+    <div style={{ display: "flex" }}>
+      <div style={{ width: 150, display: "flex", flexDirection: "column" }}>
+        <FormControl>
+          <InputLabel id="site-select-label">Site</InputLabel>
+          <Select
+            labelId="site-select-label"
+            value={site}
+            id="site-select"
+            onChange={(e) => setSite(e.target.value as string)}
+          >
+            <MenuItem value="any">Any</MenuItem>
+            {sites.map((s) => (
+              <MenuItem key={s} value={s}>
+                {s[0].toUpperCase() + s.slice(1)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl>
+          <InputLabel id="virus-select-label">Virus</InputLabel>
+          <Select
+            labelId="virus-select-label"
+            value={virus}
+            id="virus-select"
+            onChange={(e) => setVirus(e.target.value as string)}
+          >
+            {viruses.map((s) => (
+              <MenuItem key={s} value={s}>
+                {s}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+      <div>
+        <LineChart
+          width={450}
+          height={250}
+          data={serologyWide}
+          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+        >
+          {pids.map((pid) => (
+            <Line
+              key={pid}
+              dataKey={pid}
+              stroke="#8884d8"
+              dot={true}
+              isAnimationActive={false}
+              connectNulls
+            />
+          ))}
+          <YAxis
+            ticks={titres}
+            scale="log"
+            domain={["auto", "auto"]}
+            label="Titre"
+          >
+            <Label
+              value="Titre"
+              angle={-90}
+              position="insideLeft"
+              style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+            />
+          </YAxis>
+          <XAxis dataKey="day">
+            <Label
+              value="Day"
+              position="bottom"
+              style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+            />
+          </XAxis>
+        </LineChart>
+      </div>
+    </div>
+  )
+}
+
+function BaselinePlots({
   participantsExtra,
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
-
   return (
     <div style={{ display: "flex" }}>
       <PlotColumn title="Overall" participantsExtra={participantsExtra} />

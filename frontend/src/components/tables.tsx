@@ -4,6 +4,7 @@ import {
   GenderV,
   Participant,
   Schedule,
+  Serology,
   SiteV,
   Vaccination,
   VaccinationStatusV,
@@ -130,12 +131,14 @@ export default function Tables({
   schedule,
   weeklySurvey,
   withdrawn,
+  serology,
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
   vaccination: Vaccination[]
   schedule: Schedule[]
   weeklySurvey: WeeklySurvey[]
   withdrawn: Withdrawn[]
+  serology: Serology[]
 }) {
   const commonCols = useMemo(
     () => ({
@@ -244,6 +247,10 @@ export default function Tables({
     {
       name: "withdrawn",
       element: <WithdrawnTable withdrawn={withdrawn} commonCols={commonCols} />,
+    },
+    {
+      name: "serology",
+      element: <SerologyTable serology={serology} commonCols={commonCols} />,
     },
     {
       name: "summary",
@@ -513,6 +520,40 @@ function WithdrawnTable({
   }, [commonCols])
 
   return <Table columns={columns} data={withdrawn} />
+}
+
+function SerologyTable({
+  serology,
+  commonCols,
+}: {
+  serology: Serology[]
+  commonCols: any
+}) {
+  const columns = useMemo(() => {
+    return [
+      commonCols.pid,
+      commonCols.year({ name: "redcapProjectYear", start: 2020, end: 2021 }),
+      {
+        Header: "Day",
+        accessor: "day",
+        filter: "exactText",
+        width: 70,
+      },
+      {
+        Header: "Virus",
+        accessor: "virus",
+        width: 300,
+      },
+      {
+        Header: "Titre",
+        accessor: "titre",
+        filter: "exactText",
+        width: 70,
+      },
+    ]
+  }, [commonCols])
+
+  return <Table columns={columns} data={serology} />
 }
 
 function useCounted<T extends Object, K extends keyof T>(
