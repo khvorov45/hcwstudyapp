@@ -8,6 +8,7 @@ import {
   Popover,
   Theme,
   Tooltip,
+  useTheme,
 } from "@material-ui/core"
 import People from "@material-ui/icons/People"
 import Home from "@material-ui/icons/Home"
@@ -26,6 +27,7 @@ import Settings from "./settings"
 import reportIcon from "@iconify/icons-carbon/report"
 import themeLightDark from "@iconify/icons-mdi/theme-light-dark"
 import questionCircle from "@iconify/icons-bi/question-circle"
+import closeOutline from "@iconify/icons-carbon/close-outline"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -111,6 +113,7 @@ export default function Nav({
     null
   )
   const classes = useStyles()
+  const theme = useTheme()
   const matchRes = useRouteMatch<{ location: string }>({ path: "/:location" })
   function activeIf(page: string) {
     return matchRes?.params.location === page ? "active" : ""
@@ -249,6 +252,26 @@ export default function Nav({
         </Tooltip>
       </div>
       <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ width: 48 }}></div>
+          <div style={{ textAlign: "center", fontSize: "medium" }}>
+            Settings
+          </div>
+          <div>
+            <IconButton
+              style={{ color: theme.palette.error.main }}
+              onClick={() => setSettingsOpen(false)}
+            >
+              <Icon icon={closeOutline} />
+            </IconButton>
+          </div>
+        </div>
         <Settings
           token={token}
           user={user}
