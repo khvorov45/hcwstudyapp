@@ -192,7 +192,7 @@ function FullSpec() {
   return (
     <div>
       <div className={classes.title}>{apiSpec.result.info.title}</div>
-      <div style={{ paddingLeft: 20, paddingTop: 10 }}>
+      <div style={{ paddingLeft: 20, fontSize: "medium" }}>
         Raw YAML can be found{" "}
         <MaterialLink
           className={classes.link}
