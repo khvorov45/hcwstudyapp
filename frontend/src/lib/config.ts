@@ -3,4 +3,4 @@ export const API_ROOT =
 
 export const API_SPEC_FILEPATH =
   process.env.REACT_APP_API_SPEC_FILEPATH ??
-  "https://raw.githubusercontent.com/khvorov45/hcwstudyapp/master/backend/hcwstudyapp-openapi.yml"
+  "https://raw.githubusercontent.com/khvorov45/hcwstudyapp/master/openapi.yml"
