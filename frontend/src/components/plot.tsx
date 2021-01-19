@@ -94,11 +94,11 @@ function SerologyPlots({
   )
 
   const [site, setSite] = useState(sites[0])
-  const [virus, setVirus] = useState(viruses[0] ?? "")
+  const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
   // Set the virus to the first value as soon as it's available
   useEffect(() => {
-    virus === "" && viruses[0] && setVirus(viruses[0])
+    !virus && viruses[0] && setVirus(viruses[0])
   }, [viruses, virus])
 
   const filteredData = serology.filter(
@@ -146,7 +146,7 @@ function SerologyPlots({
           <InputLabel id="virus-select-label">Virus</InputLabel>
           <Select
             labelId="virus-select-label"
-            value={virus}
+            value={virus ?? ""}
             id="virus-select"
             onChange={(e) => setVirus(e.target.value as string)}
             style={{ width: 225 }}
