@@ -45,12 +45,8 @@ export default function Plots({
   serology,
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
-  serology: Serology[]
+  serology: (Serology & { site?: Site })[]
 }) {
-  const serologyExtra = serology.map((s) => ({
-    site: participantsExtra.find((p) => p.pid === s.pid)?.site,
-    ...s,
-  }))
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage
   return (
@@ -71,7 +67,7 @@ export default function Plots({
             <BaselinePlots participantsExtra={participantsExtra} />
           </Route>
           <Route exact path="/plots/serology">
-            <SerologyPlots serology={serologyExtra} />
+            <SerologyPlots serology={serology} />
           </Route>
         </Switch>
       </ScreenHeight>

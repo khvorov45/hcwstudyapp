@@ -291,6 +291,11 @@ export default function App() {
     ...p,
   }))
 
+  const serologyExtra = serology.map((s) => ({
+    site: participantsExtra.find((p) => p.pid === s.pid)?.site,
+    ...s,
+  }))
+
   // About page md ------------------------------------------------------------
 
   const aboutPageMd = useAsync(async () => {
@@ -391,7 +396,7 @@ export default function App() {
               >
                 <Plots
                   participantsExtra={participantsExtra}
-                  serology={serology}
+                  serology={serologyExtra}
                 />
               </AuthRoute>
             </Switch>
