@@ -26,6 +26,7 @@ import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
 import Autocomplete from "@material-ui/lab/Autocomplete"
+import { useWindowSize } from "../lib/hooks"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -122,6 +123,7 @@ function SerologyPlots({
   )
   const theme = useTheme()
   const classes = useStyles()
+  const windowSize = useWindowSize()
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className={classes.control}>
@@ -170,8 +172,14 @@ function SerologyPlots({
       </div>
       <div>
         <LineChart
-          width={500}
-          height={300}
+          width={
+            windowSize.width - 20 < 500
+              ? 500
+              : windowSize.width - 20 > 800
+              ? 800
+              : windowSize.width - 20
+          }
+          height={400}
           data={serologyWide}
           margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
         >
