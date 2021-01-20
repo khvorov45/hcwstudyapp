@@ -114,9 +114,7 @@ function SerologyPlots({
         }
       )
   )
-  const theme = useTheme()
   const classes = useStyles()
-  const windowSize = useWindowSize()
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className={classes.control}>
@@ -144,7 +142,9 @@ function SerologyPlots({
           value={selectedPid}
           onChange={(e, n) => {
             setSelectedPid(n)
-            setSite(null)
+            if (!site) {
+              setSite(plotData.find((d) => d.pid === n)?.site ?? null)
+            }
           }}
         />
       </div>
@@ -156,7 +156,10 @@ function SerologyPlots({
             yTicks={titres}
           />
         ) : (
-          <></>
+          <div style={{ marginTop: 20, fontSize: "medium" }}>
+            Select either virus or PID (or both). Not selecting a PID will
+            render all available PIDs which takes a while.
+          </div>
         )}
       </div>
     </div>
