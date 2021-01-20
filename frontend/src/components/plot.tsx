@@ -86,7 +86,9 @@ function SerologyPlots({
 }) {
   const sites = Object.keys(SiteV.keys)
 
-  const viruses = Array.from(new Set(serology.map((s) => s.virus)))
+  const viruses = Array.from(
+    new Set(serology.map((s) => s.virus))
+  ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
   const days = Array.from(new Set(serology.map((s) => s.day))).sort(
     (a, b) => a - b
   )
