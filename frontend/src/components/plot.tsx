@@ -328,10 +328,11 @@ function GenericBar<T extends Record<string, string | number>>({
   yKey: keyof T
 }) {
   const theme = useTheme()
+  const windowSize = useWindowSize()
   if (data.length === 0 || !data.some((r) => r[yKey] > 0)) return <></>
   return (
     <BarChart
-      width={450}
+      width={windowSize.width - 20 > 450 ? 450 : windowSize.width - 20}
       height={250}
       data={data}
       margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
