@@ -5,6 +5,7 @@ import {
   Participant,
   Schedule,
   Serology,
+  Site,
   SiteV,
   Vaccination,
   VaccinationStatusV,
@@ -138,7 +139,7 @@ export default function Tables({
   schedule: Schedule[]
   weeklySurvey: WeeklySurvey[]
   withdrawn: Withdrawn[]
-  serology: Serology[]
+  serology: (Serology & { site?: Site })[]
 }) {
   const commonCols = useMemo(
     () => ({

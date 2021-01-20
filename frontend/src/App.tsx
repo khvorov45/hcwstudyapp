@@ -386,7 +386,7 @@ export default function App() {
                   schedule={schedule}
                   weeklySurvey={weeklySurvey}
                   withdrawn={withdrawn}
-                  serology={serology}
+                  serology={serologyExtra}
                 />
               </AuthRoute>
               <AuthRoute
