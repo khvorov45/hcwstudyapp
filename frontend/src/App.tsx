@@ -173,7 +173,10 @@ export default function App() {
         validator: UserV,
       })
     },
-    [token]
+    [token],
+    {
+      setLoading: (state) => ({ ...state, loading: true }),
+    }
   )
 
   useEffect(() => {
