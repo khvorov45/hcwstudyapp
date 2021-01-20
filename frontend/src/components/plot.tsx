@@ -120,7 +120,14 @@ function SerologyPlots({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className={classes.control}>
-        <SiteSelect sites={sites} site={site} setSite={setSite} />
+        <SiteSelect
+          sites={sites}
+          site={site}
+          setSite={(s) => {
+            setSite(s)
+            setSelectedPid(null)
+          }}
+        />
         {virus ? (
           <Autocomplete
             options={viruses}
@@ -145,7 +152,10 @@ function SerologyPlots({
           style={{ width: 150 }}
           renderInput={(params) => <TextField {...params} label="PID" />}
           value={selectedPid}
-          onChange={(e, n) => setSelectedPid(n)}
+          onChange={(e, n) => {
+            setSelectedPid(n)
+            setSite(null)
+          }}
         />
       </div>
       <div>
