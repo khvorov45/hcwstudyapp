@@ -182,7 +182,7 @@ export default function App() {
   useEffect(() => {
     async function conditionalRefresh() {
       // Gotta wait until we actually get a good token from somewhere
-      if (auth.status !== "success" || !token) {
+      if (auth.status !== "success" || auth.loading || !token) {
         return
       }
       const noLastRefresh = token.lastRefresh === null
