@@ -370,7 +370,7 @@ function SiteSelect({
   return (
     <Autocomplete
       options={sites}
-      getOptionLabel={(option) => option}
+      getOptionLabel={(option) => option[0].toUpperCase() + option.slice(1)}
       style={{ width: 150 }}
       renderInput={(params) => <TextField {...params} label="Site" />}
       value={site}
