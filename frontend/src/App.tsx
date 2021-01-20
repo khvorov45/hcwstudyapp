@@ -203,7 +203,7 @@ export default function App() {
     conditionalRefresh()
     const interval = setInterval(conditionalRefresh, 60 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [token, auth])
+  }, [token, auth.status, auth.loading])
 
   const logout = useAsyncCallback(
     async ({ allDevices }: { allDevices: boolean }) => {
