@@ -149,59 +149,15 @@ function SerologyPlots({
         />
       </div>
       <div>
-        <LineChart
-          width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
-          height={400}
-          data={serologyWide}
-          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-        >
-          {plotPids.map((pid) =>
-            viruses.map((v) => (
-              <Line
-                key={`${pid}--${v}`}
-                dataKey={`${pid}--${v}`}
-                stroke={
-                  theme.palette.primary[
-                    theme.palette.type === "dark" ? "light" : "dark"
-                  ]
-                }
-                dot={{
-                  fill: theme.palette.text.secondary,
-                  stroke: theme.palette.text.secondary,
-                }}
-                isAnimationActive={false}
-                connectNulls
-              />
-            ))
-          )}
-          <YAxis
-            ticks={titres}
-            scale="log"
-            domain={["auto", "auto"]}
-            tick={{
-              fill: theme.palette.text.secondary,
-            }}
-          >
-            <Label
-              value="Titre"
-              angle={-90}
-              position="insideLeft"
-              style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-            />
-          </YAxis>
-          <XAxis
-            dataKey="day"
-            tick={{
-              fill: theme.palette.text.secondary,
-            }}
-          >
-            <Label
-              value="Day"
-              position="bottom"
-              style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-            />
-          </XAxis>
-        </LineChart>
+        {selectedPid || virus ? (
+          <Spaghetti
+            data={serologyWide}
+            keys={plotPids.flatMap((pid) => viruses.map((v) => `${pid}--${v}`))}
+            yTicks={titres}
+          />
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   )
@@ -368,5 +324,71 @@ function SiteSelect({
       value={site}
       onChange={(e, n) => setSite(n)}
     />
+  )
+}
+
+function Spaghetti<T extends Object>({
+  data,
+  yTicks,
+  keys,
+}: {
+  data: T[]
+  yTicks: number[]
+  keys: string[]
+}) {
+  const windowSize = useWindowSize()
+  const theme = useTheme()
+  return (
+    <LineChart
+      width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
+      height={400}
+      data={data}
+      margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+    >
+      {keys.map((k) => (
+        <Line
+          key={k}
+          dataKey={k}
+          stroke={
+            theme.palette.primary[
+              theme.palette.type === "dark" ? "light" : "dark"
+            ]
+          }
+          dot={{
+            fill: theme.palette.text.secondary,
+            stroke: theme.palette.text.secondary,
+          }}
+          isAnimationActive={false}
+          connectNulls
+        />
+      ))}
+      <YAxis
+        ticks={yTicks}
+        scale="log"
+        domain={["auto", "auto"]}
+        tick={{
+          fill: theme.palette.text.secondary,
+        }}
+      >
+        <Label
+          value="Titre"
+          angle={-90}
+          position="insideLeft"
+          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+        />
+      </YAxis>
+      <XAxis
+        dataKey="day"
+        tick={{
+          fill: theme.palette.text.secondary,
+        }}
+      >
+        <Label
+          value="Day"
+          position="bottom"
+          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+        />
+      </XAxis>
+    </LineChart>
   )
 }
