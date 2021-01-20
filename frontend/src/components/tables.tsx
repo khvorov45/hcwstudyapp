@@ -577,22 +577,6 @@ type SummarizedCount = {
 
 type Summarized = SummarizedLogmean | SummarizedNumeric | SummarizedCount
 
-function useCounted<T extends Object, K extends keyof T>(
-  data: Pick<T, K>[],
-  key: K
-) {
-  const counted = useMemo(
-    () =>
-      d3.rollup(
-        data,
-        (v) => summariseCount(v),
-        (d) => d[key]
-      ),
-    [data, key]
-  )
-  return counted
-}
-
 function summariseNumerical(ns: number[]): SummarizedNumeric {
   return {
     kind: "numeric",
@@ -655,17 +639,25 @@ function Summary({
   participantsExtra: (Participant & { age: number; prevVac: number })[]
   serology: (Serology & { site?: Site })[]
 }) {
-  const countsBySite = useCounted(participantsExtra, "site")
-  const countsByVac = useCounted(participantsExtra, "prevVac")
-  const countsByGender = useCounted(participantsExtra, "gender")
-  const ageBySite = useMemo(
-    () =>
-      d3.rollup(
-        participantsExtra,
-        (v) => summariseNumerical(v.map((v) => v.age)),
-        (d) => d.site
-      ),
-    [participantsExtra]
+  const countsBySite = d3.rollup(
+    participantsExtra,
+    summariseCount,
+    (d) => d.site
+  )
+  const countsByVac = d3.rollup(
+    participantsExtra,
+    summariseCount,
+    (d) => d.prevVac
+  )
+  const countsByGender = d3.rollup(
+    participantsExtra,
+    summariseCount,
+    (d) => d.gender
+  )
+  const ageBySite = d3.rollup(
+    participantsExtra,
+    (v) => summariseNumerical(v.map((v) => v.age)),
+    (d) => d.site
   )
   const gmtByDaySite = d3.rollup(
     serology,
@@ -678,27 +670,18 @@ function Summary({
     (v) => summariseLogmean(v.map((v) => v.titre)),
     (d) => d.day
   )
-
-  const countsByGenderSite = useMemo(
-    () =>
-      d3.rollup(
-        participantsExtra,
-        (v) => summariseCount(v),
-        (d) => d.gender,
-        (d) => d.site
-      ),
-    [participantsExtra]
+  const countsByGenderSite = d3.rollup(
+    participantsExtra,
+    summariseCount,
+    (d) => d.gender,
+    (d) => d.site
   )
 
-  const countsByVacSite = useMemo(
-    () =>
-      d3.rollup(
-        participantsExtra,
-        (v) => summariseCount(v),
-        (d) => d.prevVac,
-        (d) => d.site
-      ),
-    [participantsExtra]
+  const countsByVacSite = d3.rollup(
+    participantsExtra,
+    summariseCount,
+    (d) => d.prevVac,
+    (d) => d.site
   )
 
   // Convert the counts above to the appropriate table
