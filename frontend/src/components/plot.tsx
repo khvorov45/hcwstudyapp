@@ -17,7 +17,7 @@ import {
 } from "@material-ui/core"
 import { Participant, Serology, Site } from "../lib/data"
 import * as d3 from "d3-array"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
@@ -90,13 +90,9 @@ function SerologyPlots({
   const [site, setSite] = useState<string | null>(null)
   const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
-  // Set the virus to the first value as soon as it's available
-  useEffect(() => {
-    !virus && viruses[0] && setVirus(viruses[0])
-  }, [viruses, virus])
 
   const filteredData = serology.filter(
-    (s) => s.virus === virus && (!site || s.site === site)
+    (s) => (!virus || s.virus === virus) && (!site || s.site === site)
   )
 
   const availablePids = Array.from(new Set(filteredData.map((s) => s.pid)))
@@ -110,9 +106,13 @@ function SerologyPlots({
   const serologyWide = days.map((day) =>
     plotData
       .filter((s) => s.day === day)
-      .reduce((acc, cur) => Object.assign(acc, { [cur.pid]: cur.titre }), {
-        day,
-      })
+      .reduce(
+        (acc, cur) =>
+          Object.assign(acc, { [`${cur.pid}--${cur.virus}`]: cur.titre }),
+        {
+          day,
+        }
+      )
   )
   const theme = useTheme()
   const classes = useStyles()
@@ -128,24 +128,14 @@ function SerologyPlots({
             setSelectedPid(null)
           }}
         />
-        {virus ? (
-          <Autocomplete
-            options={viruses}
-            getOptionLabel={(option) => option}
-            style={{ width: 225 }}
-            renderInput={(params) => <TextField {...params} label="Virus" />}
-            value={virus}
-            onChange={(e, n) => setVirus(n)}
-            disableClearable
-          />
-        ) : (
-          <Autocomplete
-            options={[]}
-            value={null}
-            style={{ width: 225 }}
-            renderInput={(params) => <TextField {...params} label="Virus" />}
-          />
-        )}
+        <Autocomplete
+          options={viruses}
+          getOptionLabel={(option) => option}
+          style={{ width: 225 }}
+          renderInput={(params) => <TextField {...params} label="Virus" />}
+          value={virus}
+          onChange={(e, n) => setVirus(n)}
+        />
         <Autocomplete
           options={availablePids}
           getOptionLabel={(option) => option}
@@ -165,23 +155,25 @@ function SerologyPlots({
           data={serologyWide}
           margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
         >
-          {plotPids.map((pid) => (
-            <Line
-              key={pid}
-              dataKey={pid}
-              stroke={
-                theme.palette.primary[
-                  theme.palette.type === "dark" ? "light" : "dark"
-                ]
-              }
-              dot={{
-                fill: theme.palette.text.secondary,
-                stroke: theme.palette.text.secondary,
-              }}
-              isAnimationActive={false}
-              connectNulls
-            />
-          ))}
+          {plotPids.map((pid) =>
+            viruses.map((v) => (
+              <Line
+                key={`${pid}--${v}`}
+                dataKey={`${pid}--${v}`}
+                stroke={
+                  theme.palette.primary[
+                    theme.palette.type === "dark" ? "light" : "dark"
+                  ]
+                }
+                dot={{
+                  fill: theme.palette.text.secondary,
+                  stroke: theme.palette.text.secondary,
+                }}
+                isAnimationActive={false}
+                connectNulls
+              />
+            ))
+          )}
           <YAxis
             ticks={titres}
             scale="log"
