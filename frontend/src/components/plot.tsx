@@ -187,7 +187,11 @@ function SerologyPlots({
             <Line
               key={pid}
               dataKey={pid}
-              stroke="#8884d8"
+              stroke={
+                theme.palette.primary[
+                  theme.palette.type === "dark" ? "light" : "dark"
+                ]
+              }
               dot={{
                 fill: theme.palette.text.secondary,
                 stroke: theme.palette.text.secondary,
