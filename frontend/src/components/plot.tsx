@@ -19,7 +19,7 @@ import {
   Theme,
   useTheme,
 } from "@material-ui/core"
-import { Participant, Serology, Site, SiteV } from "../lib/data"
+import { Participant, Serology, Site } from "../lib/data"
 import * as d3 from "d3-array"
 import React, { useEffect, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
@@ -80,8 +80,6 @@ function SerologyPlots({
 }: {
   serology: (Serology & { site?: Site })[]
 }) {
-  const sites = Object.keys(SiteV.keys)
-
   const viruses = Array.from(
     new Set(serology.map((s) => s.virus))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
@@ -91,8 +89,9 @@ function SerologyPlots({
   const titres = Array.from(new Set(serology.map((s) => s.titre))).sort(
     (a, b) => a - b
   )
+  const sites = Array.from(new Set(serology.map((s) => s.site ?? "(missing)")))
 
-  const [site, setSite] = useState(sites[0])
+  const [site, setSite] = useState<string | null>(null)
   const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
   // Set the virus to the first value as soon as it's available
@@ -101,7 +100,7 @@ function SerologyPlots({
   }, [viruses, virus])
 
   const filteredData = serology.filter(
-    (s) => s.virus === virus && (site === "any" || s.site === site)
+    (s) => s.virus === virus && (!site || s.site === site)
   )
 
   const availablePids = Array.from(new Set(filteredData.map((s) => s.pid)))
@@ -125,23 +124,7 @@ function SerologyPlots({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className={classes.control}>
-        <FormControl>
-          <InputLabel id="site-select-label">Site</InputLabel>
-          <Select
-            labelId="site-select-label"
-            value={site}
-            id="site-select"
-            onChange={(e) => setSite(e.target.value as string)}
-            style={{ width: 125 }}
-          >
-            <MenuItem value="any">Any</MenuItem>
-            {sites.map((s) => (
-              <MenuItem key={s} value={s}>
-                {s[0].toUpperCase() + s.slice(1)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <SiteSelect sites={sites} site={site} setSite={setSite} />
         <FormControl>
           <InputLabel id="virus-select-label">Virus</InputLabel>
           <Select
@@ -231,21 +214,13 @@ function BaselinePlots({
   participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
-  const [site, setSite] = useState<string | null>("overall")
+  const [site, setSite] = useState<string | null>(null)
   return (
     <div>
-      <Autocomplete
-        id="site-select"
-        options={(sites as string[]).concat(["overall"])}
-        getOptionLabel={(option) => option[0].toUpperCase() + option.slice(1)}
-        style={{ width: 150 }}
-        renderInput={(params) => <TextField {...params} label="Site" />}
-        value={site}
-        onChange={(e, n) => setSite(n)}
-      />
+      <SiteSelect sites={sites} site={site} setSite={setSite} />
       <PlotColumn
         participantsExtra={participantsExtra.filter(
-          (p) => site === "overall" || p.site === site
+          (p) => !site || p.site === site
         )}
       />
     </div>
@@ -373,5 +348,26 @@ function GenericBar<T extends Record<string, string | number>>({
         isAnimationActive={false}
       />
     </BarChart>
+  )
+}
+
+function SiteSelect({
+  sites,
+  site,
+  setSite,
+}: {
+  sites: string[]
+  site: string | null
+  setSite: (s: string | null) => void
+}) {
+  return (
+    <Autocomplete
+      options={sites}
+      getOptionLabel={(option) => option}
+      style={{ width: 150 }}
+      renderInput={(params) => <TextField {...params} label="Site" />}
+      value={site}
+      onChange={(e, n) => setSite(n)}
+    />
   )
 }
