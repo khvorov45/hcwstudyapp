@@ -188,7 +188,10 @@ function SerologyPlots({
               key={pid}
               dataKey={pid}
               stroke="#8884d8"
-              dot={true}
+              dot={{
+                fill: theme.palette.text.secondary,
+                stroke: theme.palette.text.secondary,
+              }}
               isAnimationActive={false}
               connectNulls
             />
