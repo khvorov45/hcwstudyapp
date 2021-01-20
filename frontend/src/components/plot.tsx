@@ -10,11 +10,7 @@ import {
 } from "recharts"
 import {
   createStyles,
-  FormControl,
-  InputLabel,
   makeStyles,
-  MenuItem,
-  Select,
   TextField,
   Theme,
   useTheme,
@@ -125,24 +121,25 @@ function SerologyPlots({
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className={classes.control}>
         <SiteSelect sites={sites} site={site} setSite={setSite} />
-        <FormControl>
-          <InputLabel id="virus-select-label">Virus</InputLabel>
-          <Select
-            labelId="virus-select-label"
-            value={virus ?? ""}
-            id="virus-select"
-            onChange={(e) => setVirus(e.target.value as string)}
+        {virus ? (
+          <Autocomplete
+            options={viruses}
+            getOptionLabel={(option) => option}
             style={{ width: 225 }}
-          >
-            {viruses.map((s) => (
-              <MenuItem key={s} value={s}>
-                {s}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            renderInput={(params) => <TextField {...params} label="Virus" />}
+            value={virus}
+            onChange={(e, n) => setVirus(n)}
+            disableClearable
+          />
+        ) : (
+          <Autocomplete
+            options={[]}
+            value={null}
+            style={{ width: 225 }}
+            renderInput={(params) => <TextField {...params} label="Virus" />}
+          />
+        )}
         <Autocomplete
-          id="combo-box-demo"
           options={availablePids}
           getOptionLabel={(option) => option}
           style={{ width: 150 }}
