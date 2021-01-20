@@ -367,7 +367,15 @@ function GenericBar<T extends Record<string, string | number>>({
           color: theme.palette.text.primary,
         }}
       />
-      <Bar dataKey={yKey as string} fill="#8884d8" isAnimationActive={false} />
+      <Bar
+        dataKey={yKey as string}
+        fill={
+          theme.palette.primary[
+            theme.palette.type === "dark" ? "light" : "dark"
+          ]
+        }
+        isAnimationActive={false}
+      />
     </BarChart>
   )
 }
