@@ -100,17 +100,24 @@ function SerologyPlots({
 
   const availablePids = Array.from(new Set(siteFiltered.map((s) => s.pid)))
 
-  const serologyWide = days.map((day) =>
-    pidFiltered
-      .filter((s) => s.day === day)
-      .reduce(
-        (acc, cur) =>
-          Object.assign(acc, { [`${cur.pid}--${cur.virus}`]: cur.titre }),
-        {
-          day,
-        }
-      )
+  // Summarise each virus
+  const virusDaySummarized = d3.rollup(
+    pidFiltered,
+    (v) => Math.exp(d3.mean(v.map((d) => Math.log(d.titre))) ?? 0),
+    (d) => d.virus,
+    (d) => d.day
   )
+
+  const serologyWide = days.map((day) =>
+    viruses.reduce(
+      (acc, v) =>
+        Object.assign(acc, { [v]: virusDaySummarized.get(v)?.get(day) }),
+      {
+        day,
+      }
+    )
+  )
+
   const classes = useStyles()
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -146,14 +153,12 @@ function SerologyPlots({
         />
       </div>
       <div>
-        {selectedPid || virus ? (
-          <Spaghetti data={serologyWide} keys={viruses} yTicks={titres} />
-        ) : (
-          <div style={{ marginTop: 20, fontSize: "medium" }}>
-            Select either virus or PID (or both). Not selecting a PID will
-            render all available PIDs which takes a while.
-          </div>
-        )}
+        <Spaghetti
+          data={serologyWide}
+          keys={viruses}
+          yTicks={titres}
+          yLab={selectedPid ? "Titre" : "GMT"}
+        />
       </div>
     </div>
   )
@@ -327,9 +332,11 @@ function Spaghetti<T extends Object>({
   data,
   yTicks,
   keys,
+  yLab,
 }: {
   data: T[]
   yTicks: number[]
+  yLab: string
   keys: string[]
 }) {
   const windowSize = useWindowSize()
@@ -367,7 +374,7 @@ function Spaghetti<T extends Object>({
         }}
       >
         <Label
-          value="Titre"
+          value={yLab}
           angle={-90}
           position="insideLeft"
           style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
