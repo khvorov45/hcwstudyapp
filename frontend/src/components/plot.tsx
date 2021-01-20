@@ -172,13 +172,7 @@ function SerologyPlots({
       </div>
       <div>
         <LineChart
-          width={
-            windowSize.width - 20 < 500
-              ? 500
-              : windowSize.width - 20 > 800
-              ? 800
-              : windowSize.width - 20
-          }
+          width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
           height={400}
           data={serologyWide}
           margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
