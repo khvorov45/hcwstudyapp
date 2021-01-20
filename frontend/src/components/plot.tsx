@@ -87,24 +87,21 @@ function SerologyPlots({
   )
   const sites = Array.from(new Set(serology.map((s) => s.site ?? "(missing)")))
 
+  // Filters applied in the order presented
   const [site, setSite] = useState<string | null>(null)
   const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
 
-  const filteredData = serology.filter(
-    (s) => (!virus || s.virus === virus) && (!site || s.site === site)
-  )
-
-  const availablePids = Array.from(new Set(filteredData.map((s) => s.pid)))
-
-  const plotData = filteredData.filter(
+  const siteFiltered = serology.filter((s) => !site || s.site === site)
+  const virusFiltered = siteFiltered.filter((s) => !virus || s.virus === virus)
+  const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
   )
 
-  const plotPids = Array.from(new Set(plotData.map((s) => s.pid)))
+  const availablePids = Array.from(new Set(siteFiltered.map((s) => s.pid)))
 
   const serologyWide = days.map((day) =>
-    plotData
+    pidFiltered
       .filter((s) => s.day === day)
       .reduce(
         (acc, cur) =>
@@ -143,18 +140,14 @@ function SerologyPlots({
           onChange={(e, n) => {
             setSelectedPid(n)
             if (!site) {
-              setSite(plotData.find((d) => d.pid === n)?.site ?? null)
+              setSite(pidFiltered.find((d) => d.pid === n)?.site ?? null)
             }
           }}
         />
       </div>
       <div>
         {selectedPid || virus ? (
-          <Spaghetti
-            data={serologyWide}
-            keys={plotPids.flatMap((pid) => viruses.map((v) => `${pid}--${v}`))}
-            yTicks={titres}
-          />
+          <Spaghetti data={serologyWide} keys={viruses} yTicks={titres} />
         ) : (
           <div style={{ marginTop: 20, fontSize: "medium" }}>
             Select either virus or PID (or both). Not selecting a PID will
