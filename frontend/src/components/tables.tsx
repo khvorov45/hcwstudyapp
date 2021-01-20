@@ -255,7 +255,9 @@ export default function Tables({
     },
     {
       name: "summary",
-      element: <Summary participantsExtra={participantsExtra} />,
+      element: (
+        <Summary participantsExtra={participantsExtra} serology={serology} />
+      ),
     },
   ].map((t) =>
     Object.assign(t, { path: `/tables/${t.name}`, link: `/tables/${t.name}` })
@@ -579,10 +581,21 @@ function summariseNumerical(ns: number[]): string {
   )})`
 }
 
+function summariseLogmean(ns: number[]): string {
+  const logN = ns.map(Math.log)
+  const mn = d3.mean(logN) ?? 0
+  const se = (d3.deviation(logN) ?? 0) / Math.sqrt(ns.length)
+  return `${Math.round(Math.exp(mn))} (${Math.round(
+    Math.exp(mn - 1.96 * se)
+  )}, ${Math.round(Math.exp(mn + 1.96 * se))})`
+}
+
 function Summary({
   participantsExtra,
+  serology,
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
+  serology: (Serology & { site?: Site })[]
 }) {
   const countsBySite = useCounted(participantsExtra, "site")
   const countsByVac = useCounted(participantsExtra, "prevVac")
@@ -596,6 +609,19 @@ function Summary({
       ),
     [participantsExtra]
   )
+  const gmtByDaySite = d3.rollup(
+    serology,
+    (v) => summariseLogmean(v.map((v) => v.titre)),
+    (d) => d.day,
+    (d) => d.site
+  )
+  console.log(gmtByDaySite)
+  const gmtByDay = d3.rollup(
+    serology,
+    (v) => summariseLogmean(v.map((v) => v.titre)),
+    (d) => d.day
+  )
+  console.log(gmtByDay)
 
   const countsByGenderSite = useMemo(
     () =>
@@ -621,9 +647,9 @@ function Summary({
 
   // Convert the counts above to the appropriate table
 
-  function toWide(v: Map<string, number | string>) {
+  function toWide(v: Map<string | undefined, number | string>) {
     return Array.from(v, ([k, v]) => ({
-      key: k,
+      key: k ?? "(missing)",
       value: v,
     })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
   }
@@ -661,7 +687,16 @@ function Summary({
     })
   )
 
-  const counts = [ageRow]
+  const gmtByDaySiteWithMarginal = Array.from(gmtByDaySite, ([k, v]) => ({
+    label: k,
+    ...toWide(v),
+    total: gmtByDay.get(k),
+  })).sort((a, b) => a.label - b.label)
+  console.log(gmtByDaySiteWithMarginal)
+
+  const counts = emptyRow("GMT: mean (95% CI)")
+    .concat(gmtByDaySiteWithMarginal)
+    .concat([ageRow])
     .concat(emptyRow("Vaccinations"))
     .concat(countsByVacSiteWithMarginal)
     .concat(emptyRow("Gender"))
