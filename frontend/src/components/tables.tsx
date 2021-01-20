@@ -34,6 +34,7 @@ import {
   TextField,
   Select,
   MenuItem,
+  useTheme,
 } from "@material-ui/core"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { useWindowSize } from "../lib/hooks"
@@ -559,6 +560,23 @@ function SerologyTable({
   return <Table columns={columns} data={serology} />
 }
 
+type SummarizedNumeric = {
+  kind: "numeric"
+  content: { mean: number; sd: number }
+}
+
+type SummarizedLogmean = {
+  kind: "logmean"
+  content: { logmean: number; se: number }
+}
+
+type SummarizedCount = {
+  kind: "count"
+  content: { n: number }
+}
+
+type Summarized = SummarizedLogmean | SummarizedNumeric | SummarizedCount
+
 function useCounted<T extends Object, K extends keyof T>(
   data: Pick<T, K>[],
   key: K
@@ -567,7 +585,7 @@ function useCounted<T extends Object, K extends keyof T>(
     () =>
       d3.rollup(
         data,
-        (v) => v.length,
+        (v) => summariseCount(v),
         (d) => d[key]
       ),
     [data, key]
@@ -575,19 +593,59 @@ function useCounted<T extends Object, K extends keyof T>(
   return counted
 }
 
-function summariseNumerical(ns: number[]): string {
-  return `${Math.round(d3.mean(ns) ?? 0)} (${Math.round(
-    d3.deviation(ns) ?? 0
-  )})`
+function summariseNumerical(ns: number[]): SummarizedNumeric {
+  return {
+    kind: "numeric",
+    content: {
+      mean: d3.mean(ns) ?? 0,
+      sd: d3.deviation(ns) ?? 0,
+    },
+  }
 }
 
-function summariseLogmean(ns: number[]): string {
+function summariseLogmean(ns: number[]): SummarizedLogmean {
   const logN = ns.map(Math.log)
-  const mn = d3.mean(logN) ?? 0
-  const se = (d3.deviation(logN) ?? 0) / Math.sqrt(ns.length)
-  return `${Math.round(Math.exp(mn))} (${Math.round(
-    Math.exp(mn - 1.96 * se)
-  )}, ${Math.round(Math.exp(mn + 1.96 * se))})`
+  return {
+    kind: "logmean",
+    content: {
+      logmean: d3.mean(logN) ?? 0,
+      se: (d3.deviation(logN) ?? 0) / Math.sqrt(ns.length),
+    },
+  }
+}
+
+function summariseCount<T>(ns: T[]): SummarizedCount {
+  return {
+    kind: "count",
+    content: {
+      n: ns.length,
+    },
+  }
+}
+
+function renderSummarized(s: Summarized, theme: Theme) {
+  if (!s || !s.kind) {
+    return s
+  }
+  if (s.kind === "numeric") {
+    return `${Math.round(s.content.mean)} (${Math.round(s.content.sd)})`
+  }
+  if (s.kind === "logmean") {
+    return (
+      <div>
+        <div>{Math.round(Math.exp(s.content.logmean))}</div>
+        <div style={{ color: theme.palette.text.secondary }}>
+          {`${Math.round(
+            Math.exp(s.content.logmean - 1.96 * s.content.se)
+          )}-${Math.round(Math.exp(s.content.logmean + 1.96 * s.content.se))}`}
+        </div>
+      </div>
+    )
+  }
+  if (s.kind === "count") {
+    return `${s.content.n}`
+  }
+  return "summarized"
 }
 
 function Summary({
@@ -615,19 +673,17 @@ function Summary({
     (d) => d.day,
     (d) => d.site
   )
-  console.log(gmtByDaySite)
   const gmtByDay = d3.rollup(
     serology,
     (v) => summariseLogmean(v.map((v) => v.titre)),
     (d) => d.day
   )
-  console.log(gmtByDay)
 
   const countsByGenderSite = useMemo(
     () =>
       d3.rollup(
         participantsExtra,
-        (v) => v.length,
+        (v) => summariseCount(v),
         (d) => d.gender,
         (d) => d.site
       ),
@@ -638,7 +694,7 @@ function Summary({
     () =>
       d3.rollup(
         participantsExtra,
-        (v) => v.length,
+        (v) => summariseCount(v),
         (d) => d.prevVac,
         (d) => d.site
       ),
@@ -647,14 +703,17 @@ function Summary({
 
   // Convert the counts above to the appropriate table
 
-  function toWide(v: Map<string | undefined, number | string>) {
+  function toWide(v: Map<string | undefined, Summarized>) {
     return Array.from(v, ([k, v]) => ({
       key: k ?? "(missing)",
       value: v,
     })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
   }
 
-  type Row = { label?: string | number; total?: number | string }
+  type Row = {
+    label?: string | number
+    total?: Summarized
+  }
 
   const ageRow: Row = {
     label: "Age: mean (sd)",
@@ -664,7 +723,7 @@ function Summary({
 
   const bottomRow = {
     label: "Total",
-    total: participantsExtra.length,
+    total: summariseCount(participantsExtra),
     ...toWide(countsBySite),
   }
 
@@ -692,7 +751,6 @@ function Summary({
     ...toWide(v),
     total: gmtByDay.get(k),
   })).sort((a, b) => a.label - b.label)
-  console.log(gmtByDaySiteWithMarginal)
 
   const counts = emptyRow("GMT: mean (95% CI)")
     .concat(gmtByDaySiteWithMarginal)
@@ -702,6 +760,8 @@ function Summary({
     .concat(emptyRow("Gender"))
     .concat(countsByGenderSiteWithMarginal)
     .concat(bottomRow)
+
+  const theme = useTheme()
 
   const columns = useMemo(() => {
     return [
@@ -714,16 +774,16 @@ function Summary({
         Header: "Site",
         columns: Array.from(countsBySite.keys()).map((s) => ({
           Header: toTitleCase(s),
-          accessor: (p: any) => p[s],
+          accessor: (p: any) => renderSummarized(p[s], theme),
         })),
       },
       {
         Header: "Total",
-        accessor: (p: any) => p.total,
+        accessor: (p: any) => renderSummarized(p.total, theme),
         width: 100,
       },
     ]
-  }, [countsBySite])
+  }, [countsBySite, theme])
 
   return (
     <SummaryTable
