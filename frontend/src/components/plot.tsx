@@ -235,25 +235,30 @@ function BaselinePlots({
   participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
+  const [site, setSite] = useState<string | null>("overall")
   return (
-    <div style={{ display: "flex" }}>
-      <PlotColumn title="Overall" participantsExtra={participantsExtra} />
-      {sites.map((s) => (
-        <PlotColumn
-          key={s}
-          title={s[0].toUpperCase() + s.slice(1)}
-          participantsExtra={participantsExtra.filter((p) => p.site === s)}
-        />
-      ))}
+    <div>
+      <Autocomplete
+        id="site-select"
+        options={(sites as string[]).concat(["overall"])}
+        getOptionLabel={(option) => option[0].toUpperCase() + option.slice(1)}
+        style={{ width: 150 }}
+        renderInput={(params) => <TextField {...params} label="Site" />}
+        value={site}
+        onChange={(e, n) => setSite(n)}
+      />
+      <PlotColumn
+        participantsExtra={participantsExtra.filter(
+          (p) => site === "overall" || p.site === site
+        )}
+      />
     </div>
   )
 }
 
 function PlotColumn({
-  title,
   participantsExtra,
 }: {
-  title: string
   participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
   const genderCounts = d3.rollup(
@@ -281,43 +286,32 @@ function PlotColumn({
       count: a.length,
     }))
   return (
-    <div>
-      <div
-        style={{
-          fontSize: "large",
-          textAlign: "center",
-          fontWeight: "bold",
-        }}
-      >
-        {title}
-      </div>
-      <div>
-        <GenericBar data={agesBinned} xLab="Age" xKey="range" yKey="count" />
-        <GenericBar
-          data={Array.from(genderCounts, ([k, v]) => ({
-            gender: k ?? "(missing)",
-            count: v,
-          }))}
-          xLab="Gender"
-          xKey="gender"
-          yKey="count"
-        />
-        <GenericBar
-          data={Array.from(priorVaccinationCounts, ([k, v]) => ({
-            priorVaccinations: k ?? "(missing)",
-            count: v,
-          })).sort((a, b) =>
-            a.priorVaccinations > b.priorVaccinations
-              ? 1
-              : a.priorVaccinations < b.priorVaccinations
-              ? -1
-              : 0
-          )}
-          xLab="Known prior vaccinations"
-          xKey="priorVaccinations"
-          yKey="count"
-        />
-      </div>
+    <div style={{ display: "flex", flexWrap: "wrap" }}>
+      <GenericBar data={agesBinned} xLab="Age" xKey="range" yKey="count" />
+      <GenericBar
+        data={Array.from(genderCounts, ([k, v]) => ({
+          gender: k ?? "(missing)",
+          count: v,
+        }))}
+        xLab="Gender"
+        xKey="gender"
+        yKey="count"
+      />
+      <GenericBar
+        data={Array.from(priorVaccinationCounts, ([k, v]) => ({
+          priorVaccinations: k ?? "(missing)",
+          count: v,
+        })).sort((a, b) =>
+          a.priorVaccinations > b.priorVaccinations
+            ? 1
+            : a.priorVaccinations < b.priorVaccinations
+            ? -1
+            : 0
+        )}
+        xLab="Known prior vaccinations"
+        xKey="priorVaccinations"
+        yKey="count"
+      />
     </div>
   )
 }
