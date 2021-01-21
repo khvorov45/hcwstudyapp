@@ -7,6 +7,7 @@ import {
   Label,
   LineChart,
   Line,
+  Legend,
 } from "recharts"
 import {
   createStyles,
@@ -23,6 +24,7 @@ import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
 import Autocomplete from "@material-ui/lab/Autocomplete"
 import { useWindowSize } from "../lib/hooks"
+import { interpolateSinebow } from "d3-scale-chromatic"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -339,6 +341,9 @@ function Spaghetti<T extends Object>({
   yLab: string
   keys: string[]
 }) {
+  const lineColors = keys.map((k, i) =>
+    interpolateSinebow(i / (keys.length - 1) / 1.1)
+  )
   const windowSize = useWindowSize()
   const theme = useTheme()
   return (
@@ -348,18 +353,15 @@ function Spaghetti<T extends Object>({
       data={data}
       margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
     >
-      {keys.map((k) => (
+      {keys.map((k, i) => (
         <Line
           key={k}
           dataKey={k}
-          stroke={
-            theme.palette.primary[
-              theme.palette.type === "dark" ? "light" : "dark"
-            ]
-          }
+          stroke={lineColors[i]}
           dot={{
-            fill: theme.palette.text.secondary,
-            stroke: theme.palette.text.secondary,
+            fill: lineColors[i],
+            stroke: lineColors[i],
+            shape: "square",
           }}
           isAnimationActive={false}
           connectNulls
@@ -392,6 +394,7 @@ function Spaghetti<T extends Object>({
           style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
         />
       </XAxis>
+      <Legend verticalAlign="top" />
     </LineChart>
   )
 }
