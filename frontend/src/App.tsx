@@ -40,7 +40,14 @@ import * as d3 from "d3-array"
 import { tableFetch, useTableData, useTableDataPlain } from "./lib/table-data"
 import moment from "moment"
 import ScreenHeight from "./components/screen-height"
-import { LinkExternal } from "./components/link"
+import { LinkExternal, LinkInternal } from "./components/link"
+
+function LinkRenderer(props: any) {
+  if (props.href.startsWith("/")) {
+    return <LinkInternal to={props.href}>{props.children}</LinkInternal>
+  }
+  return LinkExternal(props)
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -355,7 +362,7 @@ export default function App() {
                 <ScreenHeight heightTaken={50}>
                   <ReactMarkdown
                     className={classes.home}
-                    renderers={{ link: LinkExternal, thematicBreak: Divider }}
+                    renderers={{ link: LinkRenderer, thematicBreak: Divider }}
                   >
                     {aboutPageMd.result ?? ""}
                   </ReactMarkdown>

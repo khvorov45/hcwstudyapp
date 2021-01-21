@@ -5,56 +5,64 @@
 Top-left:
 
 - [Home](https://hcwflustudy.com) (main study site homepage)
-- Reports (main page, no content there, so redirects to this page)
-- About (this page)
-- Tables
-- Plots
+- [Reports](/) (main page, no content there, so redirects to this page)
+- [About](/about) (this page)
+- [Tables](/tables)
+- [Plots](/plots)
 
 Top-right:
 
-- Email login/token
-- API (including R code to access data)
+- [Email login/token](/email)
+- [API](/api-spec) (including [R code](/api-spec/r-code) to access data)
 - Settings (sync/withdrawn filter)
 - Logout
 - Theme switch (light/dark)
 
-## Tables
+## [Tables](/tables)
 
-### Contact
+### [Contact](/tables/contact)
 
 Participant contact information.
 
-### Baseline
+### [Baseline](/tables/baseline)
 
 Information from the baseline survey.
 
-### Schedule
+### [Vaccination](/tables/vaccination)
+
+Vaccination history.
+
+### [Schedule](/tables/schedule)
 
 Scheduled dates as per the REDCap scheduling instrument.
 
-### Weekly survey
+### [Weekly survey](/tables/weekly-survey)
 
 Information from the weekly surveys.
 
-### Weekly completion
+### [Weekly completion](/tables/weekly-completion)
 
 Completion of weekly surveys.
 
-### Serology
+### [Withdrawn](/tables/withdrawn)
+
+Withdrawn subjects.
+
+### [Serology](/tables/serology)
 
 HI titres in long format.
 
-### Summary
+### [Summary](/tables/summary)
 
 Baseline (age, gender, vaccination history) and serology (GMT) summaries.
 
-## Plots
+## [Plots](/plots)
 
-### Baseline
+### [Baseline](/plots/baseline)
 
 Age, gender and vaccination history.
 
-### Serology
+### [Serology](/plots/serology)
 
 GMT (when no PID selected) and individual observations (when a PID is selected).
 
