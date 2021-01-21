@@ -14,6 +14,7 @@ import { useAsyncCallback } from "react-async-hook"
 import { IconButtonContainer } from "./loading"
 import { TokenType } from "../lib/data"
 import ScreenHeight from "./screen-height"
+import { LinkInternal } from "./link"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -100,11 +101,17 @@ function EmailForm({ tokenType }: { tokenType: TokenType }) {
         </IconButtonContainer>
       </form>
       <div className={classes.info}>
-        {tokenType === "session"
-          ? `Access links are single-use. They log you in on one device. You can
+        {tokenType === "session" ? (
+          `Access links are single-use. They log you in on one device. You can
           generate multiple links for multiple devices and stay logged in on all
           of them.`
-          : "API Tokens don't expire."}
+        ) : (
+          <span>
+            API tokens are needed for API access, e.g.{" "}
+            <LinkInternal to="/api-spec/r-code">through R</LinkInternal>. These
+            don't expire.
+          </span>
+        )}
       </div>
     </div>
   )
