@@ -46,6 +46,10 @@ import {
 } from "@material-ui/pickers"
 import DateFnsUtils from "@date-io/moment"
 import { Moment } from "moment"
+import { Icon } from "@iconify/react"
+import sortIcon from "@iconify/icons-fa-solid/sort"
+import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
+import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -974,7 +978,15 @@ function Table<T extends object>({
                     {h.render("Header")}
                   </div>
                   <div className={"sort"}>
-                    {h.isSorted ? (h.isSortedDesc ? "D" : "A") : "N"}
+                    {h.isSorted ? (
+                      h.isSortedDesc ? (
+                        <Icon icon={sortDownIcon} />
+                      ) : (
+                        <Icon icon={sortUpIcon} />
+                      )
+                    ) : (
+                      <Icon icon={sortIcon} />
+                    )}
                   </div>
                 </div>
                 <div>{h.render("Filter")}</div>
