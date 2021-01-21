@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       overflow: "auto",
       "& .header": {
-        height: 60,
+        height: 70,
         whiteSpace: "nowrap",
         borderBottom: `1px solid ${theme.palette.divider}`,
         "&>*": {
@@ -931,7 +931,7 @@ function Table<T extends object>({
         {/*Body*/}
         <div {...table.getTableBodyProps()} className="body">
           <FixedSizeList
-            height={windowSize.height - 50 - 50 - 60 - detectScrollbarWidth()}
+            height={windowSize.height - 50 - 50 - 70 - detectScrollbarWidth()}
             itemCount={table.rows.length}
             itemSize={35}
             width={table.totalColumnsWidth + scrollbarWidth}
