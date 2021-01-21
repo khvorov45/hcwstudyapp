@@ -12,7 +12,7 @@ import {
   WeeklySurvey,
   Withdrawn,
 } from "../lib/data"
-import React, { CSSProperties, useMemo, useState } from "react"
+import React, { CSSProperties, ReactNode, useMemo, useState } from "react"
 import {
   Column,
   FilterProps,
@@ -117,9 +117,6 @@ const useStyles = makeStyles((theme: Theme) =>
       "& .data-row.label-row": {
         background: theme.palette.background.alt,
         borderTop: `1px solid ${theme.palette.divider}`,
-        "& td:first-child": {
-          textAlign: "left",
-        },
       },
       "& .data-row.label-row:first-child": {
         borderTop: 0,
@@ -703,12 +700,12 @@ function Summary({
   }
 
   type Row = {
-    label?: string | number
+    label?: string | number | ReactNode
     total?: Summarized
   }
 
   const ageRow: Row = {
-    label: "Age: median (min-max)",
+    label: <RowLabel label="Age" top="median" bottom="min-max" />,
     total: summariseNumeric(participantsExtra.map((p) => p.age)),
     ...toWide(ageBySite),
   }
@@ -719,9 +716,9 @@ function Summary({
     ...toWide(countsBySite),
   }
 
-  const emptyRow: (title?: string | number) => Row[] = (
-    title?: string | number
-  ) => [{ label: title, total: undefined }]
+  function genEmptyRow(label: string, top: string, bottom: string): Row[] {
+    return [{ label: <RowLabel label={label} top={top} bottom={bottom} /> }]
+  }
 
   const countsByVacSiteWithMarginal = Array.from(countsByVacSite, ([k, v]) => ({
     label: k ? k.toString() : k,
@@ -744,12 +741,12 @@ function Summary({
     total: gmtByDay.get(k),
   })).sort((a, b) => a.label - b.label)
 
-  const counts = emptyRow("GMT: mean (95% CI)")
+  const counts = genEmptyRow("GMT", "mean", "95% CI")
     .concat(gmtByDaySiteWithMarginal)
     .concat([ageRow])
-    .concat(emptyRow("Vaccinations"))
+    .concat(genEmptyRow("Vaccinations", "", ""))
     .concat(countsByVacSiteWithMarginal)
-    .concat(emptyRow("Gender"))
+    .concat(genEmptyRow("Gender", "", ""))
     .concat(countsByGenderSiteWithMarginal)
     .concat(bottomRow)
 
@@ -782,18 +779,39 @@ function Summary({
       columns={columns}
       data={counts}
       overheadColumnId="Site_1"
-      isLabelRow={(r) =>
-        r.label && typeof r.label === "string"
-          ? [
-              "Vaccinations",
-              "Gender",
-              "Total",
-              "GMT: mean (95% CI)",
-              "Age: median (min-max)",
-            ].includes(r.label)
-          : false
-      }
+      isLabelRow={(r) => (r.label ? typeof r.label === "object" : false)}
     />
+  )
+}
+
+function RowLabel({
+  label,
+  top,
+  bottom,
+}: {
+  label: string
+  top: string
+  bottom: string
+}) {
+  const theme = useTheme()
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <div style={{ marginRight: 5 }}>{label}</div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div>{top}</div>
+        <div style={{ color: theme.palette.text.secondary }}>{bottom}</div>
+      </div>
+    </div>
   )
 }
 
