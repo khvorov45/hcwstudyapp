@@ -76,6 +76,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       "& .th, & .td": {
         padding: "0.5rem",
+        textAlign: "center",
       },
       "& .header-content": {
         display: "flex",
