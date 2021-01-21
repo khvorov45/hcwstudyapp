@@ -1,15 +1,9 @@
 import { useAsync } from "react-async-hook"
 import swagger from "@apidevtools/swagger-parser"
-import {
-  makeStyles,
-  Theme,
-  createStyles,
-  Link as MaterialLink,
-  useTheme,
-} from "@material-ui/core"
+import { makeStyles, Theme, createStyles, useTheme } from "@material-ui/core"
 import { NamedDivider } from "./divider"
 import { API_ROOT, API_SPEC_FILEPATH } from "../lib/config"
-import { Link, useRouteMatch, Switch, Route } from "react-router-dom"
+import { useRouteMatch, Switch, Route } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import SyntaxHighlighter from "react-syntax-highlighter"
 import {
@@ -18,6 +12,7 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/hljs"
 import { TableName } from "../lib/api"
 import ScreenHeight from "./screen-height"
+import { LinkExternal, LinkInternal } from "./link"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -86,10 +81,6 @@ const useStyles = makeStyles((theme: Theme) =>
       textTransform: "uppercase",
       fontWeight: "bold",
     },
-    link: {
-      color:
-        theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"],
-    },
   })
 )
 
@@ -138,9 +129,7 @@ function RCode() {
       <div style={{ marginLeft: 20 }}>
         <div className={classes.description}>
           The token can be obtained on the{" "}
-          <MaterialLink className={classes.link} component={Link} to="/email">
-            email page
-          </MaterialLink>
+          <LinkInternal to="/email">email page</LinkInternal>
         </div>
         <SyntaxHighlighter
           language="r"
@@ -194,12 +183,9 @@ function FullSpec() {
       <div className={classes.title}>{apiSpec.result.info.title}</div>
       <div style={{ paddingLeft: 20, fontSize: "medium" }}>
         Raw YAML can be found{" "}
-        <MaterialLink
-          className={classes.link}
-          href="https://github.com/khvorov45/hcwstudyapp/blob/master/openapi.yaml"
-        >
+        <LinkExternal href="https://github.com/khvorov45/hcwstudyapp/blob/master/openapi.yaml">
           here
-        </MaterialLink>
+        </LinkExternal>
       </div>
       {Object.entries(apiSpec.result.paths).map(
         ([path, pathEntries]: [path: string, pathEntries: any]) => {
@@ -287,14 +273,7 @@ function Security({ security }: { security: any }) {
           {security.map((s: Object) =>
             Object.keys(s).map((k) => (
               <span key={k}>
-                Bearer{" "}
-                <MaterialLink
-                  className={classes.link}
-                  component={Link}
-                  to="email"
-                >
-                  token ({k})
-                </MaterialLink>
+                Bearer <LinkInternal to="/email">token ({k})</LinkInternal>
               </span>
             ))
           )}
