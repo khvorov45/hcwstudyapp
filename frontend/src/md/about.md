@@ -4,7 +4,7 @@
 
 Top-left:
 
-- Home (main study site homepage)
+- [Home](https://hcwflustudy.com) (main study site homepage)
 - Reports (main page, no content there, so redirects to this page)
 - About (this page)
 - Tables

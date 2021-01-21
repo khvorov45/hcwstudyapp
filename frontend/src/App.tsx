@@ -5,8 +5,6 @@ import {
   makeStyles,
   Theme,
   ThemeProvider,
-  withStyles,
-  Link as MaterialLink,
   Divider,
 } from "@material-ui/core"
 import React, { ReactNode, useEffect, useMemo, useState } from "react"
@@ -42,6 +40,7 @@ import * as d3 from "d3-array"
 import { tableFetch, useTableData, useTableDataPlain } from "./lib/table-data"
 import moment from "moment"
 import ScreenHeight from "./components/screen-height"
+import { LinkExternal } from "./components/link"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -356,7 +355,7 @@ export default function App() {
                 <ScreenHeight heightTaken={50}>
                   <ReactMarkdown
                     className={classes.home}
-                    renderers={{ link: Link, thematicBreak: Divider }}
+                    renderers={{ link: LinkExternal, thematicBreak: Divider }}
                   >
                     {aboutPageMd.result ?? ""}
                   </ReactMarkdown>
@@ -453,12 +452,3 @@ function Login({ setToken }: { setToken: (t: AppToken) => void }) {
   // completes
   return <Redirect to="/" />
 }
-
-const Link = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      color:
-        theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"],
-    },
-  })
-)(MaterialLink)
