@@ -51,12 +51,11 @@ function LinkRenderer(props: any) {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    belowNav: {
-      overflow: "scroll",
-      height: "calc(100vh - 50px)",
-    },
     home: {
       paddingLeft: 20,
+      "&>ul>*": {
+        marginTop: 10,
+      },
     },
   })
 )
