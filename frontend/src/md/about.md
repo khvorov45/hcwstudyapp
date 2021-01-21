@@ -40,6 +40,24 @@ Information from the weekly surveys.
 
 Completion of weekly surveys.
 
+### Serology
+
+HI titres in long format.
+
+### Summary
+
+Baseline (age, gender, vaccination history) and serology (GMT) summaries.
+
+## Plots
+
+### Baseline
+
+Age, gender and vaccination history.
+
+### Serology
+
+GMT (when no PID selected) and individual observations (when a PID is selected).
+
 ---
 
 Email: hcwcohortstudy@influenzacentre.org
