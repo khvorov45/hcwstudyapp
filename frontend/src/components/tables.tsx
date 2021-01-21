@@ -18,6 +18,7 @@ import {
   FilterProps,
   useBlockLayout,
   useFilters,
+  useSortBy,
   useTable,
 } from "react-table"
 import { FixedSizeList } from "react-window"
@@ -92,7 +93,6 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: 145,
     },
     columnName: {
-      margin: "auto",
       fontWeight: "bold",
     },
     summaryTable: {
@@ -921,7 +921,8 @@ function Table<T extends object>({
       filterTypes,
     },
     useBlockLayout,
-    useFilters
+    useFilters,
+    useSortBy
   )
   function renderRow({
     index,
@@ -956,7 +957,12 @@ function Table<T extends object>({
           {table.headers.map((h) => (
             <div {...h.getHeaderProps()} className="th">
               <div className="header-content">
-                <div className={classes.columnName}>{h.render("Header")}</div>
+                <div
+                  className={classes.columnName}
+                  {...h.getSortByToggleProps()}
+                >
+                  {h.render("Header")}
+                </div>
                 {h.render("Filter")}
               </div>
             </div>
