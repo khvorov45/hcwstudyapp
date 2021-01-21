@@ -186,6 +186,11 @@ function FullSpec() {
         <LinkExternal href="https://github.com/khvorov45/hcwstudyapp/blob/master/openapi.yaml">
           here
         </LinkExternal>
+        .
+        <div>
+          Access: anyone with Access is a user; some users have site-specific
+          access, some have unrestricted access and some have admin access.
+        </div>
       </div>
       {Object.entries(apiSpec.result.paths).map(
         ([path, pathEntries]: [path: string, pathEntries: any]) => {
