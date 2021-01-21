@@ -225,7 +225,9 @@ export async function getUsers(db: Task): Promise<User[]> {
 }
 
 export async function getUserByEmail(db: Task, email: string): Promise<User> {
-  return await db.one('SELECT * FROM "User" WHERE "email"=$1', [email])
+  return await db.one('SELECT * FROM "User" WHERE "email"=$1', [
+    email.toLowerCase(),
+  ])
 }
 
 export async function getUserByToken(db: Task, token: string): Promise<User> {
@@ -238,21 +240,27 @@ export async function getUserByToken(db: Task, token: string): Promise<User> {
 }
 
 export async function insertUsers(db: Task, us: User[]): Promise<void> {
-  await insertIntoTable(db, us, "User")
+  await insertIntoTable(
+    db,
+    us.map((u) => ({ ...u, email: u.email.toLowerCase() })),
+    "User"
+  )
 }
 
 export async function deleteUser(db: Task, email: string): Promise<void> {
-  await db.any('DELETE FROM "User" WHERE email=$1', [email])
+  await db.any('DELETE FROM "User" WHERE email=$1', [email.toLowerCase()])
 }
 
 export async function deleteUsers(db: Task, emails: string[]): Promise<void> {
-  await db.any('DELETE FROM "User" WHERE email IN ($1:csv)', [emails])
+  await db.any('DELETE FROM "User" WHERE email IN ($1:csv)', [
+    emails.map((e) => e.toLowerCase),
+  ])
 }
 
 export async function updateUser(db: Task, u: User): Promise<void> {
   const res = await db.result(
     pgpInit.helpers.update(u, ["accessGroup"], "User") + " WHERE email = $1",
-    [u.email]
+    [u.email.toLowerCase()]
   )
   if (res.rowCount === 0) {
     throw Error("no such user email: " + u.email)
@@ -308,12 +316,20 @@ async function getTokens(
 
 export async function insertTokens(db: Task, tokens: Token[]) {
   const tokensHashed = tokens.map((t) => ({
-    user: t.user,
+    user: t.user.toLowerCase(),
     hash: hash(t.token),
     type: t.type,
     expires: t.expires,
   }))
-  await insertIntoTable(db, tokensHashed, "Token")
+  try {
+    await insertIntoTable(db, tokensHashed, "Token")
+  } catch (e) {
+    if (e.message.includes("violates foreign key constraint")) {
+      throw Error("CONFLICT: no such email(s)")
+    } else {
+      throw e
+    }
+  }
 }
 
 export async function deleteToken(db: Task, token: string) {

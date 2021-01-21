@@ -54,13 +54,13 @@ function EmailForm({ tokenType }: { tokenType: TokenType }) {
       path: `auth/token/send`,
       query: { email: email, type: tokenType },
       success: StatusCodes.NO_CONTENT,
-      failure: [StatusCodes.NOT_FOUND],
+      failure: [StatusCodes.CONFLICT],
       validator: t.unknown,
     })
   })
 
   let errMsg = sendEmail.error?.message
-  if (errMsg?.startsWith("NOT FOUND")) {
+  if (errMsg?.startsWith("CONFLICT")) {
     errMsg = `No user with the given email.
     Make sure it's the one associated with the REDCap account`
   }

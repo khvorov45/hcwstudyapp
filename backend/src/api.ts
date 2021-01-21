@@ -318,6 +318,8 @@ export function getRoutes(
       res.status(StatusCodes.NOT_FOUND).json(err.message)
     } else if (err.message.startsWith("connect ECONNREFUSED")) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json("DB connection failed")
+    } else if (err.message.startsWith("CONFLICT")) {
+      res.status(StatusCodes.CONFLICT).json(err.message)
     } else {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(err.message)
     }
