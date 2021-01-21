@@ -108,20 +108,21 @@ const useStyles = makeStyles((theme: Theme) =>
       "& td": {
         borderBottom: 0,
       },
-      "& th": {
-        borderRight: `1px solid ${theme.palette.divider}`,
+      "& thead": {
         borderBottom: `1px solid ${theme.palette.divider}`,
-      },
-      "& th:first-child": {
-        borderLeft: `1px solid ${theme.palette.divider}`,
-      },
-      "& .data-row:nth-child(even)": {
-        background: theme.palette.background.alt,
+        "&>tr>th": {
+          borderBottom: 0,
+        },
       },
       "& .data-row.label-row": {
+        background: theme.palette.background.alt,
+        borderTop: `1px solid ${theme.palette.divider}`,
         "& td:first-child": {
           textAlign: "left",
         },
+      },
+      "& .data-row.label-row:first-child": {
+        borderTop: 0,
       },
     },
   })
@@ -775,7 +776,13 @@ function Summary({
       overheadColumnId="Site_1"
       isLabelRow={(r) =>
         r.label && typeof r.label === "string"
-          ? ["Vaccinations", "Gender", "Total"].includes(r.label)
+          ? [
+              "Vaccinations",
+              "Gender",
+              "Total",
+              "GMT: mean (95% CI)",
+              "Age: mean (sd)",
+            ].includes(r.label)
           : false
       }
     />
