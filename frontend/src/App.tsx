@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     home: {
       paddingLeft: 20,
+      paddingRight: 20,
       "&>ul>*": {
         marginTop: 10,
       },
