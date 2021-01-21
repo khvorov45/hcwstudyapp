@@ -563,7 +563,7 @@ function SerologyTable({
 
 type SummarizedNumeric = {
   kind: "numeric"
-  content: { mean: number; sd: number }
+  content: { mean: number; min: number; max: number }
 }
 
 type SummarizedLogmean = {
@@ -578,12 +578,13 @@ type SummarizedCount = {
 
 type Summarized = SummarizedLogmean | SummarizedNumeric | SummarizedCount
 
-function summariseNumerical(ns: number[]): SummarizedNumeric {
+function summariseNumeric(ns: number[]): SummarizedNumeric {
   return {
     kind: "numeric",
     content: {
-      mean: d3.mean(ns) ?? 0,
-      sd: d3.deviation(ns) ?? 0,
+      mean: d3.median(ns) ?? 0,
+      min: d3.min(ns) ?? 0,
+      max: d3.max(ns) ?? 0,
     },
   }
 }
@@ -613,7 +614,14 @@ function renderSummarized(s: Summarized, theme: Theme) {
     return s
   }
   if (s.kind === "numeric") {
-    return `${Math.round(s.content.mean)} (${Math.round(s.content.sd)})`
+    return (
+      <div>
+        <div>{Math.round(s.content.mean)}</div>{" "}
+        <div style={{ color: theme.palette.text.secondary }}>
+          {Math.round(s.content.min)}-{Math.round(s.content.max)}
+        </div>
+      </div>
+    )
   }
   if (s.kind === "logmean") {
     return (
@@ -657,7 +665,7 @@ function Summary({
   )
   const ageBySite = d3.rollup(
     participantsExtra,
-    (v) => summariseNumerical(v.map((v) => v.age)),
+    (v) => summariseNumeric(v.map((v) => v.age)),
     (d) => d.site
   )
   const gmtByDaySite = d3.rollup(
@@ -700,8 +708,8 @@ function Summary({
   }
 
   const ageRow: Row = {
-    label: "Age: mean (sd)",
-    total: summariseNumerical(participantsExtra.map((p) => p.age)),
+    label: "Age: median (min-max)",
+    total: summariseNumeric(participantsExtra.map((p) => p.age)),
     ...toWide(ageBySite),
   }
 
@@ -781,7 +789,7 @@ function Summary({
               "Gender",
               "Total",
               "GMT: mean (95% CI)",
-              "Age: mean (sd)",
+              "Age: median (min-max)",
             ].includes(r.label)
           : false
       }
