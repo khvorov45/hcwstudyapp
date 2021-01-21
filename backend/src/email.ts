@@ -35,7 +35,7 @@ export async function emailLoginLink(
   await t.transporter.sendMail({
     from: t.from,
     to: email,
-    subject: "token",
+    subject: "NIH HCW Study Login Link",
     text: content,
     html: content.replace(/\n/g, "<br/>"),
   })
@@ -55,7 +55,7 @@ export async function emailApiToken(
   await t.transporter.sendMail({
     from: t.from,
     to: email,
-    subject: "token",
+    subject: "NIH HCW Study API Token",
     text: content,
     html: content.replace(/\n/g, "<br/>"),
   })
