@@ -79,9 +79,21 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: "0.5rem",
         textAlign: "center",
       },
-      "& .header-content": {
-        display: "flex",
-        flexDirection: "column",
+      "& .th": {
+        "& .header-content": {
+          display: "flex",
+          flexDirection: "column",
+        },
+        "& .clickable": {
+          display: "grid",
+          gridTemplateAreas: `"name sort"`,
+          "& .name": {
+            gridArea: "name",
+          },
+          "& .sort": {
+            gridArea: "sort",
+          },
+        },
       },
     },
     numberFilter: {
@@ -957,13 +969,15 @@ function Table<T extends object>({
           {table.headers.map((h) => (
             <div {...h.getHeaderProps()} className="th">
               <div className="header-content">
-                <div
-                  className={classes.columnName}
-                  {...h.getSortByToggleProps()}
-                >
-                  {h.render("Header")}
+                <div className="clickable" {...h.getSortByToggleProps()}>
+                  <div className={classes.columnName + " name"}>
+                    {h.render("Header")}
+                  </div>
+                  <div className={"sort"}>
+                    {h.isSorted ? (h.isSortedDesc ? "D" : "A") : "N"}
+                  </div>
                 </div>
-                {h.render("Filter")}
+                <div>{h.render("Filter")}</div>
               </div>
             </div>
           ))}
