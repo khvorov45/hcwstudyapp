@@ -91,6 +91,7 @@ const useStyles = makeStyles((theme: Theme) =>
         "& .clickable": {
           display: "grid",
           gridTemplateAreas: `"name sort"`,
+          gridTemplateColumns: "auto 2ch",
           "& .name": {
             gridArea: "name",
           },
