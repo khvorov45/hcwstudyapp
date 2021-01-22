@@ -161,6 +161,7 @@ export default function Tables({
     () => ({
       pid: {
         Header: "PID",
+        id: "pid",
         accessor: (p: any) => p.pid,
         width: 100,
       },
@@ -935,6 +936,9 @@ function Table<T extends object>({
       data,
       defaultColumn,
       filterTypes,
+      initialState: {
+        sortBy: [{ id: "pid" }],
+      },
     },
     useBlockLayout,
     useFilters,
