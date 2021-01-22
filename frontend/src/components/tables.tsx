@@ -858,6 +858,7 @@ function RowLabel({
       style={{
         display: "flex",
         alignItems: "center",
+        whiteSpace: "pre",
       }}
     >
       <div style={{ marginRight: 5 }}>{label}</div>
