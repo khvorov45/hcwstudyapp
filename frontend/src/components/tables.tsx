@@ -114,7 +114,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     summaryTable: {
       margin: "auto",
-      maxWidth: 800,
+      maxWidth: 900,
       "& th, & td": {
         textAlign: "center",
         paddingTop: 5,
@@ -888,8 +888,12 @@ function SummaryTable<T extends object>({
 }) {
   const table = useTable({ columns, data })
   const classes = useStyles()
+  const windowSize = useWindowSize()
   return (
-    <TableContainer className={classes.summaryTable}>
+    <TableContainer
+      className={classes.summaryTable}
+      style={{ height: windowSize.height - 50 - 50 - detectScrollbarWidth() }}
+    >
       <MaterialTable {...table.getTableProps()}>
         <TableHead>
           {table.headerGroups.map((headerGroup) => (
