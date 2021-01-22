@@ -584,7 +584,7 @@ type SummarizedNumeric = {
 
 type SummarizedLogmean = {
   kind: "logmean"
-  content: { logmean: number; se: number }
+  content: { logmean: number; se: number; precision: number }
 }
 
 type SummarizedCount = {
@@ -605,15 +605,20 @@ function summariseNumeric(ns: number[]): SummarizedNumeric {
   }
 }
 
-function summariseLogmean(ns: number[]): SummarizedLogmean {
+function summariseLogmean(ns: number[], precision?: number): SummarizedLogmean {
   const logN = ns.map(Math.log)
   return {
     kind: "logmean",
     content: {
-      logmean: d3.mean(logN) ?? 0,
-      se: (d3.deviation(logN) ?? 0) / Math.sqrt(ns.length),
+      logmean: d3.mean(logN) ?? NaN,
+      se: (d3.deviation(logN) ?? NaN) / Math.sqrt(ns.length),
+      precision: precision ?? 0,
     },
   }
+}
+
+function round(n: number, precision: number): string {
+  return n.toFixed(precision)
 }
 
 function summariseCount<T>(ns: T[]): SummarizedCount {
@@ -640,13 +645,20 @@ function renderSummarized(s: Summarized, theme: Theme) {
     )
   }
   if (s.kind === "logmean") {
+    if (isNaN(s.content.logmean)) {
+      return ""
+    }
     return (
       <div>
-        <div>{Math.round(Math.exp(s.content.logmean))}</div>
+        <div>{round(Math.exp(s.content.logmean), s.content.precision)}</div>
         <div style={{ color: theme.palette.text.secondary }}>
-          {`${Math.round(
-            Math.exp(s.content.logmean - 1.96 * s.content.se)
-          )}-${Math.round(Math.exp(s.content.logmean + 1.96 * s.content.se))}`}
+          {`${round(
+            Math.exp(s.content.logmean - 1.96 * s.content.se),
+            s.content.precision
+          )}-${round(
+            Math.exp(s.content.logmean + 1.96 * s.content.se),
+            s.content.precision
+          )}`}
         </div>
       </div>
     )
@@ -695,6 +707,24 @@ function Summary({
     (v) => summariseLogmean(v.map((v) => v.titre)),
     (d) => d.day
   )
+  const gmrByPid = d3.rollup(
+    serology,
+    (v) =>
+      Math.exp(
+        Math.log(v.find((d) => d.day === 14)?.titre ?? NaN) -
+          Math.log(v.find((d) => d.day === 0)?.titre ?? NaN)
+      ),
+    (d) => d.pid
+  )
+  const gmrBySite = d3.rollup(
+    participantsExtra,
+    (v) =>
+      summariseLogmean(
+        v.map((d) => gmrByPid.get(d.pid) ?? NaN),
+        1
+      ),
+    (d) => d.site
+  )
   const countsByGenderSite = d3.rollup(
     participantsExtra,
     summariseCount,
@@ -727,6 +757,15 @@ function Summary({
     label: <RowLabel label="Age" top="median" bottom="min-max" />,
     total: summariseNumeric(participantsExtra.map((p) => p.age)),
     ...toWide(ageBySite),
+  }
+
+  const gmrRow: Row = {
+    label: <RowLabel label="GMR (14 vs 0)" top="mean" bottom="95% CI" />,
+    total: summariseLogmean(
+      participantsExtra.map((p) => gmrByPid.get(p.pid) ?? NaN),
+      1
+    ),
+    ...toWide(gmrBySite),
   }
 
   const bottomRow = {
@@ -762,6 +801,7 @@ function Summary({
 
   const counts = genEmptyRow("GMT", "mean", "95% CI")
     .concat(gmtByDaySiteWithMarginal)
+    .concat(gmrRow)
     .concat([ageRow])
     .concat(genEmptyRow("Vaccinations", "", ""))
     .concat(countsByVacSiteWithMarginal)
