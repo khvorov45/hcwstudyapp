@@ -861,7 +861,7 @@ function RowLabel({
         whiteSpace: "pre",
       }}
     >
-      <div style={{ marginRight: 5 }}>{label}</div>
+      <div style={{ marginRight: 10 }}>{label}</div>
       <div
         style={{
           display: "flex",
