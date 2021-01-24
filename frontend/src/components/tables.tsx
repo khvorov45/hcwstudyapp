@@ -696,15 +696,17 @@ function Summary({
     (v) => summariseNumeric(v.map((v) => v.age)),
     (d) => d.site
   )
-  const gmtByDaySite = d3.rollup(
+  const gmtByVirusDaySite = d3.rollup(
     serology,
     (v) => summariseLogmean(v.map((v) => v.titre)),
+    (d) => d.virus,
     (d) => d.day,
     (d) => d.site
   )
-  const gmtByDay = d3.rollup(
+  const gmtByVirusDay = d3.rollup(
     serology,
     (v) => summariseLogmean(v.map((v) => v.titre)),
+    (d) => d.virus,
     (d) => d.day
   )
   const gmrByPid = d3.rollup(
@@ -793,14 +795,22 @@ function Summary({
     })
   )
 
-  const gmtByDaySiteWithMarginal = Array.from(gmtByDaySite, ([k, v]) => ({
-    label: k,
-    ...toWide(v),
-    total: gmtByDay.get(k),
-  })).sort((a, b) => a.label - b.label)
+  const gmtByVirusDaySiteWithMarginal = Array.from(gmtByVirusDaySite.entries())
+    .sort((a, b) => (a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : 0))
+    .flatMap(([virus, gmtByDaySite]) => {
+      const gmtByDaySiteWithMarginal = Array.from(
+        gmtByDaySite,
+        ([day, siteTitres]) => ({
+          label: day,
+          ...toWide(siteTitres),
+          total: gmtByVirusDay.get(virus)?.get(day),
+        })
+      ).sort((a, b) => a.label - b.label)
+      return genEmptyRow(virus, "", "").concat(gmtByDaySiteWithMarginal)
+    })
 
   const counts = genEmptyRow("GMT", "mean", "95% CI")
-    .concat(gmtByDaySiteWithMarginal)
+    .concat(gmtByVirusDaySiteWithMarginal)
     .concat(gmrRow)
     .concat([ageRow])
     .concat(genEmptyRow("Vaccinations", "", ""))
