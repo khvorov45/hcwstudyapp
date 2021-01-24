@@ -253,7 +253,7 @@ export async function deleteUser(db: Task, email: string): Promise<void> {
 
 export async function deleteUsers(db: Task, emails: string[]): Promise<void> {
   await db.any('DELETE FROM "User" WHERE email IN ($1:csv)', [
-    emails.map((e) => e.toLowerCase),
+    emails.map((e) => e.toLowerCase()),
   ])
 }
 
