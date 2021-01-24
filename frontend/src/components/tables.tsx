@@ -904,7 +904,7 @@ function SummaryTable<T extends object>({
       className={classes.summaryTable}
       style={{ height: windowSize.height - 50 - 50 - detectScrollbarWidth() }}
     >
-      <MaterialTable {...table.getTableProps()}>
+      <MaterialTable {...table.getTableProps()} stickyHeader>
         <TableHead>
           {table.headerGroups.map((headerGroup) => (
             <TableRow {...headerGroup.getHeaderGroupProps()}>
