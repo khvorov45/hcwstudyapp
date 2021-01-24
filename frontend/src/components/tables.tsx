@@ -676,6 +676,8 @@ function Summary({
   participantsExtra: (Participant & { age: number; prevVac: number })[]
   serology: (Serology & { site?: Site })[]
 }) {
+  const viruses = Array.from(new Set(serology.map((s) => s.virus)))
+
   const countsBySite = d3.rollup(
     participantsExtra,
     summariseCount,
@@ -709,23 +711,45 @@ function Summary({
     (d) => d.virus,
     (d) => d.day
   )
-  const gmrByPid = d3.rollup(
-    serology,
-    (v) =>
-      Math.exp(
-        Math.log(v.find((d) => d.day === 14)?.titre ?? NaN) -
-          Math.log(v.find((d) => d.day === 0)?.titre ?? NaN)
+  const titreRises = viruses.flatMap((virus) =>
+    participantsExtra.map((participant) => ({
+      virus,
+      pid: participant.pid,
+      site: participant.site,
+      rise: Math.exp(
+        Math.log(
+          serology.find(
+            (s) =>
+              s.pid === participant.pid && s.virus === virus && s.day === 14
+          )?.titre ?? NaN
+        ) -
+          Math.log(
+            serology.find(
+              (s) =>
+                s.pid === participant.pid && s.virus === virus && s.day === 0
+            )?.titre ?? NaN
+          )
       ),
-    (d) => d.pid
+    }))
   )
-  const gmrBySite = d3.rollup(
-    participantsExtra,
+  const gmrByVirusSite = d3.rollup(
+    titreRises,
     (v) =>
       summariseLogmean(
-        v.map((d) => gmrByPid.get(d.pid) ?? NaN),
+        v.map((d) => d.rise),
         1
       ),
+    (d) => d.virus,
     (d) => d.site
+  )
+  const gmrByVirus = d3.rollup(
+    titreRises,
+    (v) =>
+      summariseLogmean(
+        v.map((d) => d.rise),
+        1
+      ),
+    (d) => d.virus
   )
   const countsByGenderSite = d3.rollup(
     participantsExtra,
@@ -741,7 +765,7 @@ function Summary({
     (d) => d.site
   )
 
-  // Convert the counts above to the appropriate table
+  // Convert the summaries above to the appropriate table
 
   function toWide(v: Map<string | undefined, Summarized>) {
     return Array.from(v, ([k, v]) => ({
@@ -759,15 +783,6 @@ function Summary({
     label: <RowLabel label="Age" top="median" bottom="min-max" />,
     total: summariseNumeric(participantsExtra.map((p) => p.age)),
     ...toWide(ageBySite),
-  }
-
-  const gmrRow: Row = {
-    label: <RowLabel label="GMR (14 vs 0)" top="mean" bottom="95% CI" />,
-    total: summariseLogmean(
-      participantsExtra.map((p) => gmrByPid.get(p.pid) ?? NaN),
-      1
-    ),
-    ...toWide(gmrBySite),
   }
 
   const bottomRow = {
@@ -809,9 +824,18 @@ function Summary({
       return genEmptyRow(virus, "", "").concat(gmtByDaySiteWithMarginal)
     })
 
+  const gmrByVirusSiteWithMarginal = Array.from(gmrByVirusSite.entries())
+    .sort((a, b) => (a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : 0))
+    .map(([virus, gmrBySite]) => ({
+      label: virus,
+      ...toWide(gmrBySite),
+      total: gmrByVirus.get(virus),
+    }))
+
   const counts = genEmptyRow("GMT", "mean", "95% CI")
     .concat(gmtByVirusDaySiteWithMarginal)
-    .concat(gmrRow)
+    .concat(genEmptyRow("GMR (14 vs 0)", "mean", "95% CI"))
+    .concat(gmrByVirusSiteWithMarginal)
     .concat([ageRow])
     .concat(genEmptyRow("Vaccinations count", "", ""))
     .concat(countsByVacSiteWithMarginal)
