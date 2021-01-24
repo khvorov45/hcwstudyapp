@@ -771,7 +771,7 @@ function Summary({
   }
 
   const bottomRow = {
-    label: "Total",
+    label: <RowLabel label="Total count" top="" bottom="" />,
     total: summariseCount(participantsExtra),
     ...toWide(countsBySite),
   }
@@ -813,9 +813,9 @@ function Summary({
     .concat(gmtByVirusDaySiteWithMarginal)
     .concat(gmrRow)
     .concat([ageRow])
-    .concat(genEmptyRow("Vaccinations", "", ""))
+    .concat(genEmptyRow("Vaccinations count", "", ""))
     .concat(countsByVacSiteWithMarginal)
-    .concat(genEmptyRow("Gender", "", ""))
+    .concat(genEmptyRow("Gender count", "", ""))
     .concat(countsByGenderSiteWithMarginal)
     .concat(bottomRow)
 
