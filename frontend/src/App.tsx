@@ -297,10 +297,14 @@ export default function App() {
     ...p,
   }))
 
-  const serologyExtra = serology.map((s) => ({
-    site: participantsExtra.find((p) => p.pid === s.pid)?.site,
-    ...s,
-  }))
+  const serologyExtra = serology.map((s) => {
+    const p = participantsExtra.find((p) => p.pid === s.pid)
+    return {
+      site: p?.site,
+      prevVac: p?.prevVac,
+      ...s,
+    }
+  })
 
   // About page md ------------------------------------------------------------
 

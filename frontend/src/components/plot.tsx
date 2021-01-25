@@ -76,7 +76,7 @@ export default function Plots({
 function SerologyPlots({
   serology,
 }: {
-  serology: (Serology & { site?: Site })[]
+  serology: (Serology & { site?: Site; prevVac?: number })[]
 }) {
   const viruses = Array.from(
     new Set(serology.map((s) => s.virus))
@@ -88,13 +88,24 @@ function SerologyPlots({
     (a, b) => a - b
   )
   const sites = Array.from(new Set(serology.map((s) => s.site ?? "(missing)")))
+  const prevVacs = Array.from(
+    new Set(serology.map((s) => s.prevVac ?? Infinity))
+  )
+    .sort((a, b) => a - b)
+    .map((x) => (x === Infinity ? "(missing)" : x))
 
   // Filters applied in the order presented
+  const [vaccinations, setVaccinations] = useState<number | "(missing)" | null>(
+    null
+  )
   const [site, setSite] = useState<string | null>(null)
   const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
 
-  const siteFiltered = serology.filter((s) => !site || s.site === site)
+  const vacFiltered = serology.filter(
+    (s) => !vaccinations || s.prevVac === vaccinations
+  )
+  const siteFiltered = vacFiltered.filter((s) => !site || s.site === site)
   const virusFiltered = siteFiltered.filter((s) => !virus || s.virus === virus)
   const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
@@ -124,6 +135,19 @@ function SerologyPlots({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className={classes.control}>
+        <Autocomplete
+          options={prevVacs}
+          getOptionLabel={(option) => option.toString()}
+          style={{ width: 125 }}
+          renderInput={(params) => (
+            <TextField {...params} label="Vaccinations" />
+          )}
+          value={vaccinations}
+          onChange={(e, n) => {
+            setVaccinations(n)
+            setSelectedPid(null)
+          }}
+        />
         <SiteSelect
           sites={sites}
           site={site}
@@ -148,8 +172,12 @@ function SerologyPlots({
           value={selectedPid}
           onChange={(e, n) => {
             setSelectedPid(n)
+            const thisPid = pidFiltered.find((d) => d.pid === n)
             if (!site) {
-              setSite(pidFiltered.find((d) => d.pid === n)?.site ?? null)
+              setSite(thisPid?.site ?? null)
+            }
+            if (!vaccinations) {
+              setVaccinations(thisPid?.prevVac ?? null)
             }
           }}
         />
