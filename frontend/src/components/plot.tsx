@@ -111,7 +111,9 @@ function SerologyPlots({
     (s) => !selectedPid || s.pid === selectedPid
   )
 
-  const availablePids = Array.from(new Set(siteFiltered.map((s) => s.pid)))
+  const availablePids = Array.from(
+    new Set(siteFiltered.map((s) => s.pid))
+  ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
 
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
