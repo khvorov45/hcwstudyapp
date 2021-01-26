@@ -263,9 +263,11 @@ export default function App() {
     []
   )
 
-  const withdrawn = useTableData(withdrawnFetch.result, {})
   const tableSettings = {
-    withdrawn: { setting: withdrawnSetting, ids: withdrawn.map((w) => w.pid) },
+    withdrawn: {
+      setting: withdrawnSetting,
+      ids: withdrawnFetch.result?.map((w) => w.pid) ?? [],
+    },
   }
 
   const participants = useTableData(participantsFetch.result, tableSettings)
@@ -278,7 +280,7 @@ export default function App() {
 
   const vaccinationCounts = useMemo(() => {
     const counts = d3.rollup(
-      vaccination,
+      vaccination ?? [],
       (v) =>
         d3.sum(v, (v) =>
           ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
@@ -291,14 +293,14 @@ export default function App() {
   }, [vaccination])
 
   const now = moment()
-  const participantsExtra = participants.map((p) => ({
+  const participantsExtra = participants?.map((p) => ({
     age: now.diff(p.dob, "year"),
     prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
     ...p,
   }))
 
-  const serologyExtra = serology.map((s) => {
-    const p = participantsExtra.find((p) => p.pid === s.pid)
+  const serologyExtra = serology?.map((s) => {
+    const p = participantsExtra?.find((p) => p.pid === s.pid)
     return {
       site: p?.site,
       prevVac: p?.prevVac,
@@ -392,10 +394,10 @@ export default function App() {
               >
                 <Tables
                   participantsExtra={participantsExtra}
-                  vaccination={vaccination}
-                  schedule={schedule}
-                  weeklySurvey={weeklySurvey}
-                  withdrawn={withdrawn}
+                  vaccination={vaccination ?? []}
+                  schedule={schedule ?? []}
+                  weeklySurvey={weeklySurvey ?? []}
+                  withdrawn={withdrawnFetch.result ?? []}
                   serology={serologyExtra}
                 />
               </AuthRoute>
@@ -405,8 +407,8 @@ export default function App() {
                 path="/plots"
               >
                 <Plots
-                  participantsExtra={participantsExtra}
-                  serology={serologyExtra}
+                  participantsExtra={participantsExtra ?? []}
+                  serology={serologyExtra ?? []}
                 />
               </AuthRoute>
             </Switch>

@@ -15,15 +15,14 @@ export function useTableData<T extends { pid: string }>(
   data: T[] | undefined,
   settings: TableSettings
 ) {
-  const dataMemo = useMemo(() => data ?? [], [data])
   if (settings.withdrawn && settings.withdrawn.setting !== "any") {
-    return dataMemo.filter(
+    return data?.filter(
       (r) =>
         settings.withdrawn?.ids.includes(r.pid) ===
         (settings.withdrawn?.setting === "yes")
     )
   }
-  return dataMemo
+  return data
 }
 
 export async function tableFetch<T>(
