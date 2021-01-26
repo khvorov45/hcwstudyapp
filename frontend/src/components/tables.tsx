@@ -12,7 +12,13 @@ import {
   WeeklySurvey,
   Withdrawn,
 } from "../lib/data"
-import React, { CSSProperties, ReactNode, useMemo, useState } from "react"
+import React, {
+  CSSProperties,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   Column,
   FilterProps,
@@ -716,9 +722,13 @@ function Summary({
   const viruses = Array.from(
     new Set(serologyFull?.map((s) => s.virus))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
+  const firstVirus = viruses[0]
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
-    viruses.slice(0, 1)
+    firstVirus ? [firstVirus] : []
   )
+  useEffect(() => setVirusesSelected(firstVirus ? [firstVirus] : []), [
+    firstVirus,
+  ])
   const serology = serologyFull?.filter(
     (s) => virusesSelected.length === 0 || virusesSelected?.includes(s.virus)
   )
