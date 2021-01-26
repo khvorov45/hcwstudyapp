@@ -153,10 +153,10 @@ export default function Tables({
   serology,
 }: {
   participantsExtra?: (Participant & { age: number; prevVac: number })[]
-  vaccination: Vaccination[]
-  schedule: Schedule[]
-  weeklySurvey: WeeklySurvey[]
-  withdrawn: Withdrawn[]
+  vaccination?: Vaccination[]
+  schedule?: Schedule[]
+  weeklySurvey?: WeeklySurvey[]
+  withdrawn?: Withdrawn[]
   serology?: (Serology & { site?: Site })[]
 }) {
   const commonCols = useMemo(
@@ -230,19 +230,13 @@ export default function Tables({
     {
       name: "contact",
       element: (
-        <Contact
-          participants={participantsExtra ?? []}
-          commonCols={commonCols}
-        />
+        <Contact participants={participantsExtra} commonCols={commonCols} />
       ),
     },
     {
       name: "baseline",
       element: (
-        <Baseline
-          participants={participantsExtra ?? []}
-          commonCols={commonCols}
-        />
+        <Baseline participants={participantsExtra} commonCols={commonCols} />
       ),
     },
     {
@@ -276,9 +270,7 @@ export default function Tables({
     },
     {
       name: "serology",
-      element: (
-        <SerologyTable serology={serology ?? []} commonCols={commonCols} />
-      ),
+      element: <SerologyTable serology={serology} commonCols={commonCols} />,
     },
     {
       name: "summary",
@@ -328,7 +320,7 @@ function Contact({
   participants,
   commonCols,
 }: {
-  participants: Participant[]
+  participants?: Participant[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -349,14 +341,18 @@ function Contact({
     ]
   }, [commonCols])
 
-  return <Table columns={columns} data={participants} />
+  return (
+    <PageContainer loading={!participants}>
+      <Table columns={columns} data={participants ?? []} />
+    </PageContainer>
+  )
 }
 
 function Baseline({
   participants,
   commonCols,
 }: {
-  participants: Participant[]
+  participants?: Participant[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -379,14 +375,18 @@ function Baseline({
     ]
   }, [commonCols])
 
-  return <Table columns={columns} data={participants} />
+  return (
+    <PageContainer loading={!participants}>
+      <Table columns={columns} data={participants ?? []} />
+    </PageContainer>
+  )
 }
 
 function ScheduleTable({
   schedule,
   commonCols,
 }: {
-  schedule: Schedule[]
+  schedule?: Schedule[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -403,14 +403,18 @@ function ScheduleTable({
     ]
   }, [commonCols])
 
-  return <Table columns={columns} data={schedule} />
+  return (
+    <PageContainer loading={!schedule}>
+      <Table columns={columns} data={schedule ?? []} />
+    </PageContainer>
+  )
 }
 
 function WeeklySurveyTable({
   weeklySurvey,
   commonCols,
 }: {
-  weeklySurvey: WeeklySurvey[]
+  weeklySurvey?: WeeklySurvey[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -436,14 +440,18 @@ function WeeklySurveyTable({
     ]
   }, [commonCols])
 
-  return <Table columns={columns} data={weeklySurvey} />
+  return (
+    <PageContainer loading={!weeklySurvey}>
+      <Table columns={columns} data={weeklySurvey ?? []} />
+    </PageContainer>
+  )
 }
 
 function WeeklyCompletion({
   weeklySurvey,
   commonCols,
 }: {
-  weeklySurvey: WeeklySurvey[]
+  weeklySurvey?: WeeklySurvey[]
   commonCols: any
 }) {
   type WeeklyCompletion = {
@@ -453,7 +461,7 @@ function WeeklyCompletion({
   }
 
   const weeklyCompletion: WeeklyCompletion[] = []
-  weeklySurvey
+  ;(weeklySurvey ?? [])
     .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
     .reduce((a, s) => {
       if (a[a.length - 1]?.pid === s.pid) {
@@ -510,14 +518,18 @@ function WeeklyCompletion({
     ]
   }, [weeksAbbr, commonCols])
 
-  return <Table columns={columns} data={weeklyCompletion} />
+  return (
+    <PageContainer loading={!weeklySurvey}>
+      <Table columns={columns} data={weeklyCompletion} />
+    </PageContainer>
+  )
 }
 
 function VaccinationTable({
   vaccination,
   commonCols,
 }: {
-  vaccination: Vaccination[]
+  vaccination?: Vaccination[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -535,28 +547,36 @@ function VaccinationTable({
     ]
   }, [commonCols])
 
-  return <Table columns={columns} data={vaccination} />
+  return (
+    <PageContainer loading={!vaccination}>
+      <Table columns={columns} data={vaccination ?? []} />
+    </PageContainer>
+  )
 }
 
 function WithdrawnTable({
   withdrawn,
   commonCols,
 }: {
-  withdrawn: Withdrawn[]
+  withdrawn?: Withdrawn[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
     return [commonCols.pid, commonCols.date({ name: "date", header: "Date" })]
   }, [commonCols])
 
-  return <Table columns={columns} data={withdrawn} />
+  return (
+    <PageContainer loading={!withdrawn}>
+      <Table columns={columns} data={withdrawn ?? []} />
+    </PageContainer>
+  )
 }
 
 function SerologyTable({
   serology,
   commonCols,
 }: {
-  serology: Serology[]
+  serology?: Serology[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -583,7 +603,11 @@ function SerologyTable({
     ]
   }, [commonCols])
 
-  return <Table columns={columns} data={serology} />
+  return (
+    <PageContainer loading={!serology}>
+      <Table columns={columns} data={serology ?? []} />
+    </PageContainer>
+  )
 }
 
 type SummarizedNumeric = {

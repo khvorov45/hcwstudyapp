@@ -394,10 +394,10 @@ export default function App() {
               >
                 <Tables
                   participantsExtra={participantsExtra}
-                  vaccination={vaccination ?? []}
-                  schedule={schedule ?? []}
-                  weeklySurvey={weeklySurvey ?? []}
-                  withdrawn={withdrawnFetch.result ?? []}
+                  vaccination={vaccination}
+                  schedule={schedule}
+                  weeklySurvey={weeklySurvey}
+                  withdrawn={withdrawnFetch.result}
                   serology={serologyExtra}
                 />
               </AuthRoute>
