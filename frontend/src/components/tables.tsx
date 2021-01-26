@@ -284,7 +284,7 @@ export default function Tables({
       name: "summary",
       element: (
         <Summary
-          participantsExtra={participantsExtra}
+          participantsExtraFull={participantsExtra}
           serologyFull={serology}
         />
       ),
@@ -714,10 +714,10 @@ function renderSummarized(s: Summarized, theme: Theme) {
 }
 
 function Summary({
-  participantsExtra,
+  participantsExtraFull,
   serologyFull,
 }: {
-  participantsExtra?: (Participant & { age: number; prevVac: number })[]
+  participantsExtraFull?: (Participant & { age: number; prevVac: number })[]
   serologyFull?: (Serology & { site?: Site; prevVac?: number })[]
 }) {
   const viruses = Array.from(
@@ -742,6 +742,10 @@ function Summary({
     (s) =>
       (virusesSelected.length === 0 || virusesSelected.includes(s.virus)) &&
       (vacSelected.length === 0 || vacSelected.includes(s.prevVac ?? -1))
+  )
+  const serologyPids = Array.from(new Set(serology?.map((s) => s.pid)))
+  const participantsExtra = participantsExtraFull?.filter((p) =>
+    serologyPids.includes(p.pid)
   )
 
   const countsBySite = d3.rollup(
