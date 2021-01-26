@@ -127,6 +127,7 @@ const useStyles = makeStyles((theme: Theme) =>
         textAlign: "center",
         paddingTop: 5,
         paddingBottom: 5,
+        minWidth: 100,
       },
       "& .site-overhead": {
         background: theme.palette.background.alt,
@@ -717,11 +718,17 @@ function Summary({
   serologyFull,
 }: {
   participantsExtra?: (Participant & { age: number; prevVac: number })[]
-  serologyFull?: (Serology & { site?: Site })[]
+  serologyFull?: (Serology & { site?: Site; prevVac?: number })[]
 }) {
   const viruses = Array.from(
     new Set(serologyFull?.map((s) => s.virus))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
+  const vaccinations = Array.from(
+    new Set(serologyFull ? serologyFull.map((s) => s.prevVac ?? -1) : [])
+  )
+    .filter((s) => s !== -1)
+    .sort((a, b) => a - b)
+
   const firstVirus = viruses[0]
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
     firstVirus ? [firstVirus] : []
@@ -729,8 +736,12 @@ function Summary({
   useEffect(() => setVirusesSelected(firstVirus ? [firstVirus] : []), [
     firstVirus,
   ])
+  const [vacSelected, setVacSelected] = useState<number[]>([])
+
   const serology = serologyFull?.filter(
-    (s) => virusesSelected.length === 0 || virusesSelected?.includes(s.virus)
+    (s) =>
+      (virusesSelected.length === 0 || virusesSelected.includes(s.virus)) &&
+      (vacSelected.length === 0 || vacSelected.includes(s.prevVac ?? -1))
   )
 
   const countsBySite = d3.rollup(
@@ -913,15 +924,7 @@ function Summary({
   const columns = useMemo(() => {
     return [
       {
-        Header: (
-          <Autocomplete
-            options={viruses}
-            value={virusesSelected}
-            onChange={(e, n) => setVirusesSelected(n)}
-            renderInput={(params) => <TextField {...params} label="Virus" />}
-            multiple
-          />
-        ),
+        Header: "",
         id: "var",
         accessor: (p: any) => p.label,
       },
@@ -938,10 +941,40 @@ function Summary({
         width: 100,
       },
     ]
-  }, [countsBySite, theme, viruses, virusesSelected])
+  }, [countsBySite, theme])
 
   return (
     <PageContainer loading={participantsExtra && serology ? false : true}>
+      <div
+        style={{
+          display: "flex",
+          height: 100,
+          overflow: "scroll",
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Autocomplete
+          options={viruses}
+          value={virusesSelected}
+          onChange={(e, n) => setVirusesSelected(n)}
+          renderInput={(params) => (
+            <TextField {...params} label="Virus" variant="outlined" />
+          )}
+          multiple
+          style={{ marginTop: 10, width: 250, marginRight: 10 }}
+        />
+        <Autocomplete
+          options={vaccinations}
+          getOptionLabel={(a) => a.toString()}
+          value={vacSelected}
+          onChange={(e, n) => setVacSelected(n)}
+          renderInput={(params) => (
+            <TextField {...params} label="Vaccinations" variant="outlined" />
+          )}
+          multiple
+          style={{ marginTop: 10, width: 150 }}
+        />
+      </div>
       <SummaryTable
         columns={columns}
         data={counts}
@@ -1001,7 +1034,9 @@ function SummaryTable<T extends object>({
   return (
     <TableContainer
       className={classes.summaryTable}
-      style={{ height: windowSize.height - 50 - 50 - detectScrollbarWidth() }}
+      style={{
+        height: windowSize.height - 50 - 50 - 100,
+      }}
     >
       <MaterialTable {...table.getTableProps()} stickyHeader>
         <TableHead>
