@@ -51,6 +51,7 @@ import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
 import { PageContainer } from "./loading"
+import { Autocomplete } from "@material-ui/lab"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -275,7 +276,10 @@ export default function Tables({
     {
       name: "summary",
       element: (
-        <Summary participantsExtra={participantsExtra} serology={serology} />
+        <Summary
+          participantsExtra={participantsExtra}
+          serologyFull={serology}
+        />
       ),
     },
   ].map((t) =>
@@ -704,12 +708,20 @@ function renderSummarized(s: Summarized, theme: Theme) {
 
 function Summary({
   participantsExtra,
-  serology,
+  serologyFull,
 }: {
   participantsExtra?: (Participant & { age: number; prevVac: number })[]
-  serology?: (Serology & { site?: Site })[]
+  serologyFull?: (Serology & { site?: Site })[]
 }) {
-  const viruses = Array.from(new Set(serology?.map((s) => s.virus)))
+  const viruses = Array.from(
+    new Set(serologyFull?.map((s) => s.virus))
+  ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
+  const [virusesSelected, setVirusesSelected] = useState<string[]>(
+    viruses.slice(0, 1)
+  )
+  const serology = serologyFull?.filter(
+    (s) => virusesSelected.length === 0 || virusesSelected?.includes(s.virus)
+  )
 
   const countsBySite = d3.rollup(
     participantsExtra ?? [],
@@ -746,30 +758,31 @@ function Summary({
   )
   const titreRises =
     participantsExtra && serology
-      ? viruses.flatMap((virus) =>
-          participantsExtra.map((participant) => ({
-            virus,
-            pid: participant.pid,
-            site: participant.site,
-            rise: Math.exp(
-              Math.log(
-                serology.find(
-                  (s) =>
-                    s.pid === participant.pid &&
-                    s.virus === virus &&
-                    s.day === 14
-                )?.titre ?? NaN
-              ) -
+      ? (virusesSelected.length === 0 ? viruses : virusesSelected).flatMap(
+          (virus) =>
+            participantsExtra.map((participant) => ({
+              virus,
+              pid: participant.pid,
+              site: participant.site,
+              rise: Math.exp(
                 Math.log(
                   serology.find(
                     (s) =>
                       s.pid === participant.pid &&
                       s.virus === virus &&
-                      s.day === 0
+                      s.day === 14
                   )?.titre ?? NaN
-                )
-            ),
-          }))
+                ) -
+                  Math.log(
+                    serology.find(
+                      (s) =>
+                        s.pid === participant.pid &&
+                        s.virus === virus &&
+                        s.day === 0
+                    )?.titre ?? NaN
+                  )
+              ),
+            }))
         )
       : undefined
   const gmrByVirusSite = d3.rollup(
@@ -890,7 +903,15 @@ function Summary({
   const columns = useMemo(() => {
     return [
       {
-        Header: "",
+        Header: (
+          <Autocomplete
+            options={viruses}
+            value={virusesSelected}
+            onChange={(e, n) => setVirusesSelected(n)}
+            renderInput={(params) => <TextField {...params} label="Virus" />}
+            multiple
+          />
+        ),
         id: "var",
         accessor: (p: any) => p.label,
       },
@@ -907,7 +928,7 @@ function Summary({
         width: 100,
       },
     ]
-  }, [countsBySite, theme])
+  }, [countsBySite, theme, viruses, virusesSelected])
 
   return (
     <PageContainer loading={participantsExtra && serology ? false : true}>
