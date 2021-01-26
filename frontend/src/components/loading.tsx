@@ -7,6 +7,7 @@ import {
 import Check from "@material-ui/icons/Check"
 import { ReactNode } from "react"
 import { AsyncStateStatus } from "react-async-hook"
+import { BeatLoader } from "react-spinners"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -39,4 +40,26 @@ export function IconButtonContainer({
   }
   const classes = useStyles()
   return <div className={classes.iconButtonContainer}>{onDisplay}</div>
+}
+
+export function PageContainer({
+  children,
+  loading,
+}: {
+  children: ReactNode
+  loading: boolean
+}) {
+  return (
+    <div>
+      {loading ? (
+        <BeatLoader
+          color="gray"
+          css={"display: flex; justify-content: center; margin-top: 20px"}
+          size={30}
+        />
+      ) : (
+        children
+      )}
+    </div>
+  )
 }

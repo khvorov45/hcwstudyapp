@@ -50,6 +50,7 @@ import { Icon } from "@iconify/react"
 import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
+import { PageContainer } from "./loading"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -885,12 +886,14 @@ function Summary({
   }, [countsBySite, theme])
 
   return (
-    <SummaryTable
-      columns={columns}
-      data={counts}
-      overheadColumnId="Site_1"
-      isLabelRow={(r) => (r.label ? typeof r.label === "object" : false)}
-    />
+    <PageContainer loading={participantsExtra && serology ? false : true}>
+      <SummaryTable
+        columns={columns}
+        data={counts}
+        overheadColumnId="Site_1"
+        isLabelRow={(r) => (r.label ? typeof r.label === "object" : false)}
+      />
+    </PageContainer>
   )
 }
 
