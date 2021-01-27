@@ -124,38 +124,67 @@ async function resetSchema(db: Task): Promise<void> {
 
 export async function reset(
   db: Task,
-  redcapConfig: RedcapConfig,
   {
-    restoreTokens,
-    restoreUsersManual,
     firstAdmin,
     tokenDaysToLive,
   }: {
-    restoreTokens: boolean
-    restoreUsersManual: boolean
     firstAdmin: EmailToken
     tokenDaysToLive: number
   }
 ) {
-  const tokens = restoreTokens ? await getTokens(db) : []
-  const usersManual = restoreUsersManual ? await getUsersManual(db) : []
+  // The data
+  const [
+    users,
+    tokens,
+    participants,
+    redcapIds,
+    withdrawn,
+    vaccinations,
+    schedules,
+    weeklySurveys,
+    viruses,
+    serology,
+  ] = await Promise.all([
+    getUsers(db),
+    getTokens(db),
+    getParticipantsSubset(db, "admin"),
+    getRedcapIdSubset(db, "admin"),
+    getWithdrawnSubset(db, "admin"),
+    getVaccinationSubset(db, "admin"),
+    getScheduleSubset(db, "admin"),
+    getWeeklySurveySubset(db, "admin"),
+    getViruses(db),
+    getSerologySubset(db, "admin"),
+  ])
+  const [lastParticipantUpdate, lastUserUpdate] = await Promise.all([
+    getLastParticipantUpdate(db),
+    getLastUserUpdate(db),
+  ])
+
+  // The reset
   await resetSchema(db)
   await init(db, firstAdmin, tokenDaysToLive)
-  await insertUsers(
-    db,
-    usersManual.filter((u) => u.email !== firstAdmin.email)
-  )
-  if (restoreTokens) {
-    await db.any('DELETE FROM "Token"')
-    await syncRedcapUsers(db, redcapConfig)
-    const users = await getUsers(db)
-    const emails = users.map((u) => u.email)
-    await insertIntoTable(
-      db,
-      tokens.filter((tok) => emails.includes(tok.user)),
-      "Token"
-    )
-  }
+
+  // The restoration
+  await db.any('DELETE FROM "User"')
+  await Promise.all([
+    insertIntoTable(db, users, "User"),
+    insertIntoTable(db, participants, "Participant"),
+    insertIntoTable(db, viruses, "Virus"),
+  ])
+  await Promise.all([
+    insertIntoTable(db, tokens, "Token"),
+    insertIntoTable(db, redcapIds, "RedcapId"),
+    insertIntoTable(db, withdrawn, "Withdrawn"),
+    insertIntoTable(db, vaccinations, "Vaccination"),
+    insertIntoTable(db, schedules, "Schedule"),
+    insertIntoTable(db, weeklySurveys, "WeeklySurvey"),
+    insertIntoTable(db, serology, "Serology"),
+  ])
+  await Promise.all([
+    setLastParticipantUpdate(db, lastParticipantUpdate),
+    setLastUserUpdate(db, lastUserUpdate),
+  ])
 }
 
 /** Get site subset for tables with PID as FK */
@@ -324,6 +353,13 @@ export async function getLastUserUpdate(db: Task): Promise<Date | null> {
   return await db.one('SELECT "user" FROM "LastRedcapSync";', [], (v) => v.user)
 }
 
+export async function setLastUserUpdate(
+  db: Task,
+  d: Date | null
+): Promise<void> {
+  await db.any('UPDATE "LastRedcapSync" SET "user" = $1', [d])
+}
+
 // Tokens =====================================================================
 
 async function getTokens(
@@ -486,7 +522,7 @@ export async function syncRedcapParticipants(
     insertSchedule(db, schedule.filter(isInParticipant)),
     insertWeeklySurvey(db, weeklySurvey.map(findPid).filter(isInParticipant)),
   ])
-  await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [new Date()])
+  await setLastParticipantUpdate(db, new Date())
 }
 
 export async function getLastParticipantUpdate(db: Task): Promise<Date | null> {
@@ -495,6 +531,13 @@ export async function getLastParticipantUpdate(db: Task): Promise<Date | null> {
     [],
     (v) => v.participant
   )
+}
+
+async function setLastParticipantUpdate(
+  db: Task,
+  d: Date | null
+): Promise<void> {
+  await db.any('UPDATE "LastRedcapSync" SET "participant" = $1', [d])
 }
 
 // Redcap ids =================================================================

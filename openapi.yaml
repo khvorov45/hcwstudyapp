@@ -365,14 +365,9 @@ paths:
           $ref: "#/components/responses/UnauthorizedError"
   /reset:
     delete:
-      summary: Reset the database
+      summary: Reset the database (preserves the data)
       security:
         - Admin: []
-      parameters:
-        - in: query
-          name: restoreTokens
-          schema:
-            type: boolean
       responses:
         "204":
           description: "Successfully reset"

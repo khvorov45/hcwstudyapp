@@ -76,12 +76,7 @@ export function getRoutes(
   routes.delete("/reset", async (req: Request, res: Response) => {
     await transaction(db, async (tsk) => {
       await validateAdmin(req, tsk)
-      await reset(tsk, redcapConfig, {
-        restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
-        restoreUsersManual: decode(
-          BooleanFromString,
-          req.query.restoreUsersManual
-        ),
+      await reset(tsk, {
         tokenDaysToLive,
         firstAdmin: { email: firstAdminEmail, token: firstAdminToken },
       })
