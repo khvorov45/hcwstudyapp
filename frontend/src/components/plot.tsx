@@ -22,7 +22,7 @@ import {
 } from "@material-ui/core"
 import { Participant, Serology, Site } from "../lib/data"
 import * as d3 from "d3-array"
-import React, { useState } from "react"
+import React, { ReactNode, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
@@ -34,8 +34,10 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     control: {
       display: "flex",
+      overflow: "scroll",
       "&>*": {
         marginRight: 10,
+        marginTop: 5,
       },
       height: 100,
       borderBottom: `1px solid ${theme.palette.divider}`,
@@ -177,22 +179,18 @@ function SerologyPlots({
     }
   ).sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
 
-  const classes = useStyles()
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <div className={classes.control}>
-        <Autocomplete
+      <ControlRibbon>
+        <Selector
           options={prevVacs}
-          getOptionLabel={(option) => option.toString()}
-          style={{ width: 125 }}
-          renderInput={(params) => (
-            <TextField {...params} label="Vaccinations" />
-          )}
+          label="Vaccinations"
           value={vaccinations}
-          onChange={(e, n) => {
+          onChange={(n) => {
             setVaccinations(n)
             setSelectedPid(null)
           }}
+          width={140}
         />
         <SiteSelect
           sites={sites}
@@ -202,21 +200,19 @@ function SerologyPlots({
             setSelectedPid(null)
           }}
         />
-        <Autocomplete
+        <Selector
           options={viruses}
-          getOptionLabel={(option) => option}
-          style={{ width: 225 }}
-          renderInput={(params) => <TextField {...params} label="Virus" />}
+          label="Virus"
+          width={225}
           value={virus}
-          onChange={(e, n) => setVirus(n)}
+          onChange={setVirus}
         />
-        <Autocomplete
+        <Selector
           options={availablePids}
-          getOptionLabel={(option) => option}
-          style={{ width: 150 }}
-          renderInput={(params) => <TextField {...params} label="PID" />}
+          label="PID"
+          width={150}
           value={selectedPid}
-          onChange={(e, n) => {
+          onChange={(n) => {
             setSelectedPid(n)
             const thisPid = pidFiltered.find((d) => d.pid === n)
             if (!site) {
@@ -227,7 +223,7 @@ function SerologyPlots({
             }
           }}
         />
-      </div>
+      </ControlRibbon>
       <ScreenHeight heightTaken={50 + 50 + 100}>
         <Spaghetti
           data={serologyWide}
@@ -399,13 +395,12 @@ function SiteSelect({
   setSite: (s: string | null) => void
 }) {
   return (
-    <Autocomplete
+    <Selector
       options={sites}
-      getOptionLabel={(option) => option[0].toUpperCase() + option.slice(1)}
-      style={{ width: 150 }}
-      renderInput={(params) => <TextField {...params} label="Site" />}
+      label="Site"
+      width={150}
       value={site}
-      onChange={(e, n) => setSite(n)}
+      onChange={setSite}
     />
   )
 }
@@ -544,4 +539,36 @@ function PointRange<T extends { point: number; interval: number[] }>({
       </YAxis>
     </ScatterChart>
   )
+}
+
+function Selector<T>({
+  options,
+  label,
+  value,
+  onChange,
+  width,
+}: {
+  options: T[]
+  label: string
+  value: T | null
+  onChange: (s: T | null) => void
+  width: number
+}) {
+  return (
+    <Autocomplete
+      options={options}
+      getOptionLabel={(o) => `${o}`}
+      renderInput={(params) => (
+        <TextField {...params} label={label} variant="outlined" />
+      )}
+      value={value}
+      onChange={(e, n) => onChange(n)}
+      style={{ width }}
+    />
+  )
+}
+
+function ControlRibbon({ children }: { children: ReactNode }) {
+  const classes = useStyles()
+  return <div className={classes.control}>{children}</div>
 }
