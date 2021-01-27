@@ -2,7 +2,7 @@ import axios from "axios"
 import { StatusCodes } from "http-status-codes"
 import * as t from "io-ts"
 import { API_ROOT } from "./config"
-import { User } from "./data"
+import { UserToInsert } from "./data"
 import { decode } from "./io"
 
 export type TableName =
@@ -27,7 +27,7 @@ type ApiRequestConfig<T, O, I> = {
   method: "GET" | "POST" | "PUT" | "DELETE"
   path: ApiPath
   query?: Record<string, string>
-  body?: User
+  body?: UserToInsert
   token?: string | null
   success: number
   failure: number[]

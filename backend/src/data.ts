@@ -44,11 +44,24 @@ export const TokenTypeV = t.keyof({
 })
 export type TokenType = t.TypeOf<typeof TokenTypeV>
 
+export const UserKindV = t.keyof({
+  redcap: null,
+  manual: null,
+})
+export type UserKind = t.TypeOf<typeof UserKindV>
+
 export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
+  kind: UserKindV,
 })
 export type User = t.TypeOf<typeof UserV>
+
+export const UserToInsertV = t.type({
+  email: t.string,
+  accessGroup: AccessGroupV,
+})
+export type UserToInsert = t.TypeOf<typeof UserToInsertV>
 
 export const TokenV = t.type({
   user: t.string,

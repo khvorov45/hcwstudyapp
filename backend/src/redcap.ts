@@ -113,6 +113,7 @@ export async function exportUsers(config: RedcapConfig): Promise<User[]> {
     email: processRedcapStringLower(u.email),
     accessGroup: processRedcapDataAccessGroup(u.data_access_group),
     redcapProjectYear: u.redcapProjectYear,
+    kind: "redcap",
   }))
   return decode(t.array(UserV), uniqueRows(users, ["email"]))
 }

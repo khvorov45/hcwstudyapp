@@ -3,6 +3,7 @@ CREATE TYPE hfs_access_group AS ENUM (${accessGroupValues:csv});
 CREATE TYPE hfs_gender AS ENUM (${genders:csv});
 CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unknown');
 CREATE TYPE hfs_token_type AS ENUM ('session', 'api');
+CREATE TYPE hfs_user_kind AS ENUM ('redcap', 'manual');
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -24,10 +25,11 @@ INSERT INTO "Site" ("siteShort", "siteLong") VALUES
 
 CREATE TABLE "User" (
     "email" text PRIMARY KEY CHECK ("email" = lower("email")),
-    "accessGroup" hfs_access_group NOT NULL
+    "accessGroup" hfs_access_group NOT NULL,
+    "kind" hfs_user_kind NOT NULL
 );
-INSERT INTO "User" ("email", "accessGroup") VALUES
-    (${firstAdminEmail}, 'admin');
+INSERT INTO "User" ("email", "accessGroup", "kind") VALUES
+    (${firstAdminEmail}, 'admin', 'manual');
 
 CREATE TABLE "Token" (
     "user" text REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE,

@@ -39,6 +39,8 @@ import {
   SerologyV,
   TokenTypeV,
   User,
+  UserKind,
+  UserToInsertV,
   UserV,
   VirusV,
 } from "./data"
@@ -47,6 +49,7 @@ import { createToken } from "./auth"
 import { RedcapConfig } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
+import { pipe } from "fp-ts/lib/function"
 
 export function getRoutes(
   db: DB,
@@ -75,6 +78,10 @@ export function getRoutes(
       await validateAdmin(req, tsk)
       await reset(tsk, redcapConfig, {
         restoreTokens: decode(BooleanFromString, req.query.restoreTokens),
+        restoreUsersManual: decode(
+          BooleanFromString,
+          req.query.restoreUsersManual
+        ),
         tokenDaysToLive,
         firstAdmin: { email: firstAdminEmail, token: firstAdminToken },
       })
@@ -93,7 +100,11 @@ export function getRoutes(
   routes.post("/users", async (req: Request, res: Response) => {
     await transaction(db, async (tsk) => {
       await validateAdmin(req, tsk)
-      const us = decode(t.array(UserV), req.body)
+      const us = pipe(
+        req.body,
+        (body) => decode(t.array(UserToInsertV), body),
+        (arr) => arr.map((a) => ({ ...a, kind: "manual" as UserKind }))
+      )
       await insertUsers(tsk, us)
     })
     res.status(StatusCodes.NO_CONTENT).end()

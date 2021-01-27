@@ -127,13 +127,24 @@ export async function reset(
   redcapConfig: RedcapConfig,
   {
     restoreTokens,
+    restoreUsersManual,
     firstAdmin,
     tokenDaysToLive,
-  }: { restoreTokens: boolean; firstAdmin: EmailToken; tokenDaysToLive: number }
+  }: {
+    restoreTokens: boolean
+    restoreUsersManual: boolean
+    firstAdmin: EmailToken
+    tokenDaysToLive: number
+  }
 ) {
   const tokens = restoreTokens ? await getTokens(db) : []
+  const usersManual = restoreUsersManual ? await getUsersManual(db) : []
   await resetSchema(db)
   await init(db, firstAdmin, tokenDaysToLive)
+  await insertUsers(
+    db,
+    usersManual.filter((u) => u.email !== firstAdmin.email)
+  )
   if (restoreTokens) {
     await db.any('DELETE FROM "Token"')
     await syncRedcapUsers(db, redcapConfig)
@@ -187,7 +198,7 @@ async function insertIntoTable<T>(
     return
   }
   const cols: Record<typeof t, string[]> = {
-    User: ["email", "accessGroup"],
+    User: ["email", "accessGroup", "kind"],
     Token: ["user", "hash", "type", "expires"],
     Vaccination: ["pid", "year", "status"],
     RedcapId: ["pid", "redcapRecordId", "redcapProjectYear"],
@@ -222,6 +233,10 @@ async function insertIntoTable<T>(
 
 export async function getUsers(db: Task): Promise<User[]> {
   return await db.any('SELECT * FROM "User"')
+}
+
+export async function getUsersManual(db: Task): Promise<User[]> {
+  return await db.any(`SELECT * FROM "User" WHERE "kind" = 'manual'`)
 }
 
 export async function getUserByEmail(db: Task, email: string): Promise<User> {
@@ -267,7 +282,8 @@ export async function updateUser(db: Task, u: User): Promise<void> {
   }
 }
 
-/** Will not touch the admins, drop everyone else and replace with redcap users
+/** Will not touch the manually created users,
+ * drop everyone else and replace with redcap users
  */
 export async function syncRedcapUsers(
   db: Task,
@@ -278,24 +294,26 @@ export async function syncRedcapUsers(
     getUsers(db),
     getTokens(db),
   ])
-  const dbNonAdminEmails = dbUsers
-    .filter((u) => u.accessGroup !== "admin")
+  const dbRedcapEmails = dbUsers
+    .filter((u) => u.kind === "redcap")
     .map((u) => u.email)
-  if (dbNonAdminEmails.length > 0) {
-    await deleteUsers(db, dbNonAdminEmails)
+  const dbManualEmails = dbUsers
+    .filter((u) => u.kind === "manual")
+    .map((u) => u.email)
+  if (dbRedcapEmails.length > 0) {
+    await deleteUsers(db, dbRedcapEmails)
   }
-  await insertUsers(db, redcapUsers)
-  // Restore tokens
-  const redcapEmails = redcapUsers.map((r) => r.email)
-  const dbAdminEmails = dbUsers
-    .filter((u) => u.accessGroup === "admin")
-    .map((u) => u.email)
 
+  const redcapUsersToInsert = redcapUsers.filter(
+    (u) => !dbManualEmails.includes(u.email)
+  )
+  await insertUsers(db, redcapUsersToInsert)
+
+  // Restore tokens
+  const insertedEmails = redcapUsersToInsert.map((r) => r.email)
   await insertIntoTable(
     db,
-    tokens.filter(
-      (t) => !dbAdminEmails.includes(t.user) && redcapEmails.includes(t.user)
-    ),
+    tokens.filter((t) => insertedEmails.includes(t.user)),
     "Token"
   )
 

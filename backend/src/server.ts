@@ -48,6 +48,9 @@ async function main() {
     .default("firstConnectionRetryMaxAttempts", 5)
     .default("backendPort", 7001).argv
 
+  // Make sure first admin email is lowercased
+  args.firstAdminEmail = args.firstAdminEmail.toLowerCase()
+
   // Create the server
   const app = express()
   app.use(express.json({ limit: "100mb" }))

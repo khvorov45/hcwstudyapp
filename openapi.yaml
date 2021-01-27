@@ -87,12 +87,12 @@ paths:
       security:
         - Admin: []
       requestBody:
-        description: Users to add
+        description: Users to add (kind will be set to manual)
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Users"
+              $ref: "#/components/schemas/UsersToInsert"
       responses:
         "204":
           description: Successful addition
@@ -386,6 +386,7 @@ components:
       required:
         - email
         - accessGroup
+        - kind
       properties:
         email:
           type: string
@@ -401,10 +402,36 @@ components:
               newcastle,
               perth,
             ]
+        kind:
+          enum: [redcap, manual]
     Users:
       type: array
       items:
         $ref: "#/components/schemas/User"
+    UserToInsert:
+      type: object
+      required:
+        - email
+        - accessGroup
+      properties:
+        email:
+          type: string
+        accessGroup:
+          enum:
+            [
+              admin,
+              unrestricted,
+              melbourne,
+              sydney,
+              adelaide,
+              brisbane,
+              newcastle,
+              perth,
+            ]
+    UsersToInsert:
+      type: array
+      items:
+        $ref: "#/components/schemas/UserToInsert"
     Participant:
       type: object
       required:
