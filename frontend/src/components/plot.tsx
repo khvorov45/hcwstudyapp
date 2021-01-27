@@ -34,10 +34,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     control: {
       display: "flex",
-      flexWrap: "wrap",
       "&>*": {
         marginRight: 10,
       },
+      height: 100,
+      borderBottom: `1px solid ${theme.palette.divider}`,
     },
   })
 )
