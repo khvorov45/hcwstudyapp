@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme: Theme) =>
         backgroundColor: theme.palette.primary[theme.palette.type],
       },
       "& .activeAlways": {
-        backgroundColor: theme.palette.secondary[theme.palette.type],
+        backgroundColor: theme.palette.primary[theme.palette.type],
       },
     },
     simpleNav: {
