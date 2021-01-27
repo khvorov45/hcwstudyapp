@@ -44,6 +44,7 @@ export default function Plots({
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
   serology: (Serology & { site?: Site })[]
+  titreChange: { pid: string; site: Site }[]
 }) {
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage

@@ -308,6 +308,41 @@ export default function App() {
     }
   })
 
+  const viruses = serology
+    ? Array.from(new Set(serology.map((s) => s.virus)))
+    : []
+
+  const titreChange =
+    participantsExtra && serologyExtra
+      ? viruses.flatMap((virus) =>
+          participantsExtra.map((participant) => ({
+            virus,
+            pid: participant.pid,
+            site: participant.site,
+            day1: 0,
+            day2: 14,
+            rise: Math.exp(
+              Math.log(
+                serologyExtra.find(
+                  (s) =>
+                    s.pid === participant.pid &&
+                    s.virus === virus &&
+                    s.day === 14
+                )?.titre ?? NaN
+              ) -
+                Math.log(
+                  serologyExtra.find(
+                    (s) =>
+                      s.pid === participant.pid &&
+                      s.virus === virus &&
+                      s.day === 0
+                  )?.titre ?? NaN
+                )
+            ),
+          }))
+        )
+      : undefined
+
   // About page md ------------------------------------------------------------
 
   const aboutPageMd = useAsync(async () => {
@@ -399,6 +434,7 @@ export default function App() {
                   weeklySurvey={weeklySurvey}
                   withdrawn={withdrawnFetch.result}
                   serology={serologyExtra}
+                  titreChange={titreChange}
                 />
               </AuthRoute>
               <AuthRoute
@@ -409,6 +445,7 @@ export default function App() {
                 <Plots
                   participantsExtra={participantsExtra ?? []}
                   serology={serologyExtra ?? []}
+                  titreChange={titreChange ?? []}
                 />
               </AuthRoute>
             </Switch>

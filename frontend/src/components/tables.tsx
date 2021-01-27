@@ -159,6 +159,7 @@ export default function Tables({
   weeklySurvey,
   withdrawn,
   serology,
+  titreChange,
 }: {
   participantsExtra?: (Participant & { age: number; prevVac: number })[]
   vaccination?: Vaccination[]
@@ -166,6 +167,7 @@ export default function Tables({
   weeklySurvey?: WeeklySurvey[]
   withdrawn?: Withdrawn[]
   serology?: (Serology & { site?: Site })[]
+  titreChange?: { pid: string; rise: number; site: Site; virus: string }[]
 }) {
   const commonCols = useMemo(
     () => ({
@@ -286,6 +288,7 @@ export default function Tables({
         <Summary
           participantsExtraFull={participantsExtra}
           serologyFull={serology}
+          titreChangeFull={titreChange}
         />
       ),
     },
@@ -716,9 +719,11 @@ function renderSummarized(s: Summarized, theme: Theme) {
 function Summary({
   participantsExtraFull,
   serologyFull,
+  titreChangeFull,
 }: {
   participantsExtraFull?: (Participant & { age: number; prevVac: number })[]
   serologyFull?: (Serology & { site?: Site; prevVac?: number })[]
+  titreChangeFull?: { pid: string; rise: number; virus: string; site: string }[]
 }) {
   const viruses = Array.from(
     new Set(serologyFull?.map((s) => s.virus))
@@ -746,6 +751,11 @@ function Summary({
   const serologyPids = Array.from(new Set(serology?.map((s) => s.pid)))
   const participantsExtra = participantsExtraFull?.filter((p) =>
     serologyPids.includes(p.pid)
+  )
+  const titreChange = titreChangeFull?.filter(
+    (p) =>
+      serologyPids.includes(p.pid) &&
+      (virusesSelected.length === 0 || virusesSelected.includes(p.virus))
   )
 
   const countsBySite = d3.rollup(
@@ -781,37 +791,9 @@ function Summary({
     (d) => d.virus,
     (d) => d.day
   )
-  const titreRises =
-    participantsExtra && serology
-      ? (virusesSelected.length === 0 ? viruses : virusesSelected).flatMap(
-          (virus) =>
-            participantsExtra.map((participant) => ({
-              virus,
-              pid: participant.pid,
-              site: participant.site,
-              rise: Math.exp(
-                Math.log(
-                  serology.find(
-                    (s) =>
-                      s.pid === participant.pid &&
-                      s.virus === virus &&
-                      s.day === 14
-                  )?.titre ?? NaN
-                ) -
-                  Math.log(
-                    serology.find(
-                      (s) =>
-                        s.pid === participant.pid &&
-                        s.virus === virus &&
-                        s.day === 0
-                    )?.titre ?? NaN
-                  )
-              ),
-            }))
-        )
-      : undefined
+
   const gmrByVirusSite = d3.rollup(
-    titreRises ?? [],
+    titreChange ?? [],
     (v) =>
       summariseLogmean(
         v.map((d) => d.rise),
@@ -821,7 +803,7 @@ function Summary({
     (d) => d.site
   )
   const gmrByVirus = d3.rollup(
-    titreRises ?? [],
+    titreChange ?? [],
     (v) =>
       summariseLogmean(
         v.map((d) => d.rise),
