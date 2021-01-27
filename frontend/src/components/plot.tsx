@@ -8,6 +8,10 @@ import {
   LineChart,
   Line,
   Legend,
+  ScatterChart,
+  Scatter,
+  ErrorBar,
+  CartesianGrid,
 } from "recharts"
 import {
   createStyles,
@@ -41,10 +45,11 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Plots({
   participantsExtra,
   serology,
+  titreChange,
 }: {
   participantsExtra: (Participant & { age: number; prevVac: number })[]
   serology: (Serology & { site?: Site })[]
-  titreChange: { pid: string; site: Site }[]
+  titreChange: { pid: string; site: Site; virus: string; rise: number }[]
 }) {
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage
@@ -66,7 +71,7 @@ export default function Plots({
             <BaselinePlots participantsExtra={participantsExtra} />
           </Route>
           <Route exact path="/plots/serology">
-            <SerologyPlots serology={serology} />
+            <SerologyPlots serology={serology} titreChange={titreChange} />
           </Route>
         </Switch>
       </ScreenHeight>
@@ -76,8 +81,10 @@ export default function Plots({
 
 function SerologyPlots({
   serology,
+  titreChange,
 }: {
   serology: (Serology & { site?: Site; prevVac?: number })[]
+  titreChange: { pid: string; rise: number; virus: string }[]
 }) {
   const viruses = Array.from(
     new Set(serology.map((s) => s.virus))
@@ -104,7 +111,10 @@ function SerologyPlots({
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
 
   const vacFiltered = serology.filter(
-    (s) => !vaccinations || s.prevVac === vaccinations
+    (s) =>
+      vaccinations === null ||
+      (vaccinations === "(missing)" && s.prevVac === undefined) ||
+      s.prevVac === vaccinations
   )
   const siteFiltered = vacFiltered.filter((s) => !site || s.site === site)
   const virusFiltered = siteFiltered.filter((s) => !virus || s.virus === virus)
@@ -116,12 +126,31 @@ function SerologyPlots({
     new Set(siteFiltered.map((s) => s.pid))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
 
+  const plotPids = Array.from(new Set(pidFiltered.map((s) => s.pid)))
+
+  const titreChangeFiltered = titreChange.filter(
+    (t) => plotPids.includes(t.pid) && (!virus || t.virus === virus)
+  )
+
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
     pidFiltered,
     (v) => Math.exp(d3.mean(v.map((d) => Math.log(d.titre))) ?? 0),
     (d) => d.virus,
     (d) => d.day
+  )
+
+  // Summarise titre rises
+  const titreChangesSummarized = d3.rollup(
+    titreChangeFiltered,
+    (v) => {
+      const logRises = v.map((d) => Math.log(d.rise))
+      return {
+        logmean: d3.mean(logRises) ?? NaN,
+        se: (d3.deviation(logRises) ?? NaN) / Math.sqrt(logRises.length),
+      }
+    },
+    (d) => d.virus
   )
 
   const serologyWide = days.map((day) =>
@@ -133,6 +162,21 @@ function SerologyPlots({
       }
     )
   )
+
+  const titreChangesPlot = Array.from(
+    titreChangesSummarized,
+    ([virus, summary]) => {
+      const mean = Math.exp(summary.logmean)
+      return {
+        virus,
+        point: mean,
+        interval: [
+          mean - Math.exp(summary.logmean - 1.96 * summary.se),
+          Math.exp(summary.logmean + 1.96 * summary.se) - mean,
+        ],
+      }
+    }
+  ).sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
 
   const classes = useStyles()
   return (
@@ -191,6 +235,12 @@ function SerologyPlots({
           keys={viruses}
           yTicks={titres}
           yLab={selectedPid ? "Titre" : "GMT"}
+        />
+        <PointRange
+          data={titreChangesPlot}
+          xKey={"virus"}
+          yRange={[1, 30]}
+          yTicks={[1, 2, 5, 10, 20, 30]}
         />
       </div>
     </div>
@@ -427,5 +477,72 @@ function Spaghetti<T extends Object>({
       </XAxis>
       <Legend verticalAlign="top" />
     </LineChart>
+  )
+}
+
+function PointRange<T extends { point: number; interval: number[] }>({
+  data,
+  xKey,
+  yRange,
+  yTicks,
+}: {
+  data: T[]
+  xKey: keyof T
+  yRange: [number, number]
+  yTicks: number[]
+}) {
+  const windowSize = useWindowSize()
+  const theme = useTheme()
+  return (
+    <ScatterChart
+      width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
+      height={400}
+      margin={{ top: 20, right: 20, bottom: 150, left: 20 }}
+    >
+      <CartesianGrid stroke={theme.palette.background.alt} vertical={false} />
+      <Scatter
+        data={data}
+        fill={
+          theme.palette.primary[
+            theme.palette.type === "dark" ? "light" : "dark"
+          ]
+        }
+      >
+        <ErrorBar
+          dataKey={"interval"}
+          stroke={
+            theme.palette.primary[
+              theme.palette.type === "dark" ? "light" : "dark"
+            ]
+          }
+        />
+      </Scatter>
+      <XAxis
+        dataKey={xKey as string}
+        angle={-45}
+        textAnchor="end"
+        interval={0}
+        tick={{
+          fill: theme.palette.text.secondary,
+        }}
+      />
+      <YAxis
+        dataKey="point"
+        tick={{
+          fill: theme.palette.text.secondary,
+        }}
+        domain={yRange}
+        ticks={yTicks}
+        scale="log"
+        minTickGap={0}
+      >
+        <Label
+          angle={-90}
+          value="GMR"
+          position="insideLeft"
+          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+        />
+      </YAxis>
+    </ScatterChart>
   )
 }
