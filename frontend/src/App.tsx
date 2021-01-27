@@ -26,6 +26,7 @@ import {
   User,
   UserV,
   VaccinationV,
+  VirusV,
   WeeklySurveyV,
   WithdrawnV,
 } from "./lib/data"
@@ -253,6 +254,10 @@ export default function App() {
     () => tableFetch("withdrawn", WithdrawnV, token?.token),
     []
   )
+  const virusFetch = useAsync(
+    () => tableFetch("virus", VirusV, token?.token),
+    []
+  )
   const serologyFetch = useAsync(
     () => tableFetch("serology", SerologyV, token?.token),
     []
@@ -300,10 +305,13 @@ export default function App() {
   }))
 
   const serologyExtra = serology?.map((s) => {
+    const v = virusFetch.result?.find((v) => v.name === s.virus)
     const p = participantsExtra?.find((p) => p.pid === s.pid)
     return {
       site: p?.site,
       prevVac: p?.prevVac,
+      virusShortName: v?.shortName,
+      virusClade: v?.clade,
       ...s,
     }
   })
@@ -433,6 +441,7 @@ export default function App() {
                   schedule={schedule}
                   weeklySurvey={weeklySurvey}
                   withdrawn={withdrawnFetch.result}
+                  virus={virusFetch.result}
                   serology={serologyExtra}
                   titreChange={titreChange}
                 />

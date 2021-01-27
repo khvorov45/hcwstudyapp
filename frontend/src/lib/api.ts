@@ -13,6 +13,7 @@ export type TableName =
   | "withdrawn"
   | "serology"
   | "users"
+  | "virus"
 
 export type ApiPath =
   | TableName

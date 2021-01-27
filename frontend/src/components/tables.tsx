@@ -9,6 +9,7 @@ import {
   SiteV,
   Vaccination,
   VaccinationStatusV,
+  Virus,
   WeeklySurvey,
   Withdrawn,
 } from "../lib/data"
@@ -158,6 +159,7 @@ export default function Tables({
   schedule,
   weeklySurvey,
   withdrawn,
+  virus,
   serology,
   titreChange,
 }: {
@@ -166,7 +168,8 @@ export default function Tables({
   schedule?: Schedule[]
   weeklySurvey?: WeeklySurvey[]
   withdrawn?: Withdrawn[]
-  serology?: (Serology & { site?: Site })[]
+  virus?: Virus[]
+  serology?: (Serology & { site?: Site; virusClade?: string })[]
   titreChange?: { pid: string; rise: number; site: Site; virus: string }[]
 }) {
   const commonCols = useMemo(
@@ -232,6 +235,12 @@ export default function Tables({
           missing ? ["true", "false", "(missing)"] : ["true", "false"]
         ),
       }),
+      clade: {
+        Header: "Clade",
+        accessor: "virusClade",
+        filter: "exactText",
+        width: 100,
+      },
     }),
     []
   )
@@ -277,6 +286,10 @@ export default function Tables({
     {
       name: "withdrawn",
       element: <WithdrawnTable withdrawn={withdrawn} commonCols={commonCols} />,
+    },
+    {
+      name: "virus",
+      element: <VirusTable virus={virus} commonCols={commonCols} />,
     },
     {
       name: "serology",
@@ -586,11 +599,41 @@ function WithdrawnTable({
   )
 }
 
+function VirusTable({
+  virus,
+  commonCols,
+}: {
+  virus?: Virus[]
+  commonCols: any
+}) {
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: "Name",
+        accessor: (v: Virus) => v.name,
+        width: 250,
+      },
+      {
+        Header: "Short name",
+        accessor: (v: Virus) => v.shortName,
+        width: 200,
+      },
+      commonCols.clade,
+    ]
+  }, [commonCols.clade])
+
+  return (
+    <PageContainer loading={!virus}>
+      <Table columns={columns} data={virus ?? []} />
+    </PageContainer>
+  )
+}
+
 function SerologyTable({
   serology,
   commonCols,
 }: {
-  serology?: Serology[]
+  serology?: (Serology & { virusClade?: string })[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -606,8 +649,9 @@ function SerologyTable({
       {
         Header: "Virus",
         accessor: "virus",
-        width: 300,
+        width: 250,
       },
+      commonCols.clade,
       {
         Header: "Titre",
         accessor: "titre",
