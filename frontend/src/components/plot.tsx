@@ -63,19 +63,17 @@ export default function Plots({
         ]}
         active={({ link }) => link === `/plots/${subpage}`}
       />
-      <ScreenHeight heightTaken={50 + 50}>
-        <Switch>
-          <Route exact path="/plots">
-            <Redirect to="/plots/baseline" />
-          </Route>
-          <Route exact path="/plots/baseline">
-            <BaselinePlots participantsExtra={participantsExtra} />
-          </Route>
-          <Route exact path="/plots/serology">
-            <SerologyPlots serology={serology} titreChange={titreChange} />
-          </Route>
-        </Switch>
-      </ScreenHeight>
+      <Switch>
+        <Route exact path="/plots">
+          <Redirect to="/plots/baseline" />
+        </Route>
+        <Route exact path="/plots/baseline">
+          <BaselinePlots participantsExtra={participantsExtra} />
+        </Route>
+        <Route exact path="/plots/serology">
+          <SerologyPlots serology={serology} titreChange={titreChange} />
+        </Route>
+      </Switch>
     </div>
   )
 }
@@ -230,7 +228,7 @@ function SerologyPlots({
           }}
         />
       </div>
-      <div>
+      <ScreenHeight heightTaken={50 + 50 + 100}>
         <Spaghetti
           data={serologyWide}
           keys={viruses}
@@ -243,7 +241,7 @@ function SerologyPlots({
           yRange={[1, 30]}
           yTicks={[1, 2, 5, 10, 20, 30]}
         />
-      </div>
+      </ScreenHeight>
     </div>
   )
 }
@@ -256,14 +254,14 @@ function BaselinePlots({
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<string | null>(null)
   return (
-    <div>
+    <ScreenHeight heightTaken={50 + 50}>
       <SiteSelect sites={sites} site={site} setSite={setSite} />
       <PlotColumn
         participantsExtra={participantsExtra.filter(
           (p) => !site || p.site === site
         )}
       />
-    </div>
+    </ScreenHeight>
   )
 }
 
