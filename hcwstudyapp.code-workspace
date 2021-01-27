@@ -6,5 +6,10 @@
     {
       "path": "backend"
     }
-  ]
+  ],
+  "settings": {
+    "cSpell.words": [
+      "Withdrawns"
+    ]
+  }
 }
