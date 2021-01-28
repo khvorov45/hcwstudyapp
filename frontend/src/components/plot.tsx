@@ -108,7 +108,7 @@ function SerologyPlots({
     (number | "(missing)" | null)[]
   >([])
   const [site, setSite] = useState<string[]>([])
-  const [virus, setVirus] = useState<string | null>(null)
+  const [virus, setVirus] = useState<string[]>([])
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
 
   const vacFiltered = serology.filter(
@@ -120,7 +120,10 @@ function SerologyPlots({
   const siteFiltered = vacFiltered.filter(
     (s) => site.length === 0 || (s.site !== undefined && site.includes(s.site))
   )
-  const virusFiltered = siteFiltered.filter((s) => !virus || s.virus === virus)
+  const virusFiltered = siteFiltered.filter(
+    (s) =>
+      virus.length === 0 || (s.virus !== undefined && virus.includes(s.virus))
+  )
   const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
   )
@@ -132,7 +135,9 @@ function SerologyPlots({
   const plotPids = Array.from(new Set(pidFiltered.map((s) => s.pid)))
 
   const titreChangeFiltered = titreChange.filter(
-    (t) => plotPids.includes(t.pid) && (!virus || t.virus === virus)
+    (t) =>
+      plotPids.includes(t.pid) &&
+      (virus.length === 0 || (t.virus !== undefined && virus.includes(t.virus)))
   )
 
   // Summarise each virus
@@ -201,7 +206,7 @@ function SerologyPlots({
             setSelectedPid(null)
           }}
         />
-        <Selector
+        <SelectorMultiple
           options={viruses}
           label="Virus"
           width={225}
