@@ -35,6 +35,7 @@ import {
 } from "./lib/table-data"
 import ScreenHeight from "./components/screen-height"
 import { LinkExternal, LinkInternal } from "./components/link"
+import { GlobalLoading } from "./components/loading"
 
 function LinkRenderer(props: any) {
   if (props.href.startsWith("/")) {
@@ -284,6 +285,7 @@ export default function App() {
             }}
             onUserUpdate={usersFetch.execute}
           />
+          <GlobalLoading loading={allTableDataLoad.loading} />
           <div>
             <Switch>
               <Route exact path="/login">

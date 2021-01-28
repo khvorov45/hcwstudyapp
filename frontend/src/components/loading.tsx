@@ -1,6 +1,7 @@
 import {
   CircularProgress,
   createStyles,
+  Dialog,
   makeStyles,
   Theme,
 } from "@material-ui/core"
@@ -61,5 +62,25 @@ export function PageContainer({
         children
       )}
     </div>
+  )
+}
+
+export function GlobalLoading({ loading }: { loading: boolean }) {
+  return (
+    <Dialog open={loading}>
+      <div style={{ padding: 5, fontSize: "medium" }}>
+        Loading data, please wait
+      </div>
+      <BeatLoader
+        color="gray"
+        css={`
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
+          padding: 5px;
+        `}
+        size={30}
+      />
+    </Dialog>
   )
 }
