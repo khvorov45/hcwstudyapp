@@ -23,24 +23,6 @@ import { decode } from "./io"
 import moment from "moment"
 import * as d3 from "d3-array"
 
-export type TableSettings = {
-  withdrawn: { setting: "yes" | "no" | "any"; ids: string[] }
-}
-
-function applyTableSettings<T extends { pid: string }>(
-  settings: TableSettings,
-  data?: T[]
-) {
-  if (settings.withdrawn.setting !== "any") {
-    return data?.filter(
-      (r) =>
-        settings.withdrawn.ids.includes(r.pid) ===
-        (settings.withdrawn.setting === "yes")
-    )
-  }
-  return data
-}
-
 export async function tableFetch<T>(
   name: TableName,
   validator: t.Type<T, unknown, any>,
@@ -226,5 +208,42 @@ export async function loadAllTableData(
     virus,
     serologyExtra,
     titreChanges,
+  }
+}
+
+export type TableSettings = {
+  withdrawn: { setting: "yes" | "no" | "any"; ids: string[] }
+}
+
+function applyTableSettings<T extends { pid: string }>(
+  settings: TableSettings,
+  data: T[]
+) {
+  if (settings.withdrawn.setting !== "any") {
+    return data?.filter(
+      (r) =>
+        settings.withdrawn.ids.includes(r.pid) ===
+        (settings.withdrawn.setting === "yes")
+    )
+  }
+  return data
+}
+
+export function applyTableSettingsAllData(
+  settings: TableSettings,
+  allData?: AllTableData | null
+): AllTableData | null | undefined {
+  if (!allData) {
+    return allData
+  }
+  return {
+    participantsExtra: applyTableSettings(settings, allData.participantsExtra),
+    schedule: applyTableSettings(settings, allData.schedule),
+    weeklySurvey: applyTableSettings(settings, allData.weeklySurvey),
+    vaccination: applyTableSettings(settings, allData.vaccination),
+    withdrawn: allData.withdrawn,
+    virus: allData.virus,
+    serologyExtra: applyTableSettings(settings, allData.serologyExtra),
+    titreChanges: applyTableSettings(settings, allData.titreChanges),
   }
 }

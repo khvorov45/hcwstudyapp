@@ -27,7 +27,12 @@ import Email from "./components/email"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 import Plots from "./components/plot"
-import { loadAllTableData, tableFetch } from "./lib/table-data"
+import {
+  applyTableSettingsAllData,
+  loadAllTableData,
+  tableFetch,
+  TableSettings,
+} from "./lib/table-data"
 import ScreenHeight from "./components/screen-height"
 import { LinkExternal, LinkInternal } from "./components/link"
 
@@ -226,6 +231,16 @@ export default function App() {
     auth.status,
     token?.token,
   ])
+  const tableSettings: TableSettings = {
+    withdrawn: {
+      setting: withdrawnSetting,
+      ids: allTableDataLoad.result?.withdrawn.map((w) => w.pid) ?? [],
+    },
+  }
+  const allTableData = applyTableSettingsAllData(
+    tableSettings,
+    allTableDataLoad.result
+  )
   const usersFetch = useAsync(
     async (token?: string) => {
       if (!token) {
@@ -321,14 +336,14 @@ export default function App() {
                 path="/tables"
               >
                 <Tables
-                  participantsExtra={allTableDataLoad.result?.participantsExtra}
-                  vaccination={allTableDataLoad.result?.vaccination}
-                  schedule={allTableDataLoad.result?.schedule}
-                  weeklySurvey={allTableDataLoad.result?.weeklySurvey}
-                  withdrawn={allTableDataLoad.result?.withdrawn}
-                  virus={allTableDataLoad.result?.virus}
-                  serology={allTableDataLoad.result?.serologyExtra}
-                  titreChange={allTableDataLoad.result?.titreChanges}
+                  participantsExtra={allTableData?.participantsExtra}
+                  vaccination={allTableData?.vaccination}
+                  schedule={allTableData?.schedule}
+                  weeklySurvey={allTableData?.weeklySurvey}
+                  withdrawn={allTableData?.withdrawn}
+                  virus={allTableData?.virus}
+                  serology={allTableData?.serologyExtra}
+                  titreChange={allTableData?.titreChanges}
                 />
               </AuthRoute>
               <AuthRoute
@@ -337,11 +352,9 @@ export default function App() {
                 path="/plots"
               >
                 <Plots
-                  participantsExtra={
-                    allTableDataLoad.result?.participantsExtra ?? []
-                  }
-                  serology={allTableDataLoad.result?.serologyExtra ?? []}
-                  titreChange={allTableDataLoad.result?.titreChanges ?? []}
+                  participantsExtra={allTableData?.participantsExtra ?? []}
+                  serology={allTableData?.serologyExtra ?? []}
+                  titreChange={allTableData?.titreChanges ?? []}
                 />
               </AuthRoute>
             </Switch>
