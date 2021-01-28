@@ -320,36 +320,41 @@ export default function App() {
     ? Array.from(new Set(serology.map((s) => s.virus)))
     : []
 
-  const titreChange =
-    participantsExtra && serologyExtra
-      ? viruses.flatMap((virus) =>
-          participantsExtra.map((participant) => ({
-            virus,
-            pid: participant.pid,
-            site: participant.site,
-            day1: 0,
-            day2: 14,
-            rise: Math.exp(
-              Math.log(
-                serologyExtra.find(
-                  (s) =>
-                    s.pid === participant.pid &&
-                    s.virus === virus &&
-                    s.day === 14
-                )?.titre ?? NaN
-              ) -
+  const ready = participantsExtra !== undefined && serologyExtra !== undefined
+  const titreChangeCalc = useAsync(
+    async () =>
+      ready
+        ? viruses.flatMap((virus) =>
+            participantsExtra!.map((participant) => ({
+              virus,
+              pid: participant.pid,
+              site: participant.site,
+              day1: 0,
+              day2: 14,
+              rise: Math.exp(
                 Math.log(
-                  serologyExtra.find(
+                  serologyExtra!.find(
                     (s) =>
                       s.pid === participant.pid &&
                       s.virus === virus &&
-                      s.day === 0
+                      s.day === 14
                   )?.titre ?? NaN
-                )
-            ),
-          }))
-        )
-      : undefined
+                ) -
+                  Math.log(
+                    serologyExtra!.find(
+                      (s) =>
+                        s.pid === participant.pid &&
+                        s.virus === virus &&
+                        s.day === 0
+                    )?.titre ?? NaN
+                  )
+              ),
+            }))
+          )
+        : undefined,
+    [ready]
+  )
+  const titreChange = titreChangeCalc.result
 
   // About page md ------------------------------------------------------------
 
