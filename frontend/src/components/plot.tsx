@@ -149,7 +149,7 @@ function SerologyPlots({
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
     pidFiltered,
-    (v) => Math.exp(d3.mean(v.map((d) => Math.log(d.titre))) ?? 0),
+    (v) => Math.exp(d3.mean(v.map((d) => Math.log(d.titre))) ?? NaN),
     (d) => d.virus,
     (d) => d.day
   )
