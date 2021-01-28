@@ -202,7 +202,7 @@ function SerologyPlots({
             setVaccinations(n)
             setSelectedPid(null)
           }}
-          width={140}
+          width={150}
         />
         <SiteSelect
           sites={sites}
