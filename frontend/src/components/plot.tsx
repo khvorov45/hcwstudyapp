@@ -149,7 +149,19 @@ function SerologyPlots({
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
     pidFiltered,
-    (v) => Math.exp(d3.mean(v.map((d) => Math.log(d.titre))) ?? NaN),
+    (v) => {
+      const logmean = d3.mean(v.map((d) => Math.log(d.titre))) ?? NaN
+      const se =
+        (d3.deviation(v.map((d) => Math.log(d.titre))) ?? NaN) /
+        Math.sqrt(v.length)
+      const mean = Math.exp(logmean)
+      const low = Math.exp(logmean - 1.96 * se)
+      const high = Math.exp(logmean + 1.96 * se)
+      return {
+        mean: Math.exp(logmean),
+        interval: [mean - low, high - mean],
+      }
+    },
     (d) => d.virus,
     (d) => d.day
   )
@@ -445,7 +457,8 @@ function Spaghetti<T extends Object>({
       {keys.map((k, i) => (
         <Line
           key={k}
-          dataKey={k}
+          name={k}
+          dataKey={(d) => d[k].mean}
           stroke={lineColors[i]}
           dot={{
             fill: lineColors[i],
@@ -454,7 +467,9 @@ function Spaghetti<T extends Object>({
           }}
           isAnimationActive={false}
           connectNulls
-        />
+        >
+          <ErrorBar dataKey={(d) => d[k].interval} stroke={lineColors[i]} />
+        </Line>
       ))}
       <YAxis
         ticks={yTicks}
