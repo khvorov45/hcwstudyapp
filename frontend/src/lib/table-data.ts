@@ -15,6 +15,9 @@ import {
   SiteV,
   Participant,
   Vaccination,
+  Schedule,
+  WeeklySurvey,
+  Withdrawn,
 } from "./data"
 import { decode } from "./io"
 import moment from "moment"
@@ -168,10 +171,21 @@ function genTitreChange(
   return decode(t.array(TitreChangeV), titreChanges)
 }
 
+export type AllTableData = {
+  participantsExtra: ParticipantExtra[]
+  schedule: Schedule[]
+  weeklySurvey: WeeklySurvey[]
+  vaccination: Vaccination[]
+  withdrawn: Withdrawn[]
+  virus: Virus[]
+  serologyExtra: SerologyExtra[]
+  titreChanges: TitreChange[]
+}
+
 export async function loadAllTableData(
   authStatus: AsyncStateStatus,
   token?: string
-) {
+): Promise<AllTableData | null> {
   if (!token || authStatus !== "success") {
     return null
   }
