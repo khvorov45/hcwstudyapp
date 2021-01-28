@@ -168,13 +168,12 @@ function SerologyPlots({
     titreChangesSummarized,
     ([virus, summary]) => {
       const mean = Math.exp(summary.logmean)
+      const low = mean - Math.exp(summary.logmean - 1.96 * summary.se)
+      const high = Math.exp(summary.logmean + 1.96 * summary.se) - mean
       return {
         virus,
-        point: mean,
-        interval: [
-          mean - Math.exp(summary.logmean - 1.96 * summary.se),
-          Math.exp(summary.logmean + 1.96 * summary.se) - mean,
-        ],
+        point: isNaN(mean) ? null : mean,
+        interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
       }
     }
   ).sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
@@ -235,7 +234,8 @@ function SerologyPlots({
           data={titreChangesPlot}
           xKey={"virus"}
           yRange={[1, 30]}
-          yTicks={[1, 2, 5, 10, 20, 30]}
+          yTicks={[0.5, 1, 2, 5, 10, 20, 30]}
+          yLab={selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)"}
         />
       </ScreenHeight>
     </div>
@@ -474,19 +474,27 @@ function Spaghetti<T extends Object>({
   )
 }
 
-function PointRange<T extends { point: number; interval: number[] }>({
+function PointRange<
+  T extends { point: number | null; interval: (number | null)[] }
+>({
   data,
   xKey,
   yRange,
   yTicks,
+  yLab,
 }: {
   data: T[]
   xKey: keyof T
   yRange: [number, number]
   yTicks: number[]
+  yLab: string
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
+  // If nothing to display
+  if (data.filter((d) => d.point).length === 0) {
+    return <></>
+  }
   return (
     <ScatterChart
       width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
@@ -532,7 +540,7 @@ function PointRange<T extends { point: number; interval: number[] }>({
       >
         <Label
           angle={-90}
-          value="GMR"
+          value={yLab}
           position="insideLeft"
           style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
         />
