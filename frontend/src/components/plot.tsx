@@ -104,18 +104,18 @@ function SerologyPlots({
     .map((x) => (x === Infinity ? "(missing)" : x))
 
   // Filters applied in the order presented
-  const [vaccinations, setVaccinations] = useState<number | "(missing)" | null>(
-    null
-  )
+  const [vaccinations, setVaccinations] = useState<
+    (number | "(missing)" | null)[]
+  >([])
   const [site, setSite] = useState<string | null>(null)
   const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
 
   const vacFiltered = serology.filter(
     (s) =>
-      vaccinations === null ||
-      (vaccinations === "(missing)" && s.prevVac === undefined) ||
-      s.prevVac === vaccinations
+      vaccinations.length === 0 ||
+      (vaccinations.includes("(missing)") && s.prevVac === undefined) ||
+      (s.prevVac !== undefined && vaccinations.includes(s.prevVac))
   )
   const siteFiltered = vacFiltered.filter((s) => !site || s.site === site)
   const virusFiltered = siteFiltered.filter((s) => !virus || s.virus === virus)
@@ -181,7 +181,7 @@ function SerologyPlots({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <ControlRibbon>
-        <Selector
+        <SelectorMultiple
           options={prevVacs}
           label="Vaccinations"
           value={vaccinations}
@@ -217,8 +217,8 @@ function SerologyPlots({
             if (!site) {
               setSite(thisPid?.site ?? null)
             }
-            if (!vaccinations) {
-              setVaccinations(thisPid?.prevVac ?? null)
+            if (thisPid?.prevVac !== undefined) {
+              setVaccinations([thisPid.prevVac])
             }
           }}
         />
@@ -572,6 +572,34 @@ function Selector<T>({
       value={value}
       onChange={(e, n) => onChange(n)}
       style={{ width }}
+    />
+  )
+}
+
+function SelectorMultiple<T>({
+  options,
+  label,
+  value,
+  onChange,
+  width,
+}: {
+  options: T[]
+  label: string
+  value: T[]
+  onChange: (s: T[]) => void
+  width: number
+}) {
+  return (
+    <Autocomplete
+      options={options}
+      getOptionLabel={(o) => `${o}`}
+      renderInput={(params) => (
+        <TextField {...params} label={label} variant="outlined" />
+      )}
+      value={value}
+      onChange={(e, n) => onChange(n)}
+      style={{ width }}
+      multiple
     />
   )
 }
