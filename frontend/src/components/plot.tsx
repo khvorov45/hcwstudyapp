@@ -107,7 +107,7 @@ function SerologyPlots({
   const [vaccinations, setVaccinations] = useState<
     (number | "(missing)" | null)[]
   >([])
-  const [site, setSite] = useState<string | null>(null)
+  const [site, setSite] = useState<string[]>([])
   const [virus, setVirus] = useState<string | null>(null)
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
 
@@ -117,7 +117,9 @@ function SerologyPlots({
       (vaccinations.includes("(missing)") && s.prevVac === undefined) ||
       (s.prevVac !== undefined && vaccinations.includes(s.prevVac))
   )
-  const siteFiltered = vacFiltered.filter((s) => !site || s.site === site)
+  const siteFiltered = vacFiltered.filter(
+    (s) => site.length === 0 || (s.site !== undefined && site.includes(s.site))
+  )
   const virusFiltered = siteFiltered.filter((s) => !virus || s.virus === virus)
   const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
@@ -214,8 +216,8 @@ function SerologyPlots({
           onChange={(n) => {
             setSelectedPid(n)
             const thisPid = pidFiltered.find((d) => d.pid === n)
-            if (!site) {
-              setSite(thisPid?.site ?? null)
+            if (thisPid?.site !== undefined) {
+              setSite([thisPid.site])
             }
             if (thisPid?.prevVac !== undefined) {
               setVaccinations([thisPid.prevVac])
@@ -248,13 +250,14 @@ function BaselinePlots({
   participantsExtra: (Participant & { age: number; prevVac: number })[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
-  const [site, setSite] = useState<string | null>(null)
+  const [site, setSite] = useState<string[]>([])
   return (
     <ScreenHeight heightTaken={50 + 50}>
       <SiteSelect sites={sites} site={site} setSite={setSite} />
       <PlotColumn
         participantsExtra={participantsExtra.filter(
-          (p) => !site || p.site === site
+          (p) =>
+            site.length === 0 || (p.site !== undefined && site.includes(p.site))
         )}
       />
     </ScreenHeight>
@@ -391,14 +394,14 @@ function SiteSelect({
   setSite,
 }: {
   sites: string[]
-  site: string | null
-  setSite: (s: string | null) => void
+  site: string[]
+  setSite: (s: string[]) => void
 }) {
   return (
-    <Selector
+    <SelectorMultiple
       options={sites}
       label="Site"
-      width={150}
+      width={200}
       value={site}
       onChange={setSite}
     />
