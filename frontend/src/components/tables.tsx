@@ -235,12 +235,12 @@ export default function Tables({
           missing ? ["true", "false", "(missing)"] : ["true", "false"]
         ),
       }),
-      clade: {
+      clade: (s: string) => ({
         Header: "Clade",
-        accessor: "virusClade",
+        accessor: s,
         filter: "exactText",
         width: 100,
-      },
+      }),
     }),
     []
   )
@@ -618,9 +618,9 @@ function VirusTable({
         accessor: (v: Virus) => v.shortName,
         width: 200,
       },
-      commonCols.clade,
+      commonCols.clade("clade"),
     ]
-  }, [commonCols.clade])
+  }, [commonCols])
 
   return (
     <PageContainer loading={!virus}>
@@ -651,7 +651,7 @@ function SerologyTable({
         accessor: "virus",
         width: 250,
       },
-      commonCols.clade,
+      commonCols.clade("virusClade"),
       {
         Header: "Titre",
         accessor: "titre",
