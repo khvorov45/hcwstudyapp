@@ -57,7 +57,6 @@ import { Icon } from "@iconify/react"
 import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
-import { PageContainer } from "./loading"
 import { Autocomplete } from "@material-ui/lab"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -368,11 +367,7 @@ function Contact({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!participants}>
-      <Table columns={columns} data={participants ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={participants ?? []} />
 }
 
 function Baseline({
@@ -402,11 +397,7 @@ function Baseline({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!participants}>
-      <Table columns={columns} data={participants ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={participants ?? []} />
 }
 
 function ScheduleTable({
@@ -430,11 +421,7 @@ function ScheduleTable({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!schedule}>
-      <Table columns={columns} data={schedule ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={schedule ?? []} />
 }
 
 function WeeklySurveyTable({
@@ -467,11 +454,7 @@ function WeeklySurveyTable({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!weeklySurvey}>
-      <Table columns={columns} data={weeklySurvey ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={weeklySurvey ?? []} />
 }
 
 function WeeklyCompletion({
@@ -545,11 +528,7 @@ function WeeklyCompletion({
     ]
   }, [weeksAbbr, commonCols])
 
-  return (
-    <PageContainer loading={!weeklySurvey}>
-      <Table columns={columns} data={weeklyCompletion} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={weeklyCompletion} />
 }
 
 function VaccinationTable({
@@ -574,11 +553,7 @@ function VaccinationTable({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!vaccination}>
-      <Table columns={columns} data={vaccination ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={vaccination ?? []} />
 }
 
 function WithdrawnTable({
@@ -592,11 +567,7 @@ function WithdrawnTable({
     return [commonCols.pid, commonCols.date({ name: "date", header: "Date" })]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!withdrawn}>
-      <Table columns={columns} data={withdrawn ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={withdrawn ?? []} />
 }
 
 function VirusTable({
@@ -622,11 +593,7 @@ function VirusTable({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!virus}>
-      <Table columns={columns} data={virus ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={virus ?? []} />
 }
 
 function SerologyTable({
@@ -661,11 +628,7 @@ function SerologyTable({
     ]
   }, [commonCols])
 
-  return (
-    <PageContainer loading={!serology}>
-      <Table columns={columns} data={serology ?? []} />
-    </PageContainer>
-  )
+  return <Table columns={columns} data={serology ?? []} />
 }
 
 type SummarizedNumeric = {
@@ -974,7 +937,7 @@ function Summary({
   }, [countsBySite, theme])
 
   return (
-    <PageContainer loading={participantsExtra && serology ? false : true}>
+    <div>
       <div
         style={{
           display: "flex",
@@ -1011,7 +974,7 @@ function Summary({
         overheadColumnId="Site_1"
         isLabelRow={(r) => (r.label ? typeof r.label === "object" : false)}
       />
-    </PageContainer>
+    </div>
   )
 }
 
