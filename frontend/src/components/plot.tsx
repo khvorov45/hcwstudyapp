@@ -29,6 +29,7 @@ import ScreenHeight from "./screen-height"
 import Autocomplete from "@material-ui/lab/Autocomplete"
 import { useWindowSize } from "../lib/hooks"
 import { interpolateSinebow } from "d3-scale-chromatic"
+import detectScrollbarWidth from "../lib/scrollbar-width"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,6 +39,11 @@ const useStyles = makeStyles((theme: Theme) =>
       "&>*": {
         marginRight: 10,
         marginTop: 5,
+        paddingTop: 5,
+        flexShrink: 0,
+        height: 100 - 6 - detectScrollbarWidth(),
+        overflowY: "scroll",
+        overflowX: "hidden",
       },
       height: 100,
       borderBottom: `1px solid ${theme.palette.divider}`,
@@ -608,6 +614,7 @@ function SelectorMultiple<T>({
       onChange={(e, n) => onChange(n)}
       style={{ width }}
       multiple
+      disableCloseOnSelect
     />
   )
 }
