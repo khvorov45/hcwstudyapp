@@ -7,7 +7,7 @@ import {
   ThemeProvider,
   Divider,
 } from "@material-ui/core"
-import React, { ReactNode, useEffect, useMemo, useState } from "react"
+import React, { ReactNode, useEffect, useState } from "react"
 import StatusCodes from "http-status-codes"
 import { AsyncStateStatus, useAsync, useAsyncCallback } from "react-async-hook"
 import {
@@ -19,17 +19,7 @@ import {
 import * as t from "io-ts"
 import Nav from "./components/nav"
 import { apiReq } from "./lib/api"
-import {
-  ParticipantV,
-  ScheduleV,
-  SerologyV,
-  User,
-  UserV,
-  VaccinationV,
-  VirusV,
-  WeeklySurveyV,
-  WithdrawnV,
-} from "./lib/data"
+import { User, UserV } from "./lib/data"
 import ReactMarkdown from "react-markdown"
 import aboutMdPath from "./md/about.md"
 import Tables from "./components/tables"
@@ -37,9 +27,7 @@ import Email from "./components/email"
 import ApiSpec from "./components/api-spec"
 import Users from "./components/users"
 import Plots from "./components/plot"
-import * as d3 from "d3-array"
-import { tableFetch, useTableData, useTableDataPlain } from "./lib/table-data"
-import moment from "moment"
+import { loadAllTableData, tableFetch } from "./lib/table-data"
 import ScreenHeight from "./components/screen-height"
 import { LinkExternal, LinkInternal } from "./components/link"
 
@@ -234,127 +222,23 @@ export default function App() {
 
   // Table data ---------------------------------------------------------------
 
-  const participantsFetch = useAsync(
-    () => tableFetch("participants", ParticipantV, token?.token),
-    []
-  )
-  const scheduleFetch = useAsync(
-    () => tableFetch("schedule", ScheduleV, token?.token),
-    []
-  )
-  const weeklySurveyFetch = useAsync(
-    () => tableFetch("weekly-survey", WeeklySurveyV, token?.token),
-    []
-  )
-  const vaccinationFetch = useAsync(
-    () => tableFetch("vaccination", VaccinationV, token?.token),
-    []
-  )
-  const withdrawnFetch = useAsync(
-    () => tableFetch("withdrawn", WithdrawnV, token?.token),
-    []
-  )
-  const virusFetch = useAsync(
-    () => tableFetch("virus", VirusV, token?.token),
-    []
-  )
-  const serologyFetch = useAsync(
-    () => tableFetch("serology", SerologyV, token?.token),
-    []
-  )
-
+  const allTableDataLoad = useAsync(loadAllTableData, [
+    auth.status,
+    token?.token,
+  ])
   const usersFetch = useAsync(
-    () => tableFetch("users", UserV, token?.token),
-    []
-  )
-
-  const tableSettings = {
-    withdrawn: {
-      setting: withdrawnSetting,
-      ids: withdrawnFetch.result?.map((w) => w.pid) ?? [],
+    async (token?: string) => {
+      if (!token) {
+        return []
+      }
+      return await tableFetch("users", UserV, token)
     },
-  }
-
-  const participants = useTableData(participantsFetch.result, tableSettings)
-  const schedule = useTableData(scheduleFetch.result, tableSettings)
-  const weeklySurvey = useTableData(weeklySurveyFetch.result, tableSettings)
-  const vaccination = useTableData(vaccinationFetch.result, tableSettings)
-  const serology = useTableData(serologyFetch.result, tableSettings)
-
-  const users = useTableDataPlain(usersFetch.result)
-
-  const vaccinationCounts = useMemo(() => {
-    const counts = d3.rollup(
-      vaccination ?? [],
-      (v) =>
-        d3.sum(v, (v) =>
-          ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
-        ),
-      (d) => d.pid
-    )
-    return Array.from(counts, ([k, v]) => ({ pid: k, count: v })).sort((a, b) =>
-      a.count > b.count ? 1 : a.count < b.count ? -1 : 0
-    )
-  }, [vaccination])
-
-  const now = moment()
-  const participantsExtra = participants?.map((p) => ({
-    age: now.diff(p.dob, "year"),
-    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
-    ...p,
-  }))
-
-  const serologyExtra = serology?.map((s) => {
-    const v = virusFetch.result?.find((v) => v.name === s.virus)
-    const p = participantsExtra?.find((p) => p.pid === s.pid)
-    return {
-      site: p?.site,
-      prevVac: p?.prevVac,
-      virusShortName: v?.shortName,
-      virusClade: v?.clade,
-      ...s,
-    }
-  })
-
-  const viruses = serology
-    ? Array.from(new Set(serology.map((s) => s.virus)))
-    : []
-
-  const ready = participantsExtra !== undefined && serologyExtra !== undefined
-  const titreChangeCalc = useAsync(
-    async () =>
-      ready
-        ? viruses.flatMap((virus) =>
-            participantsExtra!.map((participant) => ({
-              virus,
-              pid: participant.pid,
-              site: participant.site,
-              day1: 0,
-              day2: 14,
-              rise: Math.exp(
-                Math.log(
-                  serologyExtra!.find(
-                    (s) =>
-                      s.pid === participant.pid &&
-                      s.virus === virus &&
-                      s.day === 14
-                  )?.titre ?? NaN
-                ) -
-                  Math.log(
-                    serologyExtra!.find(
-                      (s) =>
-                        s.pid === participant.pid &&
-                        s.virus === virus &&
-                        s.day === 0
-                    )?.titre ?? NaN
-                  )
-              ),
-            }))
-          )
-        : undefined,
-    [ready]
+    [token?.token]
   )
-  const titreChange = titreChangeCalc.result
+  useEffect(
+    () => allTableDataLoad.error && console.error(allTableDataLoad.error),
+    [allTableDataLoad.error]
+  )
 
   // About page md ------------------------------------------------------------
 
@@ -381,11 +265,7 @@ export default function App() {
               localStorage.setItem("withdrawn", v)
             }}
             onParticipantUpdate={() => {
-              participantsFetch.execute()
-              scheduleFetch.execute()
-              weeklySurveyFetch.execute()
-              vaccinationFetch.execute()
-              withdrawnFetch.execute()
+              allTableDataLoad.execute(auth.status, token?.token)
             }}
             onUserUpdate={usersFetch.execute}
           />
@@ -430,7 +310,7 @@ export default function App() {
                 path="/users"
               >
                 <Users
-                  users={users}
+                  users={usersFetch.result ?? []}
                   onEdit={usersFetch.execute}
                   token={token?.token}
                 />
@@ -441,14 +321,14 @@ export default function App() {
                 path="/tables"
               >
                 <Tables
-                  participantsExtra={participantsExtra}
-                  vaccination={vaccination}
-                  schedule={schedule}
-                  weeklySurvey={weeklySurvey}
-                  withdrawn={withdrawnFetch.result}
-                  virus={virusFetch.result}
-                  serology={serologyExtra}
-                  titreChange={titreChange}
+                  participantsExtra={allTableDataLoad.result?.participantsExtra}
+                  vaccination={allTableDataLoad.result?.vaccination}
+                  schedule={allTableDataLoad.result?.schedule}
+                  weeklySurvey={allTableDataLoad.result?.weeklySurvey}
+                  withdrawn={allTableDataLoad.result?.withdrawn}
+                  virus={allTableDataLoad.result?.virus}
+                  serology={allTableDataLoad.result?.serologyExtra}
+                  titreChange={allTableDataLoad.result?.titreChanges}
                 />
               </AuthRoute>
               <AuthRoute
@@ -457,9 +337,11 @@ export default function App() {
                 path="/plots"
               >
                 <Plots
-                  participantsExtra={participantsExtra ?? []}
-                  serology={serologyExtra ?? []}
-                  titreChange={titreChange ?? []}
+                  participantsExtra={
+                    allTableDataLoad.result?.participantsExtra ?? []
+                  }
+                  serology={allTableDataLoad.result?.serologyExtra ?? []}
+                  titreChange={allTableDataLoad.result?.titreChanges ?? []}
                 />
               </AuthRoute>
             </Switch>
