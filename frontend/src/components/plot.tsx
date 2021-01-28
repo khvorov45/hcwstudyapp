@@ -458,7 +458,7 @@ function Spaghetti<T extends Object>({
         <Line
           key={k}
           name={k}
-          dataKey={(d) => d[k].mean}
+          dataKey={(d) => d[k]?.mean}
           stroke={lineColors[i]}
           dot={{
             fill: lineColors[i],
@@ -468,7 +468,7 @@ function Spaghetti<T extends Object>({
           isAnimationActive={false}
           connectNulls
         >
-          <ErrorBar dataKey={(d) => d[k].interval} stroke={lineColors[i]} />
+          <ErrorBar dataKey={(d) => d[k]?.interval} stroke={lineColors[i]} />
         </Line>
       ))}
       <YAxis
