@@ -123,10 +123,10 @@ export const TitreChangeV = t.type({
 export type TitreChange = t.TypeOf<typeof TitreChangeV>
 
 function genTitreChange(
-  viruses: string[],
   participantsExtra: ParticipantExtra[],
   serologyExtra: SerologyExtra[]
 ): TitreChange[] {
+  const viruses = Array.from(new Set(serologyExtra.map((s) => s.virus)))
   const titreChanges = viruses.flatMap((virus) =>
     participantsExtra.map((participant) => ({
       virus,
@@ -193,11 +193,7 @@ export async function loadAllTableData(
   const vaccinationCounts = genVaccinationCounts(vaccination)
   const participantsExtra = genParticipantExtra(participants, vaccinationCounts)
   const serologyExtra = genSerologyExtra(serology, virus, participantsExtra)
-  const titreChanges = genTitreChange(
-    virus.map((v) => v.name),
-    participantsExtra,
-    serologyExtra
-  )
+  const titreChanges = genTitreChange(participantsExtra, serologyExtra)
 
   return {
     participantsExtra,
