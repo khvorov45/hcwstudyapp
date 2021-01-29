@@ -254,7 +254,6 @@ function SerologyPlots({
           keys={viruses}
           yTicks={titres}
           yLab={selectedPid ? "Titre" : "GMT"}
-          renderError={selectedPid === null}
         />
         <PointRange
           data={titreChangesPlot}
@@ -437,13 +436,11 @@ function Spaghetti<T extends Object>({
   yTicks,
   keys,
   yLab,
-  renderError,
 }: {
   data: T[]
   yTicks: number[]
   yLab: string
   keys: string[]
-  renderError: boolean
 }) {
   const lineColors = keys.map((k, i) =>
     interpolateSinebow(i / (keys.length - 1) / 1.1)
@@ -470,11 +467,7 @@ function Spaghetti<T extends Object>({
           }}
           isAnimationActive={false}
           connectNulls
-        >
-          {renderError && (
-            <ErrorBar dataKey={(d) => d[k]?.interval} stroke={lineColors[i]} />
-          )}
-        </Line>
+        />
       ))}
       <YAxis
         ticks={yTicks}
