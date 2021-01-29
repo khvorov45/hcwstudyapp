@@ -525,7 +525,7 @@ function PointRange<
       height={400}
       margin={{ top: 20, right: 20, bottom: 125, left: 20 }}
     >
-      <CartesianGrid stroke={theme.palette.background.alt} vertical={false} />
+      <CartesianGrid stroke={theme.palette.background.alt} />
       <Scatter
         data={data}
         fill={
