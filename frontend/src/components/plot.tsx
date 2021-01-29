@@ -9,6 +9,7 @@ import {
   Scatter,
   ErrorBar,
   CartesianGrid,
+  Text,
 } from "recharts"
 import {
   createStyles,
@@ -241,17 +242,20 @@ function SerologyPlots({
       <ScreenHeight heightTaken={50 + 50 + 100}>
         <PointRange
           data={serologyPlot}
-          xKey={"virus"}
+          xKey="day"
+          xKey2="virus"
           yRange={[5, 10240]}
           yTicks={[5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]}
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
+          xAngle={-45}
         />
         <PointRange
           data={titreChangesPlot}
-          xKey={"virus"}
+          xKey="virus"
           yRange={[1, 30]}
           yTicks={[0.5, 1, 2, 5, 10, 20, 30]}
           yLab={selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)"}
+          xAngle={-45}
         />
       </ScreenHeight>
     </div>
@@ -422,20 +426,91 @@ function SiteSelect({
   )
 }
 
+function CustomizedAxisTick({
+  x,
+  y,
+  payload,
+  color,
+  angle,
+}: {
+  x?: number
+  y?: number
+  payload?: any
+  color: string
+  angle: number
+}) {
+  return (
+    <Text
+      x={x}
+      y={y}
+      width={250}
+      textAnchor={angle === 0 ? "middle" : "end"}
+      verticalAnchor="middle"
+      angle={angle}
+      fill={color}
+    >
+      {payload.value}
+    </Text>
+  )
+}
+
+function CustomizedAxisTickGrouped<T extends object>({
+  x,
+  y,
+  payload,
+  data,
+  dataKey,
+  color,
+}: {
+  x?: number
+  y?: number
+  payload?: any
+  data: T[]
+  dataKey: keyof T
+  color: string
+}) {
+  const relevantSubset = data.filter(
+    (row: any) => row[dataKey] === payload.value
+  )
+  const firstIdx = data.findIndex((row: any) => row[dataKey] === payload.value)
+  // Draw once per group
+  if (firstIdx === payload.index) {
+    const xOffset = payload.offset * Math.floor(relevantSubset.length / 2)
+    return (
+      <Text
+        x={x ? x + xOffset : undefined}
+        y={y}
+        width={250}
+        angle={-45}
+        textAnchor="end"
+        verticalAnchor="start"
+        fill={color}
+      >
+        {payload.value}
+      </Text>
+    )
+  }
+  return null
+}
+
 function PointRange<
   T extends { point: number | null; interval: (number | null)[] }
 >({
   data,
   xKey,
+  xKey2,
   yRange,
   yTicks,
   yLab,
+  xAngle,
 }: {
   data: T[]
   xKey: keyof T
+  xKey2?: keyof T
   yRange: [number, number]
   yTicks: number[]
   yLab: string
+  xAngle: number
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
@@ -445,9 +520,10 @@ function PointRange<
   }
   return (
     <ScatterChart
+      data={data}
       width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
       height={400}
-      margin={{ top: 20, right: 20, bottom: 150, left: 20 }}
+      margin={{ top: 20, right: 20, bottom: 125, left: 20 }}
     >
       <CartesianGrid stroke={theme.palette.background.alt} vertical={false} />
       <Scatter
@@ -467,15 +543,35 @@ function PointRange<
           }
         />
       </Scatter>
+
       <XAxis
         dataKey={xKey as string}
-        angle={-45}
-        textAnchor="end"
         interval={0}
-        tick={{
-          fill: theme.palette.text.secondary,
-        }}
+        tick={
+          <CustomizedAxisTick
+            color={theme.palette.text.secondary}
+            angle={xAngle}
+          />
+        }
       />
+
+      {xKey2 && (
+        <XAxis
+          dataKey={xKey2 as string}
+          xAxisId={xKey2 as string}
+          tickLine={false}
+          axisLine={false}
+          interval={0}
+          tick={
+            <CustomizedAxisTickGrouped
+              data={data}
+              dataKey={xKey2}
+              color={theme.palette.text.secondary}
+            />
+          }
+        />
+      )}
+
       <YAxis
         dataKey="point"
         tick={{
