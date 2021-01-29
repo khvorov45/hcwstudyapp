@@ -248,6 +248,7 @@ function SerologyPlots({
           yTicks={[5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]}
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
+          x2LineOffsetCoefficient={3}
         />
         <PointRange
           data={titreChangesPlot}
@@ -461,6 +462,7 @@ function CustomizedAxisTickGrouped<T extends object>({
   data,
   dataKey,
   color,
+  lineOffsetCoefficient,
 }: {
   x?: number
   y?: number
@@ -468,6 +470,7 @@ function CustomizedAxisTickGrouped<T extends object>({
   data: T[]
   dataKey: keyof T
   color: string
+  lineOffsetCoefficient: number
 }) {
   const relevantSubset = data.filter(
     (row: any) => row[dataKey] === payload.value
@@ -476,18 +479,31 @@ function CustomizedAxisTickGrouped<T extends object>({
   // Draw once per group
   if (firstIdx === payload.index) {
     const xOffset = payload.offset * Math.floor(relevantSubset.length / 2)
+    const lineOffset =
+      payload.offset *
+      Math.floor(relevantSubset.length / 2) *
+      lineOffsetCoefficient
     return (
-      <Text
-        x={x ? x + xOffset : undefined}
-        y={y}
-        width={250}
-        angle={-45}
-        textAnchor="end"
-        verticalAnchor="start"
-        fill={color}
-      >
-        {payload.value}
-      </Text>
+      <g>
+        <line
+          x1={x}
+          y1={y ? y - 2 : y}
+          x2={x ? x + lineOffset : x}
+          y2={y ? y - 2 : y}
+          style={{ stroke: color, strokeWidth: 2 }}
+        />
+        <Text
+          x={x ? x + xOffset : undefined}
+          y={y}
+          width={250}
+          angle={-45}
+          textAnchor="end"
+          verticalAnchor="start"
+          fill={color}
+        >
+          {payload.value}
+        </Text>
+      </g>
     )
   }
   return null
@@ -503,6 +519,7 @@ function PointRange<
   yTicks,
   yLab,
   xAngle,
+  x2LineOffsetCoefficient,
 }: {
   data: T[]
   xKey: keyof T
@@ -511,6 +528,7 @@ function PointRange<
   yTicks: number[]
   yLab: string
   xAngle: number
+  x2LineOffsetCoefficient?: number
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
@@ -567,6 +585,7 @@ function PointRange<
               data={data}
               dataKey={xKey2}
               color={theme.palette.text.secondary}
+              lineOffsetCoefficient={x2LineOffsetCoefficient ?? 0}
             />
           }
         />
