@@ -5,9 +5,6 @@ import {
   Tooltip,
   Bar,
   Label,
-  LineChart,
-  Line,
-  Legend,
   ScatterChart,
   Scatter,
   ErrorBar,
@@ -28,7 +25,6 @@ import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
 import Autocomplete from "@material-ui/lab/Autocomplete"
 import { useWindowSize } from "../lib/hooks"
-import { interpolateSinebow } from "d3-scale-chromatic"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -96,12 +92,6 @@ function SerologyPlots({
   const viruses = Array.from(
     new Set(serology.map((s) => s.virus))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
-  const days = Array.from(new Set(serology.map((s) => s.day))).sort(
-    (a, b) => a - b
-  )
-  const titres = Array.from(new Set(serology.map((s) => s.titre))).sort(
-    (a, b) => a - b
-  )
   const sites = Array.from(new Set(serology.map((s) => s.site ?? "(missing)")))
   const prevVacs = Array.from(
     new Set(serology.map((s) => s.prevVac ?? Infinity))
@@ -149,19 +139,12 @@ function SerologyPlots({
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
     pidFiltered,
-    (v) => {
-      const logmean = d3.mean(v.map((d) => Math.log(d.titre))) ?? NaN
-      const se =
+    (v) => ({
+      logmean: d3.mean(v.map((d) => Math.log(d.titre))) ?? NaN,
+      se:
         (d3.deviation(v.map((d) => Math.log(d.titre))) ?? NaN) /
-        Math.sqrt(v.length)
-      const mean = Math.exp(logmean)
-      const low = Math.exp(logmean - 1.96 * se)
-      const high = Math.exp(logmean + 1.96 * se)
-      return {
-        mean: Math.exp(logmean),
-        interval: [mean - low, high - mean],
-      }
-    },
+        Math.sqrt(v.length),
+    }),
     (d) => d.virus,
     (d) => d.day
   )
@@ -179,15 +162,22 @@ function SerologyPlots({
     (d) => d.virus
   )
 
-  const serologyWide = days.map((day) =>
-    viruses.reduce(
-      (acc, v) =>
-        Object.assign(acc, { [v]: virusDaySummarized.get(v)?.get(day) }),
-      {
+  const serologyPlot = Array.from(virusDaySummarized, ([virus, daySummary]) =>
+    Array.from(daySummary, ([day, summary]) => {
+      const mean = Math.exp(summary.logmean)
+      const low = mean - Math.exp(summary.logmean - 1.96 * summary.se)
+      const high = Math.exp(summary.logmean + 1.96 * summary.se) - mean
+      return {
+        virus,
         day,
+        point: isNaN(mean) ? null : mean,
+        interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
       }
-    )
+    })
   )
+    .flat()
+    .sort((a, b) => a.day - b.day)
+    .sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
 
   const titreChangesPlot = Array.from(
     titreChangesSummarized,
@@ -249,11 +239,12 @@ function SerologyPlots({
         />
       </ControlRibbon>
       <ScreenHeight heightTaken={50 + 50 + 100}>
-        <Spaghetti
-          data={serologyWide}
-          keys={viruses}
-          yTicks={titres}
-          yLab={selectedPid ? "Titre" : "GMT"}
+        <PointRange
+          data={serologyPlot}
+          xKey={"virus"}
+          yRange={[5, 10240]}
+          yTicks={[5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]}
+          yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
         />
         <PointRange
           data={titreChangesPlot}
@@ -428,76 +419,6 @@ function SiteSelect({
       value={site}
       onChange={setSite}
     />
-  )
-}
-
-function Spaghetti<T extends Object>({
-  data,
-  yTicks,
-  keys,
-  yLab,
-}: {
-  data: T[]
-  yTicks: number[]
-  yLab: string
-  keys: string[]
-}) {
-  const lineColors = keys.map((k, i) =>
-    interpolateSinebow(i / (keys.length - 1) / 1.1)
-  )
-  const windowSize = useWindowSize()
-  const theme = useTheme()
-  return (
-    <LineChart
-      width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
-      height={400}
-      data={data}
-      margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-    >
-      {keys.map((k, i) => (
-        <Line
-          key={k}
-          name={k}
-          dataKey={(d) => d[k]?.mean}
-          stroke={lineColors[i]}
-          dot={{
-            fill: lineColors[i],
-            stroke: lineColors[i],
-            shape: "square",
-          }}
-          isAnimationActive={false}
-          connectNulls
-        />
-      ))}
-      <YAxis
-        ticks={yTicks}
-        scale="log"
-        domain={["auto", "auto"]}
-        tick={{
-          fill: theme.palette.text.secondary,
-        }}
-      >
-        <Label
-          value={yLab}
-          angle={-90}
-          position="insideLeft"
-          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-        />
-      </YAxis>
-      <XAxis
-        dataKey="day"
-        tick={{
-          fill: theme.palette.text.secondary,
-        }}
-      >
-        <Label
-          value="Day"
-          position="bottom"
-          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-        />
-      </XAxis>
-      <Legend verticalAlign="top" />
-    </LineChart>
   )
 }
 
