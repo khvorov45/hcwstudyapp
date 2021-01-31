@@ -4,8 +4,6 @@ import {
   GenderV,
   Participant,
   Schedule,
-  Serology,
-  Site,
   SiteV,
   Vaccination,
   VaccinationStatusV,
@@ -58,6 +56,7 @@ import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
 import { Autocomplete } from "@material-ui/lab"
+import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -162,14 +161,14 @@ export default function Tables({
   serology,
   titreChange,
 }: {
-  participantsExtra?: (Participant & { age: number; prevVac: number })[]
+  participantsExtra?: ParticipantExtra[]
   vaccination?: Vaccination[]
   schedule?: Schedule[]
   weeklySurvey?: WeeklySurvey[]
   withdrawn?: Withdrawn[]
   virus?: Virus[]
-  serology?: (Serology & { site?: Site; virusClade?: string })[]
-  titreChange?: { pid: string; rise: number; site: Site; virus: string }[]
+  serology?: SerologyExtra[]
+  titreChange?: TitreChange[]
 }) {
   const commonCols = useMemo(
     () => ({
@@ -600,7 +599,7 @@ function SerologyTable({
   serology,
   commonCols,
 }: {
-  serology?: (Serology & { virusClade?: string })[]
+  serology?: SerologyExtra[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
@@ -728,9 +727,9 @@ function Summary({
   serologyFull,
   titreChangeFull,
 }: {
-  participantsExtraFull?: (Participant & { age: number; prevVac: number })[]
-  serologyFull?: (Serology & { site?: Site; prevVac?: number })[]
-  titreChangeFull?: { pid: string; rise: number; virus: string; site: string }[]
+  participantsExtraFull?: ParticipantExtra[]
+  serologyFull?: SerologyExtra[]
+  titreChangeFull?: TitreChange[]
 }) {
   const viruses = Array.from(
     new Set(serologyFull?.map((s) => s.virus))
