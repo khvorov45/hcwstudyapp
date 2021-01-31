@@ -256,6 +256,7 @@ function SerologyPlots({
           yTicks={[5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]}
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
+          xTickDy={10}
           x2LineOffsetCoefficient={3}
           x2RenderPayload={(value, xOffset) => (
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
@@ -463,6 +464,7 @@ function SiteSelect({
 function CustomizedAxisTick({
   x,
   y,
+  dy,
   payload,
   color,
   angle,
@@ -470,6 +472,7 @@ function CustomizedAxisTick({
 }: {
   x?: number
   y?: number
+  dy?: number
   payload?: any
   color: string
   angle: number
@@ -480,6 +483,7 @@ function CustomizedAxisTick({
       <text
         x={0}
         y={0}
+        dy={dy}
         width={250}
         textAnchor={angle === 0 ? "middle" : "end"}
         transform={`rotate(${angle})`}
@@ -536,9 +540,7 @@ function CustomizedAxisTickGrouped<T extends object>({
             y={0}
             dy={16}
             width={250}
-            //angle={-45}
             textAnchor="end"
-            //verticalAnchor="start"
             fill={color}
             transform={`rotate(-45, ${xOffset}, 0)`}
           >
@@ -562,6 +564,7 @@ function PointRange<
   yLab,
   xAngle,
   xRenderPayload,
+  xTickDy,
   x2LineOffsetCoefficient,
   x2RenderPayload,
 }: {
@@ -572,6 +575,7 @@ function PointRange<
   yTicks: number[]
   yLab: string
   xAngle: number
+  xTickDy?: number
   xRenderPayload?: (value: any) => ReactNode
   x2LineOffsetCoefficient?: number
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
@@ -616,6 +620,7 @@ function PointRange<
             color={theme.palette.text.secondary}
             angle={xAngle}
             renderPayload={xRenderPayload ?? ((v) => <tspan>{v}</tspan>)}
+            dy={xTickDy}
           />
         }
       />
