@@ -146,7 +146,7 @@ function SerologyPlots({
         (d3.deviation(v.map((d) => Math.log(d.titre))) ?? NaN) /
         Math.sqrt(v.length),
     }),
-    (d) => d.virus,
+    (d) => d.virusShortName,
     (d) => d.day
   )
 
