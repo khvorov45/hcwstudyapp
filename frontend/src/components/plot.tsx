@@ -18,7 +18,6 @@ import {
   Theme,
   useTheme,
 } from "@material-ui/core"
-import { Participant, Serology, Site } from "../lib/data"
 import * as d3 from "d3-array"
 import React, { ReactNode, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
@@ -27,6 +26,7 @@ import ScreenHeight from "./screen-height"
 import Autocomplete from "@material-ui/lab/Autocomplete"
 import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
+import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -53,9 +53,9 @@ export default function Plots({
   serology,
   titreChange,
 }: {
-  participantsExtra: (Participant & { age: number; prevVac: number })[]
-  serology: (Serology & { site?: Site })[]
-  titreChange: { pid: string; site: Site; virus: string; rise: number }[]
+  participantsExtra: ParticipantExtra[]
+  serology: SerologyExtra[]
+  titreChange: TitreChange[]
 }) {
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage
@@ -87,8 +87,8 @@ function SerologyPlots({
   serology,
   titreChange,
 }: {
-  serology: (Serology & { site?: Site; prevVac?: number })[]
-  titreChange: { pid: string; rise: number; virus: string }[]
+  serology: SerologyExtra[]
+  titreChange: TitreChange[]
 }) {
   const viruses = Array.from(
     new Set(serology.map((s) => s.virus))
@@ -266,7 +266,7 @@ function SerologyPlots({
 function BaselinePlots({
   participantsExtra,
 }: {
-  participantsExtra: (Participant & { age: number; prevVac: number })[]
+  participantsExtra: ParticipantExtra[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<string[]>([])
@@ -286,7 +286,7 @@ function BaselinePlots({
 function PlotColumn({
   participantsExtra,
 }: {
-  participantsExtra: (Participant & { age: number; prevVac: number })[]
+  participantsExtra: ParticipantExtra[]
 }) {
   const genderCounts = d3.rollup(
     participantsExtra,
