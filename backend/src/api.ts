@@ -114,7 +114,7 @@ export function getRoutes(
   routes.put("/users", async (req: Request, res: Response) => {
     await transaction(db, async (tsk) => {
       await validateAdmin(req, tsk)
-      await updateUser(tsk, decode(UserV, req.body))
+      await updateUser(tsk, decode(UserToInsertV, req.body))
     })
 
     res.status(StatusCodes.NO_CONTENT).end()
