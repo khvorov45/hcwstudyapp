@@ -160,7 +160,7 @@ function SerologyPlots({
         se: (d3.deviation(logRises) ?? NaN) / Math.sqrt(logRises.length),
       }
     },
-    (d) => d.virus
+    (d) => d.virusShortName
   )
 
   const serologyPlot = Array.from(virusDaySummarized, ([virus, daySummary]) =>

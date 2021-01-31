@@ -114,6 +114,8 @@ function genSerologyExtra(
 
 export const TitreChangeV = t.type({
   virus: t.string,
+  virusShortName: t.string,
+  virusClade: t.string,
   pid: t.string,
   site: SiteV,
   day1: t.number,
@@ -124,31 +126,39 @@ export type TitreChange = t.TypeOf<typeof TitreChangeV>
 
 function genTitreChange(
   participantsExtra: ParticipantExtra[],
-  serologyExtra: SerologyExtra[]
+  serologyExtra: SerologyExtra[],
+  virusTable: Virus[]
 ): TitreChange[] {
-  const viruses = Array.from(new Set(serologyExtra.map((s) => s.virus)))
-  const titreChanges = viruses.flatMap((virus) =>
-    participantsExtra.map((participant) => ({
-      virus,
-      pid: participant.pid,
-      site: participant.site,
-      day1: 0,
-      day2: 14,
-      rise: Math.exp(
-        Math.log(
-          serologyExtra.find(
-            (s) =>
-              s.pid === participant.pid && s.virus === virus && s.day === 14
-          )?.titre ?? NaN
-        ) -
+  const titreChanges = virusTable.flatMap((virus) =>
+    participantsExtra
+      .map((participant) => ({
+        virus: virus.name,
+        virusShortName: virus.shortName,
+        virusClade: virus.clade,
+        pid: participant.pid,
+        site: participant.site,
+        day1: 0,
+        day2: 14,
+        rise: Math.exp(
           Math.log(
             serologyExtra.find(
               (s) =>
-                s.pid === participant.pid && s.virus === virus && s.day === 0
+                s.pid === participant.pid &&
+                s.virus === virus.name &&
+                s.day === 14
             )?.titre ?? NaN
-          )
-      ),
-    }))
+          ) -
+            Math.log(
+              serologyExtra.find(
+                (s) =>
+                  s.pid === participant.pid &&
+                  s.virus === virus.name &&
+                  s.day === 0
+              )?.titre ?? NaN
+            )
+        ),
+      }))
+      .filter((p) => !isNaN(p.rise))
   )
   return decode(t.array(TitreChangeV), titreChanges)
 }
@@ -193,7 +203,7 @@ export async function loadAllTableData(
   const vaccinationCounts = genVaccinationCounts(vaccination)
   const participantsExtra = genParticipantExtra(participants, vaccinationCounts)
   const serologyExtra = genSerologyExtra(serology, virus, participantsExtra)
-  const titreChanges = genTitreChange(participantsExtra, serologyExtra)
+  const titreChanges = genTitreChange(participantsExtra, serologyExtra, virus)
 
   return {
     participantsExtra,
