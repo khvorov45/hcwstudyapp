@@ -289,7 +289,7 @@ function VirusTick({
   return (
     <>
       <tspan x={xOffset}>{name}</tspan>
-      <tspan x={xOffset} dy={20}>
+      <tspan x={xOffset} dy={14}>
         {viruses.find((v) => v.shortName === name)?.clade}
       </tspan>
     </>
