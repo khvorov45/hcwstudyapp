@@ -249,6 +249,19 @@ function SerologyPlots({
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
           x2LineOffsetCoefficient={3}
+          x2RenderPayload={(value, xOffset) => {
+            return (
+              <>
+                <tspan x={xOffset}>{value}</tspan>
+                <tspan x={xOffset} dy={20}>
+                  {
+                    pidFiltered.find((p) => p.virusShortName === value)
+                      ?.virusClade
+                  }
+                </tspan>
+              </>
+            )
+          }}
         />
         <PointRange
           data={titreChangesPlot}
@@ -463,6 +476,7 @@ function CustomizedAxisTickGrouped<T extends object>({
   dataKey,
   color,
   lineOffsetCoefficient,
+  renderPayload,
 }: {
   x?: number
   y?: number
@@ -471,6 +485,7 @@ function CustomizedAxisTickGrouped<T extends object>({
   dataKey: keyof T
   color: string
   lineOffsetCoefficient: number
+  renderPayload: (v: any, offset: number) => ReactNode
 }) {
   const relevantSubset = data.filter(
     (row: any) => row[dataKey] === payload.value
@@ -492,17 +507,21 @@ function CustomizedAxisTickGrouped<T extends object>({
           y2={y ? y - 2 : y}
           style={{ stroke: color, strokeWidth: 2 }}
         />
-        <Text
-          x={x ? x + xOffset : undefined}
-          y={y}
-          width={250}
-          angle={-45}
-          textAnchor="end"
-          verticalAnchor="start"
-          fill={color}
-        >
-          {payload.value}
-        </Text>
+        <g transform={`translate(${x},${y})`}>
+          <text
+            x={xOffset}
+            y={0}
+            dy={16}
+            width={250}
+            //angle={-45}
+            textAnchor="end"
+            //verticalAnchor="start"
+            fill={color}
+            transform={`rotate(-45, ${xOffset}, 0)`}
+          >
+            {renderPayload(payload.value, xOffset)}
+          </text>
+        </g>
       </g>
     )
   }
@@ -520,6 +539,7 @@ function PointRange<
   yLab,
   xAngle,
   x2LineOffsetCoefficient,
+  x2RenderPayload,
 }: {
   data: T[]
   xKey: keyof T
@@ -529,6 +549,7 @@ function PointRange<
   yLab: string
   xAngle: number
   x2LineOffsetCoefficient?: number
+  x2RenderPayload?: (value: any, xOffset: number) => ReactNode
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
@@ -586,6 +607,7 @@ function PointRange<
               dataKey={xKey2}
               color={theme.palette.text.secondary}
               lineOffsetCoefficient={x2LineOffsetCoefficient ?? 0}
+              renderPayload={x2RenderPayload ?? ((v, o) => <></>)}
             />
           }
         />
