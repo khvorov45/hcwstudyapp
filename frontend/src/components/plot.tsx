@@ -9,7 +9,6 @@ import {
   Scatter,
   ErrorBar,
   CartesianGrid,
-  Text,
 } from "recharts"
 import {
   createStyles,
@@ -27,6 +26,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete"
 import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
+import { Virus } from "../lib/data"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -52,10 +52,12 @@ export default function Plots({
   participantsExtra,
   serology,
   titreChange,
+  virusTable,
 }: {
   participantsExtra: ParticipantExtra[]
   serology: SerologyExtra[]
   titreChange: TitreChange[]
+  virusTable: Virus[]
 }) {
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage
@@ -76,7 +78,11 @@ export default function Plots({
           <BaselinePlots participantsExtra={participantsExtra} />
         </Route>
         <Route exact path="/plots/serology">
-          <SerologyPlots serology={serology} titreChange={titreChange} />
+          <SerologyPlots
+            serology={serology}
+            titreChange={titreChange}
+            virusTable={virusTable}
+          />
         </Route>
       </Switch>
     </div>
@@ -86,9 +92,11 @@ export default function Plots({
 function SerologyPlots({
   serology,
   titreChange,
+  virusTable,
 }: {
   serology: SerologyExtra[]
   titreChange: TitreChange[]
+  virusTable: Virus[]
 }) {
   const viruses = Array.from(
     new Set(serology.map((s) => s.virus))
@@ -249,19 +257,9 @@ function SerologyPlots({
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
           x2LineOffsetCoefficient={3}
-          x2RenderPayload={(value, xOffset) => {
-            return (
-              <>
-                <tspan x={xOffset}>{value}</tspan>
-                <tspan x={xOffset} dy={20}>
-                  {
-                    pidFiltered.find((p) => p.virusShortName === value)
-                      ?.virusClade
-                  }
-                </tspan>
-              </>
-            )
-          }}
+          x2RenderPayload={(value, xOffset) => (
+            <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
+          )}
         />
         <PointRange
           data={titreChangesPlot}
@@ -270,9 +268,31 @@ function SerologyPlots({
           yTicks={[0.5, 1, 2, 5, 10, 20, 30]}
           yLab={selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)"}
           xAngle={-45}
+          xRenderPayload={(value) => (
+            <VirusTick name={value} xOffset={0} viruses={virusTable} />
+          )}
         />
       </ScreenHeight>
     </div>
+  )
+}
+
+function VirusTick({
+  name,
+  xOffset,
+  viruses,
+}: {
+  name: string
+  xOffset: number
+  viruses: Virus[]
+}) {
+  return (
+    <>
+      <tspan x={xOffset}>{name}</tspan>
+      <tspan x={xOffset} dy={20}>
+        {viruses.find((v) => v.shortName === name)?.clade}
+      </tspan>
+    </>
   )
 }
 
@@ -446,25 +466,28 @@ function CustomizedAxisTick({
   payload,
   color,
   angle,
+  renderPayload,
 }: {
   x?: number
   y?: number
   payload?: any
   color: string
   angle: number
+  renderPayload: (v: any) => ReactNode
 }) {
   return (
-    <Text
-      x={x}
-      y={y}
-      width={250}
-      textAnchor={angle === 0 ? "middle" : "end"}
-      verticalAnchor="middle"
-      angle={angle}
-      fill={color}
-    >
-      {payload.value}
-    </Text>
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        width={250}
+        textAnchor={angle === 0 ? "middle" : "end"}
+        transform={`rotate(${angle})`}
+        fill={color}
+      >
+        {renderPayload(payload.value)}
+      </text>
+    </g>
   )
 }
 
@@ -538,6 +561,7 @@ function PointRange<
   yTicks,
   yLab,
   xAngle,
+  xRenderPayload,
   x2LineOffsetCoefficient,
   x2RenderPayload,
 }: {
@@ -548,6 +572,7 @@ function PointRange<
   yTicks: number[]
   yLab: string
   xAngle: number
+  xRenderPayload?: (value: any) => ReactNode
   x2LineOffsetCoefficient?: number
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
 }) {
@@ -590,6 +615,7 @@ function PointRange<
           <CustomizedAxisTick
             color={theme.palette.text.secondary}
             angle={xAngle}
+            renderPayload={xRenderPayload ?? ((v) => <tspan>{v}</tspan>)}
           />
         }
       />

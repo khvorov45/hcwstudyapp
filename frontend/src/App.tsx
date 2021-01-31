@@ -357,6 +357,7 @@ export default function App() {
                   participantsExtra={allTableData?.participantsExtra ?? []}
                   serology={allTableData?.serologyExtra ?? []}
                   titreChange={allTableData?.titreChanges ?? []}
+                  virusTable={allTableData?.virus ?? []}
                 />
               </AuthRoute>
             </Switch>
