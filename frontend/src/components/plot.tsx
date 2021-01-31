@@ -587,7 +587,7 @@ function PointRange<
       data={data}
       width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
       height={400}
-      margin={{ top: 20, right: 20, bottom: 125, left: 20 }}
+      margin={{ top: 20, right: 0, bottom: 125, left: 5 }}
     >
       <CartesianGrid stroke={theme.palette.background.alt} />
       <Scatter
