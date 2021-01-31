@@ -328,7 +328,7 @@ export default function App() {
               >
                 <Users
                   users={usersFetch.result ?? []}
-                  onEdit={usersFetch.execute}
+                  onEdit={() => token && usersFetch.execute(token.token)}
                   token={token?.token}
                 />
               </AuthRoute>

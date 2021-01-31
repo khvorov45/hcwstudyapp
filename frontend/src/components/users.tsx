@@ -164,7 +164,7 @@ export default function Users({
                               setEditedIndex(null)
                               onEdit()
                             })
-                            .catch((e) => {})
+                            .catch((e) => console.error(e))
                         }
                         disabled={i !== editedIndex || updateUser.loading}
                       >
