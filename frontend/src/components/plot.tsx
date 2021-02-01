@@ -304,7 +304,7 @@ function SerologyPlots({
           maxWidth={
             (virus.length === 0 ? viruses.length : virus.length) *
             widthPerVirus *
-            2
+            3
           }
           height={500}
         />
@@ -664,7 +664,10 @@ function PointRange<
       <ScatterChart
         data={data}
         margin={{ top: 20, right: 0, bottom: 90, left: 10 }}
-        width={minmax(windowSize.width - scrollBarWidth, minWidth, maxWidth)}
+        // 80px is approximately how big the vertical axis is
+        width={
+          minmax(windowSize.width - scrollBarWidth, minWidth, maxWidth) + 80
+        }
         height={height}
       >
         <CartesianGrid stroke={theme.palette.background.alt} />
