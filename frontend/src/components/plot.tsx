@@ -9,6 +9,7 @@ import {
   Scatter,
   ErrorBar,
   CartesianGrid,
+  Cell,
 } from "recharts"
 import {
   createStyles,
@@ -27,6 +28,7 @@ import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 import { Virus } from "../lib/data"
+import { interpolateSinebow } from "d3"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -107,6 +109,9 @@ function SerologyPlots({
   )
     .sort((a, b) => a - b)
     .map((x) => (x === Infinity ? "(missing)" : x))
+  const days = Array.from(new Set(serology.map((s) => s.day))).sort(
+    (a, b) => a - b
+  )
 
   // Filters applied in the order presented
   const [vaccinations, setVaccinations] = useState<
@@ -202,6 +207,8 @@ function SerologyPlots({
     }
   ).sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
 
+  const dayColors = createDescreteMapping(days)
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <ControlRibbon>
@@ -261,6 +268,7 @@ function SerologyPlots({
           x2RenderPayload={(value, xOffset) => (
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
           )}
+          getPointColor={(v) => dayColors[v.day]}
         />
         <PointRange
           data={titreChangesPlot}
@@ -275,6 +283,15 @@ function SerologyPlots({
         />
       </ScreenHeight>
     </div>
+  )
+}
+
+function createDescreteMapping<T extends string | number>(
+  x: T[]
+): Record<T, string> {
+  return x.reduce(
+    (acc, v, i) => ({ ...acc, [v]: interpolateSinebow(i / x.length) }),
+    {} as Record<T, string>
   )
 }
 
@@ -567,6 +584,7 @@ function PointRange<
   xTickDy,
   x2LineOffsetCoefficient,
   x2RenderPayload,
+  getPointColor,
 }: {
   data: T[]
   xKey: keyof T
@@ -579,6 +597,7 @@ function PointRange<
   xRenderPayload?: (value: any) => ReactNode
   x2LineOffsetCoefficient?: number
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
+  getPointColor?: (x: T) => string
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
@@ -594,14 +613,18 @@ function PointRange<
       margin={{ top: 20, right: 0, bottom: 125, left: 5 }}
     >
       <CartesianGrid stroke={theme.palette.background.alt} />
-      <Scatter
-        data={data}
-        fill={
-          theme.palette.primary[
-            theme.palette.type === "dark" ? "light" : "dark"
-          ]
-        }
-      >
+      <Scatter data={data}>
+        {data.map((entry, index) => (
+          <Cell
+            key={`cell-${index}`}
+            fill={
+              getPointColor?.(entry) ??
+              theme.palette.primary[
+                theme.palette.type === "dark" ? "light" : "dark"
+              ]
+            }
+          />
+        ))}
         <ErrorBar
           dataKey={"interval"}
           stroke={
