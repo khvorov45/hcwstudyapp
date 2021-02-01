@@ -269,7 +269,6 @@ function SerologyPlots({
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
           xTickDy={10}
-          x3LineOffsetCoefficient={3}
           x3RenderPayload={(value, xOffset) => (
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
           )}
@@ -524,7 +523,6 @@ function CustomizedAxisTickGrouped<T extends object>({
   data,
   dataKey,
   color,
-  lineOffsetCoefficient,
   renderPayload,
 }: {
   x?: number
@@ -533,26 +531,18 @@ function CustomizedAxisTickGrouped<T extends object>({
   data: T[]
   dataKey: keyof T
   color: string
-  lineOffsetCoefficient: number
   renderPayload: (v: any, offset: number) => ReactNode
 }) {
-  const relevantSubset = data.filter(
-    (row: any) => row[dataKey] === payload.value
-  )
   // Assume sorted
   if (data[payload.index - 1]?.[dataKey] !== payload.value) {
     const xOffset = 0 //payload.offset * Math.floor(relevantSubset.length / 2)
-    const lineOffset =
-      payload.offset *
-      Math.floor(relevantSubset.length / 2) *
-      lineOffsetCoefficient
     return (
       <g>
         <line
-          x1={x}
+          x1={x ? x - 7 : x}
           y1={y ? y - 2 : y}
-          x2={x ? x + lineOffset : x}
-          y2={y ? y - 2 : y}
+          x2={x ? x - 7 : x}
+          y2={y ? y - 32 : y}
           style={{ stroke: color, strokeWidth: 2 }}
         />
         <g transform={`translate(${x},${y})`}>
@@ -587,8 +577,6 @@ function PointRange<
   xAngle,
   xRenderPayload,
   xTickDy,
-  x2LineOffsetCoefficient,
-  x3LineOffsetCoefficient,
   x2RenderPayload,
   x3RenderPayload,
   getPointColor,
@@ -603,8 +591,6 @@ function PointRange<
   xAngle: number
   xTickDy?: number
   xRenderPayload?: (value: any) => ReactNode
-  x2LineOffsetCoefficient?: number
-  x3LineOffsetCoefficient?: number
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
   x3RenderPayload?: (value: any, xOffset: number) => ReactNode
   getPointColor?: (x: T) => string
@@ -670,7 +656,6 @@ function PointRange<
               data={data}
               dataKey={xKey2}
               color={theme.palette.text.secondary}
-              lineOffsetCoefficient={x2LineOffsetCoefficient ?? 0}
               renderPayload={(v, o) => <tspan>{v}</tspan>}
             />
           }
@@ -689,7 +674,6 @@ function PointRange<
               data={data}
               dataKey={xKey3}
               color={theme.palette.text.secondary}
-              lineOffsetCoefficient={x3LineOffsetCoefficient ?? 0}
               renderPayload={x3RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)}
             />
           }
