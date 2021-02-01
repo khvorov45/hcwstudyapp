@@ -648,6 +648,7 @@ function PointRange<
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
+  const scrollBarWidth = detectScrollbarWidth()
   // If nothing to display
   if (data.filter((d) => d.point).length === 0) {
     return <></>
@@ -655,17 +656,15 @@ function PointRange<
   return (
     <div
       style={{
-        overflow: "scroll",
-        height: height + detectScrollbarWidth() * 2 + 10,
+        overflowX: "scroll",
+        overflowY: "hidden",
+        height: height + scrollBarWidth,
       }}
     >
       <ScatterChart
         data={data}
         margin={{ top: 20, right: 0, bottom: 90, left: 10 }}
-        width={
-          minmax(windowSize.width, minWidth, maxWidth) -
-          detectScrollbarWidth() * 2
-        }
+        width={minmax(windowSize.width - scrollBarWidth, minWidth, maxWidth)}
         height={height}
       >
         <CartesianGrid stroke={theme.palette.background.alt} />
