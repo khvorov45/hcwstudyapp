@@ -220,6 +220,15 @@ function SerologyPlots({
 
   const dayColors = createDescreteMapping(days)
 
+  // Plot width
+  const widthPerVac = 20
+  const widthPerDay =
+    (vaccinations.length === 0 ? prevVacs.length : vaccinations.length) *
+    widthPerVac
+  const widthPerVirus =
+    (selectedDays.length === 0 ? availableDays.length : selectedDays.length) *
+    widthPerDay
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <ControlRibbon>
@@ -289,8 +298,14 @@ function SerologyPlots({
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
           )}
           getPointColor={(v) => dayColors[v.day]}
-          minWidth={(virus.length === 0 ? viruses.length : virus.length) * 250}
-          maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 500}
+          minWidth={
+            (virus.length === 0 ? viruses.length : virus.length) * widthPerVirus
+          }
+          maxWidth={
+            (virus.length === 0 ? viruses.length : virus.length) *
+            widthPerVirus *
+            2
+          }
           height={500}
         />
         <PointRange
