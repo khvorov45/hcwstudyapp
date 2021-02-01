@@ -150,15 +150,19 @@ function SerologyPlots({
       (virus.length === 0 || (t.virus !== undefined && virus.includes(t.virus)))
   )
 
+  // Summarise the above for plots
+  function summariseLogmean(v: number[]) {
+    const logs = v.map(Math.log)
+    return {
+      logmean: d3.mean(logs) ?? NaN,
+      se: (d3.deviation(logs) ?? NaN) / Math.sqrt(v.length),
+    }
+  }
+
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
     pidFiltered,
-    (v) => ({
-      logmean: d3.mean(v.map((d) => Math.log(d.titre))) ?? NaN,
-      se:
-        (d3.deviation(v.map((d) => Math.log(d.titre))) ?? NaN) /
-        Math.sqrt(v.length),
-    }),
+    (v) => summariseLogmean(v.map((v) => v.titre)),
     (d) => d.virusShortName,
     (d) => d.day
   )
@@ -166,13 +170,7 @@ function SerologyPlots({
   // Summarise titre rises
   const titreChangesSummarized = d3.rollup(
     titreChangeFiltered,
-    (v) => {
-      const logRises = v.map((d) => Math.log(d.rise))
-      return {
-        logmean: d3.mean(logRises) ?? NaN,
-        se: (d3.deviation(logRises) ?? NaN) / Math.sqrt(logRises.length),
-      }
-    },
+    (v) => summariseLogmean(v.map((v) => v.rise)),
     (d) => d.virusShortName
   )
 
