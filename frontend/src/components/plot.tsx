@@ -174,7 +174,8 @@ function SerologyPlots({
     pidFiltered,
     (v) => summariseLogmean(v.map((v) => v.titre)),
     (d) => d.virusShortName,
-    (d) => d.day
+    (d) => d.day,
+    (d) => d.prevVac
   )
 
   // Summarise titre rises
@@ -185,15 +186,18 @@ function SerologyPlots({
   )
 
   const serologyPlot = Array.from(virusDaySummarized, ([virus, daySummary]) =>
-    Array.from(daySummary, ([day, summary]) => {
-      return {
+    Array.from(daySummary, ([day, vacSummary]) =>
+      Array.from(vacSummary, ([prevVac, summary]) => ({
         ...summary,
         virus,
         day,
-      }
-    })
+        prevVac,
+      }))
+    )
   )
     .flat()
+    .flat()
+    .sort((a, b) => a.prevVac - b.prevVac)
     .sort((a, b) => a.day - b.day)
     .sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
 
@@ -257,15 +261,16 @@ function SerologyPlots({
       <ScreenHeight heightTaken={50 + 50 + 100}>
         <PointRange
           data={serologyPlot}
-          xKey="day"
-          xKey2="virus"
+          xKey="prevVac"
+          xKey2="day"
+          xKey3="virus"
           yRange={[5, 10240]}
           yTicks={[5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]}
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
           xTickDy={10}
-          x2LineOffsetCoefficient={3}
-          x2RenderPayload={(value, xOffset) => (
+          x3LineOffsetCoefficient={3}
+          x3RenderPayload={(value, xOffset) => (
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
           )}
           getPointColor={(v) => dayColors[v.day]}
@@ -534,10 +539,9 @@ function CustomizedAxisTickGrouped<T extends object>({
   const relevantSubset = data.filter(
     (row: any) => row[dataKey] === payload.value
   )
-  const firstIdx = data.findIndex((row: any) => row[dataKey] === payload.value)
-  // Draw once per group
-  if (firstIdx === payload.index) {
-    const xOffset = payload.offset * Math.floor(relevantSubset.length / 2)
+  // Assume sorted
+  if (data[payload.index - 1]?.[dataKey] !== payload.value) {
+    const xOffset = 0 //payload.offset * Math.floor(relevantSubset.length / 2)
     const lineOffset =
       payload.offset *
       Math.floor(relevantSubset.length / 2) *
@@ -576,6 +580,7 @@ function PointRange<
   data,
   xKey,
   xKey2,
+  xKey3,
   yRange,
   yTicks,
   yLab,
@@ -583,12 +588,15 @@ function PointRange<
   xRenderPayload,
   xTickDy,
   x2LineOffsetCoefficient,
+  x3LineOffsetCoefficient,
   x2RenderPayload,
+  x3RenderPayload,
   getPointColor,
 }: {
   data: T[]
   xKey: keyof T
   xKey2?: keyof T
+  xKey3?: keyof T
   yRange: [number, number]
   yTicks: number[]
   yLab: string
@@ -596,7 +604,9 @@ function PointRange<
   xTickDy?: number
   xRenderPayload?: (value: any) => ReactNode
   x2LineOffsetCoefficient?: number
+  x3LineOffsetCoefficient?: number
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
+  x3RenderPayload?: (value: any, xOffset: number) => ReactNode
   getPointColor?: (x: T) => string
 }) {
   const windowSize = useWindowSize()
@@ -661,7 +671,26 @@ function PointRange<
               dataKey={xKey2}
               color={theme.palette.text.secondary}
               lineOffsetCoefficient={x2LineOffsetCoefficient ?? 0}
-              renderPayload={x2RenderPayload ?? ((v, o) => <></>)}
+              renderPayload={(v, o) => <tspan>{v}</tspan>}
+            />
+          }
+        />
+      )}
+
+      {xKey3 && (
+        <XAxis
+          dataKey={xKey3 as string}
+          xAxisId={xKey3 as string}
+          tickLine={false}
+          axisLine={false}
+          interval={0}
+          tick={
+            <CustomizedAxisTickGrouped
+              data={data}
+              dataKey={xKey3}
+              color={theme.palette.text.secondary}
+              lineOffsetCoefficient={x3LineOffsetCoefficient ?? 0}
+              renderPayload={x3RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)}
             />
           }
         />
