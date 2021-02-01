@@ -318,8 +318,8 @@ function SerologyPlots({
           xRenderPayload={(value) => (
             <VirusTick name={value} xOffset={0} viruses={virusTable} />
           )}
-          minWidth={(virus.length === 0 ? viruses.length : virus.length) * 100}
-          maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 150}
+          minWidth={(virus.length === 0 ? viruses.length : virus.length) * 50}
+          maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 100}
           height={400}
         />
       </ScreenHeight>
@@ -666,7 +666,8 @@ function PointRange<
         margin={{ top: 20, right: 0, bottom: 90, left: 10 }}
         // 80px is approximately how big the vertical axis is
         width={
-          minmax(windowSize.width - scrollBarWidth, minWidth, maxWidth) + 80
+          minmax(windowSize.width - scrollBarWidth - 80, minWidth, maxWidth) +
+          80
         }
         height={height}
       >
