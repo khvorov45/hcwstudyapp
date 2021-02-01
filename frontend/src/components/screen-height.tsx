@@ -13,7 +13,9 @@ export default function ScreenHeight({
     <div
       style={{
         height: windowSize.height - heightTaken,
-        overflow: "scroll",
+        overflowY: "scroll",
+        // Expect children to handle their own horizontal scrolling
+        overflowX: "hidden",
       }}
     >
       {children}
