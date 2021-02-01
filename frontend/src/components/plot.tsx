@@ -656,7 +656,7 @@ function PointRange<
               data={data}
               dataKey={xKey2}
               color={theme.palette.text.secondary}
-              renderPayload={(v, o) => <tspan>{v}</tspan>}
+              renderPayload={x2RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)}
             />
           }
         />
