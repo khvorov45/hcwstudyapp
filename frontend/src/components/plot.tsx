@@ -268,7 +268,9 @@ function SerologyPlots({
           yTicks={[5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]}
           yLab={selectedPid ? "Titre" : "GMT (95% CI)"}
           xAngle={-45}
+          xLab="Vax"
           xTickDy={10}
+          x2Lab="Day"
           x3RenderPayload={(value, xOffset) => (
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
           )}
@@ -587,7 +589,9 @@ function PointRange<
   xAngle,
   xRenderPayload,
   xTickDy,
+  xLab,
   x2RenderPayload,
+  x2Lab,
   x3RenderPayload,
   getPointColor,
   height,
@@ -603,8 +607,10 @@ function PointRange<
   yLab: string
   xAngle: number
   xTickDy?: number
+  xLab?: string
   xRenderPayload?: (value: any) => ReactNode
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
+  x2Lab?: string
   x3RenderPayload?: (value: any, xOffset: number) => ReactNode
   getPointColor?: (x: T) => string
   height: number
@@ -667,7 +673,15 @@ function PointRange<
               dy={xTickDy}
             />
           }
-        />
+        >
+          <Label
+            fill={theme.palette.text.primary}
+            position="insideLeft"
+            offset={-30}
+          >
+            {xLab}
+          </Label>
+        </XAxis>
 
         {xKey2 && (
           <XAxis
@@ -686,7 +700,15 @@ function PointRange<
                 }
               />
             }
-          />
+          >
+            <Label
+              fill={theme.palette.text.primary}
+              position="insideLeft"
+              offset={-30}
+            >
+              {x2Lab}
+            </Label>
+          </XAxis>
         )}
 
         {xKey3 && (
