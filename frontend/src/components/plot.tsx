@@ -656,15 +656,16 @@ function PointRange<
     <div
       style={{
         overflow: "scroll",
-        height: height + detectScrollbarWidth() * 2,
+        height: height + detectScrollbarWidth() * 2 - 5,
       }}
     >
       <ScatterChart
         data={data}
-        margin={{ top: 20, right: 0, bottom: 125, left: 5 }}
+        margin={{ top: 20, right: 0, bottom: 125, left: 10 }}
         width={
           minmax(windowSize.width, minWidth, maxWidth) -
-          detectScrollbarWidth() * 2
+          detectScrollbarWidth() * 2 -
+          5
         }
         height={height}
       >
