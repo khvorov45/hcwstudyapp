@@ -241,6 +241,7 @@ function SerologyPlots({
             setSelectedPid(null)
           }}
           width={150}
+          inputMode="none"
         />
         <SiteSelect
           sites={sites}
@@ -256,6 +257,7 @@ function SerologyPlots({
           width={225}
           value={virus}
           onChange={setVirus}
+          inputMode="none"
         />
         <Selector
           options={availablePids}
@@ -279,6 +281,7 @@ function SerologyPlots({
           width={150}
           value={selectedDays}
           onChange={setSelectedDays}
+          inputMode="none"
         />
       </ControlRibbon>
       <ScreenHeight heightTaken={50 + 50 + 100}>
@@ -515,6 +518,7 @@ function SiteSelect({
       width={200}
       value={site}
       onChange={setSite}
+      inputMode="none"
     />
   )
 }
@@ -818,19 +822,26 @@ function SelectorMultiple<T>({
   value,
   onChange,
   width,
+  inputMode,
 }: {
   options: T[]
   label: string
   value: T[]
   onChange: (s: T[]) => void
   width: number
+  inputMode?: "text" | "numeric" | "none"
 }) {
   return (
     <Autocomplete
       options={options}
       getOptionLabel={(o) => `${o}`}
       renderInput={(params) => (
-        <TextField {...params} label={label} variant="outlined" />
+        <TextField
+          {...params}
+          label={label}
+          variant="outlined"
+          inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
+        />
       )}
       value={value}
       onChange={(e, n) => onChange(n)}
