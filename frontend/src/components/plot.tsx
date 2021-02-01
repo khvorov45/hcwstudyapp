@@ -273,6 +273,9 @@ function SerologyPlots({
             <VirusTick name={value} xOffset={xOffset} viruses={virusTable} />
           )}
           getPointColor={(v) => dayColors[v.day]}
+          minWidth={(virus.length === 0 ? viruses.length : virus.length) * 250}
+          maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 500}
+          height={500}
         />
         <PointRange
           data={titreChangesPlot}
@@ -284,6 +287,9 @@ function SerologyPlots({
           xRenderPayload={(value) => (
             <VirusTick name={value} xOffset={0} viruses={virusTable} />
           )}
+          minWidth={(virus.length === 0 ? viruses.length : virus.length) * 100}
+          maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 150}
+          height={400}
         />
       </ScreenHeight>
     </div>
@@ -564,6 +570,10 @@ function CustomizedAxisTickGrouped<T extends object>({
   return null
 }
 
+function minmax(x: number, min: number, max: number) {
+  return x < min ? min : x > max ? max : x
+}
+
 function PointRange<
   T extends { point: number | null; interval: (number | null)[] }
 >({
@@ -580,6 +590,9 @@ function PointRange<
   x2RenderPayload,
   x3RenderPayload,
   getPointColor,
+  height,
+  minWidth,
+  maxWidth,
 }: {
   data: T[]
   xKey: keyof T
@@ -594,6 +607,9 @@ function PointRange<
   x2RenderPayload?: (value: any, xOffset: number) => ReactNode
   x3RenderPayload?: (value: any, xOffset: number) => ReactNode
   getPointColor?: (x: T) => string
+  height: number
+  minWidth: number
+  maxWidth: number
 }) {
   const windowSize = useWindowSize()
   const theme = useTheme()
@@ -602,102 +618,116 @@ function PointRange<
     return <></>
   }
   return (
-    <ScatterChart
-      data={data}
-      width={windowSize.width - 20 > 800 ? 800 : windowSize.width - 20}
-      height={400}
-      margin={{ top: 20, right: 0, bottom: 125, left: 5 }}
+    <div
+      style={{
+        overflow: "scroll",
+        height: height + detectScrollbarWidth() * 2,
+      }}
     >
-      <CartesianGrid stroke={theme.palette.background.alt} />
-      <Scatter data={data}>
-        {data.map((entry, index) => (
-          <Cell
-            key={`cell-${index}`}
-            fill={
-              getPointColor?.(entry) ??
+      <ScatterChart
+        data={data}
+        margin={{ top: 20, right: 0, bottom: 125, left: 5 }}
+        width={
+          minmax(windowSize.width, minWidth, maxWidth) -
+          detectScrollbarWidth() * 2
+        }
+        height={height}
+      >
+        <CartesianGrid stroke={theme.palette.background.alt} />
+        <Scatter data={data}>
+          {data.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={
+                getPointColor?.(entry) ??
+                theme.palette.primary[
+                  theme.palette.type === "dark" ? "light" : "dark"
+                ]
+              }
+            />
+          ))}
+          <ErrorBar
+            dataKey={"interval"}
+            stroke={
               theme.palette.primary[
                 theme.palette.type === "dark" ? "light" : "dark"
               ]
             }
           />
-        ))}
-        <ErrorBar
-          dataKey={"interval"}
-          stroke={
-            theme.palette.primary[
-              theme.palette.type === "dark" ? "light" : "dark"
-            ]
+        </Scatter>
+
+        <XAxis
+          dataKey={xKey as string}
+          interval={0}
+          tick={
+            <CustomizedAxisTick
+              color={theme.palette.text.secondary}
+              angle={xAngle}
+              renderPayload={xRenderPayload ?? ((v) => <tspan>{v}</tspan>)}
+              dy={xTickDy}
+            />
           }
         />
-      </Scatter>
 
-      <XAxis
-        dataKey={xKey as string}
-        interval={0}
-        tick={
-          <CustomizedAxisTick
-            color={theme.palette.text.secondary}
-            angle={xAngle}
-            renderPayload={xRenderPayload ?? ((v) => <tspan>{v}</tspan>)}
-            dy={xTickDy}
+        {xKey2 && (
+          <XAxis
+            dataKey={xKey2 as string}
+            xAxisId={xKey2 as string}
+            tickLine={false}
+            axisLine={false}
+            interval={0}
+            tick={
+              <CustomizedAxisTickGrouped
+                data={data}
+                dataKey={xKey2}
+                color={theme.palette.text.secondary}
+                renderPayload={
+                  x2RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)
+                }
+              />
+            }
           />
-        }
-      />
+        )}
 
-      {xKey2 && (
-        <XAxis
-          dataKey={xKey2 as string}
-          xAxisId={xKey2 as string}
-          tickLine={false}
-          axisLine={false}
-          interval={0}
-          tick={
-            <CustomizedAxisTickGrouped
-              data={data}
-              dataKey={xKey2}
-              color={theme.palette.text.secondary}
-              renderPayload={x2RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)}
-            />
-          }
-        />
-      )}
+        {xKey3 && (
+          <XAxis
+            dataKey={xKey3 as string}
+            xAxisId={xKey3 as string}
+            tickLine={false}
+            axisLine={false}
+            interval={0}
+            tick={
+              <CustomizedAxisTickGrouped
+                data={data}
+                dataKey={xKey3}
+                color={theme.palette.text.secondary}
+                renderPayload={
+                  x3RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)
+                }
+              />
+            }
+          />
+        )}
 
-      {xKey3 && (
-        <XAxis
-          dataKey={xKey3 as string}
-          xAxisId={xKey3 as string}
-          tickLine={false}
-          axisLine={false}
-          interval={0}
-          tick={
-            <CustomizedAxisTickGrouped
-              data={data}
-              dataKey={xKey3}
-              color={theme.palette.text.secondary}
-              renderPayload={x3RenderPayload ?? ((v, o) => <tspan>{v}</tspan>)}
-            />
-          }
-        />
-      )}
-
-      <YAxis
-        dataKey="point"
-        tick={{
-          fill: theme.palette.text.secondary,
-        }}
-        domain={yRange}
-        ticks={yTicks}
-        scale="log"
-        minTickGap={0}
-      >
-        <Label
-          angle={-90}
-          value={yLab}
-          position="insideLeft"
-          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-        />
-      </YAxis>
-    </ScatterChart>
+        <YAxis
+          dataKey="point"
+          tick={{
+            fill: theme.palette.text.secondary,
+          }}
+          domain={yRange}
+          ticks={yTicks}
+          scale="log"
+          minTickGap={0}
+        >
+          <Label
+            angle={-90}
+            value={yLab}
+            position="insideLeft"
+            style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+          />
+        </YAxis>
+      </ScatterChart>
+    </div>
   )
 }
 
