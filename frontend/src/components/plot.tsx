@@ -120,6 +120,7 @@ function SerologyPlots({
   const [site, setSite] = useState<string[]>([])
   const [virus, setVirus] = useState<string[]>([])
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
+  const [selectedDays, setSelectedDays] = useState<number[]>([])
 
   const vacFiltered = serology.filter(
     (s) =>
@@ -137,10 +138,16 @@ function SerologyPlots({
   const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
   )
+  const daysFiltered = pidFiltered.filter(
+    (s) => selectedDays.length === 0 || selectedDays.includes(s.day)
+  )
 
   const availablePids = Array.from(
     new Set(siteFiltered.map((s) => s.pid))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
+  const availableDays = Array.from(new Set(pidFiltered.map((s) => s.day))).sort(
+    (a, b) => a - b
+  )
 
   const plotPids = Array.from(new Set(pidFiltered.map((s) => s.pid)))
 
@@ -171,7 +178,7 @@ function SerologyPlots({
 
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
-    pidFiltered,
+    daysFiltered,
     (v) => summariseLogmean(v.map((v) => v.titre)),
     (d) => d.virusShortName,
     (d) => d.day,
@@ -256,6 +263,13 @@ function SerologyPlots({
               setVaccinations([thisPid.prevVac])
             }
           }}
+        />
+        <SelectorMultiple
+          options={availableDays}
+          label="Day"
+          width={150}
+          value={selectedDays}
+          onChange={setSelectedDays}
         />
       </ControlRibbon>
       <ScreenHeight heightTaken={50 + 50 + 100}>
