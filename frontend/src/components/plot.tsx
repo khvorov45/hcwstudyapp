@@ -153,9 +153,19 @@ function SerologyPlots({
   // Summarise the above for plots
   function summariseLogmean(v: number[]) {
     const logs = v.map(Math.log)
+    const logmean = d3.mean(logs) ?? NaN
+    const se = (d3.deviation(logs) ?? NaN) / Math.sqrt(v.length)
+    const mean = Math.exp(logmean)
+    const low = mean - Math.exp(logmean - 1.96 * se)
+    const high = Math.exp(logmean + 1.96 * se) - mean
     return {
-      logmean: d3.mean(logs) ?? NaN,
-      se: (d3.deviation(logs) ?? NaN) / Math.sqrt(v.length),
+      logmean,
+      se,
+      mean,
+      low,
+      high,
+      point: isNaN(mean) ? null : mean,
+      interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
     }
   }
 
@@ -176,14 +186,10 @@ function SerologyPlots({
 
   const serologyPlot = Array.from(virusDaySummarized, ([virus, daySummary]) =>
     Array.from(daySummary, ([day, summary]) => {
-      const mean = Math.exp(summary.logmean)
-      const low = mean - Math.exp(summary.logmean - 1.96 * summary.se)
-      const high = Math.exp(summary.logmean + 1.96 * summary.se) - mean
       return {
+        ...summary,
         virus,
         day,
-        point: isNaN(mean) ? null : mean,
-        interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
       }
     })
   )
@@ -194,13 +200,9 @@ function SerologyPlots({
   const titreChangesPlot = Array.from(
     titreChangesSummarized,
     ([virus, summary]) => {
-      const mean = Math.exp(summary.logmean)
-      const low = mean - Math.exp(summary.logmean - 1.96 * summary.se)
-      const high = Math.exp(summary.logmean + 1.96 * summary.se) - mean
       return {
+        ...summary,
         virus,
-        point: isNaN(mean) ? null : mean,
-        interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
       }
     }
   ).sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
