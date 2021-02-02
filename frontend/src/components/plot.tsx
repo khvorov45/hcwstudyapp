@@ -240,7 +240,7 @@ function SerologyPlots({
             setVaccinations(n)
             setSelectedPid(null)
           }}
-          width={150}
+          width={200}
           inputMode="none"
         />
         <SiteSelect
@@ -278,7 +278,7 @@ function SerologyPlots({
         <SelectorMultiple
           options={availableDays}
           label="Day"
-          width={150}
+          width={200}
           value={selectedDays}
           onChange={setSelectedDays}
           inputMode="none"
@@ -843,6 +843,7 @@ function SelectorMultiple<T>({
           inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
         />
       )}
+      renderTags={(value, getProps) => <div>{`${value.length} selected`}</div>}
       value={value}
       onChange={(e, n) => onChange(n)}
       style={{ width }}
