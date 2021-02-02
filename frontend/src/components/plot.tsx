@@ -96,6 +96,14 @@ export default function Plots({
   )
 }
 
+function PlotContainer({ children }: { children: ReactNode }) {
+  return (
+    <ScreenHeight heightTaken={50 + 50 + 56 + detectScrollbarWidth()}>
+      {children}
+    </ScreenHeight>
+  )
+}
+
 function SerologyPlots({
   serology,
   titreChange,
@@ -283,7 +291,7 @@ function SerologyPlots({
           inputMode="none"
         />
       </ControlRibbon>
-      <ScreenHeight heightTaken={50 + 50 + 56 + detectScrollbarWidth()}>
+      <PlotContainer>
         <PointRange
           data={serologyPlot}
           xKey="prevVac"
@@ -324,7 +332,7 @@ function SerologyPlots({
           maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 100}
           height={400}
         />
-      </ScreenHeight>
+      </PlotContainer>
     </div>
   )
 }
@@ -369,7 +377,7 @@ function BaselinePlots({
       <ControlRibbon>
         <SiteSelect sites={sites} site={site} setSite={setSite} />
       </ControlRibbon>
-      <ScreenHeight heightTaken={50 + 50 + 56 + detectScrollbarWidth()}>
+      <PlotContainer>
         <PlotColumn
           participantsExtra={participantsExtra.filter(
             (p) =>
@@ -377,7 +385,7 @@ function BaselinePlots({
               (p.site !== undefined && site.includes(p.site))
           )}
         />
-      </ScreenHeight>
+      </PlotContainer>
     </>
   )
 }
