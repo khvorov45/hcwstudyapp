@@ -365,17 +365,20 @@ function BaselinePlots({
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<string[]>([])
   return (
-    <ScreenHeight heightTaken={50 + 50}>
+    <>
       <ControlRibbon>
         <SiteSelect sites={sites} site={site} setSite={setSite} />
       </ControlRibbon>
-      <PlotColumn
-        participantsExtra={participantsExtra.filter(
-          (p) =>
-            site.length === 0 || (p.site !== undefined && site.includes(p.site))
-        )}
-      />
-    </ScreenHeight>
+      <ScreenHeight heightTaken={50 + 50 + 56 + detectScrollbarWidth()}>
+        <PlotColumn
+          participantsExtra={participantsExtra.filter(
+            (p) =>
+              site.length === 0 ||
+              (p.site !== undefined && site.includes(p.site))
+          )}
+        />
+      </ScreenHeight>
+    </>
   )
 }
 
