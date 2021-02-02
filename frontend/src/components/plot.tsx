@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts"
 import {
+  Checkbox,
   createStyles,
   makeStyles,
   TextField,
@@ -844,6 +845,12 @@ function SelectorMultiple<T>({
         />
       )}
       renderTags={(value, getProps) => <div>{`${value.length} selected`}</div>}
+      renderOption={(option, { selected }) => (
+        <>
+          <Checkbox checked={selected} size="small" />
+          {option}
+        </>
+      )}
       value={value}
       onChange={(e, n) => onChange(n)}
       style={{ width }}
