@@ -42,9 +42,6 @@ const useStyles = makeStyles((theme: Theme) =>
         flexShrink: 0,
         height: 56,
         overflow: "hidden",
-        "& ::before": {
-          borderBottom: 0,
-        },
       },
       "&>*:last-child": {
         borderRight: 0,
@@ -819,11 +816,36 @@ function Selector<T>({
       options={options}
       getOptionLabel={(o) => `${o}`}
       renderInput={(params) => (
-        <TextField {...params} label={label} variant="filled" />
+        <SelectorTextField params={params} label={label} />
       )}
       value={value}
       onChange={(e, n) => onChange(n)}
       style={{ width }}
+    />
+  )
+}
+
+function SelectorTextField({
+  params,
+  label,
+  inputMode,
+}: {
+  params: any
+  label: string
+  inputMode?: "text" | "numeric" | "none"
+}) {
+  const theme = useTheme()
+  return (
+    <TextField
+      {...params}
+      label={label}
+      variant="filled"
+      inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
+      InputProps={{
+        ...params.InputProps,
+        disableUnderline: true,
+        style: { backgroundColor: theme.palette.background.default },
+      }}
     />
   )
 }
@@ -848,11 +870,10 @@ function SelectorMultiple<T>({
       options={options}
       getOptionLabel={(o) => `${o}`}
       renderInput={(params) => (
-        <TextField
-          {...params}
+        <SelectorTextField
+          params={params}
           label={label}
-          variant="filled"
-          inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
+          inputMode={inputMode}
         />
       )}
       renderTags={(value, getProps) => <div>{`${value.length} selected`}</div>}
