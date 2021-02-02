@@ -105,19 +105,15 @@ function SerologyPlots({
     new Set(serology.map((s) => s.virus))
   ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
   const sites = Array.from(new Set(serology.map((s) => s.site ?? "(missing)")))
-  const prevVacs = Array.from(
-    new Set(serology.map((s) => s.prevVac ?? Infinity))
+  const prevVacs = Array.from(new Set(serology.map((s) => s.prevVac))).sort(
+    (a, b) => a - b
   )
-    .sort((a, b) => a - b)
-    .map((x) => (x === Infinity ? "(missing)" : x))
   const days = Array.from(new Set(serology.map((s) => s.day))).sort(
     (a, b) => a - b
   )
 
   // Filters applied in the order presented
-  const [vaccinations, setVaccinations] = useState<
-    (number | "(missing)" | null)[]
-  >([0, 5])
+  const [vaccinations, setVaccinations] = useState<number[]>([0, 5])
   const [site, setSite] = useState<string[]>([])
   const [virus, setVirus] = useState<string[]>([])
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
@@ -126,7 +122,6 @@ function SerologyPlots({
   const vacFiltered = serology.filter(
     (s) =>
       vaccinations.length === 0 ||
-      (vaccinations.includes("(missing)") && s.prevVac === undefined) ||
       (s.prevVac !== undefined && vaccinations.includes(s.prevVac))
   )
   const siteFiltered = vacFiltered.filter(
