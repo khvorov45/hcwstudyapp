@@ -117,11 +117,11 @@ function SerologyPlots({
   // Filters applied in the order presented
   const [vaccinations, setVaccinations] = useState<
     (number | "(missing)" | null)[]
-  >([])
+  >([0, 5])
   const [site, setSite] = useState<string[]>([])
   const [virus, setVirus] = useState<string[]>([])
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
-  const [selectedDays, setSelectedDays] = useState<number[]>([])
+  const [selectedDays, setSelectedDays] = useState<number[]>([0, 14])
 
   const vacFiltered = serology.filter(
     (s) =>
