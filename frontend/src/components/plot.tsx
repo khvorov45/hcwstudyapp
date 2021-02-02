@@ -237,7 +237,7 @@ function SerologyPlots({
     widthPerDay
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <>
       <ControlRibbon>
         <SelectorMultiple
           options={prevVacs}
@@ -333,7 +333,7 @@ function SerologyPlots({
           height={400}
         />
       </PlotContainer>
-    </div>
+    </>
   )
 }
 
