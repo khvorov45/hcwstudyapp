@@ -482,6 +482,7 @@ function GenericBar<T extends Record<string, string | number>>({
       </XAxis>
       <YAxis tick={{ fill: theme.palette.text.secondary }}>
         <Label
+          // @ts-ignore
           angle={-90}
           value="Count"
           position="insideLeft"
@@ -685,7 +686,7 @@ function PointRange<
         height={height}
       >
         <CartesianGrid stroke={theme.palette.background.alt} />
-        <Scatter data={data}>
+        <Scatter className="scatter" data={data}>
           {data.map((entry, index) => (
             <Cell
               key={`cell-${index}`}
@@ -787,6 +788,7 @@ function PointRange<
           minTickGap={0}
         >
           <Label
+            // @ts-ignore
             angle={-90}
             value={yLab}
             position="insideLeft"
