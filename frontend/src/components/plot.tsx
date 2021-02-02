@@ -35,17 +35,21 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     control: {
       display: "flex",
-      overflow: "scroll",
+      overflowX: "scroll",
+      overflowY: "hidden",
       "&>*": {
-        marginRight: 10,
-        marginTop: 5,
-        paddingTop: 5,
+        borderRight: `1px solid ${theme.palette.divider}`,
         flexShrink: 0,
-        height: 100 - 6 - detectScrollbarWidth(),
-        overflowY: "scroll",
-        overflowX: "hidden",
+        height: 56,
+        overflow: "hidden",
+        "& ::before": {
+          borderBottom: 0,
+        },
       },
-      height: 100,
+      "&>*:last-child": {
+        borderRight: 0,
+      },
+      height: 56 + detectScrollbarWidth(),
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
   })
@@ -279,7 +283,7 @@ function SerologyPlots({
           inputMode="none"
         />
       </ControlRibbon>
-      <ScreenHeight heightTaken={50 + 50 + 100}>
+      <ScreenHeight heightTaken={50 + 50 + 56 + detectScrollbarWidth()}>
         <PointRange
           data={serologyPlot}
           xKey="prevVac"
@@ -362,7 +366,9 @@ function BaselinePlots({
   const [site, setSite] = useState<string[]>([])
   return (
     <ScreenHeight heightTaken={50 + 50}>
-      <SiteSelect sites={sites} site={site} setSite={setSite} />
+      <ControlRibbon>
+        <SiteSelect sites={sites} site={site} setSite={setSite} />
+      </ControlRibbon>
       <PlotColumn
         participantsExtra={participantsExtra.filter(
           (p) =>
@@ -802,7 +808,7 @@ function Selector<T>({
       options={options}
       getOptionLabel={(o) => `${o}`}
       renderInput={(params) => (
-        <TextField {...params} label={label} variant="outlined" />
+        <TextField {...params} label={label} variant="filled" />
       )}
       value={value}
       onChange={(e, n) => onChange(n)}
@@ -834,7 +840,7 @@ function SelectorMultiple<T>({
         <TextField
           {...params}
           label={label}
-          variant="outlined"
+          variant="filled"
           inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
         />
       )}
