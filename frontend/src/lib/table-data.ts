@@ -121,6 +121,7 @@ export const TitreChangeV = t.type({
   day1: t.number,
   day2: t.number,
   rise: t.number,
+  prevVac: t.number,
 })
 export type TitreChange = t.TypeOf<typeof TitreChangeV>
 
@@ -137,6 +138,7 @@ function genTitreChange(
         virusClade: virus.clade,
         pid: participant.pid,
         site: participant.site,
+        prevVac: participant.prevVac,
         day1: 0,
         day2: 14,
         rise: Math.exp(

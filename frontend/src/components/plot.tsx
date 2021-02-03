@@ -183,7 +183,8 @@ function SerologyPlots({
   const titreChangesSummarized = d3.rollup(
     titreChangeFiltered,
     (v) => summariseLogmean(v.map((v) => v.rise)),
-    (d) => d.virusShortName
+    (d) => d.virusShortName,
+    (d) => d.prevVac
   )
 
   const serologyPlot = Array.from(virusDaySummarized, ([virus, daySummary]) =>
@@ -203,13 +204,16 @@ function SerologyPlots({
 
   const titreChangesPlot = Array.from(
     titreChangesSummarized,
-    ([virus, summary]) => {
-      return {
+    ([virus, vacSummary]) =>
+      Array.from(vacSummary, ([prevVac, summary]) => ({
         ...summary,
         virus,
-      }
-    }
-  ).sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
+        prevVac,
+      }))
+  )
+    .flat()
+    .sort((a, b) => a.prevVac - b.prevVac)
+    .sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
 
   const dayColors = createDescreteMapping(days)
 
@@ -303,7 +307,7 @@ function SerologyPlots({
         />
         <PointRange
           data={titreChangesPlot}
-          xAccessor={(d) => [d.virus]}
+          xAccessor={(d) => [d.virus, d.prevVac.toString()]}
           yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
           minWidthPerX={20}
           maxWidthMultiplier={3}
@@ -323,11 +327,13 @@ function SerologyPlots({
                 <VirusTick {...props} viruses={virusTable} />
               ),
             },
+            { name: "Vax" },
           ]}
           pad={{
             axis: { top: 10, bottom: 150, left: 55, right: 80 },
             data: { top: 0, right: 0, bottom: 10, left: 10 },
           }}
+          categorySeparatorXLevel={0}
         />
       </PlotContainer>
     </>
