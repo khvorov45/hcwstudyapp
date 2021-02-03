@@ -269,7 +269,7 @@ function SerologyPlots({
         />
       </ControlRibbon>
       <PlotContainer>
-        <PointRange2
+        <PointRange
           data={serologyPlot}
           xAccessor={(d) => [d.virus, d.day.toString(), d.prevVac.toString()]}
           yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
@@ -289,7 +289,7 @@ function SerologyPlots({
               textAnchor: "start",
               angle: 45,
               renderTick: (props) => (
-                <VirusTick2 {...props} viruses={virusTable} />
+                <VirusTick {...props} viruses={virusTable} />
               ),
             },
             { name: "Day" },
@@ -301,7 +301,7 @@ function SerologyPlots({
           }}
           categorySeparatorXLevel={0}
         />
-        <PointRange2
+        <PointRange
           data={titreChangesPlot}
           xAccessor={(d) => [d.virus]}
           yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
@@ -320,7 +320,7 @@ function SerologyPlots({
               textAnchor: "start",
               angle: 45,
               renderTick: (props) => (
-                <VirusTick2 {...props} viruses={virusTable} />
+                <VirusTick {...props} viruses={virusTable} />
               ),
             },
           ]}
@@ -343,7 +343,7 @@ function createDescreteMapping<T extends string | number>(
   )
 }
 
-function VirusTick2({
+function VirusTick({
   tick,
   x,
   y,
@@ -647,7 +647,7 @@ type Pad = {
   right: number
 }
 
-function PointRange2<T extends Object>({
+function PointRange<T extends Object>({
   data,
   xAccessor,
   yAccessor,
