@@ -30,6 +30,7 @@ import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 import { Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
+import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -174,8 +175,8 @@ function SerologyPlots({
       logmean,
       se,
       mean,
-      low,
-      high,
+      low: mean - low,
+      high: mean + high,
       point: isNaN(mean) ? null : mean,
       interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
     }
@@ -329,6 +330,66 @@ function SerologyPlots({
           maxWidth={(virus.length === 0 ? viruses.length : virus.length) * 100}
           height={400}
         />
+        <PointRange2
+          data={serologyPlot}
+          xAccessor={(d) => [d.virus, d.day.toString(), d.prevVac.toString()]}
+          yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
+          minWidthPerX={20}
+          maxWidthMultiplier={3}
+          height={500}
+          yAxisSpec={{
+            min: 5,
+            max: 10240,
+            ticks: [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240],
+            lab: selectedPid ? "Titre" : "GMT (95% CI)",
+            leftpad: 20,
+          }}
+          getColor={(v) => dayColors[v.day]}
+          xAxisSpec={[
+            {
+              textAnchor: "start",
+              angle: 45,
+              renderTick: (props) => (
+                <VirusTick2 {...props} viruses={virusTable} />
+              ),
+            },
+            { name: "Day" },
+            { name: "Vax" },
+          ]}
+          pad={{
+            axis: { top: 10, bottom: 150, left: 55, right: 80 },
+            data: { top: 0, right: 0, bottom: 10, left: 10 },
+          }}
+          categorySeparatorXLevel={0}
+        />
+        <PointRange2
+          data={titreChangesPlot}
+          xAccessor={(d) => [d.virus]}
+          yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
+          minWidthPerX={20}
+          maxWidthMultiplier={3}
+          height={400}
+          yAxisSpec={{
+            min: 0.5,
+            max: 30,
+            ticks: [0.5, 1, 2, 5, 10, 20, 30],
+            lab: selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)",
+            leftpad: 20,
+          }}
+          xAxisSpec={[
+            {
+              textAnchor: "start",
+              angle: 45,
+              renderTick: (props) => (
+                <VirusTick2 {...props} viruses={virusTable} />
+              ),
+            },
+          ]}
+          pad={{
+            axis: { top: 10, bottom: 150, left: 55, right: 80 },
+            data: { top: 0, right: 0, bottom: 10, left: 10 },
+          }}
+        />
       </PlotContainer>
     </>
   )
@@ -357,6 +418,29 @@ function VirusTick({
       <tspan x={xOffset}>{name}</tspan>
       <tspan x={xOffset} dy={14}>
         {viruses.find((v) => v.shortName === name)?.clade}
+      </tspan>
+    </>
+  )
+}
+
+function VirusTick2({
+  tick,
+  x,
+  y,
+  viruses,
+}: {
+  tick: string
+  x: number
+  y: number
+  viruses: Virus[]
+}) {
+  return (
+    <>
+      <tspan x={x} y={y}>
+        {tick}
+      </tspan>
+      <tspan x={x} y={y + 14}>
+        {viruses.find((v) => v.shortName === tick)?.clade}
       </tspan>
     </>
   )
@@ -897,4 +981,331 @@ function SelectorMultiple<T>({
 function ControlRibbon({ children }: { children: ReactNode }) {
   const classes = useStyles()
   return <div className={classes.control}>{children}</div>
+}
+
+type Pad = {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+function PointRange2<T extends Object>({
+  data,
+  xAccessor,
+  yAccessor,
+  minWidthPerX,
+  maxWidthMultiplier,
+  height,
+  yAxisSpec,
+  getColor,
+  xAxisSpec,
+  categorySeparatorXLevel,
+  pad,
+}: {
+  data: T[]
+  xAccessor: (d: T) => string[]
+  yAccessor: (d: T) => { point: number; low: number; high: number }
+  minWidthPerX: number
+  maxWidthMultiplier: number
+  height: number
+  yAxisSpec: {
+    min: number
+    max: number
+    ticks: number[]
+    lab: string
+    leftpad: number
+  }
+  getColor?: (x: T) => string
+  xAxisSpec: {
+    name?: string
+    textAnchor?: "middle" | "start"
+    angle?: number
+    renderTick?: (props: { tick: string; x: number; y: number }) => ReactNode
+  }[]
+  categorySeparatorXLevel?: number
+  pad: { axis: Pad; data: Pad }
+}) {
+  // Figure out plot dimensions (data-dependent)
+  const uniqueXs = Array.from(new Set(data.map((x) => xAccessor(x))))
+  const minWidth =
+    minWidthPerX * uniqueXs.length +
+    pad.axis.left +
+    pad.axis.right +
+    pad.data.left +
+    pad.data.right
+  const windowSize = useWindowSize()
+  const width =
+    minmax(windowSize.width, minWidth, minWidth * maxWidthMultiplier) -
+    detectScrollbarWidth()
+  const dataWidth =
+    width - pad.axis.right - pad.data.right - pad.axis.left - pad.data.left
+  const actualWidthPerX = dataWidth / uniqueXs.length
+
+  // Now the elements that depend on plot dimensions
+  const axisTitleY = [
+    yAxisSpec.leftpad,
+    (height - pad.axis.top - pad.axis.bottom) / 2,
+  ]
+
+  const scaleXIndex = scaleLinear(
+    [0, uniqueXs.length - 1],
+    [pad.axis.left + pad.data.left, width - pad.axis.right - pad.data.right]
+  )
+  const scaleX = scaleOrdinal(
+    uniqueXs,
+    uniqueXs.map((x, i) => scaleXIndex(i))
+  )
+
+  const scaleY = scaleLog(
+    [yAxisSpec.min, yAxisSpec.max],
+    [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
+  )
+
+  // X-separators
+  let xSep: string[][] = []
+  uniqueXs.reduce((acc, cur, i) => {
+    if (categorySeparatorXLevel === undefined) {
+      return acc
+    }
+    if (i === 0) {
+      acc.push(cur)
+      return acc
+    }
+    if (
+      cur[categorySeparatorXLevel] !==
+      acc[acc.length - 1][categorySeparatorXLevel]
+    ) {
+      acc.push(cur)
+    }
+    return acc
+  }, xSep)
+
+  // Colors and distances
+  const theme = useTheme()
+  const axisColor =
+    theme.palette.type === "dark"
+      ? theme.palette.grey[300]
+      : theme.palette.grey[700]
+  const gridColor =
+    theme.palette.type === "dark"
+      ? theme.palette.grey[800]
+      : theme.palette.grey[200]
+  const xAxesDistance = 15
+  const distanceFromTicks = 7
+  const tickLength = 5
+  return (
+    <div
+      style={{
+        overflowX: "scroll",
+        overflowY: "hidden",
+        height: height + detectScrollbarWidth(),
+      }}
+    >
+      <svg width={width} height={height}>
+        {/* Category separators */}
+        {xSep.map((x, i) => {
+          const x1 = scaleX(x) - actualWidthPerX / 2
+          const x2 =
+            scaleX(
+              i === xSep.length - 1
+                ? uniqueXs[uniqueXs.length - 1]
+                : xSep[i + 1]
+            ) +
+            (actualWidthPerX / 2) * (i === xSep.length - 1 ? 0 : -1)
+
+          return (
+            <rect
+              x={x1}
+              y={pad.axis.top}
+              width={x2 - x1}
+              height={height - pad.axis.bottom - pad.axis.top}
+              fill={
+                i % 2 === 0
+                  ? theme.palette.background.default
+                  : theme.palette.background.alt
+              }
+            />
+          )
+        })}
+        {/* Y-axis */}
+        {/* Line */}
+        <VLine
+          x={pad.axis.left}
+          y1={height - pad.axis.bottom}
+          y2={pad.axis.top}
+          color={axisColor}
+        />
+        {/* Name */}
+        <text
+          x={axisTitleY[0]}
+          y={axisTitleY[1]}
+          fill={theme.palette.text.primary}
+          textAnchor="middle"
+          transform={`rotate(-90, ${axisTitleY[0]}, ${axisTitleY[1]})`}
+        >
+          {yAxisSpec.lab}
+          {/* Ticks */}
+        </text>
+        {yAxisSpec.ticks.map((yTick) => {
+          const y = scaleY(yTick)
+          return (
+            <g key={`yTick-${yTick}`}>
+              {/* Number */}
+              <text
+                fill={theme.palette.text.secondary}
+                x={pad.axis.left - distanceFromTicks}
+                y={y}
+                textAnchor="end"
+                dominantBaseline="middle"
+              >
+                {yTick}
+              </text>
+              {/* Tick */}
+              <HLine
+                x1={pad.axis.left - tickLength}
+                x2={pad.axis.left}
+                y={y}
+                color={axisColor}
+              />
+              {/* Grid line */}
+              <HLine
+                x1={pad.axis.left}
+                x2={width - pad.axis.right}
+                y={y}
+                color={gridColor}
+              />
+            </g>
+          )
+        })}
+        {/* X-axis */}
+        {/* Line */}
+        <HLine
+          x1={pad.axis.left}
+          x2={width - pad.axis.right}
+          y={height - pad.axis.bottom}
+          color={axisColor}
+        />
+        {/* Name(s) */}
+        {xAxisSpec?.map((xAxis, i) => (
+          <text
+            x={pad.axis.left}
+            y={
+              height -
+              pad.axis.bottom +
+              distanceFromTicks +
+              (xAxisSpec.length - i - 1) * xAxesDistance
+            }
+            fill={theme.palette.text.primary}
+            textAnchor="end"
+            dominantBaseline="hanging"
+          >
+            {xAxis.name}
+          </text>
+        ))}
+
+        {/* Ticks */}
+        {uniqueXs.map((xTickGroup, i) => {
+          let prevX = i === 0 ? [] : uniqueXs[i - 1]
+          const x = scaleX(xTickGroup)
+          // Assume the values are already sorted
+          return (
+            <g key={`tick-group-x-${i}`}>
+              {/* Print the value if the previous one is not the same */}
+              {xTickGroup.map((xTick, j) => {
+                const y =
+                  height -
+                  pad.axis.bottom +
+                  distanceFromTicks +
+                  (xTickGroup.length - j - 1) * xAxesDistance
+                return (
+                  prevX[j] !== xTick && (
+                    <text
+                      key={`tick-x-${j}`}
+                      x={x}
+                      y={y}
+                      textAnchor={xAxisSpec?.[j]?.textAnchor ?? "middle"}
+                      dominantBaseline="hanging"
+                      fill={theme.palette.text.secondary}
+                      transform={`rotate(${
+                        xAxisSpec[j]?.angle ?? 0
+                      }, ${x}, ${y})`}
+                    >
+                      {xAxisSpec[j]?.renderTick?.({ tick: xTick, x, y }) ??
+                        xTick}
+                    </text>
+                  )
+                )
+              })}
+              {/* Tick */}
+              <VLine
+                x={x}
+                y1={height - pad.axis.bottom + tickLength}
+                y2={height - pad.axis.bottom}
+                color={axisColor}
+              />
+              {/* Grid line */}
+              <VLine
+                x={x}
+                y1={height - pad.axis.bottom}
+                y2={pad.axis.top}
+                color={gridColor}
+              />
+            </g>
+          )
+        })}
+        {/* Data */}
+        {data.map((d, i) => {
+          const color =
+            getColor?.(d) ??
+            theme.palette.primary[
+              theme.palette.type === "dark" ? "light" : "dark"
+            ]
+          const x = scaleX(xAccessor(d))
+          const y = yAccessor(d)
+          return (
+            <g key={`point-${i}`}>
+              <line
+                x1={x}
+                x2={x}
+                y1={scaleY(y.low)}
+                y2={scaleY(y.high)}
+                stroke={color}
+                strokeWidth={3}
+              />
+              <circle r={5} fill={color} cx={x} cy={scaleY(y.point)} />
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
+function VLine({
+  x,
+  y1,
+  y2,
+  color,
+}: {
+  x: number
+  y1: number
+  y2: number
+  color: string
+}) {
+  return <line x1={x} x2={x} y1={y1} y2={y2} stroke={color} />
+}
+
+function HLine({
+  y,
+  x1,
+  x2,
+  color,
+}: {
+  y: number
+  x1: number
+  x2: number
+  color: string
+}) {
+  return <line x1={x1} x2={x2} y1={y} y2={y} stroke={color} />
 }
