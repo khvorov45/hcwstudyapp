@@ -787,7 +787,7 @@ function PointRange<T extends Object>({
         })}
         {/* Y-axis */}
         {/* Line */}
-        <VLine
+        <StraightLine
           x={pad.axis.left}
           y1={height - pad.axis.bottom}
           y2={pad.axis.top}
@@ -819,14 +819,14 @@ function PointRange<T extends Object>({
                 {yTick}
               </text>
               {/* Tick */}
-              <HLine
+              <StraightLine
                 x1={pad.axis.left - tickLength}
                 x2={pad.axis.left}
                 y={y}
                 color={axisColor}
               />
               {/* Grid line */}
-              <HLine
+              <StraightLine
                 x1={pad.axis.left}
                 x2={width - pad.axis.right}
                 y={y}
@@ -837,7 +837,7 @@ function PointRange<T extends Object>({
         })}
         {/* X-axis */}
         {/* Line */}
-        <HLine
+        <StraightLine
           x1={pad.axis.left}
           x2={width - pad.axis.right}
           y={height - pad.axis.bottom}
@@ -895,14 +895,14 @@ function PointRange<T extends Object>({
                 )
               })}
               {/* Tick */}
-              <VLine
+              <StraightLine
                 x={x}
                 y1={height - pad.axis.bottom + tickLength}
                 y2={height - pad.axis.bottom}
                 color={axisColor}
               />
               {/* Grid line */}
-              <VLine
+              <StraightLine
                 x={x}
                 y1={height - pad.axis.bottom}
                 y2={pad.axis.top}
@@ -939,30 +939,25 @@ function PointRange<T extends Object>({
   )
 }
 
-function VLine({
+function StraightLine({
   x,
+  x1,
+  x2,
+  y,
   y1,
   y2,
   color,
 }: {
-  x: number
-  y1: number
-  y2: number
+  x?: number
+  x1?: number
+  x2?: number
+  y?: number
+  y1?: number
+  y2?: number
   color: string
 }) {
-  return <line x1={x} x2={x} y1={y1} y2={y2} stroke={color} />
-}
-
-function HLine({
-  y,
-  x1,
-  x2,
-  color,
-}: {
-  y: number
-  x1: number
-  x2: number
-  color: string
-}) {
+  if (x) {
+    return <line x1={x} x2={x} y1={y1} y2={y2} stroke={color} />
+  }
   return <line x1={x1} x2={x2} y1={y} y2={y} stroke={color} />
 }
