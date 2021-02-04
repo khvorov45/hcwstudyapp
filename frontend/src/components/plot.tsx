@@ -387,18 +387,22 @@ function PlotColumn({
     (p) => p.prevVac
   )
 
-  const agesBinned = d3
-    .bin()
-    .thresholds([18, 30, 40, 50, 66])(participantsExtra.map((p) => p.age))
-    .map((a) => ({
-      range:
-        a.x0! < 18
-          ? `<${a.x1}`
-          : a.x1! > 66
-          ? `>=${a.x0}`
-          : `${a.x0}-${a.x1! - 1}`,
-      count: a.length,
-    }))
+  function binAges(arr: number[]) {
+    return d3
+      .bin()
+      .thresholds([18, 30, 40, 50, 66])(arr)
+      .map((a) => ({
+        range:
+          a.x0! < 18
+            ? `<${a.x1}`
+            : a.x1! > 66
+            ? `>=${a.x0}`
+            : `${a.x0}-${a.x1! - 1}`,
+        count: a.length,
+      }))
+  }
+
+  const agesBinned = binAges(participantsExtra.map((p) => p.age))
 
   const genderCountsArray = Array.from(genderCounts, ([k, v]) => ({
     gender: k ?? "(missing)",
