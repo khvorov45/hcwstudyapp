@@ -737,6 +737,7 @@ function PointRange<T extends Object>({
 
           return (
             <rect
+              key={`separator-${i}`}
               x={x1}
               y={pad.axis.top}
               width={x2 - x1}
@@ -771,6 +772,7 @@ function PointRange<T extends Object>({
         {/* Name(s) */}
         {xAxisSpec?.map((xAxis, i) => (
           <text
+            key={`axis-${i}`}
             x={pad.axis.left}
             y={
               height -
