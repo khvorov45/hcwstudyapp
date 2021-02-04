@@ -421,7 +421,6 @@ function PlotColumn({
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.range}
         yAxisSpec={{
-          ticks: [0, 50, 100, 150, 200],
           lab: "Count",
         }}
         xAxisSpec={{
@@ -433,7 +432,6 @@ function PlotColumn({
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.gender}
         yAxisSpec={{
-          ticks: [0, 100, 200, 300, 400, 500, 600],
           lab: "Count",
         }}
         xAxisSpec={{
@@ -445,7 +443,6 @@ function PlotColumn({
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.priorVaccinations.toString()}
         yAxisSpec={{
-          ticks: [0, 100, 200, 300, 400, 500, 600],
           lab: "Count",
         }}
         xAxisSpec={{
@@ -454,6 +451,29 @@ function PlotColumn({
       />
     </div>
   )
+}
+
+function seq(start: number, end: number, step: number): number[] {
+  const res = []
+  for (let i = start; i <= end; i += step) {
+    res.push(i)
+  }
+  return res
+}
+
+function magnitudeOf(x: number): number {
+  return x.toFixed().length - 1
+}
+
+function roundUp(x: number) {
+  const mag = magnitudeOf(x)
+  const multiplier = Math.pow(10, mag)
+  const down = x - (x % multiplier)
+  return down + multiplier
+}
+
+function isOverHalf(x: number) {
+  return parseInt(x.toFixed()[0]) >= 5
 }
 
 function GenericBar<T extends Object>({
@@ -494,8 +514,10 @@ function GenericBar<T extends Object>({
     width - pad.axis.right - pad.data.right,
   ])
   const yValuesSum = data.map((d) => d3.sum(yAccessor(d)))
+  const yMax = yAxisSpec.max ?? d3.max(yValuesSum) ?? 100
+  const yMaxRounded = roundUp(yMax)
   const scaleY = scaleLinear(
-    [yAxisSpec.min ?? 0, yAxisSpec.max ?? d3.max(yValuesSum) ?? 100],
+    [yAxisSpec.min ?? 0, yMaxRounded],
     [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
   )
   const theme = useTheme()
@@ -508,7 +530,15 @@ function GenericBar<T extends Object>({
           height={height}
           width={width}
           label={yAxisSpec.lab}
-          ticks={yAxisSpec.ticks ?? []}
+          ticks={
+            yAxisSpec.ticks ??
+            seq(
+              yAxisSpec.min ?? 0,
+              yMaxRounded,
+              Math.pow(10, magnitudeOf(yMax)) /
+                (isOverHalf(yMaxRounded) ? 1 : 2)
+            )
+          }
           scale={scaleY}
           orientation="vertical"
           drawGrid
