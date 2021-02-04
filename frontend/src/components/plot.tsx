@@ -1,44 +1,16 @@
-import {
-  Checkbox,
-  createStyles,
-  makeStyles,
-  TextField,
-  Theme,
-  useTheme,
-} from "@material-ui/core"
+import { useTheme } from "@material-ui/core"
 import * as d3 from "d3-array"
 import React, { ReactNode, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
-import Autocomplete from "@material-ui/lab/Autocomplete"
 import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 import { Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
 import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    control: {
-      display: "flex",
-      overflowX: "scroll",
-      overflowY: "hidden",
-      "&>*": {
-        borderRight: `1px solid ${theme.palette.divider}`,
-        flexShrink: 0,
-        height: 56,
-        overflow: "hidden",
-      },
-      "&>*:last-child": {
-        borderRight: 0,
-      },
-      height: 56 + detectScrollbarWidth(),
-      borderBottom: `1px solid ${theme.palette.divider}`,
-    },
-  })
-)
+import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
 
 export default function Plots({
   participantsExtra,
@@ -612,105 +584,6 @@ function SiteSelect({
 
 function minmax(x: number, min: number, max: number) {
   return x < min ? min : x > max ? max : x
-}
-
-function Selector<T>({
-  options,
-  label,
-  value,
-  onChange,
-  width,
-}: {
-  options: T[]
-  label: string
-  value: T | null
-  onChange: (s: T | null) => void
-  width: number
-}) {
-  return (
-    <Autocomplete
-      options={options}
-      getOptionLabel={(o) => `${o}`}
-      renderInput={(params) => (
-        <SelectorTextField params={params} label={label} />
-      )}
-      value={value}
-      onChange={(e, n) => onChange(n)}
-      style={{ width }}
-    />
-  )
-}
-
-function SelectorTextField({
-  params,
-  label,
-  inputMode,
-}: {
-  params: any
-  label: string
-  inputMode?: "text" | "numeric" | "none"
-}) {
-  const theme = useTheme()
-  return (
-    <TextField
-      {...params}
-      label={label}
-      variant="filled"
-      inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
-      InputProps={{
-        ...params.InputProps,
-        disableUnderline: true,
-        style: { backgroundColor: theme.palette.background.default },
-      }}
-    />
-  )
-}
-
-function SelectorMultiple<T>({
-  options,
-  label,
-  value,
-  onChange,
-  width,
-  inputMode,
-}: {
-  options: T[]
-  label: string
-  value: T[]
-  onChange: (s: T[]) => void
-  width: number
-  inputMode?: "text" | "numeric" | "none"
-}) {
-  return (
-    <Autocomplete
-      options={options}
-      getOptionLabel={(o) => `${o}`}
-      renderInput={(params) => (
-        <SelectorTextField
-          params={params}
-          label={label}
-          inputMode={inputMode}
-        />
-      )}
-      renderTags={(value, getProps) => <div>{`${value.length} selected`}</div>}
-      renderOption={(option, { selected }) => (
-        <>
-          <Checkbox checked={selected} size="small" />
-          {option}
-        </>
-      )}
-      value={value}
-      onChange={(e, n) => onChange(n)}
-      style={{ width }}
-      multiple
-      disableCloseOnSelect
-    />
-  )
-}
-
-function ControlRibbon({ children }: { children: ReactNode }) {
-  const classes = useStyles()
-  return <div className={classes.control}>{children}</div>
 }
 
 type Pad = {
