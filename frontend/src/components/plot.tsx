@@ -352,6 +352,10 @@ function BaselinePlots({
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<string[]>([])
+  const genders = Array.from(
+    new Set(participantsExtra.map((p) => p.gender ?? "(missing)"))
+  )
+  const genderColors = createDescreteMapping(genders)
   return (
     <>
       <ControlRibbon>
@@ -364,6 +368,7 @@ function BaselinePlots({
               site.length === 0 ||
               (p.site !== undefined && site.includes(p.site))
           )}
+          getColor={(p) => genderColors[p.gender ?? "(missing)"] ?? "gray500"}
         />
       </PlotContainer>
     </>
@@ -372,8 +377,10 @@ function BaselinePlots({
 
 function PlotColumn({
   participantsExtra,
+  getColor,
 }: {
   participantsExtra: ParticipantExtra[]
+  getColor?: (p: ParticipantExtra) => string
 }) {
   const genderCounts = d3.rollup(
     participantsExtra,
@@ -381,10 +388,15 @@ function PlotColumn({
     (p) => p.gender
   )
 
+  const theme = useTheme()
+
   const priorVaccinationCounts = d3.rollup(
     participantsExtra,
     (v) => v.length,
-    (p) => p.prevVac
+    (p) => p.prevVac,
+    getColor ??
+      ((p) =>
+        theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"])
   )
 
   function binAges(arr: number[]) {
@@ -408,21 +420,24 @@ function PlotColumn({
     gender: k ?? "(missing)",
     count: v,
   }))
-  const priorVacArray = Array.from(priorVaccinationCounts, ([k, v]) => ({
-    priorVaccinations: k ?? "(missing)",
-    count: v,
-  })).sort((a, b) =>
-    a.priorVaccinations > b.priorVaccinations
-      ? 1
-      : a.priorVaccinations < b.priorVaccinations
-      ? -1
-      : 0
+  const priorVacArray = Array.from(
+    priorVaccinationCounts,
+    ([prevVac, colorSummary]) =>
+      Array.from(colorSummary, ([color, count]) => ({
+        priorVaccinations: prevVac ?? "(missing)",
+        color: color ?? "(missing)",
+        count,
+      }))
   )
+    .flat()
+    .sort((a, b) => (a.color > b.color ? 1 : a.color < b.color ? -1 : 0))
+    .sort((a, b) => a.priorVaccinations - b.priorVaccinations)
+
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <GenericBar
         data={agesBinned}
-        yAccessor={(d) => [d.count]}
+        yAccessor={(d) => d.count}
         xAccessor={(d) => d.range}
         yAxisSpec={{
           lab: "Count",
@@ -433,7 +448,7 @@ function PlotColumn({
       />
       <GenericBar
         data={genderCountsArray}
-        yAccessor={(d) => [d.count]}
+        yAccessor={(d) => d.count}
         xAccessor={(d) => d.gender}
         yAxisSpec={{
           lab: "Count",
@@ -444,7 +459,7 @@ function PlotColumn({
       />
       <GenericBar
         data={priorVacArray}
-        yAccessor={(d) => [d.count]}
+        yAccessor={(d) => d.count}
         xAccessor={(d) => d.priorVaccinations.toString()}
         yAxisSpec={{
           lab: "Count",
@@ -452,6 +467,7 @@ function PlotColumn({
         xAxisSpec={{
           lab: "Known prior vaccinations",
         }}
+        getColor={(d) => d.color}
       />
     </div>
   )
@@ -495,9 +511,10 @@ function GenericBar<T extends Object>({
   },
   yAxisSpec,
   xAxisSpec,
+  getColor,
 }: {
   data: T[]
-  yAccessor: (x: T) => number[]
+  yAccessor: (x: T) => number
   xAccessor: (x: T) => string
   minWidthPerX?: number
   maxWidthMultiplier?: number
@@ -505,19 +522,20 @@ function GenericBar<T extends Object>({
   pad?: PlotPad
   yAxisSpec: AxisSpec
   xAxisSpec: AxisSpec
+  getColor?: (d: T) => string
 }) {
+  const xValuesUnique = Array.from(new Set(data.map(xAccessor)))
   const { width, widthPerX } = usePlotSize({
-    uniqueXCount: data.length,
+    uniqueXCount: xValuesUnique.length,
     minWidthPerX: minWidthPerX,
     maxWidthMultiplier: maxWidthMultiplier,
     pad,
   })
-  const xValues = data.map(xAccessor)
-  const scaleX = scaleCategorical(xValues, [
+  const scaleX = scaleCategorical(xValuesUnique, [
     pad.axis.left + pad.data.left,
     width - pad.axis.right - pad.data.right,
   ])
-  const yValuesSum = data.map((d) => d3.sum(yAccessor(d)))
+  const yValuesSum = data.map((d) => yAccessor(d))
   const yMax = yAxisSpec.max ?? d3.max(yValuesSum) ?? 100
   const yMaxRounded = roundUp(yMax)
   const scaleY = scaleLinear(
@@ -552,27 +570,34 @@ function GenericBar<T extends Object>({
           height={height}
           width={width}
           label={xAxisSpec.lab}
-          ticks={xValues}
+          ticks={xValuesUnique}
           scale={scaleX}
           orientation="horizontal"
           drawGrid={false}
         />
-        {data.map((d, i) => {
-          const y = scaleY(yAccessor(d)[0])
-          return (
+        {xValuesUnique.map((xValue, i) => {
+          const dataSubset = data.filter((d) => xAccessor(d) === xValue)
+          const cumY = d3.cumsum(dataSubset.map(yAccessor)).map(scaleY)
+          return dataSubset.map((d, j) => (
             <rect
-              key={`bar-${i}`}
-              x={scaleX(xAccessor(d)) - barWidth / 2}
-              y={y}
+              key={`bar-${i}-${j}`}
+              x={scaleX(xValue) - barWidth / 2}
+              y={cumY[j]}
               width={barWidth}
-              height={height - y - pad.axis.bottom - pad.data.bottom}
+              height={
+                height -
+                scaleY(yAccessor(d)) -
+                pad.axis.bottom -
+                pad.data.bottom
+              }
               fill={
+                getColor?.(d) ??
                 theme.palette.primary[
                   theme.palette.type === "dark" ? "light" : "dark"
                 ]
               }
             />
-          )
+          ))
         })}
       </svg>
     </SinglePlotContainer>
