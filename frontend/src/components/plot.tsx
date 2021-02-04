@@ -414,22 +414,12 @@ function PlotColumn({
       ? -1
       : 0
   )
-  const pad = {
-    axis: { top: 20, right: 0, bottom: 40, left: 50 },
-    data: { top: 0, right: 30, bottom: 0, left: 30 },
-    yTitle: 15,
-    xTitle: 5,
-  }
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <GenericBar
         data={agesBinned}
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.range}
-        minWidthPerX={50}
-        maxWidthMultiplier={1}
-        height={200}
-        pad={pad}
         yAxisSpec={{
           max: 200,
           ticks: [0, 50, 100, 150, 200],
@@ -443,10 +433,6 @@ function PlotColumn({
         data={genderCountsArray}
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.gender}
-        minWidthPerX={50}
-        maxWidthMultiplier={1}
-        height={200}
-        pad={pad}
         yAxisSpec={{
           max: 600,
           ticks: [0, 100, 200, 300, 400, 500, 600],
@@ -460,10 +446,6 @@ function PlotColumn({
         data={priorVacArray}
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.priorVaccinations.toString()}
-        minWidthPerX={50}
-        maxWidthMultiplier={1}
-        height={200}
-        pad={pad}
         yAxisSpec={{
           max: 600,
           ticks: [0, 100, 200, 300, 400, 500, 600],
@@ -481,27 +463,32 @@ function GenericBar<T extends Object>({
   data,
   yAccessor,
   xAccessor,
-  minWidthPerX,
-  maxWidthMultiplier,
-  height,
-  pad,
+  minWidthPerX = 50,
+  maxWidthMultiplier = 1,
+  height = 200,
+  pad = {
+    axis: { top: 20, right: 0, bottom: 40, left: 50 },
+    data: { top: 0, right: 30, bottom: 0, left: 30 },
+    yTitle: 15,
+    xTitle: 5,
+  },
   yAxisSpec,
   xAxisSpec,
 }: {
   data: T[]
   yAccessor: (x: T) => number[]
   xAccessor: (x: T) => string
-  minWidthPerX: number
-  maxWidthMultiplier: number
-  height: number
-  pad: PlotPad
+  minWidthPerX?: number
+  maxWidthMultiplier?: number
+  height?: number
+  pad?: PlotPad
   yAxisSpec: AxisSpec
   xAxisSpec: AxisSpec
 }) {
   const { width, widthPerX } = usePlotSize({
     uniqueXCount: data.length,
-    minWidthPerX,
-    maxWidthMultiplier,
+    minWidthPerX: minWidthPerX,
+    maxWidthMultiplier: maxWidthMultiplier,
     pad,
   })
   const xValues = data.map(xAccessor)
