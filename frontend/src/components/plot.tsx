@@ -415,8 +415,8 @@ function PlotColumn({
       : 0
   )
   const pad = {
-    axis: { top: 20, right: 30, bottom: 40, left: 50 },
-    data: { top: 0, right: 0, bottom: 0, left: 30 },
+    axis: { top: 20, right: 0, bottom: 40, left: 50 },
+    data: { top: 0, right: 30, bottom: 0, left: 30 },
     yTitle: 15,
     xTitle: 5,
   }
@@ -529,6 +529,7 @@ function GenericBar<T extends Object>({
           ticks={yAxisSpec.ticks ?? []}
           scale={scaleY}
           orientation="vertical"
+          drawGrid
         />
         <Axis
           pad={pad}
@@ -538,6 +539,7 @@ function GenericBar<T extends Object>({
           ticks={xValues}
           scale={scaleX}
           orientation="horizontal"
+          drawGrid={false}
         />
         {data.map((d, i) => {
           const y = scaleY(yAccessor(d)[0])
@@ -756,6 +758,7 @@ function PointRange<T extends Object>({
           ticks={yAxisSpec.ticks ?? []}
           scale={scaleY}
           orientation="vertical"
+          drawGrid
         />
         {/* X-axis */}
         {/* Line */}
@@ -914,6 +917,7 @@ function Axis<T>({
   ticks,
   scale,
   orientation,
+  drawGrid,
 }: {
   pad: PlotPad
   height: number
@@ -922,6 +926,7 @@ function Axis<T>({
   ticks: T[]
   scale: (x: T) => number
   orientation: "horizontal" | "vertical"
+  drawGrid: boolean
 }) {
   const isX = orientation === "horizontal"
   const axisTitle = [
@@ -998,15 +1003,17 @@ function Axis<T>({
               color={theme.plot.axis}
             />
             {/* Grid line */}
-            <StraightLine
-              x1={isX ? undefined : pad.axis.left}
-              x2={isX ? undefined : width - pad.axis.right}
-              y={isX ? undefined : coordinate}
-              x={isX ? coordinate : undefined}
-              y1={isX ? height - pad.axis.bottom : undefined}
-              y2={isX ? pad.axis.top : undefined}
-              color={theme.plot.grid}
-            />
+            {drawGrid && (
+              <StraightLine
+                x1={isX ? undefined : pad.axis.left}
+                x2={isX ? undefined : width - pad.axis.right}
+                y={isX ? undefined : coordinate}
+                x={isX ? coordinate : undefined}
+                y1={isX ? height - pad.axis.bottom : undefined}
+                y2={isX ? pad.axis.top : undefined}
+                color={theme.plot.grid}
+              />
+            )}
           </g>
         )
       })}
