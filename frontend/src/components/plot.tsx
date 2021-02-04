@@ -431,7 +431,6 @@ function PlotColumn({
         height={200}
         pad={pad}
         yAxisSpec={{
-          min: 0,
           max: 200,
           ticks: [0, 50, 100, 150, 200],
           lab: "Count",
@@ -449,7 +448,6 @@ function PlotColumn({
         height={200}
         pad={pad}
         yAxisSpec={{
-          min: 0,
           max: 600,
           ticks: [0, 100, 200, 300, 400, 500, 600],
           lab: "Count",
@@ -467,7 +465,6 @@ function PlotColumn({
         height={200}
         pad={pad}
         yAxisSpec={{
-          min: 0,
           max: 600,
           ticks: [0, 100, 200, 300, 400, 500, 600],
           lab: "Count",
