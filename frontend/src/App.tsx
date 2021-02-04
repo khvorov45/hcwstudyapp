@@ -157,6 +157,12 @@ export default function App() {
       divider:
         paletteType === "dark" ? "rgb(70, 70, 70)" : "rgb(200, 200, 200)",
     },
+    plot: {
+      axis: paletteType === "dark" ? "rgb(200, 200, 200)" : "rgb(80, 80, 80)",
+      grid: paletteType === "dark" ? "rgb(50, 50, 50)" : "rgb(230, 230, 230)",
+      tickLength: 5,
+      tickLabelFromTick: 2,
+    },
   })
 
   // Auth ---------------------------------------------------------------------

@@ -1,4 +1,3 @@
-import { BarChart, XAxis, YAxis, Tooltip, Bar, Label } from "recharts"
 import {
   Checkbox,
   createStyles,
@@ -285,7 +284,6 @@ function SerologyPlots({
             max: 10240,
             ticks: [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240],
             lab: selectedPid ? "Titre" : "GMT (95% CI)",
-            leftpad: 20,
           }}
           getColor={(v) => dayColors[v.day]}
           xAxisSpec={[
@@ -302,6 +300,8 @@ function SerologyPlots({
           pad={{
             axis: { top: 10, bottom: 150, left: 55, right: 80 },
             data: { top: 0, right: 0, bottom: 10, left: 10 },
+            yTitle: 20,
+            xTitle: 20,
           }}
           categorySeparatorXLevel={0}
         />
@@ -317,7 +317,6 @@ function SerologyPlots({
             max: 30,
             ticks: [0.5, 1, 2, 5, 10, 20, 30],
             lab: selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)",
-            leftpad: 20,
           }}
           xAxisSpec={[
             {
@@ -332,6 +331,8 @@ function SerologyPlots({
           pad={{
             axis: { top: 10, bottom: 150, left: 55, right: 80 },
             data: { top: 0, right: 0, bottom: 10, left: 10 },
+            yTitle: 20,
+            xTitle: 20,
           }}
           categorySeparatorXLevel={0}
         />
@@ -426,99 +427,165 @@ function PlotColumn({
           : `${a.x0}-${a.x1! - 1}`,
       count: a.length,
     }))
+
+  const genderCountsArray = Array.from(genderCounts, ([k, v]) => ({
+    gender: k ?? "(missing)",
+    count: v,
+  }))
+  const priorVacArray = Array.from(priorVaccinationCounts, ([k, v]) => ({
+    priorVaccinations: k ?? "(missing)",
+    count: v,
+  })).sort((a, b) =>
+    a.priorVaccinations > b.priorVaccinations
+      ? 1
+      : a.priorVaccinations < b.priorVaccinations
+      ? -1
+      : 0
+  )
+  const pad = {
+    axis: { top: 20, right: 30, bottom: 40, left: 50 },
+    data: { top: 0, right: 0, bottom: 0, left: 30 },
+    yTitle: 15,
+    xTitle: 5,
+  }
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
-      <GenericBar data={agesBinned} xLab="Age" xKey="range" yKey="count" />
       <GenericBar
-        data={Array.from(genderCounts, ([k, v]) => ({
-          gender: k ?? "(missing)",
-          count: v,
-        }))}
-        xLab="Gender"
-        xKey="gender"
-        yKey="count"
+        data={agesBinned}
+        yAccessor={(d) => [d.count]}
+        xAccessor={(d) => d.range}
+        minWidthPerX={50}
+        maxWidthMultiplier={1}
+        height={200}
+        pad={pad}
+        yAxisSpec={{
+          min: 0,
+          max: 200,
+          ticks: [0, 50, 100, 150, 200],
+          lab: "Count",
+        }}
+        xAxisSpec={{
+          lab: "Age",
+        }}
       />
       <GenericBar
-        data={Array.from(priorVaccinationCounts, ([k, v]) => ({
-          priorVaccinations: k ?? "(missing)",
-          count: v,
-        })).sort((a, b) =>
-          a.priorVaccinations > b.priorVaccinations
-            ? 1
-            : a.priorVaccinations < b.priorVaccinations
-            ? -1
-            : 0
-        )}
-        xLab="Known prior vaccinations"
-        xKey="priorVaccinations"
-        yKey="count"
+        data={genderCountsArray}
+        yAccessor={(d) => [d.count]}
+        xAccessor={(d) => d.gender}
+        minWidthPerX={50}
+        maxWidthMultiplier={1}
+        height={200}
+        pad={pad}
+        yAxisSpec={{
+          min: 0,
+          max: 600,
+          ticks: [0, 100, 200, 300, 400, 500, 600],
+          lab: "Count",
+        }}
+        xAxisSpec={{
+          lab: "Gender",
+        }}
+      />
+      <GenericBar
+        data={priorVacArray}
+        yAccessor={(d) => [d.count]}
+        xAccessor={(d) => d.priorVaccinations.toString()}
+        minWidthPerX={50}
+        maxWidthMultiplier={1}
+        height={200}
+        pad={pad}
+        yAxisSpec={{
+          min: 0,
+          max: 600,
+          ticks: [0, 100, 200, 300, 400, 500, 600],
+          lab: "Count",
+        }}
+        xAxisSpec={{
+          lab: "Known prior vaccinations",
+        }}
       />
     </div>
   )
 }
 
-function GenericBar<T extends Record<string, string | number>>({
+function GenericBar<T extends Object>({
   data,
-  xLab,
-  xKey,
-  yKey,
+  yAccessor,
+  xAccessor,
+  minWidthPerX,
+  maxWidthMultiplier,
+  height,
+  pad,
+  yAxisSpec,
+  xAxisSpec,
 }: {
   data: T[]
-  xLab: string
-  xKey: keyof T
-  yKey: keyof T
+  yAccessor: (x: T) => number[]
+  xAccessor: (x: T) => string
+  minWidthPerX: number
+  maxWidthMultiplier: number
+  height: number
+  pad: PlotPad
+  yAxisSpec: AxisSpec
+  xAxisSpec: AxisSpec
 }) {
+  const { width, widthPerX } = usePlotSize({
+    uniqueXCount: data.length,
+    minWidthPerX,
+    maxWidthMultiplier,
+    pad,
+  })
+  const xValues = data.map(xAccessor)
+  const scaleX = scaleCategorical(xValues, [
+    pad.axis.left + pad.data.left,
+    width - pad.axis.right - pad.data.right,
+  ])
+  const scaleY = scaleLinear(
+    [yAxisSpec.min ?? 0, yAxisSpec.max ?? 100],
+    [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
+  )
   const theme = useTheme()
-  const windowSize = useWindowSize()
-  if (data.length === 0 || !data.some((r) => r[yKey] > 0)) return <></>
+  const barWidth = widthPerX * 0.8
   return (
-    <BarChart
-      width={windowSize.width - 20 > 450 ? 450 : windowSize.width - 20}
-      height={250}
-      data={data}
-      margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-    >
-      <XAxis
-        dataKey={xKey as string}
-        tick={{
-          fill: theme.palette.text.secondary,
-        }}
-      >
-        <Label
-          value={xLab}
-          position="bottom"
-          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+    <SinglePlotContainer height={height}>
+      <svg width={width} height={height}>
+        <Axis
+          pad={pad}
+          height={height}
+          width={width}
+          label={yAxisSpec.lab}
+          ticks={yAxisSpec.ticks ?? []}
+          scale={scaleY}
+          orientation="vertical"
         />
-      </XAxis>
-      <YAxis tick={{ fill: theme.palette.text.secondary }}>
-        <Label
-          // @ts-ignore
-          angle={-90}
-          value="Count"
-          position="insideLeft"
-          style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+        <Axis
+          pad={pad}
+          height={height}
+          width={width}
+          label={xAxisSpec.lab}
+          ticks={xValues}
+          scale={scaleX}
+          orientation="horizontal"
         />
-      </YAxis>
-      <Tooltip
-        contentStyle={{
-          background: theme.palette.background.default,
-          border: `1px solid ${theme.palette.divider}`,
-        }}
-        cursor={{ fill: theme.palette.background.alt }}
-        itemStyle={{
-          color: theme.palette.text.primary,
-        }}
-      />
-      <Bar
-        dataKey={yKey as string}
-        fill={
-          theme.palette.primary[
-            theme.palette.type === "dark" ? "light" : "dark"
-          ]
-        }
-        isAnimationActive={false}
-      />
-    </BarChart>
+        {data.map((d, i) => {
+          const y = scaleY(yAccessor(d)[0])
+          return (
+            <rect
+              key={`bar-${i}`}
+              x={scaleX(xAccessor(d)) - barWidth / 2}
+              y={y}
+              width={barWidth}
+              height={height - y - pad.axis.bottom - pad.data.bottom}
+              fill={
+                theme.palette.primary[
+                  theme.palette.type === "dark" ? "light" : "dark"
+                ]
+              }
+            />
+          )
+        })}
+      </svg>
+    </SinglePlotContainer>
   )
 }
 
@@ -653,6 +720,61 @@ type Pad = {
   right: number
 }
 
+type PlotPad = {
+  axis: Pad
+  data: Pad
+  yTitle: number
+  xTitle: number
+}
+
+function usePlotSize({
+  uniqueXCount,
+  minWidthPerX,
+  maxWidthMultiplier,
+  pad,
+}: {
+  uniqueXCount: number
+  minWidthPerX: number
+  maxWidthMultiplier: number
+  pad: PlotPad
+}) {
+  const minWidth =
+    minWidthPerX * uniqueXCount +
+    pad.axis.left +
+    pad.axis.right +
+    pad.data.left +
+    pad.data.right
+  const windowSize = useWindowSize()
+  const width =
+    minmax(windowSize.width, minWidth, minWidth * maxWidthMultiplier) -
+    detectScrollbarWidth()
+  const dataWidth =
+    width - pad.axis.right - pad.data.right - pad.axis.left - pad.data.left
+  const widthPerX = dataWidth / uniqueXCount
+  return {
+    width,
+    widthPerX,
+  }
+}
+
+type AxisSpec = {
+  min?: number
+  max?: number
+  ticks?: number[]
+  lab: string
+}
+
+function scaleCategorical(
+  levels: (string | string[])[],
+  [min, max]: [min: number, max: number]
+) {
+  const scaleIndex = scaleLinear([0, levels.length - 1], [min, max])
+  return scaleOrdinal(
+    levels,
+    levels.map((x, i) => scaleIndex(i))
+  )
+}
+
 function PointRange<T extends Object>({
   data,
   xAccessor,
@@ -672,13 +794,7 @@ function PointRange<T extends Object>({
   minWidthPerX: number
   maxWidthMultiplier: number
   height: number
-  yAxisSpec: {
-    min: number
-    max: number
-    ticks: number[]
-    lab: string
-    leftpad: number
-  }
+  yAxisSpec: AxisSpec
   getColor?: (x: T) => string
   xAxisSpec: {
     name?: string
@@ -687,41 +803,24 @@ function PointRange<T extends Object>({
     renderTick?: (props: { tick: string; x: number; y: number }) => ReactNode
   }[]
   categorySeparatorXLevel?: number
-  pad: { axis: Pad; data: Pad }
+  pad: PlotPad
 }) {
   // Figure out plot dimensions (data-dependent)
   const uniqueXs = Array.from(new Set(data.map((x) => xAccessor(x))))
-  const minWidth =
-    minWidthPerX * uniqueXs.length +
-    pad.axis.left +
-    pad.axis.right +
-    pad.data.left +
-    pad.data.right
-  const windowSize = useWindowSize()
-  const width =
-    minmax(windowSize.width, minWidth, minWidth * maxWidthMultiplier) -
-    detectScrollbarWidth()
-  const dataWidth =
-    width - pad.axis.right - pad.data.right - pad.axis.left - pad.data.left
-  const actualWidthPerX = dataWidth / uniqueXs.length
+  const { width, widthPerX } = usePlotSize({
+    uniqueXCount: uniqueXs.length,
+    minWidthPerX,
+    maxWidthMultiplier,
+    pad,
+  })
 
-  // Now the elements that depend on plot dimensions
-  const axisTitleY = [
-    yAxisSpec.leftpad,
-    (height - pad.axis.top - pad.axis.bottom) / 2,
-  ]
-
-  const scaleXIndex = scaleLinear(
-    [0, uniqueXs.length - 1],
-    [pad.axis.left + pad.data.left, width - pad.axis.right - pad.data.right]
-  )
-  const scaleX = scaleOrdinal(
-    uniqueXs,
-    uniqueXs.map((x, i) => scaleXIndex(i))
-  )
+  const scaleX = scaleCategorical(uniqueXs, [
+    pad.axis.left + pad.data.left,
+    width - pad.axis.right - pad.data.right,
+  ])
 
   const scaleY = scaleLog(
-    [yAxisSpec.min, yAxisSpec.max],
+    [yAxisSpec.min ?? 5, yAxisSpec.max ?? 10000],
     [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
   )
 
@@ -746,36 +845,20 @@ function PointRange<T extends Object>({
 
   // Colors and distances
   const theme = useTheme()
-  const axisColor =
-    theme.palette.type === "dark"
-      ? theme.palette.grey[300]
-      : theme.palette.grey[700]
-  const gridColor =
-    theme.palette.type === "dark"
-      ? theme.palette.grey[800]
-      : theme.palette.grey[200]
   const xAxesDistance = 15
-  const distanceFromTicks = 7
-  const tickLength = 5
   return (
-    <div
-      style={{
-        overflowX: "scroll",
-        overflowY: "hidden",
-        height: height + detectScrollbarWidth(),
-      }}
-    >
+    <SinglePlotContainer height={height}>
       <svg width={width} height={height}>
         {/* Category separators */}
         {xSep.map((x, i) => {
-          const x1 = scaleX(x) - actualWidthPerX / 2
+          const x1 = scaleX(x) - widthPerX / 2
           const x2 =
             scaleX(
               i === xSep.length - 1
                 ? uniqueXs[uniqueXs.length - 1]
                 : xSep[i + 1]
             ) +
-            (actualWidthPerX / 2) * (i === xSep.length - 1 ? 0 : -1)
+            (widthPerX / 2) * (i === xSep.length - 1 ? 0 : -1)
 
           return (
             <rect
@@ -792,62 +875,22 @@ function PointRange<T extends Object>({
           )
         })}
         {/* Y-axis */}
-        {/* Line */}
-        <StraightLine
-          x={pad.axis.left}
-          y1={height - pad.axis.bottom}
-          y2={pad.axis.top}
-          color={axisColor}
+        <Axis
+          pad={pad}
+          height={height}
+          width={width}
+          label={yAxisSpec.lab}
+          ticks={yAxisSpec.ticks ?? []}
+          scale={scaleY}
+          orientation="vertical"
         />
-        {/* Name */}
-        <text
-          x={axisTitleY[0]}
-          y={axisTitleY[1]}
-          fill={theme.palette.text.primary}
-          textAnchor="middle"
-          transform={`rotate(-90, ${axisTitleY[0]}, ${axisTitleY[1]})`}
-        >
-          {yAxisSpec.lab}
-          {/* Ticks */}
-        </text>
-        {yAxisSpec.ticks.map((yTick) => {
-          const y = scaleY(yTick)
-          return (
-            <g key={`yTick-${yTick}`}>
-              {/* Number */}
-              <text
-                fill={theme.palette.text.secondary}
-                x={pad.axis.left - distanceFromTicks}
-                y={y}
-                textAnchor="end"
-                dominantBaseline="middle"
-              >
-                {yTick}
-              </text>
-              {/* Tick */}
-              <StraightLine
-                x1={pad.axis.left - tickLength}
-                x2={pad.axis.left}
-                y={y}
-                color={axisColor}
-              />
-              {/* Grid line */}
-              <StraightLine
-                x1={pad.axis.left}
-                x2={width - pad.axis.right}
-                y={y}
-                color={gridColor}
-              />
-            </g>
-          )
-        })}
         {/* X-axis */}
         {/* Line */}
         <StraightLine
           x1={pad.axis.left}
           x2={width - pad.axis.right}
           y={height - pad.axis.bottom}
-          color={axisColor}
+          color={theme.plot.axis}
         />
         {/* Name(s) */}
         {xAxisSpec?.map((xAxis, i) => (
@@ -856,7 +899,8 @@ function PointRange<T extends Object>({
             y={
               height -
               pad.axis.bottom +
-              distanceFromTicks +
+              theme.plot.tickLength +
+              theme.plot.tickLabelFromTick +
               (xAxisSpec.length - i - 1) * xAxesDistance
             }
             fill={theme.palette.text.primary}
@@ -879,7 +923,8 @@ function PointRange<T extends Object>({
                 const y =
                   height -
                   pad.axis.bottom +
-                  distanceFromTicks +
+                  theme.plot.tickLength +
+                  theme.plot.tickLabelFromTick +
                   (xTickGroup.length - j - 1) * xAxesDistance
                 return (
                   prevX[j] !== xTick && (
@@ -903,16 +948,16 @@ function PointRange<T extends Object>({
               {/* Tick */}
               <StraightLine
                 x={x}
-                y1={height - pad.axis.bottom + tickLength}
+                y1={height - pad.axis.bottom + theme.plot.tickLength}
                 y2={height - pad.axis.bottom}
-                color={axisColor}
+                color={theme.plot.axis}
               />
               {/* Grid line */}
               <StraightLine
                 x={x}
                 y1={height - pad.axis.bottom}
                 y2={pad.axis.top}
-                color={gridColor}
+                color={theme.plot.grid}
               />
             </g>
           )
@@ -941,7 +986,7 @@ function PointRange<T extends Object>({
           )
         })}
       </svg>
-    </div>
+    </SinglePlotContainer>
   )
 }
 
@@ -966,4 +1011,132 @@ function StraightLine({
     return <line x1={x} x2={x} y1={y1} y2={y2} stroke={color} />
   }
   return <line x1={x1} x2={x2} y1={y} y2={y} stroke={color} />
+}
+
+function SinglePlotContainer({
+  children,
+  height,
+}: {
+  children: ReactNode
+  height: number
+}) {
+  return (
+    <div
+      style={{
+        overflowX: "scroll",
+        overflowY: "hidden",
+        height: height + detectScrollbarWidth(),
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function Axis<T>({
+  pad,
+  height,
+  width,
+  label,
+  ticks,
+  scale,
+  orientation,
+}: {
+  pad: PlotPad
+  height: number
+  width: number
+  label: string
+  ticks: T[]
+  scale: (x: T) => number
+  orientation: "horizontal" | "vertical"
+}) {
+  const isX = orientation === "horizontal"
+  const axisTitle = [
+    isX
+      ? (width - pad.axis.left - pad.axis.right) / 2 + pad.axis.left
+      : pad.yTitle,
+    isX
+      ? height - pad.xTitle
+      : (height - pad.axis.top - pad.axis.bottom) / 2 + pad.axis.top,
+  ]
+  const theme = useTheme()
+  return (
+    <>
+      {/* Line */}
+      <StraightLine
+        x={isX ? undefined : pad.axis.left}
+        x1={isX ? pad.axis.left : undefined}
+        x2={isX ? width - pad.axis.right : undefined}
+        y={isX ? height - pad.axis.bottom : undefined}
+        y1={isX ? undefined : height - pad.axis.bottom}
+        y2={isX ? undefined : pad.axis.top}
+        color={theme.plot.axis}
+      />
+      {/* Name */}
+      <text
+        x={axisTitle[0]}
+        y={axisTitle[1]}
+        fill={theme.palette.text.primary}
+        textAnchor="middle"
+        transform={isX ? "" : `rotate(-90, ${axisTitle[0]}, ${axisTitle[1]})`}
+      >
+        {label}
+        {/* Ticks */}
+      </text>
+      {ticks.map((tick, i) => {
+        const coordinate = scale(tick)
+        return (
+          <g key={`${isX ? "x" : "y"}-tick-${i}`}>
+            {/* Number */}
+            <text
+              fill={theme.palette.text.secondary}
+              x={
+                isX
+                  ? coordinate
+                  : pad.axis.left -
+                    theme.plot.tickLength -
+                    theme.plot.tickLabelFromTick
+              }
+              y={
+                isX
+                  ? height -
+                    (pad.axis.bottom -
+                      theme.plot.tickLength -
+                      theme.plot.tickLabelFromTick)
+                  : coordinate
+              }
+              textAnchor={isX ? "middle" : "end"}
+              dominantBaseline={isX ? "hanging" : "middle"}
+            >
+              {tick}
+            </text>
+            {/* Tick */}
+            <StraightLine
+              x1={isX ? undefined : pad.axis.left - theme.plot.tickLength}
+              x2={isX ? undefined : pad.axis.left}
+              y={isX ? undefined : coordinate}
+              x={isX ? coordinate : undefined}
+              y1={isX ? height - pad.axis.bottom : undefined}
+              y2={
+                isX
+                  ? height - pad.axis.bottom + theme.plot.tickLength
+                  : undefined
+              }
+              color={theme.plot.axis}
+            />
+            {/* Grid line */}
+            <StraightLine
+              x1={isX ? undefined : pad.axis.left}
+              x2={isX ? undefined : width - pad.axis.right}
+              y={isX ? undefined : coordinate}
+              x={isX ? coordinate : undefined}
+              y1={isX ? height - pad.axis.bottom : undefined}
+              y2={isX ? pad.axis.top : undefined}
+              color={theme.plot.grid}
+            />
+          </g>
+        )
+      })}
+    </>
+  )
 }
