@@ -382,10 +382,16 @@ function PlotColumn({
   participantsExtra: ParticipantExtra[]
   getColor?: (p: ParticipantExtra) => string
 }) {
+  const actualGetColor =
+    getColor ??
+    ((p) =>
+      theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"])
+
   const genderCounts = d3.rollup(
     participantsExtra,
     (v) => v.length,
-    (p) => p.gender
+    (p) => p.gender,
+    actualGetColor
   )
 
   const theme = useTheme()
@@ -394,9 +400,7 @@ function PlotColumn({
     participantsExtra,
     (v) => v.length,
     (p) => p.prevVac,
-    getColor ??
-      ((p) =>
-        theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"])
+    actualGetColor
   )
 
   function binAges(arr: number[]) {
@@ -416,10 +420,13 @@ function PlotColumn({
 
   const agesBinned = binAges(participantsExtra.map((p) => p.age))
 
-  const genderCountsArray = Array.from(genderCounts, ([k, v]) => ({
-    gender: k ?? "(missing)",
-    count: v,
-  }))
+  const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
+    Array.from(colorSummary, ([color, count]) => ({
+      gender: gender ?? "(missing)",
+      color: color ?? "(missing)",
+      count,
+    }))
+  ).flat()
   const priorVacArray = Array.from(
     priorVaccinationCounts,
     ([prevVac, colorSummary]) =>
@@ -456,6 +463,7 @@ function PlotColumn({
         xAxisSpec={{
           lab: "Gender",
         }}
+        getColor={(d) => d.color}
       />
       <GenericBar
         data={priorVacArray}
