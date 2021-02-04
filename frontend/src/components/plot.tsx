@@ -421,7 +421,6 @@ function PlotColumn({
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.range}
         yAxisSpec={{
-          max: 200,
           ticks: [0, 50, 100, 150, 200],
           lab: "Count",
         }}
@@ -434,7 +433,6 @@ function PlotColumn({
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.gender}
         yAxisSpec={{
-          max: 600,
           ticks: [0, 100, 200, 300, 400, 500, 600],
           lab: "Count",
         }}
@@ -447,7 +445,6 @@ function PlotColumn({
         yAccessor={(d) => [d.count]}
         xAccessor={(d) => d.priorVaccinations.toString()}
         yAxisSpec={{
-          max: 600,
           ticks: [0, 100, 200, 300, 400, 500, 600],
           lab: "Count",
         }}
@@ -496,8 +493,9 @@ function GenericBar<T extends Object>({
     pad.axis.left + pad.data.left,
     width - pad.axis.right - pad.data.right,
   ])
+  const yValuesSum = data.map((d) => d3.sum(yAccessor(d)))
   const scaleY = scaleLinear(
-    [yAxisSpec.min ?? 0, yAxisSpec.max ?? 100],
+    [yAxisSpec.min ?? 0, yAxisSpec.max ?? d3.max(yValuesSum) ?? 100],
     [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
   )
   const theme = useTheme()
@@ -949,6 +947,10 @@ function Axis<T>({
       </text>
       {ticks.map((tick, i) => {
         const coordinate = scale(tick)
+        const maxAllowed = isX ? width - pad.axis.right : pad.axis.top
+        if (isX ? coordinate > maxAllowed : coordinate < maxAllowed) {
+          return <g key={`${isX ? "x" : "y"}-tick-${i}`} />
+        }
         return (
           <g key={`${isX ? "x" : "y"}-tick-${i}`}>
             {/* Number */}
