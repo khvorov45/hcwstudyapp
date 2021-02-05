@@ -435,7 +435,6 @@ function PlotColumn({
       )
       return binAges(dataSubset.map((p) => p.age)).map((x) =>
         Object.assign(x, {
-          color: colorMapping[colorVarValue],
           colorVar: colorVarValue,
         })
       )
@@ -447,7 +446,6 @@ function PlotColumn({
     Array.from(colorSummary, ([colorVar, count]) => ({
       gender: gender ?? "(missing)",
       colorVar,
-      color: colorMapping[colorVar],
       count,
     }))
   )
@@ -460,13 +458,13 @@ function PlotColumn({
       Array.from(colorSummary, ([colorVar, count]) => ({
         priorVaccinations: prevVac ?? "(missing)",
         colorVar,
-        color: colorMapping[colorVar],
         count,
       })).sort(colorVarSort)
   )
     .flat()
     .sort((a, b) => a.priorVaccinations - b.priorVaccinations)
 
+  const getColor = (d: any) => colorMapping[d.colorVar]
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <GenericBar
@@ -479,7 +477,7 @@ function PlotColumn({
         xAxisSpec={{
           lab: "Age",
         }}
-        getColor={(d) => d.color}
+        getColor={getColor}
       />
       <GenericBar
         data={genderCountsArray}
@@ -491,7 +489,7 @@ function PlotColumn({
         xAxisSpec={{
           lab: "Gender",
         }}
-        getColor={(d) => d.color}
+        getColor={getColor}
       />
       <GenericBar
         data={priorVacArray}
@@ -503,7 +501,7 @@ function PlotColumn({
         xAxisSpec={{
           lab: "Known prior vaccinations",
         }}
-        getColor={(d) => d.color}
+        getColor={getColor}
       />
     </div>
   )
