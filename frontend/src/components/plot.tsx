@@ -352,10 +352,25 @@ function BaselinePlots({
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<string[]>([])
+  const [colorVariable, setColorVariable] = useState<
+    "gender" | "prevVac" | null
+  >(null)
+  const options = {
+    gender: "Gender",
+    prevVac: "Vaccination",
+  }
   return (
     <>
       <ControlRibbon>
         <SiteSelect sites={sites} site={site} setSite={setSite} />
+        <Selector
+          options={["gender", "prevVac"]}
+          getOptionLabel={(o) => options[o as "gender" | "prevVac"]}
+          label="Color by"
+          value={colorVariable}
+          onChange={setColorVariable}
+          width={200}
+        />
       </ControlRibbon>
       <PlotContainer>
         <PlotColumn
@@ -364,7 +379,9 @@ function BaselinePlots({
               site.length === 0 ||
               (p.site !== undefined && site.includes(p.site))
           )}
-          getColorVariable={(p) => p.prevVac.toString() ?? "(missing)"}
+          getColorVariable={
+            colorVariable ? (p) => `${p[colorVariable]}` : (p) => "constant"
+          }
         />
       </PlotContainer>
     </>
@@ -465,8 +482,11 @@ function PlotColumn({
   )
     .flat()
     .sort((a, b) => a.priorVaccinations - b.priorVaccinations)
-
-  const getColor = (d: any) => colorMapping[d.colorVar]
+  const theme = useTheme()
+  const getColor = (d: any) =>
+    colorVarValues.length === 1
+      ? theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"]
+      : colorMapping[d.colorVar]
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <GenericBar

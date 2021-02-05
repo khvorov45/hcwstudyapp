@@ -42,17 +42,19 @@ export function Selector<T>({
   value,
   onChange,
   width,
+  getOptionLabel = (o) => `${o}`,
 }: {
   options: T[]
   label: string
   value: T | null
   onChange: (s: T | null) => void
   width: number
+  getOptionLabel?: (x: T) => string
 }) {
   return (
     <Autocomplete
       options={options}
-      getOptionLabel={(o) => `${o}`}
+      getOptionLabel={getOptionLabel}
       renderInput={(params) => (
         <SelectorTextField params={params} label={label} />
       )}
