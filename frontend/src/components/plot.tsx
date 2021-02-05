@@ -408,22 +408,24 @@ function PlotColumn({
 
   function binAges(arr: number[]) {
     const thresholds = [18, 30, 40, 50, 66]
-    const thresholdsReverse = [...thresholds].reverse()
-    const closeLow = (v: number) =>
-      thresholdsReverse[thresholdsReverse.findIndex((t) => t <= v)]
-    const closeHigh = (v: number) =>
-      thresholds[thresholds.findIndex((t) => t >= v)]
+    function findRange(x0: number, x1: number) {
+      if (x0 < 18) {
+        return "<18"
+      }
+      if (x1 > 66) {
+        return ">66"
+      }
+      const closestHighIndex = thresholds.findIndex((t) => t >= x1)
+      return `${thresholds[closestHighIndex - 1]}-${
+        thresholds[closestHighIndex]
+      }`
+    }
     return d3
       .bin()
       .thresholds(thresholds)(arr)
       .filter((a) => a.length > 0)
       .map((a) => ({
-        range:
-          a.x0! < 18
-            ? "<18"
-            : a.x0! === 66
-            ? `>=66`
-            : `${closeLow(a.x0!)}-${closeHigh(a.x1!)}`,
+        range: findRange(a.x0!, a.x1!),
         count: a.length,
       }))
   }
@@ -441,6 +443,7 @@ function PlotColumn({
     })
     .flat()
     .sort(colorVarSort)
+  console.log(agesBinned)
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
     Array.from(colorSummary, ([colorVar, count]) => ({
