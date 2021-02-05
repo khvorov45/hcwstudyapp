@@ -352,10 +352,6 @@ function BaselinePlots({
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<string[]>([])
-  const genders = Array.from(
-    new Set(participantsExtra.map((p) => p.gender ?? "(missing)"))
-  )
-  const genderColors = createDescreteMapping(genders)
   return (
     <>
       <ControlRibbon>
@@ -368,7 +364,7 @@ function BaselinePlots({
               site.length === 0 ||
               (p.site !== undefined && site.includes(p.site))
           )}
-          getColor={(p) => genderColors[p.gender ?? "(missing)"] ?? "gray500"}
+          getColorVariable={(p) => p.gender ?? "(missing)"}
         />
       </PlotContainer>
     </>
@@ -377,67 +373,99 @@ function BaselinePlots({
 
 function PlotColumn({
   participantsExtra,
-  getColor,
+  getColorVariable,
 }: {
   participantsExtra: ParticipantExtra[]
-  getColor?: (p: ParticipantExtra) => string
+  getColorVariable: (p: ParticipantExtra) => string
 }) {
-  const actualGetColor =
-    getColor ??
-    ((p) =>
-      theme.palette.primary[theme.palette.type === "dark" ? "light" : "dark"])
+  const colorVarValues = Array.from(
+    new Set(participantsExtra.map(getColorVariable))
+  )
+  const colorMapping = createDescreteMapping(colorVarValues)
+  const colorVarSort = (a: any, b: any) => {
+    if (a.colorVar === "(missing)") {
+      return 1
+    }
+    if (b.colorVar === "(missing)") {
+      return -1
+    }
+    return a.colorVar > b.colorVar ? 1 : a.colorVar < b.colorVar ? -1 : 0
+  }
 
   const genderCounts = d3.rollup(
     participantsExtra,
     (v) => v.length,
     (p) => p.gender,
-    actualGetColor
+    getColorVariable
   )
-
-  const theme = useTheme()
 
   const priorVaccinationCounts = d3.rollup(
     participantsExtra,
     (v) => v.length,
     (p) => p.prevVac,
-    actualGetColor
+    getColorVariable
   )
 
   function binAges(arr: number[]) {
+    const thresholds = [18, 30, 40, 50, 66]
+    const thresholdsReverse = [...thresholds].reverse()
+    const closeLow = (v: number) =>
+      thresholdsReverse[thresholdsReverse.findIndex((t) => t <= v)]
+    const closeHigh = (v: number) =>
+      thresholds[thresholds.findIndex((t) => t >= v)]
     return d3
       .bin()
-      .thresholds([18, 30, 40, 50, 66])(arr)
+      .thresholds(thresholds)(arr)
+      .filter((a) => a.length > 0)
       .map((a) => ({
         range:
           a.x0! < 18
-            ? `<${a.x1}`
-            : a.x1! > 66
-            ? `>=${a.x0}`
-            : `${a.x0}-${a.x1! - 1}`,
+            ? "<18"
+            : a.x0! === 66
+            ? `>=66`
+            : `${closeLow(a.x0!)}-${closeHigh(a.x1!)}`,
         count: a.length,
       }))
   }
 
-  const agesBinned = binAges(participantsExtra.map((p) => p.age))
+  const agesBinned = colorVarValues
+    .map((colorVarValue) => {
+      const dataSubset = participantsExtra.filter(
+        (p) => getColorVariable(p) === colorVarValue
+      )
+      return binAges(dataSubset.map((p) => p.age))
+        .map((x) =>
+          Object.assign(x, {
+            color: colorMapping[colorVarValue],
+            colorVar: colorVarValue,
+          })
+        )
+        .sort(colorVarSort)
+    })
+    .flat()
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
-    Array.from(colorSummary, ([color, count]) => ({
+    Array.from(colorSummary, ([colorVar, count]) => ({
       gender: gender ?? "(missing)",
-      color: color ?? "(missing)",
+      colorVar,
+      color: colorMapping[colorVar],
       count,
     }))
-  ).flat()
+  )
+    .flat()
+    .sort(colorVarSort)
+
   const priorVacArray = Array.from(
     priorVaccinationCounts,
     ([prevVac, colorSummary]) =>
-      Array.from(colorSummary, ([color, count]) => ({
+      Array.from(colorSummary, ([colorVar, count]) => ({
         priorVaccinations: prevVac ?? "(missing)",
-        color: color ?? "(missing)",
+        colorVar,
+        color: colorMapping[colorVar],
         count,
-      }))
+      })).sort(colorVarSort)
   )
     .flat()
-    .sort((a, b) => (a.color > b.color ? 1 : a.color < b.color ? -1 : 0))
     .sort((a, b) => a.priorVaccinations - b.priorVaccinations)
 
   return (
@@ -452,6 +480,7 @@ function PlotColumn({
         xAxisSpec={{
           lab: "Age",
         }}
+        getColor={(d) => d.color}
       />
       <GenericBar
         data={genderCountsArray}
