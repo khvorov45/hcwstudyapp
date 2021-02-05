@@ -443,7 +443,6 @@ function PlotColumn({
     })
     .flat()
     .sort(colorVarSort)
-  console.log(agesBinned)
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
     Array.from(colorSummary, ([colorVar, count]) => ({
