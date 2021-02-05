@@ -364,7 +364,7 @@ function BaselinePlots({
               site.length === 0 ||
               (p.site !== undefined && site.includes(p.site))
           )}
-          getColorVariable={(p) => p.gender ?? "(missing)"}
+          getColorVariable={(p) => p.prevVac.toString() ?? "(missing)"}
         />
       </PlotContainer>
     </>
@@ -433,16 +433,15 @@ function PlotColumn({
       const dataSubset = participantsExtra.filter(
         (p) => getColorVariable(p) === colorVarValue
       )
-      return binAges(dataSubset.map((p) => p.age))
-        .map((x) =>
-          Object.assign(x, {
-            color: colorMapping[colorVarValue],
-            colorVar: colorVarValue,
-          })
-        )
-        .sort(colorVarSort)
+      return binAges(dataSubset.map((p) => p.age)).map((x) =>
+        Object.assign(x, {
+          color: colorMapping[colorVarValue],
+          colorVar: colorVarValue,
+        })
+      )
     })
     .flat()
+    .sort(colorVarSort)
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
     Array.from(colorSummary, ([colorVar, count]) => ({
