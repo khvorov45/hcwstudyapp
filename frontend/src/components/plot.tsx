@@ -559,6 +559,16 @@ function GenericBar<T extends Object>({
   getColor?: (d: T) => string
 }) {
   const xValuesUnique = Array.from(new Set(data.map(xAccessor)))
+  const xValueSubsets = xValuesUnique.map((xValue) => {
+    const dataSubset = data.filter((d) => xAccessor(d) === xValue)
+    const yValues = dataSubset.map(yAccessor)
+    return {
+      xValue,
+      total: d3.sum(yValues) ?? 0,
+      dataSubset,
+      cumsum: d3.cumsum(yValues),
+    }
+  })
   const { width, widthPerX } = usePlotSize({
     uniqueXCount: xValuesUnique.length,
     minWidthPerX: minWidthPerX,
@@ -569,7 +579,7 @@ function GenericBar<T extends Object>({
     pad.axis.left + pad.data.left,
     width - pad.axis.right - pad.data.right,
   ])
-  const yValuesSum = data.map((d) => yAccessor(d))
+  const yValuesSum = xValueSubsets.map((d) => d.total)
   const yMax = yAxisSpec.max ?? d3.max(yValuesSum) ?? 100
   const yMaxRounded = roundUp(yMax)
   const scaleY = scaleLinear(
@@ -609,14 +619,12 @@ function GenericBar<T extends Object>({
           orientation="horizontal"
           drawGrid={false}
         />
-        {xValuesUnique.map((xValue, i) => {
-          const dataSubset = data.filter((d) => xAccessor(d) === xValue)
-          const cumY = d3.cumsum(dataSubset.map(yAccessor)).map(scaleY)
-          return dataSubset.map((d, j) => (
+        {xValueSubsets.map((xValueSubset, i) =>
+          xValueSubset.dataSubset.map((d, j) => (
             <rect
               key={`bar-${i}-${j}`}
-              x={scaleX(xValue) - barWidth / 2}
-              y={cumY[j]}
+              x={scaleX(xValueSubset.xValue) - barWidth / 2}
+              y={scaleY(xValueSubset.cumsum[j])}
               width={barWidth}
               height={
                 height -
@@ -632,7 +640,7 @@ function GenericBar<T extends Object>({
               }
             />
           ))
-        })}
+        )}
       </svg>
     </SinglePlotContainer>
   )
