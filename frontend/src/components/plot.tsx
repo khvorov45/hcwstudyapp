@@ -202,6 +202,11 @@ function SerologyPlots({
     yTitle: 20,
     xTitle: 20,
   }
+  const virusAxisSpec: AxisSpec = {
+    textAnchor: "start",
+    angle: 45,
+    renderTick: (props) => <VirusTick {...props} viruses={virusTable} />,
+  }
   return (
     <>
       <ControlRibbon>
@@ -273,17 +278,7 @@ function SerologyPlots({
             type: "log",
           }}
           getColor={(v) => dayColors[v.day]}
-          xAxisSpec={[
-            {
-              textAnchor: "start",
-              angle: 45,
-              renderTick: (props) => (
-                <VirusTick {...props} viruses={virusTable} />
-              ),
-            },
-            { lab: "Day" },
-            { lab: "Vax" },
-          ]}
+          xAxisSpec={[virusAxisSpec, { lab: "Day" }, { lab: "Vax" }]}
           pad={pad}
           categorySeparatorXLevel={0}
         />
@@ -301,16 +296,7 @@ function SerologyPlots({
             lab: selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)",
             type: "log",
           }}
-          xAxisSpec={[
-            {
-              textAnchor: "start",
-              angle: 45,
-              renderTick: (props) => (
-                <VirusTick {...props} viruses={virusTable} />
-              ),
-            },
-            { lab: "Vax" },
-          ]}
+          xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
           pad={pad}
           categorySeparatorXLevel={0}
         />
@@ -329,16 +315,7 @@ function SerologyPlots({
               ? "Seroconverted (14 vs 0)"
               : "Seroconversion (14 vs 0, 95% CI)",
           }}
-          xAxisSpec={[
-            {
-              textAnchor: "start",
-              angle: 45,
-              renderTick: (props) => (
-                <VirusTick {...props} viruses={virusTable} />
-              ),
-            },
-            { lab: "Vax" },
-          ]}
+          xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
           pad={pad}
           categorySeparatorXLevel={0}
         />
