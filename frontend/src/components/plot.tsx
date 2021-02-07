@@ -11,7 +11,7 @@ import { Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
 import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
 import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
-import { numberSort, stringSort, unique } from "../lib/util"
+import { numberSort, rollup, stringSort, unique } from "../lib/util"
 
 export default function Plots({
   participantsExtra,
@@ -129,6 +129,26 @@ function SerologyPlots({
     }
   }
 
+  function summariseProportion(v: boolean[]) {
+    const prop = v.filter((x) => x).length / v.length
+    // Normal approximation
+    const se = Math.sqrt((prop * (1 - prop)) / v.length)
+    return {
+      prop,
+      se,
+      low: Math.max(prop - 1.96 * se, 0),
+      high: Math.min(prop + 1.96 * se, 1),
+    }
+  }
+
+  const seroconversionSummary = rollup(
+    titreChangeFiltered,
+    (x) => ({ prevVac: x.prevVac, virus: x.virusShortName }),
+    (arr) => summariseProportion(arr.map((a) => a.seroconverted))
+  )
+    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
+    .sort((a, b) => stringSort(a.virus, b.virus))
+
   // Summarise each virus
   const virusDaySummarized = d3.rollup(
     daysFiltered,
@@ -176,6 +196,12 @@ function SerologyPlots({
 
   const dayColors = createDescreteMapping(days)
 
+  const pad = {
+    axis: { top: 10, bottom: 150, left: 55, right: 80 },
+    data: { top: 0, right: 0, bottom: 10, left: 10 },
+    yTitle: 20,
+    xTitle: 20,
+  }
   return (
     <>
       <ControlRibbon>
@@ -257,12 +283,7 @@ function SerologyPlots({
             { name: "Day" },
             { name: "Vax" },
           ]}
-          pad={{
-            axis: { top: 10, bottom: 150, left: 55, right: 80 },
-            data: { top: 0, right: 0, bottom: 10, left: 10 },
-            yTitle: 20,
-            xTitle: 20,
-          }}
+          pad={pad}
           categorySeparatorXLevel={0}
         />
         <PointRange
@@ -288,12 +309,35 @@ function SerologyPlots({
             },
             { name: "Vax" },
           ]}
-          pad={{
-            axis: { top: 10, bottom: 150, left: 55, right: 80 },
-            data: { top: 0, right: 0, bottom: 10, left: 10 },
-            yTitle: 20,
-            xTitle: 20,
+          pad={pad}
+          categorySeparatorXLevel={0}
+        />
+        <PointRange
+          data={seroconversionSummary}
+          xAccessor={(d) => [d.virus, d.prevVac.toString()]}
+          yAccessor={(d) => ({ point: d.prop, low: d.low, high: d.high })}
+          minWidthPerX={20}
+          maxWidthMultiplier={3}
+          height={400}
+          yAxisSpec={{
+            min: 0.5,
+            max: 30,
+            ticks: [0.5, 1, 2, 5, 10, 20, 30],
+            lab: selectedPid
+              ? "Seroconverted (14 vs 0)"
+              : "Seroconversion (14 vs 0, 95% CI)",
           }}
+          xAxisSpec={[
+            {
+              textAnchor: "start",
+              angle: 45,
+              renderTick: (props) => (
+                <VirusTick {...props} viruses={virusTable} />
+              ),
+            },
+            { name: "Vax" },
+          ]}
+          pad={pad}
           categorySeparatorXLevel={0}
         />
       </PlotContainer>
