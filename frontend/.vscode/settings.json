@@ -5,6 +5,7 @@
         "httr",
         "iconify",
         "pids",
+        "seroconverted",
         "tibble"
     ]
 }

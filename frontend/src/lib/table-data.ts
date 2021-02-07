@@ -121,6 +121,7 @@ export const TitreChangeV = t.type({
   day1: t.number,
   day2: t.number,
   rise: t.number,
+  seroconverted: t.boolean,
   prevVac: t.number,
 })
 export type TitreChange = t.TypeOf<typeof TitreChangeV>
@@ -132,34 +133,26 @@ function genTitreChange(
 ): TitreChange[] {
   const titreChanges = virusTable.flatMap((virus) =>
     participantsExtra
-      .map((participant) => ({
-        virus: virus.name,
-        virusShortName: virus.shortName,
-        virusClade: virus.clade,
-        pid: participant.pid,
-        site: participant.site,
-        prevVac: participant.prevVac,
-        day1: 0,
-        day2: 14,
-        rise: Math.exp(
-          Math.log(
-            serologyExtra.find(
-              (s) =>
-                s.pid === participant.pid &&
-                s.virus === virus.name &&
-                s.day === 14
-            )?.titre ?? NaN
-          ) -
-            Math.log(
-              serologyExtra.find(
-                (s) =>
-                  s.pid === participant.pid &&
-                  s.virus === virus.name &&
-                  s.day === 0
-              )?.titre ?? NaN
-            )
-        ),
-      }))
+      .map((participant) => {
+        const subset = serologyExtra.filter(
+          (s) => s.pid === participant.pid && s.virus === virus.name
+        )
+        const d2 = subset.find((s) => s.day === 14)?.titre ?? NaN
+        const d1 = subset.find((s) => s.day === 0)?.titre ?? NaN
+        const rise = d2 / d1
+        return {
+          virus: virus.name,
+          virusShortName: virus.shortName,
+          virusClade: virus.clade,
+          pid: participant.pid,
+          site: participant.site,
+          prevVac: participant.prevVac,
+          day1: 0,
+          day2: 14,
+          rise,
+          seroconverted: d1 === 5 ? d2 >= 40 : rise >= 4,
+        }
+      })
       .filter((p) => !isNaN(p.rise))
   )
   return decode(t.array(TitreChangeV), titreChanges)
