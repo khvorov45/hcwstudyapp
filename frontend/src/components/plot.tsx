@@ -11,6 +11,7 @@ import { Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
 import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
 import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
+import { numberSort, stringSort, unique } from "../lib/util"
 
 export default function Plots({
   participantsExtra,
@@ -70,16 +71,10 @@ function SerologyPlots({
   titreChange: TitreChange[]
   virusTable: Virus[]
 }) {
-  const viruses = Array.from(
-    new Set(serology.map((s) => s.virus))
-  ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
-  const sites = Array.from(new Set(serology.map((s) => s.site ?? "(missing)")))
-  const prevVacs = Array.from(new Set(serology.map((s) => s.prevVac))).sort(
-    (a, b) => a - b
-  )
-  const days = Array.from(new Set(serology.map((s) => s.day))).sort(
-    (a, b) => a - b
-  )
+  const viruses = unique(serology.map((s) => s.virus)).sort(stringSort)
+  const sites = unique(serology.map((s) => s.site ?? "(missing)"))
+  const prevVacs = unique(serology.map((s) => s.prevVac)).sort(numberSort)
+  const days = unique(serology.map((s) => s.day)).sort(numberSort)
 
   // Filters applied in the order presented
   const [vaccinations, setVaccinations] = useState<number[]>([0, 5])
@@ -89,16 +84,13 @@ function SerologyPlots({
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 14])
 
   const vacFiltered = serology.filter(
-    (s) =>
-      vaccinations.length === 0 ||
-      (s.prevVac !== undefined && vaccinations.includes(s.prevVac))
+    (s) => vaccinations.length === 0 || vaccinations.includes(s.prevVac)
   )
   const siteFiltered = vacFiltered.filter(
-    (s) => site.length === 0 || (s.site !== undefined && site.includes(s.site))
+    (s) => site.length === 0 || site.includes(s.site)
   )
   const virusFiltered = siteFiltered.filter(
-    (s) =>
-      virus.length === 0 || (s.virus !== undefined && virus.includes(s.virus))
+    (s) => virus.length === 0 || virus.includes(s.virus)
   )
   const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
@@ -107,19 +99,15 @@ function SerologyPlots({
     (s) => selectedDays.length === 0 || selectedDays.includes(s.day)
   )
 
-  const availablePids = Array.from(
-    new Set(siteFiltered.map((s) => s.pid))
-  ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
-  const availableDays = Array.from(new Set(pidFiltered.map((s) => s.day))).sort(
-    (a, b) => a - b
-  )
+  const availablePids = unique(siteFiltered.map((s) => s.pid)).sort(stringSort)
+  const availableDays = unique(pidFiltered.map((s) => s.day)).sort(numberSort)
 
-  const plotPids = Array.from(new Set(pidFiltered.map((s) => s.pid)))
+  const plotPids = unique(pidFiltered.map((s) => s.pid))
 
   const titreChangeFiltered = titreChange.filter(
     (t) =>
       plotPids.includes(t.pid) &&
-      (virus.length === 0 || (t.virus !== undefined && virus.includes(t.virus)))
+      (virus.length === 0 || virus.includes(t.virus))
   )
 
   // Summarise the above for plots
@@ -169,9 +157,9 @@ function SerologyPlots({
     )
   )
     .flat(2)
-    .sort((a, b) => a.prevVac - b.prevVac)
-    .sort((a, b) => a.day - b.day)
-    .sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
+    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
+    .sort((a, b) => numberSort(a.day, b.day))
+    .sort((a, b) => stringSort(a.virus, b.virus))
 
   const titreChangesPlot = Array.from(
     titreChangesSummarized,
@@ -183,8 +171,8 @@ function SerologyPlots({
       }))
   )
     .flat()
-    .sort((a, b) => a.prevVac - b.prevVac)
-    .sort((a, b) => (a.virus > b.virus ? 1 : a.virus < b.virus ? -1 : 0))
+    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
+    .sort((a, b) => stringSort(a.virus, b.virus))
 
   const dayColors = createDescreteMapping(days)
 
