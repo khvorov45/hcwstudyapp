@@ -281,8 +281,8 @@ function SerologyPlots({
                 <VirusTick {...props} viruses={virusTable} />
               ),
             },
-            { name: "Day" },
-            { name: "Vax" },
+            { lab: "Day" },
+            { lab: "Vax" },
           ]}
           pad={pad}
           categorySeparatorXLevel={0}
@@ -309,7 +309,7 @@ function SerologyPlots({
                 <VirusTick {...props} viruses={virusTable} />
               ),
             },
-            { name: "Vax" },
+            { lab: "Vax" },
           ]}
           pad={pad}
           categorySeparatorXLevel={0}
@@ -337,7 +337,7 @@ function SerologyPlots({
                 <VirusTick {...props} viruses={virusTable} />
               ),
             },
-            { name: "Vax" },
+            { lab: "Vax" },
           ]}
           pad={pad}
           categorySeparatorXLevel={0}
@@ -780,8 +780,11 @@ type AxisSpec = {
   min?: number
   max?: number
   ticks?: number[]
-  lab: string
+  lab?: string
   type?: "linear" | "log"
+  textAnchor?: "middle" | "start"
+  angle?: number
+  renderTick?: (props: { tick: string; x: number; y: number }) => ReactNode
 }
 
 function scaleCategorical(
@@ -816,12 +819,7 @@ function PointRange<T extends Object>({
   height: number
   yAxisSpec: AxisSpec
   getColor?: (x: T) => string
-  xAxisSpec: {
-    name?: string
-    textAnchor?: "middle" | "start"
-    angle?: number
-    renderTick?: (props: { tick: string; x: number; y: number }) => ReactNode
-  }[]
+  xAxisSpec: AxisSpec[]
   categorySeparatorXLevel?: number
   pad: PlotPad
 }) {
@@ -930,7 +928,7 @@ function PointRange<T extends Object>({
             textAnchor="end"
             dominantBaseline="hanging"
           >
-            {xAxis.name}
+            {xAxis.lab}
           </text>
         ))}
 
@@ -1060,7 +1058,7 @@ function Axis<T>({
   pad,
   height,
   width,
-  label,
+  label = "",
   ticks,
   scale,
   orientation,
@@ -1069,7 +1067,7 @@ function Axis<T>({
   pad: PlotPad
   height: number
   width: number
-  label: string
+  label?: string
   ticks: T[]
   scale: (x: T) => number
   orientation: "horizontal" | "vertical"
