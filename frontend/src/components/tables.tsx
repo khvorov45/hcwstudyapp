@@ -383,8 +383,9 @@ function Baseline({
       {
         Header: "Age",
         accessor: (p: ParticipantExtra) => p.age,
-        width: 75,
-        filter: "exactText",
+        width: 150,
+        filter: "between",
+        Filter: NumberRangeColumnFilter,
       },
       {
         Header: "Gender",
@@ -1216,7 +1217,7 @@ function DefaultColumnFilter<T extends Object>({
   )
 }
 
-export function DateRangeColumnFilter<T extends Object>({
+function DateRangeColumnFilter<T extends Object>({
   column: { setFilter },
 }: FilterProps<T>) {
   const [lowvalue, setLowvalue] = useState<Moment | null>(null)
@@ -1256,6 +1257,39 @@ export function DateRangeColumnFilter<T extends Object>({
         />
       </div>
     </MuiPickersUtilsProvider>
+  )
+}
+
+function NumberRangeColumnFilter<T extends Object>({
+  column: { setFilter },
+}: FilterProps<T>) {
+  const [lowvalue, setLowvalue] = useState<number | null>(null)
+  const [highvalue, setHighvalue] = useState<number | null>(null)
+  const classes = useStyles()
+  return (
+    <div className={classes.numberFilter}>
+      <TextField
+        value={lowvalue}
+        onChange={(e) => {
+          const v = parseFloat(e.target.value)
+          setLowvalue(isNaN(v) ? null : v)
+          setFilter((old = []) => [isNaN(v) ? undefined : v, old[1]])
+        }}
+        placeholder="from"
+        style={{ marginRight: 5 }}
+      />
+      -
+      <TextField
+        value={highvalue}
+        onChange={(e) => {
+          const v = parseFloat(e.target.value)
+          setHighvalue(isNaN(v) ? null : v)
+          setFilter((old = []) => [old[0], isNaN(v) ? undefined : v])
+        }}
+        placeholder="to"
+        style={{ marginLeft: 5 }}
+      />
+    </div>
   )
 }
 
