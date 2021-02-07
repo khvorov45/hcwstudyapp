@@ -373,13 +373,19 @@ function Baseline({
   participants,
   commonCols,
 }: {
-  participants?: Participant[]
+  participants?: ParticipantExtra[]
   commonCols: any
 }) {
   const columns = useMemo(() => {
     return [
       commonCols.pid,
       commonCols.date({ name: "dob", header: "DoB" }),
+      {
+        Header: "Age",
+        accessor: (p: ParticipantExtra) => p.age,
+        width: 75,
+        filter: "exactText",
+      },
       {
         Header: "Gender",
         accessor: (p: Participant) => p.gender ?? "(missing)",
