@@ -270,6 +270,7 @@ function SerologyPlots({
             max: 10240,
             ticks: [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240],
             lab: selectedPid ? "Titre" : "GMT (95% CI)",
+            type: "log",
           }}
           getColor={(v) => dayColors[v.day]}
           xAxisSpec={[
@@ -298,6 +299,7 @@ function SerologyPlots({
             max: 30,
             ticks: [0.5, 1, 2, 5, 10, 20, 30],
             lab: selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)",
+            type: "log",
           }}
           xAxisSpec={[
             {
@@ -320,9 +322,9 @@ function SerologyPlots({
           maxWidthMultiplier={3}
           height={400}
           yAxisSpec={{
-            min: 0.5,
-            max: 30,
-            ticks: [0.5, 1, 2, 5, 10, 20, 30],
+            min: 0,
+            max: 1,
+            ticks: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
             lab: selectedPid
               ? "Seroconverted (14 vs 0)"
               : "Seroconversion (14 vs 0, 95% CI)",
@@ -779,6 +781,7 @@ type AxisSpec = {
   max?: number
   ticks?: number[]
   lab: string
+  type?: "linear" | "log"
 }
 
 function scaleCategorical(
@@ -836,7 +839,7 @@ function PointRange<T extends Object>({
     width - pad.axis.right - pad.data.right,
   ])
 
-  const scaleY = scaleLog(
+  const scaleY = (yAxisSpec.type === "log" ? scaleLog : scaleLinear)(
     [yAxisSpec.min ?? 5, yAxisSpec.max ?? 10000],
     [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
   )
