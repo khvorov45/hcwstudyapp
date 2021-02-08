@@ -10,7 +10,7 @@ import {
   tomorrowNightBright as darkCodeStyle,
   tomorrow as lightCodeStyle,
 } from "react-syntax-highlighter/dist/esm/styles/hljs"
-import { TableName } from "../lib/api"
+import { TableNameV } from "../lib/table-data"
 import ScreenHeight from "./screen-height"
 import { LinkExternal, LinkInternal } from "./link"
 
@@ -113,15 +113,7 @@ export default function ApiSpec() {
 }
 
 function RCode() {
-  const tableNames: TableName[] = [
-    "participants",
-    "schedule",
-    "vaccination",
-    "weekly-survey",
-    "withdrawn",
-    "virus",
-    "serology",
-  ]
+  const tableNames = Object.keys(TableNameV.keys)
   const classes = useStyles()
   const theme = useTheme()
   return (

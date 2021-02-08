@@ -4,16 +4,7 @@ import * as t from "io-ts"
 import { API_ROOT } from "./config"
 import { UserToInsert } from "./data"
 import { decode } from "./io"
-
-export type TableName =
-  | "participants"
-  | "schedule"
-  | "weekly-survey"
-  | "vaccination"
-  | "withdrawn"
-  | "serology"
-  | "users"
-  | "virus"
+import { TableName } from "./table-data"
 
 export type ApiPath =
   | TableName
@@ -22,6 +13,7 @@ export type ApiPath =
   | "auth/token"
   | "auth/token/user/session"
   | "participants/redcap/sync"
+  | "users"
   | "users/redcap/sync"
 
 type ApiRequestConfig<T, O, I> = {

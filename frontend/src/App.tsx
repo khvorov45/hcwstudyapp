@@ -30,7 +30,6 @@ import Plots from "./components/plot"
 import {
   applyTableSettingsAllData,
   loadAllTableData,
-  tableFetch,
   TableSettings,
 } from "./lib/table-data"
 import ScreenHeight from "./components/screen-height"
@@ -253,7 +252,14 @@ export default function App() {
       if (!token) {
         return []
       }
-      return await tableFetch("users", UserV, token)
+      return await apiReq({
+        method: "GET",
+        path: "users",
+        token: token,
+        success: StatusCodes.OK,
+        failure: [StatusCodes.UNAUTHORIZED],
+        validator: t.array(UserV),
+      })
     },
     [token?.token]
   )

@@ -1,5 +1,5 @@
 import * as t from "io-ts"
-import { apiReq, TableName } from "./api"
+import { apiReq } from "./api"
 import { StatusCodes } from "http-status-codes"
 import { AsyncStateStatus } from "react-async-hook"
 import {
@@ -22,6 +22,17 @@ import {
 import { decode } from "./io"
 import moment from "moment"
 import * as d3 from "d3-array"
+
+export const TableNameV = t.keyof({
+  participants: null,
+  schedule: null,
+  "weekly-survey": null,
+  vaccination: null,
+  withdrawn: null,
+  serology: null,
+  virus: null,
+})
+export type TableName = t.TypeOf<typeof TableNameV>
 
 export async function tableFetch<T>(
   name: TableName,
@@ -156,6 +167,16 @@ function genTitreChange(
       .filter((p) => !isNaN(p.rise))
   )
   return decode(t.array(TitreChangeV), titreChanges)
+}
+
+export type AllTableDataVanilla = {
+  participant: Participant[]
+  schedule: Schedule[]
+  weeklySurvey: WeeklySurvey[]
+  vaccination: Vaccination[]
+  withdrawn: Withdrawn[]
+  virus: Virus[]
+  serology: Serology[]
 }
 
 export type AllTableData = {
