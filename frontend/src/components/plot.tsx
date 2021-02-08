@@ -301,6 +301,7 @@ function SerologyPlots({
             Colored by day.{" "}
             {vaccinations.length !== 1
               ? `Arranged so that points with the same color form groups
+              ${virus.length !== 1 ? "(within each virus panel)" : ""}
               representing the same GMT (same virus, same day) for different
               sample subsets split by vaccination history.`
               : ""}
