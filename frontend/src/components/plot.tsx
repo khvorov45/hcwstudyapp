@@ -144,25 +144,13 @@ function SerologyPlots({
     .sort((a, b) => stringSort(a.virus, b.virus))
 
   // Titre rises (virus/vax)
-  const titreChangesSummarized = d3.rollup(
+  const titreChangesSummary = rollup(
     titreChangeFiltered,
-    (v) => summariseLogmean(v.map((v) => v.rise)),
-    (d) => d.virusShortName,
-    (d) => d.prevVac
+    (x) => ({ virusShortName: x.virusShortName, prevVac: x.prevVac }),
+    (arr) => summariseLogmean(arr.map((v) => v.rise))
   )
-
-  const titreChangesPlot = Array.from(
-    titreChangesSummarized,
-    ([virus, vacSummary]) =>
-      Array.from(vacSummary, ([prevVac, summary]) => ({
-        ...summary,
-        virus,
-        prevVac,
-      }))
-  )
-    .flat()
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
-    .sort((a, b) => stringSort(a.virus, b.virus))
+    .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
   const dayColors = createDescreteMapping(days)
 
@@ -283,8 +271,8 @@ function SerologyPlots({
         </FigureContainer>
         <FigureContainer>
           <PointRange
-            data={titreChangesPlot}
-            xAccessor={(d) => [d.virus, d.prevVac.toString()]}
+            data={titreChangesSummary}
+            xAccessor={(d) => [d.virusShortName, d.prevVac.toString()]}
             yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
             minWidthPerX={20}
             maxWidthMultiplier={3}
