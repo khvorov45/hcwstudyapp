@@ -116,3 +116,28 @@ export function cut(
     high: thresholdsSorted[closestHighIndex],
   }
 }
+
+export function getSum(arr: number[]): number {
+  return arr.reduce((sum, x) => sum + x, 0)
+}
+
+export function getMean(arr: number[]): number {
+  return getSum(arr) / arr.length
+}
+
+export function getVariance(arr: number[]): number {
+  const mean = getMean(arr)
+  return getSum(arr.map((x) => x - mean).map((x) => x * x)) / (arr.length - 1)
+}
+
+export function getStandardDeviation(arr: number[]): number {
+  return Math.sqrt(getVariance(arr))
+}
+
+export function getMeanVariance(arr: number[]) {
+  return getVariance(arr) / arr.length
+}
+
+export function getMeanStandardError(arr: number[]) {
+  return Math.sqrt(getMeanVariance(arr))
+}

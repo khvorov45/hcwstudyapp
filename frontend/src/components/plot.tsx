@@ -11,7 +11,15 @@ import { Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
 import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
 import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
-import { cut, numberSort, rollup, stringSort, unique } from "../lib/util"
+import {
+  cut,
+  numberSort,
+  rollup,
+  stringSort,
+  unique,
+  getMean,
+  getMeanStandardError,
+} from "../lib/util"
 
 export default function Plots({
   participantsExtra,
@@ -113,31 +121,27 @@ function SerologyPlots({
   // Summarise the above for plots
   function summariseLogmean(v: number[]) {
     const logs = v.map(Math.log)
-    const logmean = d3.mean(logs) ?? NaN
-    const se = (d3.deviation(logs) ?? NaN) / Math.sqrt(v.length)
+    const logmean = getMean(logs)
+    const se = getMeanStandardError(logs)
     const mean = Math.exp(logmean)
-    const low = mean - Math.exp(logmean - 1.96 * se)
-    const high = Math.exp(logmean + 1.96 * se) - mean
-    return {
-      logmean,
-      se,
-      mean,
-      low: mean - low,
-      high: mean + high,
-      point: isNaN(mean) ? null : mean,
-      interval: [isNaN(low) ? null : low, isNaN(high) ? null : high],
-    }
+    const logerr = 1.96 * se
+    const loglow = logmean - logerr
+    const loghigh = logmean + logerr
+    const low = Math.exp(loglow)
+    const high = Math.exp(loghigh)
+    return { mean, low, high }
   }
 
   function summariseProportion(v: boolean[]) {
     const prop = v.filter((x) => x).length / v.length
     // Normal approximation
     const se = Math.sqrt((prop * (1 - prop)) / v.length)
+    const err = 1.96 * se
     return {
       prop,
       se,
-      low: Math.max(prop - 1.96 * se, 0),
-      high: Math.min(prop + 1.96 * se, 1),
+      low: Math.max(prop - err, 0),
+      high: Math.min(prop + err, 1),
     }
   }
 
