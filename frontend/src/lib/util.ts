@@ -58,3 +58,49 @@ export function rollup<
     return summary as S & K
   })
 }
+
+export function cut(
+  x: number,
+  {
+    thresholds = [],
+    mode = "left",
+    formatLow = (x) => `<${mode === "left" ? "" : "="}${x}`,
+    formatHigh = (x) => `>${mode === "left" ? "=" : ""}${x}`,
+    formatBetween = (x1, x2) => `${x1}-${x2}`,
+    missing = "(missing)",
+  }: {
+    thresholds?: number[]
+    mode?: "left" | "right"
+    formatLow?: (x: number) => string
+    formatHigh?: (x: number) => string
+    formatBetween?: (x1: number, x2: number) => string
+    missing?: string
+  }
+): string {
+  if (isNaN(x) || x === null || x === undefined) {
+    return missing
+  }
+  const compareLeft =
+    mode === "left"
+      ? (x: number, left: number) => x >= left
+      : (x: number, left: number) => x > left
+  const compareRight =
+    mode === "left"
+      ? (x: number, right: number) => x < right
+      : (x: number, right: number) => x <= right
+  const thresholdsSorted =
+    thresholds.length === 0 ? [0] : thresholds.sort(numberSort)
+  if (compareRight(x, thresholdsSorted[0])) {
+    return formatLow(thresholdsSorted[0])
+  }
+  if (compareLeft(x, thresholdsSorted[thresholdsSorted.length - 1])) {
+    return formatHigh(thresholdsSorted[thresholdsSorted.length - 1])
+  }
+  const closestHighIndex = thresholdsSorted.findIndex(
+    (t, i) => compareLeft(x, thresholdsSorted[i - 1]) && compareRight(x, t)
+  )
+  return formatBetween(
+    thresholdsSorted[closestHighIndex - 1],
+    thresholdsSorted[closestHighIndex]
+  )
+}

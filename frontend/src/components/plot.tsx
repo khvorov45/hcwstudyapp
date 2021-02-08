@@ -11,7 +11,7 @@ import { Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
 import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
 import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
-import { numberSort, rollup, stringSort, unique } from "../lib/util"
+import { cut, numberSort, rollup, stringSort, unique } from "../lib/util"
 
 export default function Plots({
   participantsExtra,
@@ -472,42 +472,20 @@ function PlotColumn({
     getColorVariable
   )
 
-  function binAges(arr: number[]) {
-    const thresholds = [18, 30, 40, 50, 66]
-    function findRange(x0: number, x1: number) {
-      if (x0 < 18) {
-        return "<18"
-      }
-      if (x1 > 66) {
-        return ">66"
-      }
-      const closestHighIndex = thresholds.findIndex((t) => t >= x1)
-      return `${thresholds[closestHighIndex - 1]}-${
-        thresholds[closestHighIndex]
-      }`
-    }
-    return d3
-      .bin()
-      .thresholds(thresholds)(arr)
-      .filter((a) => a.length > 0)
-      .map((a) => ({
-        range: findRange(a.x0!, a.x1!),
-        count: a.length,
-      }))
-  }
-
-  const agesBinned = colorVarValues
-    .map((colorVarValue) => {
-      const dataSubset = participantsExtra.filter(
-        (p) => getColorVariable(p) === colorVarValue
-      )
-      return binAges(dataSubset.map((p) => p.age)).map((x) =>
-        Object.assign(x, {
-          colorVar: colorVarValue,
-        })
-      )
+  const agesBinned = rollup(
+    participantsExtra,
+    (p) => ({
+      colorVar: getColorVariable(p),
+      ageCat: cut(p.age, { thresholds: [18, 30, 40, 50, 66] }),
+    }),
+    (subset) => ({
+      count: subset.length,
+      firstAge: subset.find(
+        (p) => p.age !== null && p.age !== undefined && !isNaN(p.age)
+      )?.age,
     })
-    .flat()
+  )
+    .sort((a, b) => numberSort(a.firstAge ?? Infinity, b.firstAge ?? Infinity))
     .sort((a, b) => stringSort(a.colorVar, b.colorVar))
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
@@ -542,7 +520,7 @@ function PlotColumn({
       <GenericBar
         data={agesBinned}
         yAccessor={(d) => d.count}
-        xAccessor={(d) => d.range}
+        xAccessor={(d) => d.ageCat}
         yAxisSpec={{
           lab: "Count",
         }}
