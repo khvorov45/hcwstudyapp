@@ -145,6 +145,21 @@ function SerologyPlots({
     }
   }
 
+  // Serology (GMT's for virus/day/vax)
+  const serologySummary = rollup(
+    daysFiltered,
+    (x) => ({
+      virusShortName: x.virusShortName,
+      day: x.day,
+      prevVac: x.prevVac,
+    }),
+    (arr) => summariseLogmean(arr.map((x) => x.titre))
+  )
+    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
+    .sort((a, b) => numberSort(a.day, b.day))
+    .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
+
+  // Seroconversion (for virus/vax)
   const seroconversionSummary = rollup(
     titreChangeFiltered,
     (x) => ({ prevVac: x.prevVac, virus: x.virusShortName }),
@@ -153,37 +168,13 @@ function SerologyPlots({
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
     .sort((a, b) => stringSort(a.virus, b.virus))
 
-  // Summarise each virus
-  const virusDaySummarized = d3.rollup(
-    daysFiltered,
-    (v) => summariseLogmean(v.map((v) => v.titre)),
-    (d) => d.virusShortName,
-    (d) => d.day,
-    (d) => d.prevVac
-  )
-
-  // Summarise titre rises
+  // Titre rises (virus/vax)
   const titreChangesSummarized = d3.rollup(
     titreChangeFiltered,
     (v) => summariseLogmean(v.map((v) => v.rise)),
     (d) => d.virusShortName,
     (d) => d.prevVac
   )
-
-  const serologyPlot = Array.from(virusDaySummarized, ([virus, daySummary]) =>
-    Array.from(daySummary, ([day, vacSummary]) =>
-      Array.from(vacSummary, ([prevVac, summary]) => ({
-        ...summary,
-        virus,
-        day,
-        prevVac,
-      }))
-    )
-  )
-    .flat(2)
-    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
-    .sort((a, b) => numberSort(a.day, b.day))
-    .sort((a, b) => stringSort(a.virus, b.virus))
 
   const titreChangesPlot = Array.from(
     titreChangesSummarized,
@@ -277,8 +268,12 @@ function SerologyPlots({
       <PlotContainer>
         <FigureContainer>
           <PointRange
-            data={serologyPlot}
-            xAccessor={(d) => [d.virus, d.day.toString(), d.prevVac.toString()]}
+            data={serologySummary}
+            xAccessor={(d) => [
+              d.virusShortName,
+              d.day.toString(),
+              d.prevVac.toString(),
+            ]}
             yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
             minWidthPerX={20}
             maxWidthMultiplier={3}
