@@ -414,8 +414,14 @@ function BaselinePlots({
     "gender" | "prevVac" | null
   >(null)
   const options = {
-    gender: "Gender",
-    prevVac: "Vaccination",
+    gender: {
+      lab: "Gender",
+      getter: (p: ParticipantExtra) => p.gender ?? "(missing)",
+    },
+    prevVac: {
+      lab: "Vaccination",
+      getter: (p: ParticipantExtra) => p.prevVac.toString(),
+    },
   }
   return (
     <>
@@ -423,7 +429,7 @@ function BaselinePlots({
         <SiteSelect sites={sites} site={site} setSite={setSite} />
         <Selector
           options={["gender", "prevVac"]}
-          getOptionLabel={(o) => options[o as "gender" | "prevVac"]}
+          getOptionLabel={(o) => options[o as "gender" | "prevVac"].lab}
           label="Color by"
           value={colorVariable}
           onChange={setColorVariable}
@@ -438,7 +444,9 @@ function BaselinePlots({
               (p.site !== undefined && site.includes(p.site))
           )}
           getColorVariable={
-            colorVariable ? (p) => `${p[colorVariable]}` : (p) => "constant"
+            colorVariable
+              ? (p) => options[colorVariable].getter(p)
+              : (p) => "constant"
           }
         />
       </PlotContainer>
