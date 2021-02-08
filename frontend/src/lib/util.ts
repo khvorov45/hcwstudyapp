@@ -141,3 +141,29 @@ export function getMeanVariance(arr: number[]) {
 export function getMeanStandardError(arr: number[]) {
   return Math.sqrt(getMeanVariance(arr))
 }
+
+/** Array passed is not `log`ed */
+export function summariseLogmean(arr: number[]) {
+  const logs = arr.map(Math.log)
+  const logmean = getMean(logs)
+  const se = getMeanStandardError(logs)
+  const mean = Math.exp(logmean)
+  const logerr = 1.96 * se
+  const loglow = logmean - logerr
+  const loghigh = logmean + logerr
+  const low = Math.exp(loglow)
+  const high = Math.exp(loghigh)
+  return { mean, low, high }
+}
+
+export function summariseProportion(v: boolean[]) {
+  const prop = v.filter((x) => x).length / v.length
+  // Normal approximation
+  const se = Math.sqrt((prop * (1 - prop)) / v.length)
+  const err = 1.96 * se
+  return {
+    prop,
+    low: Math.max(prop - err, 0),
+    high: Math.min(prop + err, 1),
+  }
+}

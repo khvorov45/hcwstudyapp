@@ -17,8 +17,8 @@ import {
   rollup,
   stringSort,
   unique,
-  getMean,
-  getMeanStandardError,
+  summariseLogmean,
+  summariseProportion,
 } from "../lib/util"
 
 export default function Plots({
@@ -118,32 +118,7 @@ function SerologyPlots({
       (virus.length === 0 || virus.includes(t.virus))
   )
 
-  // Summarise the above for plots
-  function summariseLogmean(v: number[]) {
-    const logs = v.map(Math.log)
-    const logmean = getMean(logs)
-    const se = getMeanStandardError(logs)
-    const mean = Math.exp(logmean)
-    const logerr = 1.96 * se
-    const loglow = logmean - logerr
-    const loghigh = logmean + logerr
-    const low = Math.exp(loglow)
-    const high = Math.exp(loghigh)
-    return { mean, low, high }
-  }
-
-  function summariseProportion(v: boolean[]) {
-    const prop = v.filter((x) => x).length / v.length
-    // Normal approximation
-    const se = Math.sqrt((prop * (1 - prop)) / v.length)
-    const err = 1.96 * se
-    return {
-      prop,
-      se,
-      low: Math.max(prop - err, 0),
-      high: Math.min(prop + err, 1),
-    }
-  }
+  // Summarise the filtered data
 
   // Serology (GMT's for virus/day/vax)
   const serologySummary = rollup(
