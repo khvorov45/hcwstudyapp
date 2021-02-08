@@ -426,7 +426,7 @@ function BaselinePlots({
     ageCat: {
       lab: "Age",
       getter: (p: ParticipantExtra) =>
-        cut(p.age, { thresholds: ageThresholds }),
+        cut(p.age, { thresholds: ageThresholds }).string,
     },
   }
   return (
@@ -495,17 +495,19 @@ function PlotColumn({
     participantsExtra,
     (p) => ({
       colorVar: getColorVariable(p),
-      ageCat: cut(p.age, { thresholds: ageThresholds }),
+      ageCat: cut(p.age, { thresholds: ageThresholds }).string,
     }),
     (subset) => ({
       count: subset.length,
-      firstAge: subset.find(
-        (p) => p.age !== null && p.age !== undefined && !isNaN(p.age)
-      )?.age,
+      firstAge: cut(
+        subset.find((p) => p.age !== null && p.age !== undefined)?.age ?? NaN,
+        { thresholds: ageThresholds }
+      ).low,
+      ages: subset.map((s) => s.age),
     })
   )
-    .sort((a, b) => numberSort(a.firstAge ?? Infinity, b.firstAge ?? Infinity))
     .sort((a, b) => stringSort(a.colorVar, b.colorVar))
+    .sort((a, b) => numberSort(a.firstAge ?? Infinity, b.firstAge ?? Infinity))
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
     Array.from(colorSummary, ([colorVar, count]) => ({

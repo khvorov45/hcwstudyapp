@@ -76,9 +76,9 @@ export function cut(
     formatBetween?: (x1: number, x2: number) => string
     missing?: string
   }
-): string {
+): { string: string; low: number; high: number } {
   if (isNaN(x) || x === null || x === undefined) {
-    return missing
+    return { string: missing, low: Infinity, high: Infinity }
   }
   const compareLeft =
     mode === "left"
@@ -91,16 +91,28 @@ export function cut(
   const thresholdsSorted =
     thresholds.length === 0 ? [0] : thresholds.sort(numberSort)
   if (compareRight(x, thresholdsSorted[0])) {
-    return formatLow(thresholdsSorted[0])
+    return {
+      string: formatLow(thresholdsSorted[0]),
+      low: -Infinity,
+      high: thresholdsSorted[0],
+    }
   }
   if (compareLeft(x, thresholdsSorted[thresholdsSorted.length - 1])) {
-    return formatHigh(thresholdsSorted[thresholdsSorted.length - 1])
+    return {
+      string: formatHigh(thresholdsSorted[thresholdsSorted.length - 1]),
+      low: thresholdsSorted[thresholdsSorted.length - 1],
+      high: Infinity,
+    }
   }
   const closestHighIndex = thresholdsSorted.findIndex(
     (t, i) => compareLeft(x, thresholdsSorted[i - 1]) && compareRight(x, t)
   )
-  return formatBetween(
-    thresholdsSorted[closestHighIndex - 1],
-    thresholdsSorted[closestHighIndex]
-  )
+  return {
+    string: formatBetween(
+      thresholdsSorted[closestHighIndex - 1],
+      thresholdsSorted[closestHighIndex]
+    ),
+    low: thresholdsSorted[closestHighIndex - 1],
+    high: thresholdsSorted[closestHighIndex],
+  }
 }
