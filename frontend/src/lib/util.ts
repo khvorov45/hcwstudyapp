@@ -3,6 +3,12 @@ export function unique<T>(arr: T[]): T[] {
 }
 
 export function stringSort(a: string, b: string) {
+  if (a === "(missing)") {
+    return 1
+  }
+  if (b === "(missing)") {
+    return -1
+  }
   return a > b ? 1 : a < b ? -1 : 0
 }
 

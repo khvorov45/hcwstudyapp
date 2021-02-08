@@ -457,19 +457,6 @@ function PlotColumn({
     new Set(participantsExtra.map(getColorVariable))
   )
   const colorMapping = createDescreteMapping(colorVarValues)
-  function stringSort<T extends { [k: string]: string | number }>(
-    a: T,
-    b: T,
-    key: keyof T
-  ) {
-    if (a[key] === "(missing)") {
-      return 1
-    }
-    if (b[key] === "(missing)") {
-      return -1
-    }
-    return a.colorVar > b.colorVar ? 1 : a.colorVar < b.colorVar ? -1 : 0
-  }
 
   const genderCounts = d3.rollup(
     participantsExtra,
@@ -521,7 +508,7 @@ function PlotColumn({
       )
     })
     .flat()
-    .sort((a, b) => stringSort(a, b, "colorVar"))
+    .sort((a, b) => stringSort(a.colorVar, b.colorVar))
 
   const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
     Array.from(colorSummary, ([colorVar, count]) => ({
@@ -531,8 +518,8 @@ function PlotColumn({
     }))
   )
     .flat()
-    .sort((a, b) => stringSort(a, b, "colorVar"))
-    .sort((a, b) => stringSort(a, b, "gender"))
+    .sort((a, b) => stringSort(a.colorVar, b.colorVar))
+    .sort((a, b) => stringSort(a.gender, b.gender))
 
   const priorVacArray = Array.from(
     priorVaccinationCounts,
@@ -541,7 +528,7 @@ function PlotColumn({
         priorVaccinations: prevVac ?? "(missing)",
         colorVar,
         count,
-      })).sort((a, b) => stringSort(a, b, "colorVar"))
+      })).sort((a, b) => stringSort(a.colorVar, b.colorVar))
   )
     .flat()
     .sort((a, b) => a.priorVaccinations - b.priorVaccinations)
