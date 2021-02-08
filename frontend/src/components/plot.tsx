@@ -207,6 +207,14 @@ function SerologyPlots({
     angle: 45,
     renderTick: (props) => <VirusTick {...props} viruses={virusTable} />,
   }
+  const titreTicks = [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]
+  const perVirus = virus.length === 1 ? `for ${virus[0]} virus` : "per virus"
+  const perDay =
+    selectedDays.length === 1 ? `for day ${selectedDays[0]}` : "per day"
+  const perVax =
+    vaccinations.length === 1
+      ? `for the group with ${vaccinations[0]} prior vaccinations`
+      : "per prior vaccination count"
   return (
     <>
       <ControlRibbon>
@@ -263,62 +271,100 @@ function SerologyPlots({
         />
       </ControlRibbon>
       <PlotContainer>
-        <PointRange
-          data={serologyPlot}
-          xAccessor={(d) => [d.virus, d.day.toString(), d.prevVac.toString()]}
-          yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
-          minWidthPerX={20}
-          maxWidthMultiplier={3}
-          height={500}
-          yAxisSpec={{
-            min: 5,
-            max: 10240,
-            ticks: [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240],
-            lab: selectedPid ? "Titre" : "GMT (95% CI)",
-            type: "log",
-          }}
-          getColor={(v) => dayColors[v.day]}
-          xAxisSpec={[virusAxisSpec, { lab: "Day" }, { lab: "Vax" }]}
-          pad={pad}
-          categorySeparatorXLevel={0}
-        />
-        <PointRange
-          data={titreChangesPlot}
-          xAccessor={(d) => [d.virus, d.prevVac.toString()]}
-          yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
-          minWidthPerX={20}
-          maxWidthMultiplier={3}
-          height={400}
-          yAxisSpec={{
-            min: 0.5,
-            max: 30,
-            ticks: [0.5, 1, 2, 5, 10, 20, 30],
-            lab: selectedPid ? "Fold-rise (14 vs 0)" : "GMR (14 vs 0, 95% CI)",
-            type: "log",
-          }}
-          xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
-          pad={pad}
-          categorySeparatorXLevel={0}
-        />
-        <PointRange
-          data={seroconversionSummary}
-          xAccessor={(d) => [d.virus, d.prevVac.toString()]}
-          yAccessor={(d) => ({ point: d.prop, low: d.low, high: d.high })}
-          minWidthPerX={20}
-          maxWidthMultiplier={3}
-          height={400}
-          yAxisSpec={{
-            min: 0,
-            max: 1,
-            ticks: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-            lab: selectedPid
-              ? "Seroconverted (14 vs 0)"
-              : "Seroconversion (14 vs 0, 95% CI)",
-          }}
-          xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
-          pad={pad}
-          categorySeparatorXLevel={0}
-        />
+        <FigureContainer>
+          <PointRange
+            data={serologyPlot}
+            xAccessor={(d) => [d.virus, d.day.toString(), d.prevVac.toString()]}
+            yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
+            minWidthPerX={20}
+            maxWidthMultiplier={3}
+            height={500}
+            yAxisSpec={{
+              min: titreTicks[0],
+              max: titreTicks[titreTicks.length - 1],
+              ticks: titreTicks,
+              lab: selectedPid ? "Titre" : "GMT (95% CI)",
+              type: "log",
+            }}
+            getColor={(v) => dayColors[v.day]}
+            xAxisSpec={[virusAxisSpec, { lab: "Day" }, { lab: "Vax" }]}
+            pad={pad}
+            categorySeparatorXLevel={0}
+          />
+          <Caption>
+            {selectedPid
+              ? `${selectedPid} titre measurements`
+              : "Geometric mean titres with 95% CIs"}{" "}
+            {perVirus} {perDay}
+            {selectedPid === null && " " + perVax}
+            {". "}
+            Colored by day.{" "}
+            {vaccinations.length !== 1
+              ? `Arranged so that points with the same color form groups
+              representing the same GMT (same virus, same day) for different
+              sample subsets split by vaccination history.`
+              : ""}
+          </Caption>
+        </FigureContainer>
+        <FigureContainer>
+          <PointRange
+            data={titreChangesPlot}
+            xAccessor={(d) => [d.virus, d.prevVac.toString()]}
+            yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
+            minWidthPerX={20}
+            maxWidthMultiplier={3}
+            height={400}
+            yAxisSpec={{
+              min: 0.5,
+              max: 30,
+              ticks: [0.5, 1, 2, 5, 10, 20, 30],
+              lab: selectedPid
+                ? "Fold-rise (14 vs 0)"
+                : "GMR (14 vs 0, 95% CI)",
+              type: "log",
+            }}
+            xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
+            pad={pad}
+            categorySeparatorXLevel={0}
+          />
+          <Caption>
+            {selectedPid
+              ? `${selectedPid} titre rises`
+              : "Geometric mean rises with 95% CIs"}{" "}
+            between day 0 and 14 {perVirus}
+            {selectedPid === null && " " + perVax}.
+          </Caption>
+        </FigureContainer>
+        <FigureContainer>
+          <PointRange
+            data={seroconversionSummary}
+            xAccessor={(d) => [d.virus, d.prevVac.toString()]}
+            yAccessor={(d) => ({ point: d.prop, low: d.low, high: d.high })}
+            minWidthPerX={20}
+            maxWidthMultiplier={3}
+            height={400}
+            yAxisSpec={{
+              min: 0,
+              max: 1,
+              ticks: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+              lab: selectedPid
+                ? "Seroconverted (14 vs 0)"
+                : "Seroconversion (14 vs 0, 95% CI)",
+            }}
+            xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
+            pad={pad}
+            categorySeparatorXLevel={0}
+          />
+          <Caption>
+            {selectedPid
+              ? `Whether ${selectedPid} seroconverted (1) or not (0)`
+              : "Proportions seroconverted with 95% CIs (normal approximation)"}{" "}
+            between day 0 and 14 {perVirus}
+            {selectedPid === null && " " + perVax}. Seroconversion defined as
+            day 14 titre of at least 40 if day 0 titre is 5, at least a 4-fold
+            rise otherwise.
+          </Caption>
+        </FigureContainer>
       </PlotContainer>
     </>
   )
@@ -1144,5 +1190,28 @@ function Axis<T>({
         )
       })}
     </>
+  )
+}
+
+function Caption({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ margin: 10, maxWidth: "80%", alignSelf: "center" }}>
+      {children}
+    </div>
+  )
+}
+
+function FigureContainer({ children }: { children: ReactNode }) {
+  const theme = useTheme()
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        borderBottom: `1px solid ${theme.palette.divider}`,
+      }}
+    >
+      {children}
+    </div>
   )
 }
