@@ -7,10 +7,15 @@ import ScreenHeight from "./screen-height"
 import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
-import { Virus } from "../lib/data"
+import { Site, Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
 import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
-import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
+import {
+  ControlRibbon,
+  Selector,
+  SelectorMultiple,
+  SiteSelect,
+} from "./control-ribbon"
 import {
   cut,
   numberSort,
@@ -86,7 +91,7 @@ function SerologyPlots({
 
   // Filters applied in the order presented
   const [vaccinations, setVaccinations] = useState<number[]>([0, 5])
-  const [site, setSite] = useState<string[]>([])
+  const [site, setSite] = useState<Site[]>([])
   const [virus, setVirus] = useState<string[]>([])
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 14])
@@ -372,7 +377,7 @@ function BaselinePlots({
   participantsExtra: ParticipantExtra[]
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
-  const [site, setSite] = useState<string[]>([])
+  const [site, setSite] = useState<Site[]>([])
   const [colorVariable, setColorVariable] = useState<
     "gender" | "prevVac" | "ageCat" | null
   >(null)
@@ -678,27 +683,6 @@ function GenericBar<T extends Object>({
         )}
       </svg>
     </SinglePlotContainer>
-  )
-}
-
-function SiteSelect({
-  sites,
-  site,
-  setSite,
-}: {
-  sites: string[]
-  site: string[]
-  setSite: (s: string[]) => void
-}) {
-  return (
-    <SelectorMultiple
-      options={sites}
-      label="Site"
-      width={200}
-      value={site}
-      onChange={setSite}
-      inputMode="none"
-    />
   )
 }
 

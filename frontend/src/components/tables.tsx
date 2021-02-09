@@ -56,7 +56,12 @@ import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
-import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
+import {
+  ControlRibbon,
+  Selector,
+  SelectorMultiple,
+  SiteSelect,
+} from "./control-ribbon"
 import {
   findBreaks,
   insertInPlace,
@@ -745,6 +750,7 @@ function Summary({
   )
   const [vacSelected, setVacSelected] = useState<number[]>([])
   const [splitVar, setSplitVar] = useState<"Site" | "Vaccinations">("Site")
+  const [sitesSelected, setSitesSelected] = useState<Site[]>([])
 
   // Set the virus filter as soon as viruses are available - takes too long
   // otherwise
@@ -1006,6 +1012,11 @@ function Summary({
           width={150}
           onChange={(n) => setVacSelected(n)}
           inputMode="none"
+        />
+        <SiteSelect
+          site={sitesSelected}
+          sites={uniqueSites}
+          setSite={setSitesSelected}
         />
       </ControlRibbon>
       <SummaryTable

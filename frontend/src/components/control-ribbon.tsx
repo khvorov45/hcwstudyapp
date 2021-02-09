@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core"
 import { Autocomplete } from "@material-ui/lab"
 import React, { ReactNode } from "react"
+import { Site } from "../lib/data"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -137,6 +138,27 @@ export function SelectorMultiple<T>({
       style={{ width }}
       multiple
       disableCloseOnSelect
+    />
+  )
+}
+
+export function SiteSelect({
+  sites,
+  site,
+  setSite,
+}: {
+  sites: Site[]
+  site: Site[]
+  setSite: (s: Site[]) => void
+}) {
+  return (
+    <SelectorMultiple
+      options={sites}
+      label="Site"
+      width={200}
+      value={site}
+      onChange={setSite}
+      inputMode="none"
     />
   )
 }
