@@ -225,7 +225,7 @@ export type AllTableData = {
   titreChanges: TitreChange[]
 }
 
-export async function loadAllTableData(
+export async function fetchAndProcessAll(
   authStatus: AsyncStateStatus,
   token?: string
 ): Promise<AllTableData | null> {

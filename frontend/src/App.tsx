@@ -29,7 +29,7 @@ import Users from "./components/users"
 import Plots from "./components/plot"
 import {
   applyTableSettingsAllData,
-  loadAllTableData,
+  fetchAndProcessAll,
   TableSettings,
 } from "./lib/table-data"
 import ScreenHeight from "./components/screen-height"
@@ -233,7 +233,7 @@ export default function App() {
 
   // Table data ---------------------------------------------------------------
 
-  const allTableDataLoad = useAsync(loadAllTableData, [
+  const allTableDataLoad = useAsync(fetchAndProcessAll, [
     auth.status,
     token?.token,
   ])
