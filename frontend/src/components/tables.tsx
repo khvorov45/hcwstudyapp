@@ -656,9 +656,9 @@ function renderSummarized(s: any, theme: Theme) {
   if (s.kind === "numeric") {
     return (
       <div>
-        <div>{Math.round(s.content.mean)}</div>{" "}
+        <div>{Math.round(s.mean)}</div>{" "}
         <div style={{ color: theme.palette.text.secondary }}>
-          {Math.round(s.content.min)}-{Math.round(s.content.max)}
+          {Math.round(s.min)}-{Math.round(s.max)}
         </div>
       </div>
     )
@@ -677,7 +677,7 @@ function renderSummarized(s: any, theme: Theme) {
     )
   }
   if (s.kind === "count") {
-    return `${s.content.n}`
+    return `${s.n}`
   }
   return "summarized"
 }

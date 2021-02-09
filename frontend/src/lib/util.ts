@@ -188,20 +188,16 @@ export function summariseProportion(v: boolean[]) {
 export function summariseCount<T>(ns: T[]) {
   return {
     kind: "count",
-    content: {
-      n: ns.length,
-    },
+    n: ns.length,
   }
 }
 
 export function summariseNumeric(ns: number[]) {
   return {
     kind: "numeric",
-    content: {
-      mean: getQuantile(ns, 0.5),
-      min: getMin(ns),
-      max: getMax(ns),
-    },
+    mean: getQuantile(ns, 0.5),
+    min: getMin(ns),
+    max: getMax(ns),
   }
 }
 
