@@ -55,8 +55,8 @@ import { Icon } from "@iconify/react"
 import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
-import { Autocomplete } from "@material-ui/lab"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
+import { ControlRibbon, SelectorMultiple } from "./control-ribbon"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -944,36 +944,24 @@ function Summary({
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          height: 100,
-          overflow: "scroll",
-          borderBottom: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Autocomplete
+      <ControlRibbon>
+        <SelectorMultiple
           options={viruses}
+          label="Virus"
+          width={200}
           value={virusesSelected}
-          onChange={(e, n) => setVirusesSelected(n)}
-          renderInput={(params) => (
-            <TextField {...params} label="Virus" variant="outlined" />
-          )}
-          multiple
-          style={{ marginTop: 10, width: 250, marginRight: 10 }}
+          onChange={(n) => setVirusesSelected(n)}
+          inputMode="none"
         />
-        <Autocomplete
+        <SelectorMultiple
           options={vaccinations}
-          getOptionLabel={(a) => a.toString()}
+          label="Vaccinations"
           value={vacSelected}
-          onChange={(e, n) => setVacSelected(n)}
-          renderInput={(params) => (
-            <TextField {...params} label="Vaccinations" variant="outlined" />
-          )}
-          multiple
-          style={{ marginTop: 10, width: 150 }}
+          width={150}
+          onChange={(n) => setVacSelected(n)}
+          inputMode="none"
         />
-      </div>
+      </ControlRibbon>
       <SummaryTable
         columns={columns}
         data={counts}
