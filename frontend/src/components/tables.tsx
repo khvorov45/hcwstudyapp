@@ -67,6 +67,7 @@ import {
   summariseCount,
   summariseLogmean,
   summariseNumeric,
+  summariseProportion,
   unique,
 } from "../lib/util"
 
@@ -686,6 +687,19 @@ function renderSummarized(s: any, theme: Theme) {
   if (s.kind === "count") {
     return `${s.n}`
   }
+  if (s.kind === "proportion") {
+    return (
+      <div>
+        <div>
+          {isPresentNumber(s.prop) ? Math.round(s.prop * 100) + "%" : ""}
+        </div>{" "}
+        <div style={{ color: theme.palette.text.secondary }}>
+          {isPresentNumber(s.low) ? Math.round(s.low * 100) + "%" : ""}-
+          {isPresentNumber(s.high) ? Math.round(s.high * 100) + "%" : ""}
+        </div>
+      </div>
+    )
+  }
   return "summarized"
 }
 
@@ -800,6 +814,16 @@ function Summary({
     (d) => ({ prevVac: d.prevVac, site: d.site }),
     summariseCount
   )
+  const seroconvByVirusSite = rollup(
+    titreChange ?? [],
+    (d) => ({ virus: d.virus, site: d.site }),
+    (v) => summariseProportion(v.map((x) => x.seroconverted))
+  )
+  const seroconvByVirus = rollup(
+    titreChange ?? [],
+    (d) => ({ virus: d.virus }),
+    (v) => summariseProportion(v.map((x) => x.seroconverted))
+  )
 
   // Convert the summaries above to the appropriate table
 
@@ -890,10 +914,22 @@ function Summary({
     })
   ).sort((a, b) => stringSort(a.label, b.label))
 
+  const seroconvByVirusSiteWithMarginal = rollup(
+    seroconvByVirusSite,
+    (d) => ({ virus: d.virus }),
+    (v, k) => ({
+      label: k.virus,
+      total: seroconvByVirus.find((c) => c.virus === k.virus),
+      ...widenSite(v),
+    })
+  ).sort((a, b) => stringSort(a.label, b.label))
+
   const counts = genEmptyRow("GMT", "mean", "95% CI")
     .concat(gmtByVirusDaySiteWithMarginal)
     .concat(genEmptyRow("GMR (14 vs 0)", "mean", "95% CI"))
     .concat(gmrByVirusSiteWithMarginal)
+    .concat(genEmptyRow("Seroconversion (14 vs 0)", "proportion", "95% CI"))
+    .concat(seroconvByVirusSiteWithMarginal)
     .concat([ageRow])
     .concat(genEmptyRow("Vaccinations count", "", ""))
     .concat(countsByVacSiteWithMarginal)
