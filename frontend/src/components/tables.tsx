@@ -761,14 +761,18 @@ function Summary({
   // Apply filters
   const serology = serologyFull?.filter(
     (s) =>
+      (sitesSelected.length === 0 || sitesSelected.includes(s.site)) &&
       (virusesSelected.length === 0 || virusesSelected.includes(s.virus)) &&
       (vacSelected.length === 0 || vacSelected.includes(s.prevVac))
   )
   const participantsExtra = participantsExtraFull?.filter(
-    (p) => vacSelected.length === 0 || vacSelected.includes(p.prevVac)
+    (p) =>
+      (sitesSelected.length === 0 || sitesSelected.includes(p.site)) &&
+      (vacSelected.length === 0 || vacSelected.includes(p.prevVac))
   )
   const titreChange = titreChangeFull?.filter(
     (p) =>
+      (sitesSelected.length === 0 || sitesSelected.includes(p.site)) &&
       (vacSelected.length === 0 || vacSelected.includes(p.prevVac)) &&
       (virusesSelected.length === 0 || virusesSelected.includes(p.virus))
   )
@@ -972,10 +976,12 @@ function Summary({
       },
       {
         Header: "Site",
-        columns: uniqueSites.map((s) => ({
-          Header: toTitleCase(s),
-          accessor: (p: any) => renderSummarized(p[s]),
-        })),
+        columns: (sitesSelected.length === 0 ? uniqueSites : sitesSelected).map(
+          (s) => ({
+            Header: toTitleCase(s),
+            accessor: (p: any) => renderSummarized(p[s]),
+          })
+        ),
       },
       {
         Header: "Total",
@@ -983,7 +989,7 @@ function Summary({
         width: 100,
       },
     ]
-  }, [uniqueSites])
+  }, [uniqueSites, sitesSelected])
 
   return (
     <div>
