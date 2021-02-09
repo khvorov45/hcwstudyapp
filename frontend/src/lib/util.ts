@@ -160,7 +160,7 @@ export function getMax(arr: number[]): number {
 }
 
 /** Array passed is not `log`ed */
-export function summariseLogmean(arr: number[]) {
+export function summariseLogmean(arr: number[], precision: number = 3) {
   const logs = arr.map(Math.log)
   const logmean = getMean(logs)
   const se = getMeanStandardError(logs)
@@ -170,7 +170,7 @@ export function summariseLogmean(arr: number[]) {
   const loghigh = logmean + logerr
   const low = Math.exp(loglow)
   const high = Math.exp(loghigh)
-  return { mean, low, high }
+  return { kind: "logmean", mean, low, high, precision }
 }
 
 export function summariseProportion(v: boolean[]) {
@@ -201,18 +201,6 @@ export function summariseNumeric(ns: number[]) {
       mean: getQuantile(ns, 0.5),
       min: getMin(ns),
       max: getMax(ns),
-    },
-  }
-}
-
-export function summariseLogmean2(ns: number[], precision?: number) {
-  const logN = ns.map(Math.log)
-  return {
-    kind: "logmean",
-    content: {
-      logmean: getMean(logN),
-      se: getMeanStandardError(logN),
-      precision: precision ?? 0,
     },
   }
 }

@@ -65,7 +65,7 @@ import {
   round,
   stringSort,
   summariseCount,
-  summariseLogmean2,
+  summariseLogmean,
   summariseNumeric,
   unique,
 } from "../lib/util"
@@ -649,12 +649,7 @@ function SerologyTable({
   return <Table columns={columns} data={serology ?? []} />
 }
 
-type Summarized = {
-  kind: string
-  content: any
-}
-
-function renderSummarized(s: Summarized, theme: Theme) {
+function renderSummarized(s: any, theme: Theme) {
   if (!s || !s.kind) {
     return s
   }
@@ -669,20 +664,14 @@ function renderSummarized(s: Summarized, theme: Theme) {
     )
   }
   if (s.kind === "logmean") {
-    if (isNaN(s.content.logmean)) {
+    if (isNaN(s.mean)) {
       return ""
     }
     return (
       <div>
-        <div>{round(Math.exp(s.content.logmean), s.content.precision)}</div>
+        <div>{round(s.mean, s.precision)}</div>
         <div style={{ color: theme.palette.text.secondary }}>
-          {`${round(
-            Math.exp(s.content.logmean - 1.96 * s.content.se),
-            s.content.precision
-          )}-${round(
-            Math.exp(s.content.logmean + 1.96 * s.content.se),
-            s.content.precision
-          )}`}
+          {`${round(s.low, s.precision)}-${round(s.high, s.precision)}`}
         </div>
       </div>
     )
@@ -761,18 +750,26 @@ function Summary({
   const gmtByVirusDaySite = rollup(
     serology ?? [],
     (d) => ({ virus: d.virus, day: d.day, site: d.site }),
-    (v) => summariseLogmean2(v.map((v) => v.titre))
+    (v) =>
+      summariseLogmean(
+        v.map((v) => v.titre),
+        0
+      )
   )
   const gmtByVirusDay = rollup(
     serology ?? [],
     (d) => ({ virus: d.virus, day: d.day }),
-    (v) => summariseLogmean2(v.map((v) => v.titre))
+    (v) =>
+      summariseLogmean(
+        v.map((v) => v.titre),
+        0
+      )
   )
   const gmrByVirusSite = rollup(
     titreChange ?? [],
     (d) => ({ virus: d.virus, site: d.site }),
     (v) =>
-      summariseLogmean2(
+      summariseLogmean(
         v.map((d) => d.rise),
         1
       )
@@ -781,7 +778,7 @@ function Summary({
     titreChange ?? [],
     (d) => ({ virus: d.virus }),
     (v) =>
-      summariseLogmean2(
+      summariseLogmean(
         v.map((d) => d.rise),
         1
       )
@@ -809,7 +806,7 @@ function Summary({
 
   type Row = {
     label?: string | number | ReactNode
-    total?: Summarized
+    total?: any
   }
 
   const ageRow: Row = {
@@ -872,7 +869,7 @@ function Summary({
     insertInPlace(
       gmtByVirusDaySiteWithMarginal,
       b.index + i,
-      genEmptyRow(b.value, "", "")[0]
+      genEmptyRow(b.value, "", "")[0] as any
     )
   )
 
