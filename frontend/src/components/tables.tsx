@@ -653,12 +653,19 @@ function renderSummarized(s: any, theme: Theme) {
   if (!s || !s.kind) {
     return s
   }
+  function isPresent(x: any) {
+    return x !== null && x !== undefined
+  }
+  function isPresentNumber(x: any) {
+    return isPresent(x) && !isNaN(x)
+  }
   if (s.kind === "numeric") {
     return (
       <div>
-        <div>{Math.round(s.mean)}</div>{" "}
+        <div>{isPresentNumber(s.mean) ? Math.round(s.mean) : ""}</div>{" "}
         <div style={{ color: theme.palette.text.secondary }}>
-          {Math.round(s.min)}-{Math.round(s.max)}
+          {isPresentNumber(s.min) ? Math.round(s.min) : ""}-
+          {isPresentNumber(s.min) ? Math.round(s.max) : ""}
         </div>
       </div>
     )
