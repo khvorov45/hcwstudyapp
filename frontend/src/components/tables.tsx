@@ -1007,6 +1007,7 @@ function RowLabel({
         display: "flex",
         alignItems: "center",
         whiteSpace: "pre",
+        maxWidth: 150,
       }}
     >
       <div style={{ marginRight: 10 }}>{label}</div>
