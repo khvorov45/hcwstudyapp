@@ -28,6 +28,7 @@ import reportIcon from "@iconify/icons-carbon/report"
 import themeLightDark from "@iconify/icons-mdi/theme-light-dark"
 import questionCircle from "@iconify/icons-bi/question-circle"
 import closeOutline from "@iconify/icons-carbon/close-outline"
+import { AsyncStateStatus } from "react-async-hook"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -97,6 +98,7 @@ export default function Nav({
   onWithdrawnChange,
   onParticipantUpdate,
   onUserUpdate,
+  authStatus,
 }: {
   togglePalette: () => void
   user?: User
@@ -107,6 +109,7 @@ export default function Nav({
   onWithdrawnChange: (a: "yes" | "no" | "any") => void
   onParticipantUpdate: () => void
   onUserUpdate: () => void
+  authStatus: AsyncStateStatus
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [logoutAnchor, setLogoutAnchor] = useState<HTMLButtonElement | null>(
@@ -279,6 +282,7 @@ export default function Nav({
           onWithdrawnChange={onWithdrawnChange}
           onParticipantUpdate={onParticipantUpdate}
           onUserUpdate={onUserUpdate}
+          authStatus={authStatus}
         />
       </Dialog>
     </div>

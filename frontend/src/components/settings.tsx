@@ -6,7 +6,7 @@ import {
   FormHelperText,
   ButtonGroup,
 } from "@material-ui/core"
-import { useAsync, useAsyncCallback } from "react-async-hook"
+import { AsyncStateStatus, useAsync, useAsyncCallback } from "react-async-hook"
 import * as t from "io-ts"
 import { DateFromISOString } from "io-ts-types"
 import StatusCodes from "http-status-codes"
@@ -14,6 +14,11 @@ import { apiReq } from "../lib/api"
 import { BeatLoader } from "react-spinners"
 import { AuthOnly } from "./auth"
 import { User } from "../lib/data"
+import { fetchAllTableData } from "../lib/table-data"
+import React from "react"
+import { toCSV } from "../lib/download"
+import jszip from "jszip"
+import { saveAs } from "file-saver"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -73,6 +78,7 @@ export default function Settings({
   onWithdrawnChange,
   onParticipantUpdate,
   onUserUpdate,
+  authStatus,
 }: {
   token?: string
   user?: User
@@ -80,6 +86,7 @@ export default function Settings({
   onWithdrawnChange: (n: "yes" | "no" | "any") => void
   onParticipantUpdate: () => void
   onUserUpdate: () => void
+  authStatus: AsyncStateStatus
 }) {
   const classes = useStyles()
   return (
@@ -96,7 +103,44 @@ export default function Settings({
         opts={["yes", "no", "any"]}
         onChange={onWithdrawnChange}
       />
+      <DownloadAll token={token} authStatus={authStatus} />
     </div>
+  )
+}
+
+function DownloadAll({
+  authStatus,
+  token,
+}: {
+  authStatus: AsyncStateStatus
+  token?: string
+}) {
+  const handleDownload = useAsyncCallback(async () => {
+    const allData = await fetchAllTableData(authStatus, token)
+    if (!allData) {
+      throw Error("failed to fetch")
+    }
+    const allCSV = Object.entries(allData).map(([k, v]) => ({
+      name: k + ".csv",
+      content: toCSV(v),
+    }))
+    const zip = new jszip()
+    allCSV.forEach(({ name, content }) => zip.file(name, content))
+    const blob = await zip.generateAsync({ type: "blob" })
+    saveAs(blob, "nih-hcw-study-data.zip")
+  })
+  return (
+    <>
+      <Button
+        style={{ width: 200 }}
+        variant="outlined"
+        onClick={handleDownload.execute}
+        disabled={handleDownload.loading}
+      >
+        Download all data
+      </Button>
+      <FormHelperText error>{handleDownload.error?.message}</FormHelperText>
+    </>
   )
 }
 

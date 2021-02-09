@@ -298,6 +298,7 @@ export default function App() {
               allTableDataLoad.execute(auth.status, token?.token)
             }}
             onUserUpdate={usersFetch.execute}
+            authStatus={auth.status}
           />
           <GlobalLoading loading={allTableDataLoad.loading} />
           <div>
