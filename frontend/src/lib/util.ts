@@ -1,5 +1,9 @@
-export function unique<T>(arr: T[]): T[] {
+export function unique<T>(arr?: T[]): T[] {
   return Array.from(new Set(arr))
+}
+
+export function round(n: number, precision: number): string {
+  return n.toFixed(precision)
 }
 
 export function stringSort(a: string, b: string) {
@@ -47,13 +51,13 @@ export function rollup<
   T extends Object,
   K extends { [k: string]: T[keyof T] },
   S extends Object
->(arr: T[], keyGetter: (x: T) => K, summarise: (arr: T[]) => S) {
+>(arr: T[], keyGetter: (x: T) => K, summarise: (arr: T[], k: K) => S) {
   const uniqueValues = selectUnique(arr, keyGetter)
   return uniqueValues.map((uniqueValue) => {
     const subset = arr.filter(
       (a) => selectAsString(a, keyGetter) === uniqueValue.string
     )
-    const summary = summarise(subset)
+    const summary = summarise(subset, uniqueValue.object)
     Object.assign(summary, uniqueValue.object)
     return summary as S & K
   })
@@ -142,6 +146,19 @@ export function getMeanStandardError(arr: number[]) {
   return Math.sqrt(getMeanVariance(arr))
 }
 
+export function getQuantile(arr: number[], q: number) {
+  const arrSorted = arr.sort(numberSort)
+  return arrSorted[Math.floor(q * (arr.length - 1))]
+}
+
+export function getMin(arr: number[]): number {
+  return arr.reduce((acc, x) => (x < acc ? x : acc), Infinity)
+}
+
+export function getMax(arr: number[]): number {
+  return arr.reduce((acc, x) => (x > acc ? x : acc), -Infinity)
+}
+
 /** Array passed is not `log`ed */
 export function summariseLogmean(arr: number[]) {
   const logs = arr.map(Math.log)
@@ -166,4 +183,52 @@ export function summariseProportion(v: boolean[]) {
     low: Math.max(prop - err, 0),
     high: Math.min(prop + err, 1),
   }
+}
+
+export function summariseCount<T>(ns: T[]) {
+  return {
+    kind: "count",
+    content: {
+      n: ns.length,
+    },
+  }
+}
+
+export function summariseNumeric(ns: number[]) {
+  return {
+    kind: "numeric",
+    content: {
+      mean: getQuantile(ns, 0.5),
+      min: getMin(ns),
+      max: getMax(ns),
+    },
+  }
+}
+
+export function summariseLogmean2(ns: number[], precision?: number) {
+  const logN = ns.map(Math.log)
+  return {
+    kind: "logmean",
+    content: {
+      logmean: getMean(logN),
+      se: getMeanStandardError(logN),
+      precision: precision ?? 0,
+    },
+  }
+}
+
+/** Assumes the array is appropriately sorted */
+export function findBreaks(arr: (string | number)[]) {
+  return arr.reduce((acc, x, i) => {
+    if (i === 0) {
+      acc.push({ value: x, index: i })
+    } else if (x !== acc[acc.length - 1].value) {
+      acc.push({ value: x, index: i })
+    }
+    return acc
+  }, [] as { value: string | number; index: number }[])
+}
+
+export function insertInPlace<T>(arr: T[], index: number, entry: T) {
+  arr.splice(index, 0, entry)
 }

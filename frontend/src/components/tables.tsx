@@ -4,6 +4,7 @@ import {
   GenderV,
   Participant,
   Schedule,
+  Site,
   SiteV,
   Vaccination,
   VaccinationStatusV,
@@ -44,7 +45,6 @@ import {
 } from "@material-ui/core"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { useWindowSize } from "../lib/hooks"
-import * as d3 from "d3-array"
 import {
   KeyboardDatePicker,
   MuiPickersUtilsProvider,
@@ -57,6 +57,18 @@ import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 import { ControlRibbon, SelectorMultiple } from "./control-ribbon"
+import {
+  findBreaks,
+  insertInPlace,
+  numberSort,
+  rollup,
+  round,
+  stringSort,
+  summariseCount,
+  summariseLogmean2,
+  summariseNumeric,
+  unique,
+} from "../lib/util"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -637,57 +649,9 @@ function SerologyTable({
   return <Table columns={columns} data={serology ?? []} />
 }
 
-type SummarizedNumeric = {
-  kind: "numeric"
-  content: { mean: number; min: number; max: number }
-}
-
-type SummarizedLogmean = {
-  kind: "logmean"
-  content: { logmean: number; se: number; precision: number }
-}
-
-type SummarizedCount = {
-  kind: "count"
-  content: { n: number }
-}
-
-type Summarized = SummarizedLogmean | SummarizedNumeric | SummarizedCount
-
-function summariseNumeric(ns: number[]): SummarizedNumeric {
-  return {
-    kind: "numeric",
-    content: {
-      mean: d3.median(ns) ?? 0,
-      min: d3.min(ns) ?? 0,
-      max: d3.max(ns) ?? 0,
-    },
-  }
-}
-
-function summariseLogmean(ns: number[], precision?: number): SummarizedLogmean {
-  const logN = ns.map(Math.log)
-  return {
-    kind: "logmean",
-    content: {
-      logmean: d3.mean(logN) ?? NaN,
-      se: (d3.deviation(logN) ?? NaN) / Math.sqrt(ns.length),
-      precision: precision ?? 0,
-    },
-  }
-}
-
-function round(n: number, precision: number): string {
-  return n.toFixed(precision)
-}
-
-function summariseCount<T>(ns: T[]): SummarizedCount {
-  return {
-    kind: "count",
-    content: {
-      n: ns.length,
-    },
-  }
+type Summarized = {
+  kind: string
+  content: any
 }
 
 function renderSummarized(s: Summarized, theme: Theme) {
@@ -738,113 +702,109 @@ function Summary({
   serologyFull?: SerologyExtra[]
   titreChangeFull?: TitreChange[]
 }) {
-  const viruses = Array.from(
-    new Set(serologyFull?.map((s) => s.virus))
-  ).sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
-  const vaccinations = Array.from(
-    new Set(serologyFull ? serologyFull.map((s) => s.prevVac ?? -1) : [])
+  // Unique values for filters
+  const viruses = unique(serologyFull?.map((s) => s.virus)).sort(stringSort)
+  const vaccinations = unique(serologyFull?.map((s) => s.prevVac)).sort(
+    numberSort
   )
-    .filter((s) => s !== -1)
-    .sort((a, b) => a - b)
+  const uniqueSites = unique(participantsExtraFull?.map((p) => p.site))
 
+  // Filters
   const firstVirus = viruses[0]
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
     firstVirus ? [firstVirus] : []
   )
+  const [vacSelected, setVacSelected] = useState<number[]>([])
+
+  // Set the virus filter as soon as viruses are available - takes too long
+  // otherwise
   useEffect(() => setVirusesSelected(firstVirus ? [firstVirus] : []), [
     firstVirus,
   ])
-  const [vacSelected, setVacSelected] = useState<number[]>([])
 
+  // Apply filters
   const serology = serologyFull?.filter(
     (s) =>
       (virusesSelected.length === 0 || virusesSelected.includes(s.virus)) &&
-      (vacSelected.length === 0 || vacSelected.includes(s.prevVac ?? -1))
+      (vacSelected.length === 0 || vacSelected.includes(s.prevVac))
   )
-  const serologyPids = Array.from(new Set(serology?.map((s) => s.pid)))
-  const participantsExtra = participantsExtraFull?.filter((p) =>
-    serologyPids.includes(p.pid)
+  const participantsExtra = participantsExtraFull?.filter(
+    (p) => vacSelected.length === 0 || vacSelected.includes(p.prevVac)
   )
   const titreChange = titreChangeFull?.filter(
     (p) =>
-      serologyPids.includes(p.pid) &&
+      (vacSelected.length === 0 || vacSelected.includes(p.prevVac)) &&
       (virusesSelected.length === 0 || virusesSelected.includes(p.virus))
   )
 
-  const countsBySite = d3.rollup(
+  // Summarise the filtered data
+  const countsBySite = rollup(
     participantsExtra ?? [],
-    summariseCount,
-    (d) => d.site
+    (d) => ({ site: d.site }),
+    summariseCount
   )
-  const countsByVac = d3.rollup(
+  const countsByVac = rollup(
     participantsExtra ?? [],
-    summariseCount,
-    (d) => d.prevVac
+    (d) => ({ prevVac: d.prevVac }),
+    summariseCount
   )
-  const countsByGender = d3.rollup(
+  const countsByGender = rollup(
     participantsExtra ?? [],
-    summariseCount,
-    (d) => d.gender
+    (d) => ({ gender: d.gender }),
+    summariseCount
   )
-  const ageBySite = d3.rollup(
+  const ageBySite = rollup(
     participantsExtra ?? [],
-    (v) => summariseNumeric(v.map((v) => v.age)),
-    (d) => d.site
+    (d) => ({ site: d.site }),
+    (v) => summariseNumeric(v.map((v) => v.age))
   )
-  const gmtByVirusDaySite = d3.rollup(
+  const gmtByVirusDaySite = rollup(
     serology ?? [],
-    (v) => summariseLogmean(v.map((v) => v.titre)),
-    (d) => d.virus,
-    (d) => d.day,
-    (d) => d.site
+    (d) => ({ virus: d.virus, day: d.day, site: d.site }),
+    (v) => summariseLogmean2(v.map((v) => v.titre))
   )
-  const gmtByVirusDay = d3.rollup(
+  const gmtByVirusDay = rollup(
     serology ?? [],
-    (v) => summariseLogmean(v.map((v) => v.titre)),
-    (d) => d.virus,
-    (d) => d.day
+    (d) => ({ virus: d.virus, day: d.day }),
+    (v) => summariseLogmean2(v.map((v) => v.titre))
   )
-
-  const gmrByVirusSite = d3.rollup(
+  const gmrByVirusSite = rollup(
     titreChange ?? [],
+    (d) => ({ virus: d.virus, site: d.site }),
     (v) =>
-      summariseLogmean(
+      summariseLogmean2(
         v.map((d) => d.rise),
         1
-      ),
-    (d) => d.virus,
-    (d) => d.site
+      )
   )
-  const gmrByVirus = d3.rollup(
+  const gmrByVirus = rollup(
     titreChange ?? [],
+    (d) => ({ virus: d.virus }),
     (v) =>
-      summariseLogmean(
+      summariseLogmean2(
         v.map((d) => d.rise),
         1
-      ),
-    (d) => d.virus
+      )
   )
-  const countsByGenderSite = d3.rollup(
+  const countsByGenderSite = rollup(
     participantsExtra ?? [],
-    summariseCount,
-    (d) => d.gender,
-    (d) => d.site
+    (d) => ({ gender: d.gender, site: d.site }),
+    summariseCount
   )
-
-  const countsByVacSite = d3.rollup(
+  const countsByVacSite = rollup(
     participantsExtra ?? [],
-    summariseCount,
-    (d) => d.prevVac,
-    (d) => d.site
+    (d) => ({ prevVac: d.prevVac, site: d.site }),
+    summariseCount
   )
 
   // Convert the summaries above to the appropriate table
 
-  function toWide(v: Map<string | undefined, Summarized>) {
-    return Array.from(v, ([k, v]) => ({
-      key: k ?? "(missing)",
-      value: v,
-    })).reduce((acc, v) => Object.assign(acc, { [v.key]: v.value }), {})
+  /**Assume only one row is needed in the output */
+  function widenSite<T extends { site: Site }>(data: T[]) {
+    return data.reduce(
+      (acc, x) => Object.assign(acc, { [x.site]: x }),
+      {} as { [k: string]: any }
+    )
   }
 
   type Row = {
@@ -854,58 +814,77 @@ function Summary({
 
   const ageRow: Row = {
     label: <RowLabel label="Age" top="median" bottom="min-max" />,
-    total: summariseNumeric(
-      participantsExtra ? participantsExtra.map((p) => p.age) : []
-    ),
-    ...toWide(ageBySite),
+    total: summariseNumeric(participantsExtra?.map((p) => p.age) ?? []),
+    ...widenSite(ageBySite),
   }
 
   const bottomRow = {
     label: <RowLabel label="Total count" top="" bottom="" />,
     total: summariseCount(participantsExtra ?? []),
-    ...toWide(countsBySite),
+    ...widenSite(countsBySite),
   }
 
-  function genEmptyRow(label: string, top: string, bottom: string): Row[] {
+  function genEmptyRow(
+    label: string | number,
+    top: string,
+    bottom: string
+  ): Row[] {
     return [{ label: <RowLabel label={label} top={top} bottom={bottom} /> }]
   }
 
-  const countsByVacSiteWithMarginal = Array.from(countsByVacSite, ([k, v]) => ({
-    label: k ? k.toString() : k,
-    ...toWide(v),
-    total: countsByVac.get(k),
-  })).sort((a, b) => (a.label > b.label ? 1 : a.label < b.label ? -1 : 0))
+  const countsByVacSiteWithMarginal = rollup(
+    countsByVacSite,
+    (d) => ({ prevVac: d.prevVac }),
+    (v, k) => ({
+      label: k.prevVac,
+      total: countsByVac.find((c) => c.prevVac === k.prevVac),
+      ...widenSite(v),
+    })
+  ).sort((a, b) => numberSort(a.prevVac, b.prevVac))
 
-  const countsByGenderSiteWithMarginal = Array.from(
+  const countsByGenderSiteWithMarginal = rollup(
     countsByGenderSite,
-    ([k, v]) => ({
-      label: k ? k.toString() : "(missing)",
-      ...toWide(v),
-      total: countsByGender.get(k),
+    (d) => ({ gender: d.gender }),
+    (v, k) => ({
+      label: k.gender ?? "(missing)",
+      total: countsByGender.find((c) => c.gender === k.gender),
+      ...widenSite(v),
+    })
+  ).sort((a, b) => stringSort(a.label, b.label))
+
+  const gmtByVirusDaySiteWithMarginal = rollup(
+    gmtByVirusDaySite,
+    (d) => ({ virus: d.virus, day: d.day }),
+    (v, k) => ({
+      label: k.day,
+      total: gmtByVirusDay.find((c) => c.virus === k.virus && c.day === k.day),
+      ...widenSite(v),
     })
   )
+    .sort((a, b) => numberSort(a.day, b.day))
+    .sort((a, b) => stringSort(a.virus, b.virus))
 
-  const gmtByVirusDaySiteWithMarginal = Array.from(gmtByVirusDaySite.entries())
-    .sort((a, b) => (a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : 0))
-    .flatMap(([virus, gmtByDaySite]) => {
-      const gmtByDaySiteWithMarginal = Array.from(
-        gmtByDaySite,
-        ([day, siteTitres]) => ({
-          label: day,
-          ...toWide(siteTitres),
-          total: gmtByVirusDay.get(virus)?.get(day),
-        })
-      ).sort((a, b) => a.label - b.label)
-      return genEmptyRow(virus, "", "").concat(gmtByDaySiteWithMarginal)
+  // Insert label rows for each virus
+  const virusBreaks = findBreaks(
+    gmtByVirusDaySiteWithMarginal.map((x) => x.virus)
+  )
+  virusBreaks.forEach((b, i) =>
+    insertInPlace(
+      gmtByVirusDaySiteWithMarginal,
+      b.index + i,
+      genEmptyRow(b.value, "", "")[0]
+    )
+  )
+
+  const gmrByVirusSiteWithMarginal = rollup(
+    gmrByVirusSite,
+    (d) => ({ virus: d.virus }),
+    (v, k) => ({
+      label: k.virus,
+      total: gmrByVirus.find((c) => c.virus === k.virus),
+      ...widenSite(v),
     })
-
-  const gmrByVirusSiteWithMarginal = Array.from(gmrByVirusSite.entries())
-    .sort((a, b) => (a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : 0))
-    .map(([virus, gmrBySite]) => ({
-      label: virus,
-      ...toWide(gmrBySite),
-      total: gmrByVirus.get(virus),
-    }))
+  ).sort((a, b) => stringSort(a.label, b.label))
 
   const counts = genEmptyRow("GMT", "mean", "95% CI")
     .concat(gmtByVirusDaySiteWithMarginal)
@@ -929,7 +908,7 @@ function Summary({
       },
       {
         Header: "Site",
-        columns: Array.from(countsBySite.keys()).map((s) => ({
+        columns: uniqueSites.map((s) => ({
           Header: toTitleCase(s),
           accessor: (p: any) => renderSummarized(p[s], theme),
         })),
@@ -940,7 +919,7 @@ function Summary({
         width: 100,
       },
     ]
-  }, [countsBySite, theme])
+  }, [uniqueSites, theme])
 
   return (
     <div>
@@ -977,7 +956,7 @@ function RowLabel({
   top,
   bottom,
 }: {
-  label: string
+  label: string | number
   top: string
   bottom: string
 }) {
