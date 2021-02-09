@@ -1005,7 +1005,7 @@ function SummaryTable<T extends object>({
     <TableContainer
       className={classes.summaryTable}
       style={{
-        height: windowSize.height - 50 - 50 - 100,
+        height: windowSize.height - 50 - 50 - 56 - detectScrollbarWidth(),
       }}
     >
       <MaterialTable {...table.getTableProps()} stickyHeader>
