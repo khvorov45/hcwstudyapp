@@ -24,7 +24,6 @@ const useStyles = makeStyles((theme: Theme) =>
       marginTop: 10,
       "&>*": {
         marginBottom: 10,
-        borderBottom: `1px solid ${theme.palette.divider}`,
       },
     },
     selector: {
