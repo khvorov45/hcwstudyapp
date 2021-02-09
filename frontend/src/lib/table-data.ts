@@ -170,13 +170,48 @@ function genTitreChange(
 }
 
 export type AllTableDataVanilla = {
-  participant: Participant[]
+  participants: Participant[]
   schedule: Schedule[]
   weeklySurvey: WeeklySurvey[]
   vaccination: Vaccination[]
   withdrawn: Withdrawn[]
   virus: Virus[]
   serology: Serology[]
+}
+
+export async function fetchAllTableData(
+  authStatus: AsyncStateStatus,
+  token?: string
+): Promise<AllTableDataVanilla | null> {
+  if (!token || authStatus !== "success") {
+    return null
+  }
+  const [
+    participants,
+    schedule,
+    weeklySurvey,
+    vaccination,
+    withdrawn,
+    virus,
+    serology,
+  ] = await Promise.all([
+    tableFetch("participants", ParticipantV, token),
+    tableFetch("schedule", ScheduleV, token),
+    tableFetch("weekly-survey", WeeklySurveyV, token),
+    tableFetch("vaccination", VaccinationV, token),
+    tableFetch("withdrawn", WithdrawnV, token),
+    tableFetch("virus", VirusV, token),
+    tableFetch("serology", SerologyV, token),
+  ])
+  return {
+    participants,
+    schedule,
+    weeklySurvey,
+    vaccination,
+    withdrawn,
+    virus,
+    serology,
+  }
 }
 
 export type AllTableData = {
@@ -198,7 +233,13 @@ export async function loadAllTableData(
     return null
   }
 
-  const [
+  const fetchRes = await fetchAllTableData(authStatus, token)
+
+  if (!fetchRes) {
+    return null
+  }
+
+  const {
     participants,
     schedule,
     weeklySurvey,
@@ -206,15 +247,7 @@ export async function loadAllTableData(
     withdrawn,
     virus,
     serology,
-  ] = await Promise.all([
-    tableFetch("participants", ParticipantV, token),
-    tableFetch("schedule", ScheduleV, token),
-    tableFetch("weekly-survey", WeeklySurveyV, token),
-    tableFetch("vaccination", VaccinationV, token),
-    tableFetch("withdrawn", WithdrawnV, token),
-    tableFetch("virus", VirusV, token),
-    tableFetch("serology", SerologyV, token),
-  ])
+  } = fetchRes
 
   const vaccinationCounts = genVaccinationCounts(vaccination)
   const participantsExtra = genParticipantExtra(participants, vaccinationCounts)
