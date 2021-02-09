@@ -44,6 +44,7 @@ export function Selector<T>({
   width,
   getOptionLabel = (o) => `${o}`,
   inputMode,
+  disableClearable = false,
 }: {
   options: T[]
   label: string
@@ -52,6 +53,7 @@ export function Selector<T>({
   width: number
   getOptionLabel?: (x: T) => string
   inputMode: "text" | "numeric" | "none"
+  disableClearable?: boolean
 }) {
   return (
     <Autocomplete
@@ -67,6 +69,7 @@ export function Selector<T>({
       value={value}
       onChange={(e, n) => onChange(n)}
       style={{ width }}
+      disableClearable={disableClearable}
     />
   )
 }

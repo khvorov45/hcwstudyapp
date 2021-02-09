@@ -56,7 +56,7 @@ import sortIcon from "@iconify/icons-fa-solid/sort"
 import sortUpIcon from "@iconify/icons-fa-solid/sort-up"
 import sortDownIcon from "@iconify/icons-fa-solid/sort-down"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
-import { ControlRibbon, SelectorMultiple } from "./control-ribbon"
+import { ControlRibbon, Selector, SelectorMultiple } from "./control-ribbon"
 import {
   findBreaks,
   insertInPlace,
@@ -744,6 +744,7 @@ function Summary({
     firstVirus ? [firstVirus] : []
   )
   const [vacSelected, setVacSelected] = useState<number[]>([])
+  const [splitVar, setSplitVar] = useState<"Site" | "Vaccinations">("Site")
 
   // Set the virus filter as soon as viruses are available - takes too long
   // otherwise
@@ -988,6 +989,15 @@ function Summary({
           value={virusesSelected}
           onChange={(n) => setVirusesSelected(n)}
           inputMode="none"
+        />
+        <Selector
+          options={["Site", "Vaccinations"] as ("Site" | "Vaccinations")[]}
+          label="Split"
+          width={150}
+          value={splitVar}
+          onChange={(n) => setSplitVar(n ?? "Site")}
+          inputMode="none"
+          disableClearable
         />
         <SelectorMultiple
           options={vaccinations}
