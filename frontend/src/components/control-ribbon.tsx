@@ -43,6 +43,7 @@ export function Selector<T>({
   onChange,
   width,
   getOptionLabel = (o) => `${o}`,
+  inputMode,
 }: {
   options: T[]
   label: string
@@ -50,13 +51,18 @@ export function Selector<T>({
   onChange: (s: T | null) => void
   width: number
   getOptionLabel?: (x: T) => string
+  inputMode: "text" | "numeric" | "none"
 }) {
   return (
     <Autocomplete
       options={options}
       getOptionLabel={getOptionLabel}
       renderInput={(params) => (
-        <SelectorTextField params={params} label={label} />
+        <SelectorTextField
+          params={params}
+          label={label}
+          inputMode={inputMode}
+        />
       )}
       value={value}
       onChange={(e, n) => onChange(n)}
@@ -72,7 +78,7 @@ function SelectorTextField({
 }: {
   params: any
   label: string
-  inputMode?: "text" | "numeric" | "none"
+  inputMode: "text" | "numeric" | "none"
 }) {
   const theme = useTheme()
   return (
@@ -80,7 +86,7 @@ function SelectorTextField({
       {...params}
       label={label}
       variant="filled"
-      inputProps={{ ...params.inputProps, inputMode: inputMode ?? "text" }}
+      inputProps={{ ...params.inputProps, inputMode }}
       InputProps={{
         ...params.InputProps,
         disableUnderline: true,
@@ -103,7 +109,7 @@ export function SelectorMultiple<T>({
   value: T[]
   onChange: (s: T[]) => void
   width: number
-  inputMode?: "text" | "numeric" | "none"
+  inputMode: "text" | "numeric" | "none"
 }) {
   return (
     <Autocomplete

@@ -218,6 +218,7 @@ function SerologyPlots({
               setVaccinations([thisPid.prevVac])
             }
           }}
+          inputMode="text"
         />
         <SelectorMultiple
           options={availableDays}
@@ -404,6 +405,7 @@ function BaselinePlots({
           value={colorVariable}
           onChange={setColorVariable}
           width={200}
+          inputMode="none"
         />
       </ControlRibbon>
       <PlotContainer>
