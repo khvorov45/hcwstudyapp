@@ -650,38 +650,29 @@ function SerologyTable({
   return <Table columns={columns} data={serology ?? []} />
 }
 
-function renderSummarized(s: any, theme: Theme) {
+function renderSummarized(s: any) {
   if (!s || !s.kind) {
     return s
   }
-  function isPresent(x: any) {
-    return x !== null && x !== undefined
-  }
-  function isPresentNumber(x: any) {
-    return isPresent(x) && !isNaN(x)
-  }
+
   if (s.kind === "numeric") {
     return (
-      <div>
-        <div>{isPresentNumber(s.mean) ? Math.round(s.mean) : ""}</div>{" "}
-        <div style={{ color: theme.palette.text.secondary }}>
-          {isPresentNumber(s.min) ? Math.round(s.min) : ""}-
-          {isPresentNumber(s.min) ? Math.round(s.max) : ""}
-        </div>
-      </div>
+      <NumberInterval
+        x={s.mean}
+        low={s.min}
+        high={s.max}
+        format={(x) => Math.round(x).toString()}
+      />
     )
   }
   if (s.kind === "logmean") {
-    if (isNaN(s.mean)) {
-      return ""
-    }
     return (
-      <div>
-        <div>{round(s.mean, s.precision)}</div>
-        <div style={{ color: theme.palette.text.secondary }}>
-          {`${round(s.low, s.precision)}-${round(s.high, s.precision)}`}
-        </div>
-      </div>
+      <NumberInterval
+        x={s.mean}
+        low={s.low}
+        high={s.high}
+        format={(x) => round(x, s.precision)}
+      />
     )
   }
   if (s.kind === "count") {
@@ -689,18 +680,46 @@ function renderSummarized(s: any, theme: Theme) {
   }
   if (s.kind === "proportion") {
     return (
-      <div>
-        <div>
-          {isPresentNumber(s.prop) ? Math.round(s.prop * 100) + "%" : ""}
-        </div>{" "}
-        <div style={{ color: theme.palette.text.secondary }}>
-          {isPresentNumber(s.low) ? Math.round(s.low * 100) + "%" : ""}-
-          {isPresentNumber(s.high) ? Math.round(s.high * 100) + "%" : ""}
-        </div>
-      </div>
+      <NumberInterval
+        x={s.prop}
+        low={s.low}
+        high={s.high}
+        format={(x) => Math.round(x * 100) + "%"}
+      />
     )
   }
   return "summarized"
+}
+
+function isPresent(x: any) {
+  return x !== null && x !== undefined
+}
+function isPresentNumber(x: any) {
+  return isPresent(x) && !isNaN(x)
+}
+
+function NumberInterval({
+  x,
+  low,
+  high,
+  format = (x) => x.toString(),
+}: {
+  x?: number | null
+  low?: number | null
+  high?: number | null
+  format?: (x: number) => string
+}) {
+  const theme = useTheme()
+  const conditionalFormat = (x: number | null | undefined) =>
+    isPresentNumber(x) ? format(x!) : ""
+  return (
+    <div>
+      <div>{conditionalFormat(x)}</div>{" "}
+      <div style={{ color: theme.palette.text.secondary }}>
+        {conditionalFormat(low)}-{conditionalFormat(high)}
+      </div>
+    </div>
+  )
 }
 
 function Summary({
@@ -937,8 +956,6 @@ function Summary({
     .concat(countsByGenderSiteWithMarginal)
     .concat(bottomRow)
 
-  const theme = useTheme()
-
   const columns = useMemo(() => {
     return [
       {
@@ -950,16 +967,16 @@ function Summary({
         Header: "Site",
         columns: uniqueSites.map((s) => ({
           Header: toTitleCase(s),
-          accessor: (p: any) => renderSummarized(p[s], theme),
+          accessor: (p: any) => renderSummarized(p[s]),
         })),
       },
       {
         Header: "Total",
-        accessor: (p: any) => renderSummarized(p.total, theme),
+        accessor: (p: any) => renderSummarized(p.total),
         width: 100,
       },
     ]
-  }, [uniqueSites, theme])
+  }, [uniqueSites])
 
   return (
     <div>
