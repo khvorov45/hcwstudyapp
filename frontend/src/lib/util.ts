@@ -148,7 +148,8 @@ export function getMeanStandardError(arr: number[]) {
 
 export function getQuantile(arr: number[], q: number) {
   const arrSorted = arr.sort(numberSort)
-  return arrSorted[Math.floor(q * (arr.length - 1))]
+  // Just round to the nearest integer
+  return arrSorted[Math.floor(q * (arr.length - 1) + 0.5)]
 }
 
 export function getMin(arr: number[]): number {
