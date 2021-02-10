@@ -481,6 +481,7 @@ export async function syncRedcapParticipants(
     vac,
     schedule,
     weeklySurvey,
+    serology,
   ] = await Promise.all([
     exportParticipants(redcapConfig),
     exportRedcapIds(redcapConfig),
@@ -488,9 +489,11 @@ export async function syncRedcapParticipants(
     exportVaccination(redcapConfig),
     exportSchedule(redcapConfig),
     exportWeeklySurvey(redcapConfig),
+    getSerologySubset(db, "admin"),
   ])
   const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
 
+  // This will also wipe all the tables that depend on participant
   await db.any('DELETE FROM "Participant"')
   await insertParticipants(db, redcapParticipants, "admin")
 
@@ -524,6 +527,7 @@ export async function syncRedcapParticipants(
     insertVaccination(db, vac.filter(isInParticipant)),
     insertSchedule(db, schedule.filter(isInParticipant)),
     insertWeeklySurvey(db, weeklySurvey.map(findPid).filter(isInParticipant)),
+    insertSerology(db, serology.filter(isInParticipant)),
   ])
   await setLastParticipantUpdate(db, new Date())
 }
