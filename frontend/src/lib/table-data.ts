@@ -22,6 +22,7 @@ import {
 import { decode } from "./io"
 import moment from "moment"
 import * as d3 from "d3-array"
+import { getSum } from "./util"
 
 export const TableNameV = t.keyof({
   participants: null,
@@ -59,8 +60,10 @@ function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
   const counts = d3.rollup(
     vaccination,
     (v) =>
-      d3.sum(v, (v) =>
-        ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
+      getSum(
+        v.map((v) =>
+          ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
+        )
       ),
     (d) => d.pid
   )

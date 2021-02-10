@@ -24,6 +24,7 @@ import {
   unique,
   summariseLogmean,
   summariseProportion,
+  getSum,
 } from "../lib/util"
 
 export default function Plots({
@@ -604,7 +605,7 @@ function GenericBar<T extends Object>({
     const yValues = dataSubset.map(yAccessor)
     return {
       xValue,
-      total: d3.sum(yValues) ?? 0,
+      total: getSum(yValues),
       dataSubset,
       cumsum: d3.cumsum(yValues),
     }
