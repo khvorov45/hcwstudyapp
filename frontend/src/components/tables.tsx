@@ -1148,7 +1148,6 @@ function SummaryTable<T extends object>({
   const table = useTable({ columns, data })
   const classes = useStyles()
   const windowSize = useWindowSize()
-  console.log(table.headerGroups.map((h) => h.headers.map((h) => h.id)))
   return (
     <TableContainer
       className={classes.summaryTable}
