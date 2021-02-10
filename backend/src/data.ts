@@ -1,5 +1,8 @@
 import * as t from "io-ts"
-import { DateFromISOString } from "io-ts-types"
+import { DateFromISOString, date } from "io-ts-types"
+
+export const MyDateV = t.union([DateFromISOString, date])
+export type MyDate = t.TypeOf<typeof MyDateV>
 
 // https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals
 export const SiteV = t.keyof({
@@ -67,18 +70,18 @@ export const TokenV = t.type({
   user: t.string,
   token: t.string,
   type: TokenTypeV,
-  expires: t.union([DateFromISOString, t.null]),
+  expires: t.union([MyDateV, t.null]),
 })
 export type Token = t.TypeOf<typeof TokenV>
 
 export const ParticipantV = t.type({
   pid: t.string,
   site: SiteV,
-  dateScreening: t.union([DateFromISOString, t.null]),
+  dateScreening: t.union([MyDateV, t.null]),
   email: t.union([t.string, t.null]),
   mobile: t.union([t.string, t.null]),
   addBleed: t.union([t.boolean, t.null]),
-  dob: t.union([DateFromISOString, t.null]),
+  dob: t.union([MyDateV, t.null]),
   gender: t.union([GenderV, t.null]),
   baselineQuestComplete: t.boolean,
   heightCM: t.union([t.number, t.null]),
@@ -95,7 +98,7 @@ export type RedcapId = t.TypeOf<typeof RedcapIdV>
 
 export const WithdrawnV = t.type({
   pid: t.string,
-  date: DateFromISOString,
+  date: MyDateV,
 })
 export type Withdrawn = t.TypeOf<typeof WithdrawnV>
 
@@ -110,7 +113,7 @@ export const ScheduleV = t.type({
   pid: t.string,
   day: t.number,
   redcapProjectYear: t.number,
-  date: t.union([DateFromISOString, t.null]),
+  date: t.union([MyDateV, t.null]),
 })
 export type Schedule = t.TypeOf<typeof ScheduleV>
 
@@ -118,7 +121,7 @@ export const WeeklySurveyV = t.type({
   pid: t.string,
   index: t.number,
   redcapProjectYear: t.number,
-  date: t.union([DateFromISOString, t.null]),
+  date: t.union([MyDateV, t.null]),
   ari: t.boolean,
   swabCollection: t.union([t.boolean, t.null]),
 })

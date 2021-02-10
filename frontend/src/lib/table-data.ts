@@ -90,7 +90,7 @@ function genParticipantExtra(
     prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
     ...p,
   }))
-  return participantsExtra
+  return decode(t.array(ParticipantExtraV), participantsExtra)
 }
 
 export const SerologyExtraV = t.intersection([
