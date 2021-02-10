@@ -27,6 +27,7 @@ import {
   scaleLog,
   scaleOrdinal,
   interpolateSinebow,
+  getCumsum,
 } from "../lib/util"
 
 export default function Plots({
@@ -587,7 +588,7 @@ function GenericBar<T extends Object>({
       xValue,
       total: getSum(yValues),
       dataSubset,
-      cumsum: d3.cumsum(yValues),
+      cumsum: getCumsum(yValues),
     }
   })
   const { width, widthPerX } = usePlotSize({

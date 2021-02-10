@@ -134,6 +134,14 @@ export function getSum(arr: number[]): number {
   return arr.reduce((sum, x) => sum + x, 0)
 }
 
+export function getCumsum(arr: number[]): number[] {
+  return arr.reduce((acc, x) => {
+    const last = acc[acc.length - 1] ?? 0
+    acc.push(last + x)
+    return acc
+  }, [] as number[])
+}
+
 export function getMean(arr: number[]): number {
   return getSum(arr) / arr.length
 }

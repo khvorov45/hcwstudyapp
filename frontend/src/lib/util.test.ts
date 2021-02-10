@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog, scaleOrdinal } from "./util"
+import { getCumsum, scaleLinear, scaleLog, scaleOrdinal } from "./util"
 
 test("scaleLinear", () => {
   // Simplest scaling
@@ -28,4 +28,10 @@ test("scaleOrdinal", () => {
   expect(scaleOrdinal("b", cats, [0, 100])).toStrictEqual(50)
   expect(scaleOrdinal("a", cats, [0, 100])).toStrictEqual(0)
   expect(scaleOrdinal("c", cats, [0, 100])).toStrictEqual(100)
+})
+
+test("getCumsum", () => {
+  const arr = [0, 1, 2, 3, 4]
+  const expectedCumsum = [0, 1, 3, 6, 10]
+  getCumsum(arr).forEach((x, i) => expect(x).toStrictEqual(expectedCumsum[i]))
 })
