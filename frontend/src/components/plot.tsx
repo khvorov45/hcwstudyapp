@@ -9,7 +9,6 @@ import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 import { Site, Virus } from "../lib/data"
 import { interpolateSinebow } from "d3"
-import { scaleOrdinal, scaleLog, scaleLinear } from "d3-scale"
 import {
   ControlRibbon,
   Selector,
@@ -25,6 +24,9 @@ import {
   summariseLogmean,
   summariseProportion,
   getSum,
+  scaleLinear,
+  scaleLog,
+  scaleOrdinal,
 } from "../lib/util"
 
 export default function Plots({
@@ -616,17 +618,20 @@ function GenericBar<T extends Object>({
     maxWidthMultiplier: maxWidthMultiplier,
     pad,
   })
-  const scaleX = scaleCategorical(xValuesUnique, [
-    pad.axis.left + pad.data.left,
-    width - pad.axis.right - pad.data.right,
-  ])
+  const scaleX = (x: string) =>
+    scaleOrdinal(x, xValuesUnique, [
+      pad.axis.left + pad.data.left,
+      width - pad.axis.right - pad.data.right,
+    ])
   const yValuesSum = xValueSubsets.map((d) => d.total)
   const yMax = yAxisSpec.max ?? d3.max(yValuesSum) ?? 100
   const yMaxRounded = roundUp(yMax)
-  const scaleY = scaleLinear(
-    [yAxisSpec.min ?? 0, yMaxRounded],
-    [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
-  )
+  const scaleY = (x: number) =>
+    scaleLinear(
+      x,
+      [yAxisSpec.min ?? 0, yMaxRounded],
+      [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
+    )
   const theme = useTheme()
   const barWidth = widthPerX * 0.8
   return (
@@ -746,17 +751,6 @@ type AxisSpec = {
   renderTick?: (props: { tick: string; x: number; y: number }) => ReactNode
 }
 
-function scaleCategorical(
-  levels: (string | string[])[],
-  [min, max]: [min: number, max: number]
-) {
-  const scaleIndex = scaleLinear([0, levels.length - 1], [min, max])
-  return scaleOrdinal(
-    levels,
-    levels.map((x, i) => scaleIndex(i))
-  )
-}
-
 function PointRange<T extends Object>({
   data,
   xAccessor,
@@ -791,15 +785,19 @@ function PointRange<T extends Object>({
     pad,
   })
 
-  const scaleX = scaleCategorical(uniqueXs, [
-    pad.axis.left + pad.data.left,
-    width - pad.axis.right - pad.data.right,
-  ])
+  const scaleX = (x: string[]) =>
+    scaleOrdinal(
+      x.join(""),
+      uniqueXs.map((x) => x.join("")),
+      [pad.axis.left + pad.data.left, width - pad.axis.right - pad.data.right]
+    )
 
-  const scaleY = (yAxisSpec.type === "log" ? scaleLog : scaleLinear)(
-    [yAxisSpec.min ?? 5, yAxisSpec.max ?? 10000],
-    [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
-  )
+  const scaleY = (x: number) =>
+    (yAxisSpec.type === "log" ? scaleLog : scaleLinear)(
+      x,
+      [yAxisSpec.min ?? 5, yAxisSpec.max ?? 10000],
+      [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
+    )
 
   // X-separators
   let xSep: string[][] = []

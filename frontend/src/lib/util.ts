@@ -241,3 +241,32 @@ export function findBreaks(arr: (string | number)[]) {
 export function insertInPlace<T>(arr: T[], index: number, entry: T) {
   arr.splice(index, 0, entry)
 }
+
+export function scaleLinear(
+  x: number,
+  from: [number, number],
+  to: [number, number]
+): number {
+  return (x - from[0]) * ((to[1] - to[0]) / (from[1] - from[0])) + to[0]
+}
+
+export function scaleLog(
+  x: number,
+  from: [number, number],
+  to: [number, number]
+): number {
+  return scaleLinear(
+    Math.log(x),
+    [Math.log(from[0]), Math.log(from[1])],
+    [to[0], to[1]]
+  )
+}
+
+export function scaleOrdinal(
+  x: string | number,
+  possibleValues: (string | number)[],
+  to: [number, number]
+) {
+  const i = possibleValues.findIndex((v) => v === x)
+  return scaleLinear(i, [0, possibleValues.length - 1], to)
+}
