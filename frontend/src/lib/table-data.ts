@@ -21,8 +21,7 @@ import {
 } from "./data"
 import { decode } from "./io"
 import moment from "moment"
-import * as d3 from "d3-array"
-import { getSum } from "./util"
+import { getSum, rollup } from "./util"
 
 export const TableNameV = t.keyof({
   participants: null,
@@ -57,21 +56,18 @@ export const VaccinationCountV = t.type({
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
 
 function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
-  const counts = d3.rollup(
+  const counts = rollup(
     vaccination,
-    (v) =>
-      getSum(
+    (d) => ({ pid: d.pid }),
+    (v) => ({
+      count: getSum(
         v.map((v) =>
           ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
         )
       ),
-    (d) => d.pid
+    })
   )
-  const countsArray = Array.from(counts, ([k, v]) => ({
-    pid: k,
-    count: v,
-  })).sort((a, b) => (a.count > b.count ? 1 : a.count < b.count ? -1 : 0))
-  return decode(t.array(VaccinationCountV), countsArray)
+  return decode(t.array(VaccinationCountV), counts)
 }
 
 export const ParticipantExtraV = t.intersection([
