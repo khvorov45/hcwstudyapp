@@ -50,6 +50,8 @@ CREATE TABLE "Participant" (
     "addBleed" boolean,
     "dob" timestamptz,
     "gender" hfs_gender,
+    "heightCM" real,
+    "weightKG" real,
     "baselineQuestComplete" boolean NOT NULL
 );
 

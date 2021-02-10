@@ -106,6 +106,17 @@ function processRedcapDataAccessGroup(s: string | null | undefined): string {
     : s.toLowerCase()
 }
 
+function processRedcapNumber(n: string | null | undefined): number | null {
+  if (n === null || n === undefined || n === "") {
+    return null
+  }
+  const nParsed = parseFloat(n)
+  if (isNaN(nParsed)) {
+    return null
+  }
+  return nParsed
+}
+
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
   const users = (
     await redcapApiReq(config, { content: "user", desc: "users" })
@@ -141,6 +152,8 @@ export async function exportParticipants(
         "mobile_number",
         "a1_gender",
         "a2_dob",
+        "a5_height",
+        "a6_weight",
         "add_bleed",
         "study_group_vacc",
         "baseline_questionnaire_complete",
@@ -162,6 +175,8 @@ export async function exportParticipants(
       dob: processRedcapString(r.a2_dob),
       baselineQuestComplete: r.baseline_questionnaire_complete === "Complete",
       redcapProjectYear: r.redcapProjectYear,
+      heightCM: processRedcapNumber(r.a5_height),
+      weightKG: processRedcapNumber(r.a6_weight),
     }))
     .filter((r) => r.pid)
 

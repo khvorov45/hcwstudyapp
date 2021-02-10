@@ -81,6 +81,8 @@ export const ParticipantV = t.type({
   dob: t.union([DateFromISOString, t.null]),
   gender: t.union([GenderV, t.null]),
   baselineQuestComplete: t.boolean,
+  heightCM: t.union([t.number, t.null]),
+  weightKG: t.union([t.number, t.null]),
 })
 export type Participant = t.TypeOf<typeof ParticipantV>
 

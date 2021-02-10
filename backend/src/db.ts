@@ -252,6 +252,8 @@ async function insertIntoTable<T>(
       "dob",
       "gender",
       "baselineQuestComplete",
+      "heightCM",
+      "weightKG",
     ],
     Virus: Object.keys(VirusV.props),
     Serology: Object.keys(SerologyV.props),
