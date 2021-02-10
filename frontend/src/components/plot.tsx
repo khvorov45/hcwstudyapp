@@ -449,19 +449,19 @@ function PlotColumn({
   )
   const colorMapping = createDescreteMapping(colorVarValues)
 
-  const genderCounts = d3.rollup(
+  const genderCounts = rollup(
     participantsExtra,
-    (v) => v.length,
-    (p) => p.gender,
-    getColorVariable
+    (x) => ({ gender: x.gender ?? "(missing)", colorVar: getColorVariable(x) }),
+    (v) => ({ count: v.length })
   )
+    .sort((a, b) => stringSort(a.colorVar, b.colorVar))
+    .sort((a, b) => stringSort(a.gender, b.gender))
 
-  const priorVaccinationCounts = d3.rollup(
+  const priorVaccinationCounts = rollup(
     participantsExtra,
-    (v) => v.length,
-    (p) => p.prevVac,
-    getColorVariable
-  )
+    (x) => ({ prevVac: x.prevVac, colorVar: getColorVariable(x) }),
+    (v) => ({ count: v.length })
+  ).sort((a, b) => numberSort(a.prevVac, b.prevVac))
 
   const agesBinned = rollup(
     participantsExtra,
@@ -481,28 +481,6 @@ function PlotColumn({
     .sort((a, b) => stringSort(a.colorVar, b.colorVar))
     .sort((a, b) => numberSort(a.firstAge ?? Infinity, b.firstAge ?? Infinity))
 
-  const genderCountsArray = Array.from(genderCounts, ([gender, colorSummary]) =>
-    Array.from(colorSummary, ([colorVar, count]) => ({
-      gender: gender ?? "(missing)",
-      colorVar,
-      count,
-    }))
-  )
-    .flat()
-    .sort((a, b) => stringSort(a.colorVar, b.colorVar))
-    .sort((a, b) => stringSort(a.gender, b.gender))
-
-  const priorVacArray = Array.from(
-    priorVaccinationCounts,
-    ([prevVac, colorSummary]) =>
-      Array.from(colorSummary, ([colorVar, count]) => ({
-        priorVaccinations: prevVac ?? "(missing)",
-        colorVar,
-        count,
-      })).sort((a, b) => stringSort(a.colorVar, b.colorVar))
-  )
-    .flat()
-    .sort((a, b) => a.priorVaccinations - b.priorVaccinations)
   const theme = useTheme()
   const getColor = (d: any) =>
     colorVarValues.length === 1
@@ -523,7 +501,7 @@ function PlotColumn({
         getColor={getColor}
       />
       <GenericBar
-        data={genderCountsArray}
+        data={genderCounts}
         yAccessor={(d) => d.count}
         xAccessor={(d) => d.gender}
         yAxisSpec={{
@@ -535,9 +513,9 @@ function PlotColumn({
         getColor={getColor}
       />
       <GenericBar
-        data={priorVacArray}
+        data={priorVaccinationCounts}
         yAccessor={(d) => d.count}
-        xAccessor={(d) => d.priorVaccinations.toString()}
+        xAccessor={(d) => d.prevVac.toString()}
         yAxisSpec={{
           lab: "Count",
         }}
