@@ -406,6 +406,27 @@ function Baseline({
         Filter: NumberRangeColumnFilter,
       },
       {
+        Header: "Height (cm)",
+        accessor: (p: ParticipantExtra) => p.heightCM,
+        width: 150,
+        filter: "between",
+        Filter: NumberRangeColumnFilter,
+      },
+      {
+        Header: "Weight (kg)",
+        accessor: (p: ParticipantExtra) => p.weightKG,
+        width: 150,
+        filter: "between",
+        Filter: NumberRangeColumnFilter,
+      },
+      {
+        Header: "BMI",
+        accessor: (p: ParticipantExtra) => round(p.bmi),
+        width: 150,
+        filter: "between",
+        Filter: NumberRangeColumnFilter,
+      },
+      {
         Header: "Gender",
         accessor: (p: Participant) => p.gender ?? "(missing)",
         width: 75,
@@ -712,7 +733,7 @@ function NumberInterval({
   x?: number | null
   low?: number | null
   high?: number | null
-  format?: (x: number) => string
+  format?: (x: number) => string | null
 }) {
   const theme = useTheme()
   const conditionalFormat = (x: number | null | undefined) =>

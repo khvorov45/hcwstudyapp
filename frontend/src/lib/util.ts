@@ -2,7 +2,10 @@ export function unique<T>(arr?: T[]): T[] {
   return Array.from(new Set(arr))
 }
 
-export function round(n: number, precision: number): string {
+export function round(n: number | null, precision: number = 0): string | null {
+  if (n === null) {
+    return null
+  }
   return n.toFixed(precision)
 }
 
