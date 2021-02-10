@@ -973,6 +973,7 @@ function Summary({
         Header: "",
         id: "var",
         accessor: (p: any) => p.label,
+        width: 150,
       },
       {
         Header: "Site",
@@ -980,6 +981,7 @@ function Summary({
           (s) => ({
             Header: toTitleCase(s),
             accessor: (p: any) => renderSummarized(p[s]),
+            width: 100,
           })
         ),
       },
@@ -1030,6 +1032,16 @@ function Summary({
         data={counts}
         overheadColumnId="Site_1"
         isLabelRow={(r) => (r.label ? typeof r.label === "object" : false)}
+        maxWidth={
+          150 + // Label column
+          16 * 2 + // Padding on label column
+          100 + // Total
+          detectScrollbarWidth() + // Vertical one
+          100 * // What we split by
+            (sitesSelected.length === 0
+              ? uniqueSites.length
+              : sitesSelected.length)
+        }
       />
     </div>
   )
@@ -1073,11 +1085,13 @@ function SummaryTable<T extends object>({
   data,
   overheadColumnId,
   isLabelRow,
+  maxWidth,
 }: {
   columns: Column<T>[]
   data: T[]
   overheadColumnId: string
   isLabelRow: (t: T) => boolean
+  maxWidth: number
 }) {
   const table = useTable({ columns, data })
   const classes = useStyles()
@@ -1087,6 +1101,7 @@ function SummaryTable<T extends object>({
       className={classes.summaryTable}
       style={{
         height: windowSize.height - 50 - 50 - 56 - detectScrollbarWidth(),
+        maxWidth,
       }}
     >
       <MaterialTable {...table.getTableProps()} stickyHeader>
