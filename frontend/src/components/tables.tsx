@@ -741,7 +741,9 @@ function Summary({
   const vaccinations = unique(serologyFull?.map((s) => s.prevVac)).sort(
     numberSort
   )
-  const uniqueSites = unique(participantsExtraFull?.map((p) => p.site))
+  const uniqueSites = unique(participantsExtraFull?.map((p) => p.site)).sort(
+    stringSort
+  )
 
   // Filters
   const firstVirus = viruses[0]
@@ -780,12 +782,12 @@ function Summary({
   // Summarise the filtered data
   const countsBySite = rollup(
     participantsExtra ?? [],
-    (d) => ({ site: d.site }),
+    (d) => ({ site: d.site, split: d.site }),
     summariseCount
   )
   const countsByVac = rollup(
     participantsExtra ?? [],
-    (d) => ({ prevVac: d.prevVac }),
+    (d) => ({ prevVac: d.prevVac, split: d.prevVac }),
     summariseCount
   )
   const countsByGender = rollup(
@@ -793,14 +795,18 @@ function Summary({
     (d) => ({ gender: d.gender }),
     summariseCount
   )
-  const ageBySite = rollup(
+  const ageBySplit = rollup(
     participantsExtra ?? [],
-    (d) => ({ site: d.site }),
+    (d) => ({ split: splitVar === "Site" ? d.site : d.prevVac }),
     (v) => summariseNumeric(v.map((v) => v.age))
   )
-  const gmtByVirusDaySite = rollup(
+  const gmtByVirusDaySplit = rollup(
     serology ?? [],
-    (d) => ({ virus: d.virus, day: d.day, site: d.site }),
+    (d) => ({
+      virus: d.virus,
+      day: d.day,
+      split: splitVar === "Site" ? d.site : d.prevVac,
+    }),
     (v) =>
       summariseLogmean(
         v.map((v) => v.titre),
@@ -816,9 +822,12 @@ function Summary({
         0
       )
   )
-  const gmrByVirusSite = rollup(
+  const gmrByVirusSplit = rollup(
     titreChange ?? [],
-    (d) => ({ virus: d.virus, site: d.site }),
+    (d) => ({
+      virus: d.virus,
+      split: splitVar === "Site" ? d.site : d.prevVac,
+    }),
     (v) =>
       summariseLogmean(
         v.map((d) => d.rise),
@@ -834,19 +843,29 @@ function Summary({
         1
       )
   )
-  const countsByGenderSite = rollup(
+  const countsByGenderSplit = rollup(
     participantsExtra ?? [],
-    (d) => ({ gender: d.gender, site: d.site }),
+    (d) => ({
+      gender: d.gender,
+      split: splitVar === "Site" ? d.site : d.prevVac,
+    }),
     summariseCount
   )
   const countsByVacSite = rollup(
     participantsExtra ?? [],
-    (d) => ({ prevVac: d.prevVac, site: d.site }),
+    (d) => ({
+      prevVac: d.prevVac,
+      site: d.site,
+      split: splitVar === "Site" ? d.site : d.prevVac,
+    }),
     summariseCount
   )
-  const seroconvByVirusSite = rollup(
+  const seroconvByVirusSplit = rollup(
     titreChange ?? [],
-    (d) => ({ virus: d.virus, site: d.site }),
+    (d) => ({
+      virus: d.virus,
+      split: splitVar === "Site" ? d.site : d.prevVac,
+    }),
     (v) => summariseProportion(v.map((x) => x.seroconverted))
   )
   const seroconvByVirus = rollup(
@@ -858,9 +877,9 @@ function Summary({
   // Convert the summaries above to the appropriate table
 
   /**Assume only one row is needed in the output */
-  function widenSite<T extends { site: Site }>(data: T[]) {
+  function widenSplit<T extends { split: Site | number }>(data: T[]) {
     return data.reduce(
-      (acc, x) => Object.assign(acc, { [x.site]: x }),
+      (acc, x) => Object.assign(acc, { [x.split]: x }),
       {} as { [k: string]: any }
     )
   }
@@ -873,13 +892,15 @@ function Summary({
   const ageRow: Row = {
     label: <RowLabel label="Age" top="median" bottom="min-max" />,
     total: summariseNumeric(participantsExtra?.map((p) => p.age) ?? []),
-    ...widenSite(ageBySite),
+    ...widenSplit(ageBySplit),
   }
 
   const bottomRow = {
     label: <RowLabel label="Total count" top="" bottom="" />,
     total: summariseCount(participantsExtra ?? []),
-    ...widenSite(countsBySite),
+    ...(splitVar === "Site"
+      ? widenSplit(countsBySite)
+      : widenSplit(countsByVac)),
   }
 
   function genEmptyRow(
@@ -892,31 +913,34 @@ function Summary({
 
   const countsByVacSiteWithMarginal = rollup(
     countsByVacSite,
-    (d) => ({ prevVac: d.prevVac }),
+    (d) => ({ keep: splitVar === "Site" ? d.prevVac : d.site }),
     (v, k) => ({
-      label: k.prevVac,
-      total: countsByVac.find((c) => c.prevVac === k.prevVac),
-      ...widenSite(v),
+      label: k.keep.toString(),
+      total:
+        splitVar === "Site"
+          ? countsByVac.find((c) => c.prevVac === k.keep)
+          : countsBySite.find((x) => x.site === k.keep),
+      ...widenSplit(v),
     })
-  ).sort((a, b) => numberSort(a.prevVac, b.prevVac))
+  ).sort((a, b) => stringSort(a.label, b.label))
 
   const countsByGenderSiteWithMarginal = rollup(
-    countsByGenderSite,
+    countsByGenderSplit,
     (d) => ({ gender: d.gender }),
     (v, k) => ({
       label: k.gender ?? "(missing)",
       total: countsByGender.find((c) => c.gender === k.gender),
-      ...widenSite(v),
+      ...widenSplit(v),
     })
   ).sort((a, b) => stringSort(a.label, b.label))
 
   const gmtByVirusDaySiteWithMarginal = rollup(
-    gmtByVirusDaySite,
+    gmtByVirusDaySplit,
     (d) => ({ virus: d.virus, day: d.day }),
     (v, k) => ({
       label: k.day,
       total: gmtByVirusDay.find((c) => c.virus === k.virus && c.day === k.day),
-      ...widenSite(v),
+      ...widenSplit(v),
     })
   )
     .sort((a, b) => numberSort(a.day, b.day))
@@ -935,22 +959,22 @@ function Summary({
   )
 
   const gmrByVirusSiteWithMarginal = rollup(
-    gmrByVirusSite,
+    gmrByVirusSplit,
     (d) => ({ virus: d.virus }),
     (v, k) => ({
       label: k.virus,
       total: gmrByVirus.find((c) => c.virus === k.virus),
-      ...widenSite(v),
+      ...widenSplit(v),
     })
   ).sort((a, b) => stringSort(a.label, b.label))
 
   const seroconvByVirusSiteWithMarginal = rollup(
-    seroconvByVirusSite,
+    seroconvByVirusSplit,
     (d) => ({ virus: d.virus }),
     (v, k) => ({
       label: k.virus,
       total: seroconvByVirus.find((c) => c.virus === k.virus),
-      ...widenSite(v),
+      ...widenSplit(v),
     })
   ).sort((a, b) => stringSort(a.label, b.label))
 
@@ -961,12 +985,22 @@ function Summary({
     .concat(genEmptyRow("Seroconversion (14 vs 0)", "proportion", "95% CI"))
     .concat(seroconvByVirusSiteWithMarginal)
     .concat([ageRow])
-    .concat(genEmptyRow("Vaccinations count", "", ""))
+    .concat(
+      genEmptyRow(splitVar === "Site" ? "Vaccinations count" : "Site", "", "")
+    )
     .concat(countsByVacSiteWithMarginal)
     .concat(genEmptyRow("Gender count", "", ""))
     .concat(countsByGenderSiteWithMarginal)
     .concat(bottomRow)
 
+  const splitSelected =
+    splitVar === "Site"
+      ? sitesSelected.length === 0
+        ? uniqueSites
+        : sitesSelected
+      : vacSelected.length === 0
+      ? vaccinations.map((x) => x.toString())
+      : vacSelected.map((x) => x.toString())
   const columns = useMemo(() => {
     return [
       {
@@ -976,14 +1010,14 @@ function Summary({
         width: 150,
       },
       {
-        Header: "Site",
-        columns: (sitesSelected.length === 0 ? uniqueSites : sitesSelected).map(
-          (s) => ({
-            Header: toTitleCase(s),
-            accessor: (p: any) => renderSummarized(p[s]),
-            width: 100,
-          })
-        ),
+        Header: splitVar,
+        id: "overhead",
+        columns: splitSelected.map((s) => ({
+          Header: splitVar === "Site" ? toTitleCase(s) : s,
+          id: s,
+          accessor: (p: any) => renderSummarized(p[s]),
+          width: 100,
+        })),
       },
       {
         Header: "Total",
@@ -991,7 +1025,7 @@ function Summary({
         width: 100,
       },
     ]
-  }, [uniqueSites, sitesSelected])
+  }, [splitVar, splitSelected])
 
   return (
     <div>
@@ -1030,17 +1064,14 @@ function Summary({
       <SummaryTable
         columns={columns}
         data={counts}
-        overheadColumnId="Site_1"
+        overheadColumnId="overhead"
         isLabelRow={(r) => (r.label ? typeof r.label === "object" : false)}
         maxWidth={
           150 + // Label column
           16 * 2 + // Padding on label column
           100 + // Total
           detectScrollbarWidth() + // Vertical one
-          100 * // What we split by
-            (sitesSelected.length === 0
-              ? uniqueSites.length
-              : sitesSelected.length)
+          100 * splitSelected.length // What we split by
         }
       />
     </div>
@@ -1096,6 +1127,7 @@ function SummaryTable<T extends object>({
   const table = useTable({ columns, data })
   const classes = useStyles()
   const windowSize = useWindowSize()
+  console.log(table.headerGroups.map((h) => h.headers.map((h) => h.id)))
   return (
     <TableContainer
       className={classes.summaryTable}
@@ -1111,7 +1143,9 @@ function SummaryTable<T extends object>({
               {headerGroup.headers.map((h) => (
                 <TableCell
                   {...h.getHeaderProps()}
-                  className={h.id === overheadColumnId ? "site-overhead" : ""}
+                  className={
+                    h.id === `${overheadColumnId}_1` ? "site-overhead" : ""
+                  }
                 >
                   {h.render("Header")}
                 </TableCell>
