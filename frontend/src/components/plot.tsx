@@ -1,5 +1,4 @@
 import { useTheme } from "@material-ui/core"
-import * as d3 from "d3-array"
 import React, { ReactNode, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
@@ -28,6 +27,7 @@ import {
   scaleOrdinal,
   interpolateSinebow,
   getCumsum,
+  getMax,
 } from "../lib/util"
 
 export default function Plots({
@@ -603,7 +603,7 @@ function GenericBar<T extends Object>({
       width - pad.axis.right - pad.data.right,
     ])
   const yValuesSum = xValueSubsets.map((d) => d.total)
-  const yMax = yAxisSpec.max ?? d3.max(yValuesSum) ?? 100
+  const yMax = yAxisSpec.max ?? getMax(yValuesSum)
   const yMaxRounded = roundUp(yMax)
   const scaleY = (x: number) =>
     scaleLinear(
