@@ -76,6 +76,7 @@ export const ParticipantExtraV = t.intersection([
   t.type({
     age: t.union([t.number, t.null]),
     prevVac: t.number,
+    bmi: t.union([t.number, t.null]),
   }),
 ])
 export type ParticipantExtra = t.TypeOf<typeof ParticipantExtraV>
@@ -88,6 +89,10 @@ function genParticipantExtra(
   const participantsExtra = participants.map((p) => ({
     age: p.dob === null ? null : now.diff(p.dob, "year"),
     prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
+    bmi:
+      p.weightKG === null || p.heightCM === null
+        ? null
+        : p.weightKG / (p.heightCM / 100) ** 2,
     ...p,
   }))
   return decode(t.array(ParticipantExtraV), participantsExtra)
