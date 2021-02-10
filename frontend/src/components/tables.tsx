@@ -816,10 +816,15 @@ function Summary({
     (d) => ({ gender: d.gender }),
     summariseCount
   )
-  const ageBySplit = rollup(
+  const numericsBySplit = rollup(
     participantsExtra ?? [],
     (d) => ({ split: splitVar === "Site" ? d.site : d.prevVac }),
-    (v) => summariseNumeric(v.map((v) => v.age))
+    (v) => ({
+      age: summariseNumeric(v.map((v) => v.age)),
+      height: summariseNumeric(v.map((v) => v.heightCM)),
+      weight: summariseNumeric(v.map((v) => v.weightKG)),
+      bmi: summariseNumeric(v.map((v) => v.bmi)),
+    })
   )
   const gmtByVirusDaySplit = rollup(
     serology ?? [],
@@ -904,17 +909,47 @@ function Summary({
       {} as { [k: string]: any }
     )
   }
+  function genNumericRow(
+    label: string,
+    accessorParticpant: (p: ParticipantExtra) => number | null,
+    accessorSummary: (x: any) => Object
+  ): Row {
+    return {
+      label: <RowLabel label={label} top="median" bottom="min-max" />,
+      total: summariseNumeric(participantsExtra?.map(accessorParticpant) ?? []),
+      ...widenSplit(
+        numericsBySplit.map((x) => ({ split: x.split, ...accessorSummary(x) }))
+      ),
+    } as Row
+  }
 
   type Row = {
     label?: string | number | ReactNode
     total?: any
   }
 
-  const ageRow: Row = {
-    label: <RowLabel label="Age" top="median" bottom="min-max" />,
-    total: summariseNumeric(participantsExtra?.map((p) => p.age) ?? []),
-    ...widenSplit(ageBySplit),
-  }
+  const numericRows = [
+    genNumericRow(
+      "Age",
+      (p) => p.age,
+      (x) => x.age
+    ),
+    genNumericRow(
+      "Height",
+      (p) => p.heightCM,
+      (x) => x.height
+    ),
+    genNumericRow(
+      "Weight",
+      (p) => p.weightKG,
+      (x) => x.weight
+    ),
+    genNumericRow(
+      "BMI",
+      (p) => p.bmi,
+      (x) => x.bmi
+    ),
+  ]
 
   const bottomRow = {
     label: <RowLabel label="Total count" top="" bottom="" />,
@@ -1005,7 +1040,7 @@ function Summary({
     .concat(gmrByVirusSiteWithMarginal)
     .concat(genEmptyRow("Seroconversion (14 vs 0)", "proportion", "95% CI"))
     .concat(seroconvByVirusSiteWithMarginal)
-    .concat([ageRow])
+    .concat(numericRows)
     .concat(
       genEmptyRow(splitVar === "Site" ? "Vaccinations count" : "Site", "", "")
     )
