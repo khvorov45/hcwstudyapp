@@ -915,7 +915,7 @@ function Summary({
     countsByVacSite,
     (d) => ({ keep: splitVar === "Site" ? d.prevVac : d.site }),
     (v, k) => ({
-      label: k.keep.toString(),
+      label: toTitleCase(k.keep.toString()),
       total:
         splitVar === "Site"
           ? countsByVac.find((c) => c.prevVac === k.keep)
