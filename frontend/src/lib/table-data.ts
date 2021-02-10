@@ -74,7 +74,7 @@ function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
 export const ParticipantExtraV = t.intersection([
   ParticipantV,
   t.type({
-    age: t.number,
+    age: t.union([t.number, t.null]),
     prevVac: t.number,
   }),
 ])
@@ -86,7 +86,7 @@ function genParticipantExtra(
 ): ParticipantExtra[] {
   const now = moment()
   const participantsExtra = participants.map((p) => ({
-    age: now.diff(p.dob, "year"),
+    age: p.dob === null ? null : now.diff(p.dob, "year"),
     prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
     ...p,
   }))

@@ -16,7 +16,13 @@ export function stringSort(a: string, b: string) {
   return a > b ? 1 : a < b ? -1 : 0
 }
 
-export function numberSort(a: number, b: number) {
+export function numberSort(a: number | null, b: number | null) {
+  if (a === null) {
+    return -1
+  }
+  if (b === null) {
+    return 1
+  }
   return a - b
 }
 
@@ -64,7 +70,7 @@ export function rollup<
 }
 
 export function cut(
-  x: number,
+  x: number | null,
   {
     thresholds = [],
     mode = "left",
@@ -81,7 +87,7 @@ export function cut(
     missing?: string
   }
 ): { string: string; low: number; high: number } {
-  if (isNaN(x) || x === null || x === undefined) {
+  if (x === undefined || x === null || isNaN(x)) {
     return { string: missing, low: Infinity, high: Infinity }
   }
   const compareLeft =
@@ -146,18 +152,32 @@ export function getMeanStandardError(arr: number[]) {
   return Math.sqrt(getMeanVariance(arr))
 }
 
-export function getQuantile(arr: number[], q: number) {
+export function getQuantile(arr: (number | null)[], q: number) {
   const arrSorted = arr.sort(numberSort)
   // Just round to the nearest integer
   return arrSorted[Math.floor(q * (arr.length - 1) + 0.5)]
 }
 
-export function getMin(arr: number[]): number {
-  return arr.reduce((acc, x) => (x < acc ? x : acc), Infinity)
+export function getMin(arr: (number | null)[]): number {
+  // TS can't tell I'm removing all nulls from the array
+  // @ts-ignore
+  return (
+    arr
+      .filter((x) => x !== null)
+      // @ts-ignore
+      .reduce((acc, x) => (x < acc ? x : acc), Infinity)
+  )
 }
 
-export function getMax(arr: number[]): number {
-  return arr.reduce((acc, x) => (x > acc ? x : acc), -Infinity)
+export function getMax(arr: (number | null)[]): number {
+  // TS can't tell I'm removing all nulls from the array
+  // @ts-ignore
+  return (
+    arr
+      .filter((x) => x !== null)
+      // @ts-ignore
+      .reduce((acc, x) => (x > acc ? x : acc), -Infinity)
+  )
 }
 
 /** Array passed is not `log`ed */
@@ -194,7 +214,7 @@ export function summariseCount<T>(ns: T[]) {
   }
 }
 
-export function summariseNumeric(ns: number[]) {
+export function summariseNumeric(ns: (number | null)[]) {
   return {
     kind: "numeric",
     mean: getQuantile(ns, 0.5),
