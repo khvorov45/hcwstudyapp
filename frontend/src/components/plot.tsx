@@ -8,7 +8,6 @@ import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
 import { Site, Virus } from "../lib/data"
-import { interpolateSinebow } from "d3"
 import {
   ControlRibbon,
   Selector,
@@ -27,6 +26,7 @@ import {
   scaleLinear,
   scaleLog,
   scaleOrdinal,
+  interpolateSinebow,
 } from "../lib/util"
 
 export default function Plots({

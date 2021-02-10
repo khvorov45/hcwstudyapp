@@ -270,3 +270,11 @@ export function scaleOrdinal(
   const i = possibleValues.findIndex((v) => v === x)
   return scaleLinear(i, [0, possibleValues.length - 1], to)
 }
+
+export function interpolateSinebow(t: number): string {
+  return `rgb(
+    ${255 * Math.sin((0.5 - t) * Math.PI) ** 2},
+    ${255 * Math.sin((0.8333 - t) * Math.PI) ** 2},
+    ${255 * Math.sin((1.1666 - t) * Math.PI) ** 2}
+  )`
+}
