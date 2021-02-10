@@ -1370,7 +1370,7 @@ function NumberRangeColumnFilter<T extends Object>({
   return (
     <div className={classes.numberFilter}>
       <TextField
-        value={lowvalue}
+        value={lowvalue === null ? "" : lowvalue}
         onChange={(e) => {
           const v = parseFloat(e.target.value)
           setLowvalue(isNaN(v) ? null : v)
@@ -1381,7 +1381,7 @@ function NumberRangeColumnFilter<T extends Object>({
       />
       -
       <TextField
-        value={highvalue}
+        value={highvalue === null ? "" : highvalue}
         onChange={(e) => {
           const v = parseFloat(e.target.value)
           setHighvalue(isNaN(v) ? null : v)
