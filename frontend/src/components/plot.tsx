@@ -384,9 +384,20 @@ function BaselinePlots({
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<Site[]>([])
   const [colorVariable, setColorVariable] = useState<
-    "gender" | "prevVac" | "ageCat" | null
+    | "gender"
+    | "prevVac"
+    | "ageCat"
+    | "heightCat"
+    | "weightCat"
+    | "bmiCat"
+    | null
   >(null)
+
   const ageThresholds = [18, 30, 40, 50, 66]
+  const heightThresholds = [150, 160, 170, 180, 190]
+  const weightThresholds = [50, 70, 90, 110]
+  const bmiThresholds = [15, 18, 25, 30, 40]
+
   const options = {
     gender: {
       lab: "Gender",
@@ -404,15 +415,48 @@ function BaselinePlots({
         cut(p.age, { thresholds: ageThresholds }).string,
       sorter: rangeSort,
     },
+    heightCat: {
+      lab: "Height",
+      getter: (p: ParticipantExtra) =>
+        cut(p.heightCM, { thresholds: heightThresholds }).string,
+      sorter: rangeSort,
+    },
+    weightCat: {
+      lab: "Weight",
+      getter: (p: ParticipantExtra) =>
+        cut(p.weightKG, { thresholds: weightThresholds }).string,
+      sorter: rangeSort,
+    },
+    bmiCat: {
+      lab: "BMI",
+      getter: (p: ParticipantExtra) =>
+        cut(p.bmi, { thresholds: bmiThresholds }).string,
+      sorter: rangeSort,
+    },
   }
   return (
     <>
       <ControlRibbon>
         <SiteSelect sites={sites} site={site} setSite={setSite} />
         <Selector
-          options={["gender", "prevVac", "ageCat"]}
+          options={[
+            "ageCat",
+            "heightCat",
+            "weightCat",
+            "bmiCat",
+            "gender",
+            "prevVac",
+          ]}
           getOptionLabel={(o) =>
-            options[o as "gender" | "prevVac" | "ageCat"].lab
+            options[
+              o as
+                | "gender"
+                | "prevVac"
+                | "ageCat"
+                | "heightCat"
+                | "weightCat"
+                | "bmiCat"
+            ].lab
           }
           label="Color by"
           value={colorVariable}
@@ -433,10 +477,13 @@ function BaselinePlots({
               ? (p) => options[colorVariable].getter(p)
               : (p) => "constant"
           }
-          ageThresholds={ageThresholds}
           sortColorVariable={
             colorVariable ? options[colorVariable].sorter : stringSort
           }
+          ageThresholds={ageThresholds}
+          heightThresholds={heightThresholds}
+          weightThresholds={weightThresholds}
+          bmiThresholds={bmiThresholds}
         />
       </PlotContainer>
     </>
@@ -448,11 +495,17 @@ function PlotColumn({
   getColorVariable,
   sortColorVariable,
   ageThresholds,
+  heightThresholds,
+  weightThresholds,
+  bmiThresholds,
 }: {
   participantsExtra: ParticipantExtra[]
   getColorVariable: (p: ParticipantExtra) => string
   sortColorVariable: (a: string, b: string) => number
   ageThresholds: number[]
+  heightThresholds: number[]
+  weightThresholds: number[]
+  bmiThresholds: number[]
 }) {
   const colorVarValues = Array.from(
     new Set(participantsExtra.map(getColorVariable))
@@ -490,8 +543,7 @@ function PlotColumn({
     participantsExtra,
     (p) => ({
       colorVar: getColorVariable(p),
-      heightCat: cut(p.heightCM, { thresholds: [150, 160, 170, 180, 190] })
-        .string,
+      heightCat: cut(p.heightCM, { thresholds: heightThresholds }).string,
     }),
     (subset) => ({ count: subset.length })
   )
@@ -502,7 +554,7 @@ function PlotColumn({
     participantsExtra,
     (p) => ({
       colorVar: getColorVariable(p),
-      weightCat: cut(p.weightKG, { thresholds: [50, 70, 90, 110] }).string,
+      weightCat: cut(p.weightKG, { thresholds: weightThresholds }).string,
     }),
     (subset) => ({ count: subset.length })
   )
@@ -513,7 +565,7 @@ function PlotColumn({
     participantsExtra,
     (p) => ({
       colorVar: getColorVariable(p),
-      bmiCat: cut(p.bmi, { thresholds: [15, 18, 25, 30, 40] }).string,
+      bmiCat: cut(p.bmi, { thresholds: bmiThresholds }).string,
     }),
     (subset) => ({ count: subset.length })
   )
