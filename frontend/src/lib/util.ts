@@ -9,11 +9,11 @@ export function round(n: number | null, precision: number = 0): string | null {
   return n.toFixed(precision)
 }
 
-export function stringSort(a: string, b: string) {
-  if (a === "(missing)") {
+export function stringSort(a: string | null, b: string | null) {
+  if (a === "(missing)" || a === null) {
     return 1
   }
-  if (b === "(missing)") {
+  if (b === "(missing)" || b === null) {
     return -1
   }
   return a > b ? 1 : a < b ? -1 : 0
@@ -27,6 +27,22 @@ export function numberSort(a: number | null, b: number | null) {
     return 1
   }
   return a - b
+}
+
+export function rangeSort(a: string | null, b: string | null) {
+  if (a === "(missing)" || a === null) {
+    return 1
+  }
+  if (b === "(missing)" || b === null) {
+    return -1
+  }
+  if (a?.startsWith(">") || b?.startsWith("<")) {
+    return 1
+  }
+  if (b?.startsWith(">") || a?.startsWith("<")) {
+    return -1
+  }
+  return stringSort(a, b)
 }
 
 function selectAsString<

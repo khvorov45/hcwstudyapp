@@ -28,6 +28,7 @@ import {
   interpolateSinebow,
   getCumsum,
   getMax,
+  rangeSort,
 } from "../lib/util"
 
 export default function Plots({
@@ -470,17 +471,10 @@ function PlotColumn({
       colorVar: getColorVariable(p),
       ageCat: cut(p.age, { thresholds: ageThresholds }).string,
     }),
-    (subset) => ({
-      count: subset.length,
-      firstAge: cut(
-        subset.find((p) => p.age !== null && p.age !== undefined)?.age ?? null,
-        { thresholds: ageThresholds }
-      ).low,
-      ages: subset.map((s) => s.age),
-    })
+    (subset) => ({ count: subset.length })
   )
     .sort((a, b) => stringSort(a.colorVar, b.colorVar))
-    .sort((a, b) => numberSort(a.firstAge, b.firstAge))
+    .sort((a, b) => rangeSort(a.ageCat, b.ageCat))
 
   const theme = useTheme()
   const getColor = (d: any) =>
