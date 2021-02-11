@@ -174,7 +174,16 @@ function SerologyPlots({
     .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
   const pad = {
-    axis: { top: 10, bottom: 150, left: 55, right: 80 },
+    axis: {
+      top: 10,
+      bottom:
+        10 +
+        (selectedViruses.length === 1 ? 0 : 110) +
+        (selectedDays.length === 1 ? 0 : 12) +
+        (selectedVax.length === 1 ? 0 : 12),
+      left: 55,
+      right: 80,
+    },
     data: { top: 0, right: 0, bottom: 10, left: 10 },
     yTitle: 20,
     xTitle: 20,
@@ -269,7 +278,7 @@ function SerologyPlots({
             data={serologySummary}
             minWidthPerX={20}
             maxWidthMultiplier={3}
-            height={500}
+            height={400}
             yAxisSpec={{
               min: titreTicks[0],
               max: titreTicks[titreTicks.length - 1],
@@ -1250,11 +1259,7 @@ function Axis<T>({
 }
 
 function Caption({ children }: { children: ReactNode }) {
-  return (
-    <div style={{ margin: 10, maxWidth: "80%", alignSelf: "center" }}>
-      {children}
-    </div>
-  )
+  return <div style={{ maxWidth: "80%", alignSelf: "center" }}>{children}</div>
 }
 
 function FigureContainer({ children }: { children: ReactNode }) {
