@@ -190,6 +190,12 @@ function SerologyPlots({
       accessor: (d) => d.virusShortName,
     } as AxisSpec<T, string>
   }
+  function vaxAxisSpec<T extends { prevVac: number }>() {
+    if (selectedVax.length === 1) {
+      return null
+    }
+    return { lab: "Vax", accessor: (d: T) => d.prevVac.toString() }
+  }
   const titreTicks = [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]
   const perVirus =
     selectedViruses.length === 1
@@ -278,7 +284,7 @@ function SerologyPlots({
               selectedDays.length === 1
                 ? null
                 : { lab: "Day", accessor: (d) => d.day.toString() },
-              { lab: "Vax", accessor: (d) => d.prevVac.toString() },
+              vaxAxisSpec(),
             ]}
             pad={pad}
             categorySeparatorXLevel={0}
@@ -315,10 +321,7 @@ function SerologyPlots({
               type: "log",
               accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
             }}
-            xAxesSpec={[
-              virusAxisSpec(),
-              { lab: "Vax", accessor: (d) => d.prevVac.toString() },
-            ]}
+            xAxesSpec={[virusAxisSpec(), vaxAxisSpec()]}
             pad={pad}
             categorySeparatorXLevel={0}
           />
@@ -345,10 +348,7 @@ function SerologyPlots({
                 : "Seroconversion (14 vs 0, 95% CI)",
               accessor: (d) => ({ point: d.prop, low: d.low, high: d.high }),
             }}
-            xAxesSpec={[
-              virusAxisSpec(),
-              { lab: "Vax", accessor: (d) => d.prevVac.toString() },
-            ]}
+            xAxesSpec={[virusAxisSpec(), vaxAxisSpec()]}
             pad={pad}
             categorySeparatorXLevel={0}
           />
