@@ -473,14 +473,14 @@ function PlotColumn({
     (subset) => ({
       count: subset.length,
       firstAge: cut(
-        subset.find((p) => p.age !== null && p.age !== undefined)?.age ?? NaN,
+        subset.find((p) => p.age !== null && p.age !== undefined)?.age ?? null,
         { thresholds: ageThresholds }
       ).low,
       ages: subset.map((s) => s.age),
     })
   )
     .sort((a, b) => stringSort(a.colorVar, b.colorVar))
-    .sort((a, b) => numberSort(a.firstAge ?? Infinity, b.firstAge ?? Infinity))
+    .sort((a, b) => numberSort(a.firstAge, b.firstAge))
 
   const theme = useTheme()
   const getColor = (d: any) =>
