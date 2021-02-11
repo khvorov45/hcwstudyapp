@@ -630,7 +630,8 @@ function GenericBar<T extends Object>({
   data,
   yAccessor,
   xAccessor,
-  fixedWidth = 300,
+  fixedWidth = 350,
+  fixedBarWidth = 50,
   height = 200,
   pad = {
     axis: { top: 20, right: 0, bottom: 40, left: 50 },
@@ -646,6 +647,7 @@ function GenericBar<T extends Object>({
   yAccessor: (x: T) => number
   xAccessor: (x: T) => string
   fixedWidth?: number
+  fixedBarWidth?: number
   height?: number
   pad?: PlotPad
   yAxisSpec: AxisSpec
@@ -663,7 +665,7 @@ function GenericBar<T extends Object>({
       cumsum: getCumsum(yValues),
     }
   })
-  const { width, widthPerX } = usePlotSize({
+  const { width } = usePlotSize({
     fixedWidth,
     pad,
   })
@@ -682,7 +684,7 @@ function GenericBar<T extends Object>({
       [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
     )
   const theme = useTheme()
-  const barWidth = widthPerX * 0.8
+  const barWidth = fixedBarWidth
   return (
     <SinglePlotContainer height={height}>
       <svg width={width} height={height}>
