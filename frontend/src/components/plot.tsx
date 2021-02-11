@@ -191,7 +191,7 @@ function SerologyPlots({
     selectedDays.length === 1 ? `for day ${selectedDays[0]}` : "per day"
   const perVax =
     selectedVax.length === 1
-      ? `for the group with ${selectedVax[0]} prior vaccinations`
+      ? `for the group with ${selectedVax[0]} prior vaccination`
       : "per prior vaccination count"
   return (
     <>
