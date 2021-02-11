@@ -89,26 +89,26 @@ function SerologyPlots({
   titreChange: TitreChange[]
   virusTable: Virus[]
 }) {
-  const viruses = unique(serology.map((s) => s.virus)).sort(stringSort)
-  const sites = unique(serology.map((s) => s.site ?? "(missing)"))
-  const prevVacs = unique(serology.map((s) => s.prevVac)).sort(numberSort)
-  const days = unique(serology.map((s) => s.day)).sort(numberSort)
+  const uniqueViruses = unique(serology.map((s) => s.virus)).sort(stringSort)
+  const uniqueSites = unique(serology.map((s) => s.site)).sort(stringSort)
+  const uniqueVax = unique(serology.map((s) => s.prevVac)).sort(numberSort)
+  const uniqueDays = unique(serology.map((s) => s.day)).sort(numberSort)
 
   // Filters applied in the order presented
-  const [vaccinations, setVaccinations] = useState<number[]>([0, 5])
-  const [site, setSite] = useState<Site[]>([])
-  const [virus, setVirus] = useState<string[]>([])
+  const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
+  const [selectedSites, setSelectedSites] = useState<Site[]>([])
+  const [selectedViruses, setSelectedViruses] = useState<string[]>([])
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 14])
 
   const vacFiltered = serology.filter(
-    (s) => vaccinations.length === 0 || vaccinations.includes(s.prevVac)
+    (s) => selectedVax.length === 0 || selectedVax.includes(s.prevVac)
   )
   const siteFiltered = vacFiltered.filter(
-    (s) => site.length === 0 || site.includes(s.site)
+    (s) => selectedSites.length === 0 || selectedSites.includes(s.site)
   )
   const virusFiltered = siteFiltered.filter(
-    (s) => virus.length === 0 || virus.includes(s.virus)
+    (s) => selectedViruses.length === 0 || selectedViruses.includes(s.virus)
   )
   const pidFiltered = virusFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
@@ -125,7 +125,7 @@ function SerologyPlots({
   const titreChangeFiltered = titreChange.filter(
     (t) =>
       plotPids.includes(t.pid) &&
-      (virus.length === 0 || virus.includes(t.virus))
+      (selectedViruses.length === 0 || selectedViruses.includes(t.virus))
   )
 
   // Summarise the filtered data
@@ -162,7 +162,7 @@ function SerologyPlots({
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
     .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
-  const dayColors = createDescreteMapping(days)
+  const dayColors = createDescreteMapping(uniqueDays)
 
   const pad = {
     axis: { top: 10, bottom: 150, left: 55, right: 80 },
@@ -176,41 +176,44 @@ function SerologyPlots({
     renderTick: (props) => <VirusTick {...props} viruses={virusTable} />,
   }
   const titreTicks = [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]
-  const perVirus = virus.length === 1 ? `for ${virus[0]} virus` : "per virus"
+  const perVirus =
+    selectedViruses.length === 1
+      ? `for ${selectedViruses[0]} virus`
+      : "per virus"
   const perDay =
     selectedDays.length === 1 ? `for day ${selectedDays[0]}` : "per day"
   const perVax =
-    vaccinations.length === 1
-      ? `for the group with ${vaccinations[0]} prior vaccinations`
+    selectedVax.length === 1
+      ? `for the group with ${selectedVax[0]} prior vaccinations`
       : "per prior vaccination count"
   return (
     <>
       <ControlRibbon>
         <SelectorMultiple
-          options={prevVacs}
+          options={uniqueVax}
           label="Vaccinations"
-          value={vaccinations}
+          value={selectedVax}
           onChange={(n) => {
-            setVaccinations(n)
+            setSelectedVax(n)
             setSelectedPid(null)
           }}
           width={200}
           inputMode="none"
         />
         <SiteSelect
-          sites={sites}
-          site={site}
+          sites={uniqueSites}
+          site={selectedSites}
           setSite={(s) => {
-            setSite(s)
+            setSelectedSites(s)
             setSelectedPid(null)
           }}
         />
         <SelectorMultiple
-          options={viruses}
+          options={uniqueViruses}
           label="Virus"
           width={225}
-          value={virus}
-          onChange={setVirus}
+          value={selectedViruses}
+          onChange={setSelectedViruses}
           inputMode="none"
         />
         <Selector
@@ -222,10 +225,10 @@ function SerologyPlots({
             setSelectedPid(n)
             const thisPid = pidFiltered.find((d) => d.pid === n)
             if (thisPid?.site !== undefined) {
-              setSite([thisPid.site])
+              setSelectedSites([thisPid.site])
             }
             if (thisPid?.prevVac !== undefined) {
-              setVaccinations([thisPid.prevVac])
+              setSelectedVax([thisPid.prevVac])
             }
           }}
           inputMode="text"
@@ -272,9 +275,9 @@ function SerologyPlots({
             {selectedPid === null && " " + perVax}
             {". "}
             Colored by day.{" "}
-            {vaccinations.length !== 1
+            {selectedVax.length !== 1
               ? `Arranged so that points with the same color form groups
-              ${virus.length !== 1 ? "(within each virus panel)" : ""}
+              ${selectedViruses.length !== 1 ? "(within each virus panel)" : ""}
               representing the same GMT (same virus, same day) for different
               sample subsets split by vaccination history.`
               : ""}
