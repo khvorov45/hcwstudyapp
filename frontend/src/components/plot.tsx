@@ -180,6 +180,9 @@ function SerologyPlots({
     xTitle: 20,
   }
   function virusAxisSpec<T extends { virusShortName: string }>() {
+    if (selectedViruses.length === 1) {
+      return null
+    }
     return {
       textAnchor: "start",
       angle: 45,
