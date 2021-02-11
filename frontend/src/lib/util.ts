@@ -10,6 +10,9 @@ export function round(n: number | null, precision: number = 0): string | null {
 }
 
 export function stringSort(a: string | null, b: string | null) {
+  if (a === b) {
+    return 0
+  }
   if (a === "(missing)" || a === null) {
     return 1
   }
@@ -20,6 +23,9 @@ export function stringSort(a: string | null, b: string | null) {
 }
 
 export function numberSort(a: number | null, b: number | null) {
+  if (a === b) {
+    return 0
+  }
   if (a === null) {
     return -1
   }
@@ -30,6 +36,9 @@ export function numberSort(a: number | null, b: number | null) {
 }
 
 export function rangeSort(a: string | null, b: string | null) {
+  if (a === b) {
+    return 0
+  }
   if (a === "(missing)" || a === null) {
     return 1
   }
