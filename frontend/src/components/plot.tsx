@@ -893,7 +893,10 @@ function PointRange<T extends Object>({
   pad: PlotPad
 }) {
   const xAxesNotNull = xAxesSpec.filter(filterNotNull)
-  const xAccessor = (d: T) => xAxesNotNull.map((xAxis) => xAxis.accessor(d))
+  const xAccessor = (d: T) =>
+    xAxesNotNull.length === 0
+      ? [""]
+      : xAxesNotNull.map((xAxis) => xAxis.accessor(d))
 
   // Figure out plot dimensions (data-dependent)
   const uniqueXs = Array.from(new Set(data.map((x) => xAccessor(x))))

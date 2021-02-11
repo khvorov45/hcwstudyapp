@@ -284,6 +284,9 @@ export function scaleLinear(
   from: [number, number],
   to: [number, number]
 ): number {
+  if (from[0] === from[1]) {
+    return (to[0] + to[1]) / 2
+  }
   return (x - from[0]) * ((to[1] - to[0]) / (from[1] - from[0])) + to[0]
 }
 
