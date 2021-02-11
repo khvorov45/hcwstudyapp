@@ -486,6 +486,40 @@ function PlotColumn({
     .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
     .sort((a, b) => rangeSort(a.ageCat, b.ageCat))
 
+  const heightBinned = rollup(
+    participantsExtra,
+    (p) => ({
+      colorVar: getColorVariable(p),
+      heightCat: cut(p.heightCM, { thresholds: [150, 160, 170, 180, 190] })
+        .string,
+    }),
+    (subset) => ({ count: subset.length })
+  )
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
+    .sort((a, b) => rangeSort(a.heightCat, b.heightCat))
+
+  const weightBinned = rollup(
+    participantsExtra,
+    (p) => ({
+      colorVar: getColorVariable(p),
+      weightCat: cut(p.weightKG, { thresholds: [50, 70, 90, 110] }).string,
+    }),
+    (subset) => ({ count: subset.length })
+  )
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
+    .sort((a, b) => rangeSort(a.weightCat, b.weightCat))
+
+  const bmiBinned = rollup(
+    participantsExtra,
+    (p) => ({
+      colorVar: getColorVariable(p),
+      bmiCat: cut(p.bmi, { thresholds: [15, 18, 25, 30, 40] }).string,
+    }),
+    (subset) => ({ count: subset.length })
+  )
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
+    .sort((a, b) => rangeSort(a.bmiCat, b.bmiCat))
+
   const theme = useTheme()
   const getColor = (d: any) =>
     colorVarValues.length === 1
@@ -502,6 +536,42 @@ function PlotColumn({
         }}
         xAxisSpec={{
           lab: "Age",
+        }}
+        getColor={getColor}
+      />
+      <GenericBar
+        data={heightBinned}
+        yAccessor={(d) => d.count}
+        xAccessor={(d) => d.heightCat}
+        yAxisSpec={{
+          lab: "Count",
+        }}
+        xAxisSpec={{
+          lab: "Height, cm",
+        }}
+        getColor={getColor}
+      />
+      <GenericBar
+        data={weightBinned}
+        yAccessor={(d) => d.count}
+        xAccessor={(d) => d.weightCat}
+        yAxisSpec={{
+          lab: "Count",
+        }}
+        xAxisSpec={{
+          lab: "Weight, kg",
+        }}
+        getColor={getColor}
+      />
+      <GenericBar
+        data={bmiBinned}
+        yAccessor={(d) => d.count}
+        xAccessor={(d) => d.bmiCat}
+        yAxisSpec={{
+          lab: "Count",
+        }}
+        xAxisSpec={{
+          lab: "BMI",
         }}
         getColor={getColor}
       />
