@@ -630,8 +630,7 @@ function GenericBar<T extends Object>({
   data,
   yAccessor,
   xAccessor,
-  minWidthPerX = 50,
-  maxWidthMultiplier = 1,
+  fixedWidth = 300,
   height = 200,
   pad = {
     axis: { top: 20, right: 0, bottom: 40, left: 50 },
@@ -646,8 +645,7 @@ function GenericBar<T extends Object>({
   data: T[]
   yAccessor: (x: T) => number
   xAccessor: (x: T) => string
-  minWidthPerX?: number
-  maxWidthMultiplier?: number
+  fixedWidth?: number
   height?: number
   pad?: PlotPad
   yAxisSpec: AxisSpec
@@ -666,9 +664,7 @@ function GenericBar<T extends Object>({
     }
   })
   const { width, widthPerX } = usePlotSize({
-    uniqueXCount: xValuesUnique.length,
-    minWidthPerX: minWidthPerX,
-    maxWidthMultiplier: maxWidthMultiplier,
+    fixedWidth,
     pad,
   })
   const scaleX = (x: string) =>
@@ -764,29 +760,37 @@ type PlotPad = {
 }
 
 function usePlotSize({
+  fixedWidth,
   uniqueXCount,
   minWidthPerX,
   maxWidthMultiplier,
   pad,
 }: {
-  uniqueXCount: number
-  minWidthPerX: number
-  maxWidthMultiplier: number
+  fixedWidth?: number
+  uniqueXCount?: number
+  minWidthPerX?: number
+  maxWidthMultiplier?: number
   pad: PlotPad
 }) {
-  const minWidth =
-    minWidthPerX * uniqueXCount +
-    pad.axis.left +
-    pad.axis.right +
-    pad.data.left +
-    pad.data.right
   const windowSize = useWindowSize()
+
+  let minWidth: number =
+    pad.axis.left + pad.axis.right + pad.data.left + pad.data.right
+
+  if (!fixedWidth && !minWidthPerX) {
+    minWidth += 300
+  } else if (!fixedWidth) {
+    minWidth += (minWidthPerX ?? 100) * (uniqueXCount ?? 5)
+  } else {
+    minWidth += fixedWidth
+  }
+
   const width =
-    minmax(windowSize.width, minWidth, minWidth * maxWidthMultiplier) -
+    minmax(windowSize.width, minWidth, minWidth * (maxWidthMultiplier ?? 1)) -
     detectScrollbarWidth()
   const dataWidth =
     width - pad.axis.right - pad.data.right - pad.axis.left - pad.data.left
-  const widthPerX = dataWidth / uniqueXCount
+  const widthPerX = dataWidth / (uniqueXCount ?? 5)
   return {
     width,
     widthPerX,
