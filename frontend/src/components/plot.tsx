@@ -156,11 +156,11 @@ function SerologyPlots({
   // Seroconversion (for virus/vax)
   const seroconversionSummary = rollup(
     titreChangeFiltered,
-    (x) => ({ prevVac: x.prevVac, virus: x.virusShortName }),
+    (x) => ({ prevVac: x.prevVac, virusShortName: x.virusShortName }),
     (arr) => summariseProportion(arr.map((a) => a.seroconverted))
   )
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
-    .sort((a, b) => stringSort(a.virus, b.virus))
+    .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
   // Titre rises (virus/vax)
   const titreChangesSummary = rollup(
@@ -177,10 +177,13 @@ function SerologyPlots({
     yTitle: 20,
     xTitle: 20,
   }
-  const virusAxisSpec: AxisSpec = {
-    textAnchor: "start",
-    angle: 45,
-    renderTick: (props) => <VirusTick {...props} viruses={virusTable} />,
+  function virusAxisSpec<T extends { virusShortName: string }>() {
+    return {
+      textAnchor: "start",
+      angle: 45,
+      renderTick: (props) => <VirusTick {...props} viruses={virusTable} />,
+      accessor: (d) => d.virusShortName,
+    } as AxisSpec<T, string>
   }
   const titreTicks = [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240]
   const perVirus =
@@ -253,12 +256,6 @@ function SerologyPlots({
         <FigureContainer>
           <PointRange
             data={serologySummary}
-            xAccessor={(d) => [
-              d.virusShortName,
-              d.day.toString(),
-              d.prevVac.toString(),
-            ]}
-            yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
             minWidthPerX={20}
             maxWidthMultiplier={3}
             height={500}
@@ -268,9 +265,14 @@ function SerologyPlots({
               ticks: titreTicks,
               lab: selectedPid ? "Titre" : "GMT (95% CI)",
               type: "log",
+              accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
             }}
             getColor={(v) => colorsDays[v.day]}
-            xAxisSpec={[virusAxisSpec, { lab: "Day" }, { lab: "Vax" }]}
+            xAxisSpec={[
+              virusAxisSpec(),
+              { lab: "Day", accessor: (d) => d.day.toString() },
+              { lab: "Vax", accessor: (d) => d.prevVac.toString() },
+            ]}
             pad={pad}
             categorySeparatorXLevel={0}
           />
@@ -293,8 +295,6 @@ function SerologyPlots({
         <FigureContainer>
           <PointRange
             data={titreChangesSummary}
-            xAccessor={(d) => [d.virusShortName, d.prevVac.toString()]}
-            yAccessor={(d) => ({ point: d.mean, low: d.low, high: d.high })}
             minWidthPerX={20}
             maxWidthMultiplier={3}
             height={400}
@@ -306,8 +306,12 @@ function SerologyPlots({
                 ? "Fold-rise (14 vs 0)"
                 : "GMR (14 vs 0, 95% CI)",
               type: "log",
+              accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
             }}
-            xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
+            xAxisSpec={[
+              virusAxisSpec(),
+              { lab: "Vax", accessor: (d) => d.prevVac.toString() },
+            ]}
             pad={pad}
             categorySeparatorXLevel={0}
           />
@@ -322,8 +326,6 @@ function SerologyPlots({
         <FigureContainer>
           <PointRange
             data={seroconversionSummary}
-            xAccessor={(d) => [d.virus, d.prevVac.toString()]}
-            yAccessor={(d) => ({ point: d.prop, low: d.low, high: d.high })}
             minWidthPerX={20}
             maxWidthMultiplier={3}
             height={400}
@@ -334,8 +336,12 @@ function SerologyPlots({
               lab: selectedPid
                 ? "Seroconverted (14 vs 0)"
                 : "Seroconversion (14 vs 0, 95% CI)",
+              accessor: (d) => ({ point: d.prop, low: d.low, high: d.high }),
             }}
-            xAxisSpec={[virusAxisSpec, { lab: "Vax" }]}
+            xAxisSpec={[
+              virusAxisSpec(),
+              { lab: "Vax", accessor: (d) => d.prevVac.toString() },
+            ]}
             pad={pad}
             categorySeparatorXLevel={0}
           />
@@ -580,73 +586,73 @@ function PlotColumn({
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <GenericBar
         data={agesBinned}
-        yAccessor={(d) => d.count}
-        xAccessor={(d) => d.ageCat}
         yAxisSpec={{
           lab: "Count",
+          accessor: (d) => d.count,
         }}
         xAxisSpec={{
           lab: "Age",
+          accessor: (d) => d.ageCat,
         }}
         getColor={getColor}
       />
       <GenericBar
         data={heightBinned}
-        yAccessor={(d) => d.count}
-        xAccessor={(d) => d.heightCat}
         yAxisSpec={{
           lab: "Count",
+          accessor: (d) => d.count,
         }}
         xAxisSpec={{
           lab: "Height, cm",
+          accessor: (d) => d.heightCat,
         }}
         getColor={getColor}
       />
       <GenericBar
         data={weightBinned}
-        yAccessor={(d) => d.count}
-        xAccessor={(d) => d.weightCat}
         yAxisSpec={{
           lab: "Count",
+          accessor: (d) => d.count,
         }}
         xAxisSpec={{
           lab: "Weight, kg",
+          accessor: (d) => d.weightCat,
         }}
         getColor={getColor}
       />
       <GenericBar
         data={bmiBinned}
-        yAccessor={(d) => d.count}
-        xAccessor={(d) => d.bmiCat}
         yAxisSpec={{
           lab: "Count",
+          accessor: (d) => d.count,
         }}
         xAxisSpec={{
           lab: "BMI",
+          accessor: (d) => d.bmiCat,
         }}
         getColor={getColor}
       />
       <GenericBar
         data={genderCounts}
-        yAccessor={(d) => d.count}
-        xAccessor={(d) => d.gender}
         yAxisSpec={{
           lab: "Count",
+          accessor: (d) => d.count,
         }}
         xAxisSpec={{
           lab: "Gender",
+          accessor: (d) => d.gender,
         }}
         getColor={getColor}
       />
       <GenericBar
         data={priorVaccinationCounts}
-        yAccessor={(d) => d.count}
-        xAccessor={(d) => d.prevVac.toString()}
         yAxisSpec={{
           lab: "Count",
+          accessor: (d) => d.count,
         }}
         xAxisSpec={{
           lab: "Known prior vaccinations",
+          accessor: (d) => d.prevVac.toString(),
         }}
         getColor={getColor}
       />
@@ -679,8 +685,6 @@ function isOverHalf(x: number) {
 
 function GenericBar<T extends Object>({
   data,
-  yAccessor,
-  xAccessor,
   fixedWidth = 350,
   fixedBarWidth = 50,
   height = 200,
@@ -695,20 +699,18 @@ function GenericBar<T extends Object>({
   getColor,
 }: {
   data: T[]
-  yAccessor: (x: T) => number
-  xAccessor: (x: T) => string
   fixedWidth?: number
   fixedBarWidth?: number
   height?: number
   pad?: PlotPad
-  yAxisSpec: AxisSpec
-  xAxisSpec: AxisSpec
+  yAxisSpec: AxisSpec<T, number>
+  xAxisSpec: AxisSpec<T, string>
   getColor?: (d: T) => string
 }) {
-  const xValuesUnique = Array.from(new Set(data.map(xAccessor)))
+  const xValuesUnique = Array.from(new Set(data.map(xAxisSpec.accessor)))
   const xValueSubsets = xValuesUnique.map((xValue) => {
-    const dataSubset = data.filter((d) => xAccessor(d) === xValue)
-    const yValues = dataSubset.map(yAccessor)
+    const dataSubset = data.filter((d) => xAxisSpec.accessor(d) === xValue)
+    const yValues = dataSubset.map(yAxisSpec.accessor)
     return {
       xValue,
       total: getSum(yValues),
@@ -776,7 +778,7 @@ function GenericBar<T extends Object>({
               width={barWidth}
               height={
                 height -
-                scaleY(yAccessor(d)) -
+                scaleY(yAxisSpec.accessor(d)) -
                 pad.axis.bottom -
                 pad.data.bottom
               }
@@ -850,7 +852,7 @@ function usePlotSize({
   }
 }
 
-type AxisSpec = {
+type AxisSpec<T extends Object, K> = {
   min?: number
   max?: number
   ticks?: number[]
@@ -859,12 +861,11 @@ type AxisSpec = {
   textAnchor?: "middle" | "start"
   angle?: number
   renderTick?: (props: { tick: string; x: number; y: number }) => ReactNode
+  accessor: (x: T) => K
 }
 
 function PointRange<T extends Object>({
   data,
-  xAccessor,
-  yAccessor,
   minWidthPerX,
   maxWidthMultiplier,
   height,
@@ -875,17 +876,17 @@ function PointRange<T extends Object>({
   pad,
 }: {
   data: T[]
-  xAccessor: (d: T) => string[]
-  yAccessor: (d: T) => { point: number; low: number; high: number }
   minWidthPerX: number
   maxWidthMultiplier: number
   height: number
-  yAxisSpec: AxisSpec
+  yAxisSpec: AxisSpec<T, { point: number; low: number; high: number }>
   getColor?: (x: T) => string
-  xAxisSpec: AxisSpec[]
+  xAxisSpec: AxisSpec<T, string>[]
   categorySeparatorXLevel?: number
   pad: PlotPad
 }) {
+  const xAccessor = (d: T) => xAxisSpec.map((xAxis) => xAxis.accessor(d))
+
   // Figure out plot dimensions (data-dependent)
   const uniqueXs = Array.from(new Set(data.map((x) => xAccessor(x))))
   const { width, widthPerX } = usePlotSize({
@@ -1058,7 +1059,7 @@ function PointRange<T extends Object>({
               theme.palette.type === "dark" ? "light" : "dark"
             ]
           const x = scaleX(xAccessor(d))
-          const y = yAccessor(d)
+          const y = yAxisSpec.accessor(d)
           return (
             <g key={`point-${i}`}>
               <line
