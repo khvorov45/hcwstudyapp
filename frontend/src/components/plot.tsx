@@ -890,6 +890,7 @@ function PointRange<T extends Object>({
   xAxesSpec,
   categorySeparatorXLevel,
   pad,
+  toggleSettings,
 }: {
   data: T[]
   minWidthPerX: number
@@ -900,6 +901,7 @@ function PointRange<T extends Object>({
   xAxesSpec: (AxisSpec<T, string> | null)[]
   categorySeparatorXLevel?: number
   pad: PlotPad
+  toggleSettings?: () => void
 }) {
   const xAxesNotNull = xAxesSpec.filter(filterNotNull)
   const xAccessor = (d: T) =>
@@ -1094,6 +1096,14 @@ function PointRange<T extends Object>({
             </g>
           )
         })}
+        {/* Control elements */}
+        {toggleSettings && (
+          <SettingsIconEmbed
+            x={width - pad.axis.left}
+            y={0}
+            onClick={toggleSettings}
+          />
+        )}
       </svg>
     </SinglePlotContainer>
   )
@@ -1275,5 +1285,29 @@ function FigureContainer({ children }: { children: ReactNode }) {
     >
       {children}
     </div>
+  )
+}
+
+function SettingsIconEmbed({
+  x,
+  y,
+  onClick,
+}: {
+  x: number
+  y: number
+  onClick: () => void
+}) {
+  return (
+    <g
+      transform={`translate(${x}, ${y})`}
+      onClick={onClick}
+      style={{ cursor: "pointer" }}
+    >
+      <path
+        d="M32.57 15.72l-3.35-1a11.65 11.65 0 0 0-.95-2.33l1.64-3.07a.61.61 0 0 0-.11-.72l-2.39-2.4a.61.61 0 0 0-.72-.11l-3.05 1.63a11.62 11.62 0 0 0-2.36-1l-1-3.31a.61.61 0 0 0-.59-.41h-3.38a.61.61 0 0 0-.58.43l-1 3.3a11.63 11.63 0 0 0-2.38 1l-3-1.62a.61.61 0 0 0-.72.11L6.2 8.59a.61.61 0 0 0-.11.72l1.62 3a11.63 11.63 0 0 0-1 2.37l-3.31 1a.61.61 0 0 0-.43.58v3.38a.61.61 0 0 0 .43.58l3.33 1a11.62 11.62 0 0 0 1 2.33l-1.64 3.14a.61.61 0 0 0 .11.72l2.39 2.39a.61.61 0 0 0 .72.11l3.09-1.65a11.65 11.65 0 0 0 2.3.94l1 3.37a.61.61 0 0 0 .58.43h3.38a.61.61 0 0 0 .58-.43l1-3.38a11.63 11.63 0 0 0 2.28-.94l3.11 1.66a.61.61 0 0 0 .72-.11l2.39-2.39a.61.61 0 0 0 .11-.72l-1.66-3.1a11.63 11.63 0 0 0 .95-2.29l3.37-1a.61.61 0 0 0 .43-.58v-3.41a.61.61 0 0 0-.37-.59zM18 23.5a5.5 5.5 0 1 1 5.5-5.5a5.5 5.5 0 0 1-5.5 5.5z"
+        fill="#626262"
+      />
+      <rect x={0} y={0} width={36} height={36} fill="rgba(0, 0, 0, 0)" />
+    </g>
   )
 }
