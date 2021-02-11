@@ -275,7 +275,9 @@ function SerologyPlots({
             getColor={(v) => colorsDays[v.day]}
             xAxesSpec={[
               virusAxisSpec(),
-              { lab: "Day", accessor: (d) => d.day.toString() },
+              selectedDays.length === 1
+                ? null
+                : { lab: "Day", accessor: (d) => d.day.toString() },
               { lab: "Vax", accessor: (d) => d.prevVac.toString() },
             ]}
             pad={pad}
