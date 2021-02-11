@@ -89,42 +89,51 @@ function SerologyPlots({
   titreChange: TitreChange[]
   virusTable: Virus[]
 }) {
-  const uniqueViruses = unique(serology.map((s) => s.virus)).sort(stringSort)
   const uniqueSites = unique(serology.map((s) => s.site)).sort(stringSort)
-  const uniqueVax = unique(serology.map((s) => s.prevVac)).sort(numberSort)
   const uniqueDays = unique(serology.map((s) => s.day)).sort(numberSort)
+  const uniqueVax = unique(serology.map((s) => s.prevVac)).sort(numberSort)
+  const uniqueViruses = virusTable.map((v) => v.name)
+
+  // Coloring based on unique for consistency
+  const colorsDays = createDescreteMapping(uniqueDays)
 
   // Filters applied in the order presented
-  const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
-  const [selectedViruses, setSelectedViruses] = useState<string[]>([])
+  const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
+
+  // Site and vax determine the selection of pid and set it to null
+  // Pid always sets site and vax to 1 value each
   const [selectedPid, setSelectedPid] = useState<string | null>(null)
+
+  const [selectedViruses, setSelectedViruses] = useState<string[]>([])
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 14])
 
-  const vacFiltered = serology.filter(
-    (s) => selectedVax.length === 0 || selectedVax.includes(s.prevVac)
-  )
-  const siteFiltered = vacFiltered.filter(
+  const siteFiltered = serology.filter(
     (s) => selectedSites.length === 0 || selectedSites.includes(s.site)
   )
-  const virusFiltered = siteFiltered.filter(
-    (s) => selectedViruses.length === 0 || selectedViruses.includes(s.virus)
+
+  const vacFiltered = siteFiltered.filter(
+    (s) => selectedVax.length === 0 || selectedVax.includes(s.prevVac)
   )
-  const pidFiltered = virusFiltered.filter(
+
+  const availablePids = unique(vacFiltered.map((s) => s.pid)).sort(stringSort)
+  const pidFiltered = vacFiltered.filter(
     (s) => !selectedPid || s.pid === selectedPid
   )
-  const daysFiltered = pidFiltered.filter(
+
+  const virusFiltered = pidFiltered.filter(
+    (s) => selectedViruses.length === 0 || selectedViruses.includes(s.virus)
+  )
+
+  const daysFiltered = virusFiltered.filter(
     (s) => selectedDays.length === 0 || selectedDays.includes(s.day)
   )
 
-  const availablePids = unique(siteFiltered.map((s) => s.pid)).sort(stringSort)
-  const availableDays = unique(pidFiltered.map((s) => s.day)).sort(numberSort)
-
-  const plotPids = unique(pidFiltered.map((s) => s.pid))
-
   const titreChangeFiltered = titreChange.filter(
     (t) =>
-      plotPids.includes(t.pid) &&
+      (selectedPid === null
+        ? availablePids.includes(t.pid)
+        : t.pid === selectedPid) &&
       (selectedViruses.length === 0 || selectedViruses.includes(t.virus))
   )
 
@@ -162,8 +171,6 @@ function SerologyPlots({
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
     .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
-  const dayColors = createDescreteMapping(uniqueDays)
-
   const pad = {
     axis: { top: 10, bottom: 150, left: 55, right: 80 },
     data: { top: 0, right: 0, bottom: 10, left: 10 },
@@ -189,17 +196,6 @@ function SerologyPlots({
   return (
     <>
       <ControlRibbon>
-        <SelectorMultiple
-          options={uniqueVax}
-          label="Vaccinations"
-          value={selectedVax}
-          onChange={(n) => {
-            setSelectedVax(n)
-            setSelectedPid(null)
-          }}
-          width={200}
-          inputMode="none"
-        />
         <SiteSelect
           sites={uniqueSites}
           site={selectedSites}
@@ -209,11 +205,14 @@ function SerologyPlots({
           }}
         />
         <SelectorMultiple
-          options={uniqueViruses}
-          label="Virus"
-          width={225}
-          value={selectedViruses}
-          onChange={setSelectedViruses}
+          options={uniqueVax}
+          label="Vaccinations"
+          value={selectedVax}
+          onChange={(n) => {
+            setSelectedVax(n)
+            setSelectedPid(null)
+          }}
+          width={200}
           inputMode="none"
         />
         <Selector
@@ -234,7 +233,15 @@ function SerologyPlots({
           inputMode="text"
         />
         <SelectorMultiple
-          options={availableDays}
+          options={uniqueViruses}
+          label="Virus"
+          width={225}
+          value={selectedViruses}
+          onChange={setSelectedViruses}
+          inputMode="none"
+        />
+        <SelectorMultiple
+          options={uniqueDays}
           label="Day"
           width={200}
           value={selectedDays}
@@ -262,7 +269,7 @@ function SerologyPlots({
               lab: selectedPid ? "Titre" : "GMT (95% CI)",
               type: "log",
             }}
-            getColor={(v) => dayColors[v.day]}
+            getColor={(v) => colorsDays[v.day]}
             xAxisSpec={[virusAxisSpec, { lab: "Day" }, { lab: "Vax" }]}
             pad={pad}
             categorySeparatorXLevel={0}
