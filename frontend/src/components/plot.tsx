@@ -1265,6 +1265,7 @@ function FigureContainer({ children }: { children: ReactNode }) {
         display: "flex",
         flexDirection: "column",
         borderBottom: `1px solid ${theme.palette.divider}`,
+        alignItems: "center",
       }}
     >
       {children}
