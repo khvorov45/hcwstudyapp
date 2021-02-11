@@ -383,15 +383,14 @@ function BaselinePlots({
 }) {
   const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
   const [site, setSite] = useState<Site[]>([])
-  const [colorVariable, setColorVariable] = useState<
+  type ColorVariable =
     | "gender"
     | "prevVac"
     | "ageCat"
     | "heightCat"
     | "weightCat"
     | "bmiCat"
-    | null
-  >(null)
+  const [colorVariable, setColorVariable] = useState<ColorVariable | null>(null)
 
   const ageThresholds = [18, 30, 40, 50, 66]
   const heightThresholds = [150, 160, 170, 180, 190]
@@ -447,17 +446,7 @@ function BaselinePlots({
             "gender",
             "prevVac",
           ]}
-          getOptionLabel={(o) =>
-            options[
-              o as
-                | "gender"
-                | "prevVac"
-                | "ageCat"
-                | "heightCat"
-                | "weightCat"
-                | "bmiCat"
-            ].lab
-          }
+          getOptionLabel={(o) => options[o as ColorVariable].lab}
           label="Color by"
           value={colorVariable}
           onChange={setColorVariable}
