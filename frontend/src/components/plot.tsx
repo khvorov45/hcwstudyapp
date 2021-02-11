@@ -391,15 +391,18 @@ function BaselinePlots({
     gender: {
       lab: "Gender",
       getter: (p: ParticipantExtra) => p.gender ?? "(missing)",
+      sorter: stringSort,
     },
     prevVac: {
       lab: "Vaccination",
       getter: (p: ParticipantExtra) => p.prevVac.toString(),
+      sorter: stringSort,
     },
     ageCat: {
       lab: "Age",
       getter: (p: ParticipantExtra) =>
         cut(p.age, { thresholds: ageThresholds }).string,
+      sorter: rangeSort,
     },
   }
   return (
@@ -431,6 +434,9 @@ function BaselinePlots({
               : (p) => "constant"
           }
           ageThresholds={ageThresholds}
+          sortColorVariable={
+            colorVariable ? options[colorVariable].sorter : stringSort
+          }
         />
       </PlotContainer>
     </>
@@ -440,10 +446,12 @@ function BaselinePlots({
 function PlotColumn({
   participantsExtra,
   getColorVariable,
+  sortColorVariable,
   ageThresholds,
 }: {
   participantsExtra: ParticipantExtra[]
   getColorVariable: (p: ParticipantExtra) => string
+  sortColorVariable: (a: string, b: string) => number
   ageThresholds: number[]
 }) {
   const colorVarValues = Array.from(
@@ -456,14 +464,16 @@ function PlotColumn({
     (x) => ({ gender: x.gender ?? "(missing)", colorVar: getColorVariable(x) }),
     (v) => ({ count: v.length })
   )
-    .sort((a, b) => stringSort(a.colorVar, b.colorVar))
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
     .sort((a, b) => stringSort(a.gender, b.gender))
 
   const priorVaccinationCounts = rollup(
     participantsExtra,
     (x) => ({ prevVac: x.prevVac, colorVar: getColorVariable(x) }),
     (v) => ({ count: v.length })
-  ).sort((a, b) => numberSort(a.prevVac, b.prevVac))
+  )
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
+    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
 
   const agesBinned = rollup(
     participantsExtra,
@@ -473,7 +483,7 @@ function PlotColumn({
     }),
     (subset) => ({ count: subset.length })
   )
-    .sort((a, b) => stringSort(a.colorVar, b.colorVar))
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
     .sort((a, b) => rangeSort(a.ageCat, b.ageCat))
 
   const theme = useTheme()
