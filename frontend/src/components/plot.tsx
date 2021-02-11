@@ -173,21 +173,21 @@ function SerologyPlots({
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
     .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
-  const pad = {
+  const pad = (axes: ("virus" | "day" | "vax")[]) => ({
     axis: {
       top: 10,
       bottom:
         10 +
-        (selectedViruses.length === 1 ? 0 : 110) +
-        (selectedDays.length === 1 ? 0 : 12) +
-        (selectedVax.length === 1 ? 0 : 12),
+        (axes.includes("virus") && selectedViruses.length === 1 ? 0 : 110) +
+        (axes.includes("day") && selectedDays.length === 1 ? 0 : 12) +
+        (axes.includes("vax") && selectedVax.length === 1 ? 0 : 12),
       left: 55,
       right: 80,
     },
     data: { top: 0, right: 0, bottom: 10, left: 10 },
     yTitle: 20,
     xTitle: 20,
-  }
+  })
   function virusAxisSpec<T extends { virusShortName: string }>() {
     if (selectedViruses.length === 1) {
       return null
@@ -295,7 +295,7 @@ function SerologyPlots({
                 : { lab: "Day", accessor: (d) => d.day.toString() },
               vaxAxisSpec(),
             ]}
-            pad={pad}
+            pad={pad(["virus", "day", "vax"])}
             categorySeparatorXLevel={0}
           />
           <Caption>
@@ -331,7 +331,7 @@ function SerologyPlots({
               accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
             }}
             xAxesSpec={[virusAxisSpec(), vaxAxisSpec()]}
-            pad={pad}
+            pad={pad(["virus", "vax"])}
             categorySeparatorXLevel={0}
           />
           <Caption>
@@ -358,7 +358,7 @@ function SerologyPlots({
               accessor: (d) => ({ point: d.prop, low: d.low, high: d.high }),
             }}
             xAxesSpec={[virusAxisSpec(), vaxAxisSpec()]}
-            pad={pad}
+            pad={pad(["virus", "vax"])}
             categorySeparatorXLevel={0}
           />
           <Caption>
