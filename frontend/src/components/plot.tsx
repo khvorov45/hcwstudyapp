@@ -29,6 +29,7 @@ import {
   getCumsum,
   getMax,
   rangeSort,
+  getMin,
 } from "../lib/util"
 
 export default function Plots({
@@ -299,8 +300,8 @@ function SerologyPlots({
             maxWidthMultiplier={3}
             height={400}
             yAxisSpec={{
-              min: 0.5,
-              max: 30,
+              min: Math.min(0.5, getMin(titreChangesSummary.map((d) => d.low))),
+              max: Math.max(30, getMax(titreChangesSummary.map((d) => d.high))),
               ticks: [0.5, 1, 2, 5, 10, 20, 30],
               lab: selectedPid
                 ? "Fold-rise (14 vs 0)"
