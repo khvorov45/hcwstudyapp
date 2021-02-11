@@ -30,6 +30,7 @@ import {
   getMax,
   rangeSort,
   getMin,
+  filterNotNull,
 } from "../lib/util"
 
 export default function Plots({
@@ -269,7 +270,7 @@ function SerologyPlots({
               accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
             }}
             getColor={(v) => colorsDays[v.day]}
-            xAxisSpec={[
+            xAxesSpec={[
               virusAxisSpec(),
               { lab: "Day", accessor: (d) => d.day.toString() },
               { lab: "Vax", accessor: (d) => d.prevVac.toString() },
@@ -309,7 +310,7 @@ function SerologyPlots({
               type: "log",
               accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
             }}
-            xAxisSpec={[
+            xAxesSpec={[
               virusAxisSpec(),
               { lab: "Vax", accessor: (d) => d.prevVac.toString() },
             ]}
@@ -339,7 +340,7 @@ function SerologyPlots({
                 : "Seroconversion (14 vs 0, 95% CI)",
               accessor: (d) => ({ point: d.prop, low: d.low, high: d.high }),
             }}
-            xAxisSpec={[
+            xAxesSpec={[
               virusAxisSpec(),
               { lab: "Vax", accessor: (d) => d.prevVac.toString() },
             ]}
@@ -872,7 +873,7 @@ function PointRange<T extends Object>({
   height,
   yAxisSpec,
   getColor,
-  xAxisSpec,
+  xAxesSpec,
   categorySeparatorXLevel,
   pad,
 }: {
@@ -882,11 +883,12 @@ function PointRange<T extends Object>({
   height: number
   yAxisSpec: AxisSpec<T, { point: number; low: number; high: number }>
   getColor?: (x: T) => string
-  xAxisSpec: AxisSpec<T, string>[]
+  xAxesSpec: (AxisSpec<T, string> | null)[]
   categorySeparatorXLevel?: number
   pad: PlotPad
 }) {
-  const xAccessor = (d: T) => xAxisSpec.map((xAxis) => xAxis.accessor(d))
+  const xAxesNotNull = xAxesSpec.filter(filterNotNull)
+  const xAccessor = (d: T) => xAxesNotNull.map((xAxis) => xAxis.accessor(d))
 
   // Figure out plot dimensions (data-dependent)
   const uniqueXs = Array.from(new Set(data.map((x) => xAccessor(x))))
@@ -982,7 +984,7 @@ function PointRange<T extends Object>({
           color={theme.plot.axis}
         />
         {/* Name(s) */}
-        {xAxisSpec?.map((xAxis, i) => (
+        {xAxesNotNull.map((xAxis, i) => (
           <text
             key={`axis-${i}`}
             x={pad.axis.left}
@@ -991,7 +993,7 @@ function PointRange<T extends Object>({
               pad.axis.bottom +
               theme.plot.tickLength +
               theme.plot.tickLabelFromTick +
-              (xAxisSpec.length - i - 1) * xAxesDistance
+              (xAxesNotNull.length - i - 1) * xAxesDistance
             }
             fill={theme.palette.text.primary}
             textAnchor="end"
@@ -1022,14 +1024,14 @@ function PointRange<T extends Object>({
                       key={`tick-x-${j}`}
                       x={x}
                       y={y}
-                      textAnchor={xAxisSpec?.[j]?.textAnchor ?? "middle"}
+                      textAnchor={xAxesNotNull[j]?.textAnchor ?? "middle"}
                       dominantBaseline="hanging"
                       fill={theme.palette.text.secondary}
                       transform={`rotate(${
-                        xAxisSpec[j]?.angle ?? 0
+                        xAxesNotNull[j]?.angle ?? 0
                       }, ${x}, ${y})`}
                     >
-                      {xAxisSpec[j]?.renderTick?.({ tick: xTick, x, y }) ??
+                      {xAxesNotNull[j]?.renderTick?.({ tick: xTick, x, y }) ??
                         xTick}
                     </text>
                   )

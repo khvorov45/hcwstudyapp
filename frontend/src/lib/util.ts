@@ -2,6 +2,10 @@ export function unique<T>(arr?: T[]): T[] {
   return Array.from(new Set(arr))
 }
 
+export function filterNotNull<T>(x: T | null): x is T {
+  return x !== null
+}
+
 export function round(n: number | null, precision: number = 0): string | null {
   if (n === null) {
     return null
