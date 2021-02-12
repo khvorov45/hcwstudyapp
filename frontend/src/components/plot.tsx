@@ -755,7 +755,7 @@ function GenericBar<T extends Object>({
       cumsum: getCumsum(yValues),
     }
   })
-  const { width } = usePlotSize({
+  const { width, pageWidth } = usePlotSize({
     fixedWidth,
     pad,
   })
@@ -776,7 +776,7 @@ function GenericBar<T extends Object>({
   const theme = useTheme()
   const barWidth = fixedBarWidth
   return (
-    <SinglePlotContainer height={height}>
+    <SinglePlotContainer width={pageWidth} height={height}>
       <svg width={width} height={height}>
         <Axis
           pad={pad}
@@ -886,6 +886,7 @@ function usePlotSize({
   return {
     width,
     widthPerX,
+    pageWidth: windowSize.width - detectScrollbarWidth(),
   }
 }
 
@@ -932,7 +933,7 @@ function PointRange<T extends Object>({
 
   // Figure out plot dimensions (data-dependent)
   const uniqueXs = Array.from(new Set(data.map((x) => xAccessor(x))))
-  const { width, widthPerX } = usePlotSize({
+  const { width, widthPerX, pageWidth } = usePlotSize({
     uniqueXCount: uniqueXs.length,
     minWidthPerX,
     maxWidthMultiplier,
@@ -976,7 +977,7 @@ function PointRange<T extends Object>({
   const theme = useTheme()
   const xAxesDistance = 15
   return (
-    <SinglePlotContainer height={height}>
+    <SinglePlotContainer width={pageWidth} height={height}>
       <svg width={width} height={height}>
         {/* Category separators */}
         {xSep.map((x, i) => {
@@ -1156,9 +1157,11 @@ function StraightLine({
 function SinglePlotContainer({
   children,
   height,
+  width,
 }: {
   children: ReactNode
   height: number
+  width: number
 }) {
   return (
     <div
@@ -1166,6 +1169,7 @@ function SinglePlotContainer({
         overflowX: "scroll",
         overflowY: "hidden",
         height: height + detectScrollbarWidth(),
+        width: width,
       }}
     >
       {children}
