@@ -1,5 +1,5 @@
-import { useTheme } from "@material-ui/core"
-import React, { ReactNode, useState } from "react"
+import { Popover, useTheme } from "@material-ui/core"
+import React, { ReactNode, SyntheticEvent, useState } from "react"
 import { Route, useRouteMatch, Switch, Redirect } from "react-router-dom"
 import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
@@ -110,6 +110,12 @@ function SerologyPlots({
   const [selectedViruses, setSelectedViruses] = useState<string[]>([])
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 14])
 
+  // Plot-specific
+  const [gmtSettingsAnchor, setGMTSettingsAnchor] = useState<SVGElement | null>(
+    null
+  )
+
+  // Apply filters
   const siteFiltered = serology.filter(
     (s) => selectedSites.length === 0 || selectedSites.includes(s.site)
   )
@@ -263,14 +269,6 @@ function SerologyPlots({
           onChange={setSelectedViruses}
           inputMode="none"
         />
-        <SelectorMultiple
-          options={uniqueDays}
-          label="Day"
-          width={200}
-          value={selectedDays}
-          onChange={setSelectedDays}
-          inputMode="none"
-        />
       </ControlRibbon>
       <PlotContainer>
         <FigureContainer>
@@ -297,6 +295,7 @@ function SerologyPlots({
             ]}
             pad={pad(["virus", "day", "vax"])}
             categorySeparatorXLevel={0}
+            setSettingsAnchor={setGMTSettingsAnchor}
           />
           <Caption>
             {selectedPid
@@ -372,6 +371,28 @@ function SerologyPlots({
           </Caption>
         </FigureContainer>
       </PlotContainer>
+      <Popover
+        open={gmtSettingsAnchor !== null}
+        onClose={() => setGMTSettingsAnchor(null)}
+        anchorEl={gmtSettingsAnchor}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <SelectorMultiple
+          options={uniqueDays}
+          label="Day"
+          width={200}
+          value={selectedDays}
+          onChange={setSelectedDays}
+          inputMode="none"
+        />
+      </Popover>
     </>
   )
 }
@@ -890,7 +911,7 @@ function PointRange<T extends Object>({
   xAxesSpec,
   categorySeparatorXLevel,
   pad,
-  toggleSettings,
+  setSettingsAnchor,
 }: {
   data: T[]
   minWidthPerX: number
@@ -901,7 +922,7 @@ function PointRange<T extends Object>({
   xAxesSpec: (AxisSpec<T, string> | null)[]
   categorySeparatorXLevel?: number
   pad: PlotPad
-  toggleSettings?: () => void
+  setSettingsAnchor?: (el: SVGElement) => void
 }) {
   const xAxesNotNull = xAxesSpec.filter(filterNotNull)
   const xAccessor = (d: T) =>
@@ -1097,11 +1118,11 @@ function PointRange<T extends Object>({
           )
         })}
         {/* Control elements */}
-        {toggleSettings && (
+        {setSettingsAnchor && (
           <SettingsIconEmbed
             x={width - pad.axis.left}
             y={0}
-            onClick={toggleSettings}
+            onClick={(e) => setSettingsAnchor(e.currentTarget)}
           />
         )}
       </svg>
@@ -1295,7 +1316,7 @@ function SettingsIconEmbed({
 }: {
   x: number
   y: number
-  onClick: () => void
+  onClick: (e: SyntheticEvent<SVGElement>) => void
 }) {
   return (
     <g
