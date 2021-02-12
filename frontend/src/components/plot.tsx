@@ -181,7 +181,7 @@ function SerologyPlots({
 
   const pad = (axes: ("virus" | "day" | "vax")[]) => ({
     axis: {
-      top: 10,
+      top: 12,
       bottom:
         10 +
         (axes.includes("virus") && selectedViruses.length === 1 ? 0 : 110) +
