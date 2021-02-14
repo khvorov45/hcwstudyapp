@@ -439,6 +439,28 @@ export async function getParticipantsSubset(
     : await db.any('SELECT * FROM "Participant"')
 }
 
+export async function getParticipantsDeidentifiedSubset(
+  db: Task,
+  a: AccessGroup
+): Promise<Participant[]> {
+  const cols = [
+    "pid",
+    "site",
+    "dateScreening",
+    "addBleed",
+    "dob",
+    "gender",
+    "baselineQuestComplete",
+    "heightCM",
+    "weightKG",
+  ]
+    .map((x) => `"${x}"`)
+    .join(",")
+  return isSite(a)
+    ? await db.any(`SELECT ${cols} FROM "Participant" WHERE "site" = $1`, [a])
+    : await db.any(`SELECT ${cols} FROM "Participant"`)
+}
+
 export async function insertParticipants(
   db: Task,
   ps: Participant[],
