@@ -57,12 +57,14 @@ export const UserV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
   kind: UserKindV,
+  deidentifiedExport: t.boolean,
 })
 export type User = t.TypeOf<typeof UserV>
 
 export const UserToInsertV = t.type({
   email: t.string,
   accessGroup: AccessGroupV,
+  deidentifiedExport: t.boolean,
 })
 export type UserToInsert = t.TypeOf<typeof UserToInsertV>
 

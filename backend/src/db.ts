@@ -228,7 +228,7 @@ async function insertIntoTable<T>(
     return
   }
   const cols: Record<typeof t, string[]> = {
-    User: ["email", "accessGroup", "kind"],
+    User: ["email", "accessGroup", "kind", "deidentifiedExport"],
     Token: ["user", "hash", "type", "expires"],
     Vaccination: ["pid", "year", "status"],
     RedcapId: ["pid", "redcapRecordId", "redcapProjectYear"],

@@ -26,10 +26,11 @@ INSERT INTO "Site" ("siteShort", "siteLong") VALUES
 CREATE TABLE "User" (
     "email" text PRIMARY KEY CHECK ("email" = lower("email")),
     "accessGroup" hfs_access_group NOT NULL,
-    "kind" hfs_user_kind NOT NULL
+    "kind" hfs_user_kind NOT NULL,
+    "deidentifiedExport" BOOLEAN NOT NULL
 );
-INSERT INTO "User" ("email", "accessGroup", "kind") VALUES
-    (${firstAdminEmail}, 'admin', 'manual');
+INSERT INTO "User" ("email", "accessGroup", "kind", "deidentifiedExport") VALUES
+    (${firstAdminEmail}, 'admin', 'manual', 'false');
 
 CREATE TABLE "Token" (
     "user" text REFERENCES "User"("email") ON DELETE CASCADE ON UPDATE CASCADE,

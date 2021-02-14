@@ -65,7 +65,11 @@ export default function Users({
       success: StatusCodes.NO_CONTENT,
       failure: [StatusCodes.UNAUTHORIZED],
       validator: t.void,
-      body: { email: editedEmail, accessGroup: editedAccess },
+      body: {
+        email: editedEmail,
+        accessGroup: editedAccess,
+        deidentifiedExport: false,
+      },
     })
   )
 
