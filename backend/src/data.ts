@@ -76,12 +76,10 @@ export const TokenV = t.type({
 })
 export type Token = t.TypeOf<typeof TokenV>
 
-export const ParticipantV = t.type({
+export const ParticipantDeidentifiedV = t.type({
   pid: t.string,
   site: SiteV,
   dateScreening: t.union([MyDateV, t.null]),
-  email: t.union([t.string, t.null]),
-  mobile: t.union([t.string, t.null]),
   addBleed: t.union([t.boolean, t.null]),
   dob: t.union([MyDateV, t.null]),
   gender: t.union([GenderV, t.null]),
@@ -89,6 +87,15 @@ export const ParticipantV = t.type({
   heightCM: t.union([t.number, t.null]),
   weightKG: t.union([t.number, t.null]),
 })
+export type ParticipantDeidentified = t.TypeOf<typeof ParticipantDeidentifiedV>
+
+export const ParticipantV = t.intersection([
+  ParticipantDeidentifiedV,
+  t.type({
+    email: t.union([t.string, t.null]),
+    mobile: t.union([t.string, t.null]),
+  }),
+])
 export type Participant = t.TypeOf<typeof ParticipantV>
 
 export const RedcapIdV = t.type({
