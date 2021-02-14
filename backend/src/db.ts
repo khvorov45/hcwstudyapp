@@ -306,7 +306,8 @@ export async function deleteUsers(db: Task, emails: string[]): Promise<void> {
 
 export async function updateUser(db: Task, u: UserToInsert): Promise<void> {
   const res = await db.result(
-    pgpInit.helpers.update(u, ["accessGroup"], "User") + " WHERE email = $1",
+    pgpInit.helpers.update(u, ["accessGroup", "deidentifiedExport"], "User") +
+      " WHERE email = $1",
     [u.email.toLowerCase()]
   )
   if (res.rowCount === 0) {
