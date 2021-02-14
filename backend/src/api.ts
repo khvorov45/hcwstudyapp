@@ -33,6 +33,7 @@ import {
   deleteAllSerology,
   reset,
   Task,
+  getParticipantsDeidentifiedSubset,
 } from "./db"
 import {
   ParticipantV,
@@ -182,7 +183,9 @@ export function getRoutes(
   routes.get("/participants", async (req: Request, res: Response) => {
     const parts = await transaction(db, async (tsk) => {
       const u = await validateUser(req, tsk)
-      return await getParticipantsSubset(tsk, u.accessGroup)
+      return u.deidentifiedExport
+        ? await getParticipantsDeidentifiedSubset(tsk, u.accessGroup)
+        : await getParticipantsSubset(tsk, u.accessGroup)
     })
     res.json(parts)
   })
