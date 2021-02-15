@@ -27,7 +27,7 @@ import ScreenHeight from "./screen-height"
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     tableContainer: {
-      maxWidth: 600,
+      maxWidth: 650,
       margin: "auto",
       "& th": {
         borderRight: `1px solid ${theme.palette.divider}`,
@@ -68,7 +68,7 @@ export default function Users({
       body: {
         email: editedEmail,
         accessGroup: editedAccess,
-        deidentifiedExport: false,
+        deidentifiedExport: editedDeidentify,
       },
     })
   )
@@ -76,6 +76,7 @@ export default function Users({
   const [editedIndex, setEditedIndex] = useState<number | null>(null)
   const [editedAccess, setEditedAccess] = useState<AccessGroup>("admin")
   const [editedEmail, setEditedEmail] = useState("")
+  const [editedDeidentify, setEditedDeidentify] = useState(false)
   const columns = useMemo(() => {
     return [
       {
@@ -107,6 +108,32 @@ export default function Users({
             )
           }
           return accessGroup
+        },
+      },
+      {
+        Header: "Deidentify",
+        accessor: (u: User) => u.deidentifiedExport.toString(),
+        width: 150,
+        Cell: ({
+          index,
+          editedIndex,
+          deidentify,
+          editedDeidentify,
+        }: {
+          index: number
+          editedIndex: number
+          deidentify: boolean
+          editedDeidentify: boolean
+        }) => {
+          if (index === editedIndex) {
+            return (
+              <BooleanSelector
+                value={editedDeidentify}
+                onChange={setEditedDeidentify}
+              />
+            )
+          }
+          return deidentify.toString()
         },
       },
     ]
@@ -145,6 +172,8 @@ export default function Users({
                           editedIndex,
                           accessGroup: row.original.accessGroup,
                           editedAccess,
+                          deidentify: row.original.deidentifiedExport,
+                          editedDeidentify,
                         })}
                       </TableCell>
                     )
@@ -156,6 +185,7 @@ export default function Users({
                           setEditedIndex((old) => (old === i ? null : i))
                           setEditedEmail(row.original.email)
                           setEditedAccess(row.original.accessGroup)
+                          setEditedDeidentify(row.original.deidentifiedExport)
                         }}
                       >
                         <Edit />
@@ -203,6 +233,21 @@ function AccessGroupSelector({
           {a}
         </MenuItem>
       ))}
+    </Select>
+  )
+}
+
+function BooleanSelector({
+  value,
+  onChange,
+}: {
+  value: boolean
+  onChange: (a: boolean) => void
+}) {
+  return (
+    <Select value={value} onChange={(e) => onChange(e.target.value === "true")}>
+      <MenuItem value={"true"}>true</MenuItem>
+      <MenuItem value={"false"}>false</MenuItem>
     </Select>
   )
 }
