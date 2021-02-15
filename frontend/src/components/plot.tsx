@@ -464,7 +464,7 @@ function BaselinePlots({
     ageCat: {
       lab: "Age",
       getter: (p: ParticipantExtra) =>
-        cut(p.age, { thresholds: ageThresholds }).string,
+        cut(p.ageRecruitment, { thresholds: ageThresholds }).string,
       sorter: rangeSort,
     },
     heightCat: {
@@ -574,7 +574,7 @@ function PlotColumn({
     participantsExtra,
     (p) => ({
       colorVar: getColorVariable(p),
-      ageCat: cut(p.age, { thresholds: ageThresholds }).string,
+      ageCat: cut(p.ageRecruitment, { thresholds: ageThresholds }).string,
     }),
     (subset) => ({ count: subset.length })
   )

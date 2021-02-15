@@ -410,8 +410,8 @@ function Baseline({
       commonCols.pid,
       commonCols.date({ name: "dob", header: "DoB" }),
       {
-        Header: "Age",
-        accessor: (p: ParticipantExtra) => p.age,
+        Header: "Age at recruitment",
+        accessor: (p: ParticipantExtra) => round(p.ageRecruitment, 1),
         width: 150,
         filter: "between",
         Filter: NumberRangeColumnFilter,
@@ -831,7 +831,7 @@ function Summary({
     participantsExtra ?? [],
     (d) => ({ split: splitVar === "Site" ? d.site : d.prevVac }),
     (v) => ({
-      age: summariseNumeric(v.map((v) => v.age)),
+      age: summariseNumeric(v.map((v) => v.ageRecruitment)),
       height: summariseNumeric(v.map((v) => v.heightCM)),
       weight: summariseNumeric(v.map((v) => v.weightKG)),
       bmi: summariseNumeric(v.map((v) => v.bmi)),
@@ -942,7 +942,7 @@ function Summary({
   const numericRows = [
     genNumericRow(
       "Age",
-      (p) => p.age,
+      (p) => p.ageRecruitment,
       (x) => x.age
     ),
     genNumericRow(

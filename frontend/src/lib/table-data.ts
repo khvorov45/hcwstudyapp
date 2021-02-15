@@ -20,8 +20,7 @@ import {
   ParticipantDeidentifiedV,
 } from "./data"
 import { decode } from "./io"
-import moment from "moment"
-import { getSum, rollup } from "./util"
+import { dateDiffYears, getSum, rollup } from "./util"
 
 export const ParticipantV = t.union([
   ParticipantFullV,
@@ -36,6 +35,7 @@ export const TableNameV = t.keyof({
   vaccination: null,
   withdrawn: null,
   serology: null,
+
   virus: null,
 })
 export type TableName = t.TypeOf<typeof TableNameV>
@@ -79,7 +79,7 @@ function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
 export const ParticipantExtraV = t.intersection([
   ParticipantV,
   t.type({
-    age: t.union([t.number, t.null]),
+    ageRecruitment: t.union([t.number, t.null]),
     prevVac: t.number,
     bmi: t.union([t.number, t.null]),
   }),
@@ -90,9 +90,8 @@ function genParticipantExtra(
   participants: Participant[],
   vaccinationCounts: VaccinationCount[]
 ): ParticipantExtra[] {
-  const now = moment()
   const participantsExtra = participants.map((p) => ({
-    age: p.dob === null ? null : now.diff(p.dob, "year"),
+    ageRecruitment: dateDiffYears(p.dateScreening, p.dob),
     prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
     bmi:
       p.weightKG === null || p.heightCM === null

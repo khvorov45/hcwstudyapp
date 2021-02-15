@@ -318,3 +318,10 @@ export function interpolateSinebow(t: number): string {
     ${255 * Math.sin((1.1666 - t) * Math.PI) ** 2}
   )`
 }
+
+export function dateDiffYears(d1: Date | null, d2: Date | null): number | null {
+  if (d1 === null || d2 === null) {
+    return null
+  }
+  return (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+}
