@@ -941,7 +941,7 @@ function Summary({
 
   const numericRows = [
     genNumericRow(
-      "Age",
+      "Age at recruitment",
       (p) => p.ageRecruitment,
       (x) => x.age
     ),

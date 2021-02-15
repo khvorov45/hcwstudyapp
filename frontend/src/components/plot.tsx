@@ -628,7 +628,7 @@ function PlotColumn({
           accessor: (d) => d.count,
         }}
         xAxisSpec={{
-          lab: "Age",
+          lab: "Age at recruitment",
           accessor: (d) => d.ageCat,
         }}
         getColor={getColor}
