@@ -3,7 +3,7 @@ import { apiReq } from "./api"
 import { StatusCodes } from "http-status-codes"
 import { AsyncStateStatus } from "react-async-hook"
 import {
-  ParticipantV,
+  ParticipantV as ParticipantFullV,
   ScheduleV,
   WeeklySurveyV,
   VaccinationV,
@@ -13,15 +13,21 @@ import {
   Serology,
   Virus,
   SiteV,
-  Participant,
   Vaccination,
   Schedule,
   WeeklySurvey,
   Withdrawn,
+  ParticipantDeidentifiedV,
 } from "./data"
 import { decode } from "./io"
 import moment from "moment"
 import { getSum, rollup } from "./util"
+
+export const ParticipantV = t.union([
+  ParticipantFullV,
+  ParticipantDeidentifiedV,
+])
+export type Participant = t.TypeOf<typeof ParticipantV>
 
 export const TableNameV = t.keyof({
   participants: null,

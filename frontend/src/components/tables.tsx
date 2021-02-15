@@ -1,8 +1,10 @@
 import { Redirect, Route, useRouteMatch } from "react-router-dom"
 import { SimpleNav } from "./nav"
+import * as t from "io-ts"
 import {
   GenderV,
-  Participant,
+  ParticipantV as ParticipantFullV,
+  Participant as ParticipantFull,
   Schedule,
   Site,
   SiteV,
@@ -12,6 +14,7 @@ import {
   WeeklySurvey,
   Withdrawn,
 } from "../lib/data"
+import { Participant } from "../lib/table-data"
 import React, {
   CSSProperties,
   ReactNode,
@@ -366,23 +369,31 @@ function Contact({
   participants?: Participant[]
   commonCols: any
 }) {
+  const notDeidentified = t.array(ParticipantFullV).is(participants)
   const columns = useMemo(() => {
+    if (notDeidentified) {
+      return [
+        commonCols.pid,
+        {
+          Header: "Email",
+          accessor: (p: ParticipantFull) => p.email ?? "",
+          width: 400,
+        },
+        {
+          Header: "Mobile",
+          accessor: (p: ParticipantFull) => p.mobile,
+          width: 120,
+        },
+        commonCols.date({ name: "dateScreening", header: "Screened" }),
+        commonCols.site,
+      ]
+    }
     return [
       commonCols.pid,
-      {
-        Header: "Email",
-        accessor: (p: Participant) => p.email,
-        width: 400,
-      },
-      {
-        Header: "Mobile",
-        accessor: (p: Participant) => p.mobile,
-        width: 120,
-      },
       commonCols.date({ name: "dateScreening", header: "Screened" }),
       commonCols.site,
     ]
-  }, [commonCols])
+  }, [commonCols, notDeidentified])
 
   return <Table columns={columns} data={participants ?? []} />
 }
