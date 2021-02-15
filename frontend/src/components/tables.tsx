@@ -376,7 +376,7 @@ function Contact({
         commonCols.pid,
         {
           Header: "Email",
-          accessor: (p: ParticipantFull) => p.email ?? "",
+          accessor: (p: ParticipantFull) => p.email,
           width: 400,
         },
         {
@@ -384,15 +384,10 @@ function Contact({
           accessor: (p: ParticipantFull) => p.mobile,
           width: 120,
         },
-        commonCols.date({ name: "dateScreening", header: "Screened" }),
         commonCols.site,
       ]
     }
-    return [
-      commonCols.pid,
-      commonCols.date({ name: "dateScreening", header: "Screened" }),
-      commonCols.site,
-    ]
+    return [commonCols.pid, commonCols.site]
   }, [commonCols, notDeidentified])
 
   return <Table columns={columns} data={participants ?? []} />
@@ -408,6 +403,7 @@ function Baseline({
   const columns = useMemo(() => {
     return [
       commonCols.pid,
+      commonCols.date({ name: "dateScreening", header: "Screened" }),
       commonCols.date({ name: "dob", header: "DoB" }),
       {
         Header: "Age at recruitment",
