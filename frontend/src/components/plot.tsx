@@ -445,7 +445,7 @@ function BaselinePlots({
     | "bmiCat"
   const [colorVariable, setColorVariable] = useState<ColorVariable | null>(null)
 
-  const ageThresholds = [18, 30, 40, 50, 66]
+  const ageThresholds = [18, 30, 40, 50, 61]
   const heightThresholds = [150, 160, 170, 180, 190]
   const weightThresholds = [50, 70, 90, 110]
   const bmiThresholds = [15, 18, 25, 30, 40]
