@@ -1,9 +1,7 @@
 import { Redirect, Route, useRouteMatch } from "react-router-dom"
 import { SimpleNav } from "./nav"
-import * as t from "io-ts"
 import {
   GenderV,
-  ParticipantV as ParticipantFullV,
   Participant as ParticipantFull,
   Schedule,
   Site,
@@ -13,6 +11,7 @@ import {
   Virus,
   WeeklySurvey,
   Withdrawn,
+  User,
 } from "../lib/data"
 import { Participant } from "../lib/table-data"
 import React, {
@@ -181,6 +180,7 @@ export default function Tables({
   virus,
   serology,
   titreChange,
+  user,
 }: {
   participantsExtra?: ParticipantExtra[]
   vaccination?: Vaccination[]
@@ -190,6 +190,7 @@ export default function Tables({
   virus?: Virus[]
   serology?: SerologyExtra[]
   titreChange?: TitreChange[]
+  user?: User
 }) {
   const commonCols = useMemo(
     () => ({
@@ -324,9 +325,16 @@ export default function Tables({
         />
       ),
     },
-  ].map((t) =>
-    Object.assign(t, { path: `/tables/${t.name}`, link: `/tables/${t.name}` })
-  )
+  ]
+    .map((t) =>
+      Object.assign(t, { path: `/tables/${t.name}`, link: `/tables/${t.name}` })
+    )
+    .filter(
+      (t) =>
+        !user ||
+        !user.deidentifiedExport ||
+        (user.deidentifiedExport && t.name !== "contact")
+    )
 
   // Figure out active link
   const matchRes = useRouteMatch<{ table: string }>({ path: "/tables/:table" })
@@ -369,26 +377,23 @@ function Contact({
   participants?: Participant[]
   commonCols: any
 }) {
-  const notDeidentified = t.array(ParticipantFullV).is(participants)
-  const columns = useMemo(() => {
-    if (notDeidentified) {
-      return [
-        commonCols.pid,
-        {
-          Header: "Email",
-          accessor: (p: ParticipantFull) => p.email,
-          width: 400,
-        },
-        {
-          Header: "Mobile",
-          accessor: (p: ParticipantFull) => p.mobile,
-          width: 120,
-        },
-        commonCols.site,
-      ]
-    }
-    return [commonCols.pid, commonCols.site]
-  }, [commonCols, notDeidentified])
+  const columns = useMemo(
+    () => [
+      commonCols.pid,
+      {
+        Header: "Email",
+        accessor: (p: ParticipantFull) => p.email,
+        width: 400,
+      },
+      {
+        Header: "Mobile",
+        accessor: (p: ParticipantFull) => p.mobile,
+        width: 120,
+      },
+      commonCols.site,
+    ],
+    [commonCols]
+  )
 
   return <Table columns={columns} data={participants ?? []} />
 }

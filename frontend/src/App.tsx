@@ -361,6 +361,7 @@ export default function App() {
                   virus={allTableData?.virus}
                   serology={allTableData?.serologyExtra}
                   titreChange={allTableData?.titreChanges}
+                  user={auth.result}
                 />
               </AuthRoute>
               <AuthRoute
