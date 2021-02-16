@@ -22,12 +22,12 @@ export type RedcapConfig = {
 }
 
 type RedcapRequestData = {
-  [index: string]: string | undefined
   content: "record" | "user"
   desc: string
   type?: "flat" | "eav"
   rawOrLabel?: "raw" | "label"
   fields?: string
+  events?: string
   exportDataAccessGroups?: "true" | "false"
 }
 
