@@ -832,6 +832,11 @@ function Summary({
     (d) => ({ gender: d.gender }),
     summariseCount
   )
+  const countsByOccupation = rollup(
+    participantsExtra ?? [],
+    (d) => ({ occupation: d.occupation }),
+    summariseCount
+  )
   const numericsBySplit = rollup(
     participantsExtra ?? [],
     (d) => ({ split: splitVar === "Site" ? d.site : d.prevVac }),
@@ -889,6 +894,14 @@ function Summary({
     participantsExtra ?? [],
     (d) => ({
       gender: d.gender,
+      split: splitVar === "Site" ? d.site : d.prevVac,
+    }),
+    summariseCount
+  )
+  const countsByOccupationSplit = rollup(
+    participantsExtra ?? [],
+    (d) => ({
+      occupation: d.occupation,
       split: splitVar === "Site" ? d.site : d.prevVac,
     }),
     summariseCount
@@ -1006,6 +1019,16 @@ function Summary({
     })
   ).sort((a, b) => stringSort(a.label, b.label))
 
+  const countsByOccupationSplitWithMarginal = rollup(
+    countsByOccupationSplit,
+    (d) => ({ occupation: d.occupation }),
+    (v, k) => ({
+      label: k.occupation ?? "(missing)",
+      total: countsByOccupation.find((c) => c.occupation === k.occupation),
+      ...widenSplit(v),
+    })
+  ).sort((a, b) => stringSort(a.label, b.label))
+
   const gmtByVirusDaySiteWithMarginal = rollup(
     gmtByVirusDaySplit,
     (d) => ({ virus: d.virus, day: d.day }),
@@ -1063,6 +1086,8 @@ function Summary({
     .concat(countsByVacSiteWithMarginal)
     .concat(genEmptyRow("Gender count", "", ""))
     .concat(countsByGenderSiteWithMarginal)
+    .concat(genEmptyRow("Occupation count", "", ""))
+    .concat(countsByOccupationSplitWithMarginal)
     .concat(bottomRow)
 
   const splitSelected =
