@@ -41,6 +41,18 @@ export const VaccinationStatusV = t.keyof({
 })
 export type VaccinationStatus = t.TypeOf<typeof VaccinationStatusV>
 
+export const OccupationV = t.keyof({
+  nursing: null,
+  medical: null,
+  administrative: null,
+  alliedHealth: null,
+  laboratory: null,
+  ancillary: null,
+  other: null,
+  research: null,
+})
+export type Occupation = t.TypeOf<typeof OccupationV>
+
 export const TokenTypeV = t.keyof({
   session: null,
   api: null,
@@ -86,6 +98,7 @@ export const ParticipantDeidentifiedV = t.type({
   baselineQuestComplete: t.boolean,
   heightCM: t.union([t.number, t.null]),
   weightKG: t.union([t.number, t.null]),
+  occupation: t.union([OccupationV, t.null]),
 })
 export type ParticipantDeidentified = t.TypeOf<typeof ParticipantDeidentifiedV>
 

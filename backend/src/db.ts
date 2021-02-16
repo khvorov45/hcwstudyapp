@@ -5,6 +5,7 @@ import {
   AccessGroupV,
   GenderV,
   isSite,
+  OccupationV,
   Participant,
   RedcapId,
   Schedule,
@@ -114,6 +115,7 @@ async function init(
     firstAdminTokenHash: hash(firstAdmin.token),
     firstAdminTokenExpires: addDays(new Date(), tokenDaysToLive),
     sites: Object.keys(SiteV.keys),
+    occupations: Object.keys(OccupationV.keys),
   })
   console.log("initialization successful")
 }
@@ -254,6 +256,7 @@ async function insertIntoTable<T>(
       "baselineQuestComplete",
       "heightCM",
       "weightKG",
+      "occupation",
     ],
     Virus: Object.keys(VirusV.props),
     Serology: Object.keys(SerologyV.props),
@@ -453,6 +456,7 @@ export async function getParticipantsDeidentifiedSubset(
     "baselineQuestComplete",
     "heightCM",
     "weightKG",
+    "occupation",
   ]
     .map((x) => `"${x}"`)
     .join(",")

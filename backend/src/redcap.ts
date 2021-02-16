@@ -106,6 +106,26 @@ function processRedcapDataAccessGroup(s: string | null | undefined): string {
     : s.toLowerCase()
 }
 
+function processRedcapOccupation(
+  preset: string | null | undefined,
+  special: string | null | undefined
+): string | null {
+  if (preset === undefined || preset === null || preset === "") {
+    return null
+  }
+  const lowpreset = preset.toLowerCase().trim()
+  if (lowpreset === "allied health") {
+    return "alliedHealth"
+  }
+  if (lowpreset === "other") {
+    if (special?.toLowerCase().includes("research")) {
+      return "research"
+    }
+    return "other"
+  }
+  return lowpreset
+}
+
 function processRedcapNumber(n: string | null | undefined): number | null {
   if (n === null || n === undefined || n === "") {
     return null
@@ -155,6 +175,8 @@ export async function exportParticipants(
         "a2_dob",
         "a5_height",
         "a6_weight",
+        "c3_occupation",
+        "c3_spec",
         "add_bleed",
         "study_group_vacc",
         "baseline_questionnaire_complete",
@@ -178,6 +200,7 @@ export async function exportParticipants(
       redcapProjectYear: r.redcapProjectYear,
       heightCM: processRedcapNumber(r.a5_height),
       weightKG: processRedcapNumber(r.a6_weight),
+      occupation: processRedcapOccupation(r.c3_occupation, r.c3_spec),
     }))
     .filter((r) => r.pid)
 

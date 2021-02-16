@@ -4,6 +4,7 @@ CREATE TYPE hfs_gender AS ENUM (${genders:csv});
 CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unknown');
 CREATE TYPE hfs_token_type AS ENUM ('session', 'api');
 CREATE TYPE hfs_user_kind AS ENUM ('redcap', 'manual');
+CREATE TYPE hfs_occupation AS ENUM (${occupations:csv});
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -53,6 +54,7 @@ CREATE TABLE "Participant" (
     "gender" hfs_gender,
     "heightCM" real,
     "weightKG" real,
+    "occupation" hfs_occupation,
     "baselineQuestComplete" boolean NOT NULL
 );
 
