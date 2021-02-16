@@ -443,6 +443,7 @@ function BaselinePlots({
     | "heightCat"
     | "weightCat"
     | "bmiCat"
+    | "occupation"
   const [colorVariable, setColorVariable] = useState<ColorVariable | null>(null)
 
   const ageThresholds = [18, 30, 40, 50, 61]
@@ -485,6 +486,11 @@ function BaselinePlots({
         cut(p.bmi, { thresholds: bmiThresholds }).string,
       sorter: rangeSort,
     },
+    occupation: {
+      lab: "Occupation",
+      getter: (p: ParticipantExtra) => p.occupation ?? "(missing)",
+      sorter: stringSort,
+    },
   }
   return (
     <>
@@ -498,6 +504,7 @@ function BaselinePlots({
             "bmiCat",
             "gender",
             "prevVac",
+            "occupation",
           ]}
           getOptionLabel={(o) => options[o as ColorVariable].lab}
           label="Color by"
@@ -549,9 +556,7 @@ function PlotColumn({
   weightThresholds: number[]
   bmiThresholds: number[]
 }) {
-  const colorVarValues = Array.from(
-    new Set(participantsExtra.map(getColorVariable))
-  )
+  const colorVarValues = unique(participantsExtra.map(getColorVariable))
   const colorMapping = createDescreteMapping(colorVarValues)
 
   const genderCounts = rollup(
@@ -569,6 +574,14 @@ function PlotColumn({
   )
     .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
+
+  const occupationCounts = rollup(
+    participantsExtra,
+    (x) => ({ occupation: x.occupation, colorVar: getColorVariable(x) }),
+    (v) => ({ count: v.length })
+  )
+    .sort((a, b) => sortColorVariable(a.colorVar, b.colorVar))
+    .sort((a, b) => stringSort(a.occupation, b.occupation))
 
   const agesBinned = rollup(
     participantsExtra,
@@ -693,6 +706,25 @@ function PlotColumn({
         }}
         getColor={getColor}
       />
+      <GenericBar
+        data={occupationCounts}
+        yAxisSpec={{
+          lab: "Count",
+          accessor: (d) => d.count,
+        }}
+        xAxisSpec={{
+          lab: "Occupation",
+          accessor: (d) => d.occupation ?? "(missing)",
+          angle: 45,
+        }}
+        getColor={getColor}
+        modPad={(p) => {
+          p.axis.bottom = 85
+          p.axis.right = 20
+          return p
+        }}
+        relativeBarWidth={1}
+      />
     </div>
   )
 }
@@ -724,13 +756,9 @@ function GenericBar<T extends Object>({
   data,
   fixedWidth = 350,
   fixedBarWidth = 50,
+  relativeBarWidth,
   height = 200,
-  pad = {
-    axis: { top: 20, right: 0, bottom: 40, left: 50 },
-    data: { top: 0, right: 30, bottom: 0, left: 30 },
-    yTitle: 15,
-    xTitle: 5,
-  },
+  modPad = (p) => p,
   yAxisSpec,
   xAxisSpec,
   getColor,
@@ -738,12 +766,19 @@ function GenericBar<T extends Object>({
   data: T[]
   fixedWidth?: number
   fixedBarWidth?: number
+  relativeBarWidth?: number
   height?: number
-  pad?: PlotPad
+  modPad?: (p: PlotPad) => PlotPad
   yAxisSpec: AxisSpec<T, number>
   xAxisSpec: AxisSpec<T, string>
   getColor?: (d: T) => string
 }) {
+  const pad = modPad({
+    axis: { top: 20, right: 0, bottom: 40, left: 50 },
+    data: { top: 0, right: 30, bottom: 0, left: 30 },
+    yTitle: 15,
+    xTitle: 5,
+  })
   const xValuesUnique = Array.from(new Set(data.map(xAxisSpec.accessor)))
   const xValueSubsets = xValuesUnique.map((xValue) => {
     const dataSubset = data.filter((d) => xAxisSpec.accessor(d) === xValue)
@@ -755,7 +790,8 @@ function GenericBar<T extends Object>({
       cumsum: getCumsum(yValues),
     }
   })
-  const { width, pageWidth } = usePlotSize({
+  const { width, pageWidth, widthPerX } = usePlotSize({
+    uniqueXCount: xValuesUnique.length,
     fixedWidth,
     pad,
   })
@@ -774,7 +810,10 @@ function GenericBar<T extends Object>({
       [height - pad.axis.bottom - pad.data.bottom, pad.axis.top + pad.data.top]
     )
   const theme = useTheme()
-  const barWidth = fixedBarWidth
+  const barWidth =
+    relativeBarWidth === undefined
+      ? fixedBarWidth
+      : relativeBarWidth * widthPerX
   return (
     <SinglePlotContainer width={pageWidth} height={height}>
       <svg width={width} height={height}>
@@ -805,6 +844,7 @@ function GenericBar<T extends Object>({
           scale={scaleX}
           orientation="horizontal"
           drawGrid={false}
+          angle={xAxisSpec.angle}
         />
         {xValueSubsets.map((xValueSubset, i) =>
           xValueSubset.dataSubset.map((d, j) => (
@@ -1186,6 +1226,7 @@ function Axis<T>({
   scale,
   orientation,
   drawGrid,
+  angle = 0,
 }: {
   pad: PlotPad
   height: number
@@ -1195,6 +1236,7 @@ function Axis<T>({
   scale: (x: T) => number
   orientation: "horizontal" | "vertical"
   drawGrid: boolean
+  angle?: number
 }) {
   const isX = orientation === "horizontal"
   const axisTitle = [
@@ -1235,28 +1277,25 @@ function Axis<T>({
         if (isX ? coordinate > maxAllowed : coordinate < maxAllowed) {
           return <g key={`${isX ? "x" : "y"}-tick-${i}`} />
         }
+        const x = isX
+          ? coordinate
+          : pad.axis.left - theme.plot.tickLength - theme.plot.tickLabelFromTick
+        const y = isX
+          ? height -
+            (pad.axis.bottom -
+              theme.plot.tickLength -
+              theme.plot.tickLabelFromTick)
+          : coordinate
         return (
           <g key={`${isX ? "x" : "y"}-tick-${i}`}>
             {/* Number */}
             <text
               fill={theme.palette.text.secondary}
-              x={
-                isX
-                  ? coordinate
-                  : pad.axis.left -
-                    theme.plot.tickLength -
-                    theme.plot.tickLabelFromTick
-              }
-              y={
-                isX
-                  ? height -
-                    (pad.axis.bottom -
-                      theme.plot.tickLength -
-                      theme.plot.tickLabelFromTick)
-                  : coordinate
-              }
-              textAnchor={isX ? "middle" : "end"}
+              x={x}
+              y={y}
+              textAnchor={isX ? (angle !== 0 ? "start" : "middle") : "end"}
               dominantBaseline={isX ? "hanging" : "middle"}
+              transform={`rotate(${angle}, ${x}, ${y})`}
             >
               {tick}
             </text>
