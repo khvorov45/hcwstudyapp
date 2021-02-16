@@ -1247,6 +1247,7 @@ function Axis<T>({
       ? height - pad.xTitle
       : (height - pad.axis.top - pad.axis.bottom) / 2 + pad.axis.top,
   ]
+  let lastDrawnTickCoordinate = Infinity
   const theme = useTheme()
   return (
     <>
@@ -1273,10 +1274,15 @@ function Axis<T>({
       </text>
       {ticks.map((tick, i) => {
         const coordinate = scale(tick)
+        const distance = Math.abs(coordinate - lastDrawnTickCoordinate)
         const maxAllowed = isX ? width - pad.axis.right : pad.axis.top
-        if (isX ? coordinate > maxAllowed : coordinate < maxAllowed) {
+        if (
+          (isX ? coordinate > maxAllowed : coordinate < maxAllowed) ||
+          distance < 10
+        ) {
           return <g key={`${isX ? "x" : "y"}-tick-${i}`} />
         }
+        lastDrawnTickCoordinate = coordinate
         const x = isX
           ? coordinate
           : pad.axis.left - theme.plot.tickLength - theme.plot.tickLabelFromTick
