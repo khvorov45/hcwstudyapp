@@ -5,7 +5,12 @@ import { SimpleNav } from "./nav"
 import ScreenHeight from "./screen-height"
 import { useWindowSize } from "../lib/hooks"
 import detectScrollbarWidth from "../lib/scrollbar-width"
-import { ParticipantExtra, SerologyExtra, TitreChange } from "../lib/table-data"
+import {
+  ParticipantExtra,
+  SerologyExtra,
+  TitreChange,
+  VaccinationCount,
+} from "../lib/table-data"
 import { Site, Virus } from "../lib/data"
 import {
   ControlRibbon,
@@ -40,11 +45,13 @@ export default function Plots({
   serology,
   titreChange,
   virusTable,
+  vaccinationCounts,
 }: {
   participantsExtra: ParticipantExtra[]
   serology: SerologyExtra[]
   titreChange: TitreChange[]
   virusTable: Virus[]
+  vaccinationCounts: VaccinationCount[]
 }) {
   const routeMatch = useRouteMatch<{ subpage: string }>("/plots/:subpage")
   const subpage = routeMatch?.params.subpage
@@ -69,6 +76,7 @@ export default function Plots({
             serology={serology}
             titreChange={titreChange}
             virusTable={virusTable}
+            vaccinationCounts={vaccinationCounts}
           />
         </Route>
       </Switch>
@@ -88,14 +96,18 @@ function SerologyPlots({
   serology,
   titreChange,
   virusTable,
+  vaccinationCounts,
 }: {
   serology: SerologyExtra[]
   titreChange: TitreChange[]
   virusTable: Virus[]
+  vaccinationCounts: VaccinationCount[]
 }) {
   const uniqueSites = unique(serology.map((s) => s.site)).sort(stringSort)
   const uniqueDays = unique(serology.map((s) => s.day)).sort(numberSort)
-  const uniqueVax = unique(serology.map((s) => s.prevVac)).sort(numberSort)
+  const uniqueVax = unique(vaccinationCounts.map((s) => s.count)).sort(
+    numberSort
+  )
   const uniqueViruses = virusTable.map((v) => v.name)
 
   // Coloring based on unique for consistency
@@ -119,29 +131,27 @@ function SerologyPlots({
   )
 
   // Apply filters
-  const yearFiltered = serology.filter(
-    (s) => s.redcapProjectYear === selectedStudyYear
+  const vaccinationCountsFilterYearSiteVax = vaccinationCounts.filter(
+    (v) =>
+      v.upto === selectedStudyYear &&
+      (selectedSites.length === 0 || selectedSites.includes(v.site)) &&
+      (selectedVax.length === 0 || selectedVax.includes(v.count))
+  )
+  const availablePids = vaccinationCountsFilterYearSiteVax
+    .map((v) => v.pid)
+    .sort(stringSort)
+  const vaccinationCountsFiltered = vaccinationCountsFilterYearSiteVax.filter(
+    (v) => selectedPid === null || selectedPid === v.pid
   )
 
-  const siteFiltered = yearFiltered.filter(
-    (s) => selectedSites.length === 0 || selectedSites.includes(s.site)
-  )
-
-  const vacFiltered = siteFiltered.filter(
-    (s) => selectedVax.length === 0 || selectedVax.includes(s.prevVac)
-  )
-
-  const availablePids = unique(vacFiltered.map((s) => s.pid)).sort(stringSort)
-  const pidFiltered = vacFiltered.filter(
-    (s) => !selectedPid || s.pid === selectedPid
-  )
-
-  const virusFiltered = pidFiltered.filter(
-    (s) => selectedViruses.length === 0 || selectedViruses.includes(s.virus)
-  )
-
-  const daysFiltered = virusFiltered.filter(
-    (s) => selectedDays.length === 0 || selectedDays.includes(s.day)
+  const serologyFiltered = serology.filter(
+    (s) =>
+      s.redcapProjectYear === selectedStudyYear &&
+      (selectedPid === null
+        ? availablePids.includes(s.pid)
+        : s.pid === selectedPid) &&
+      (selectedViruses.length === 0 || selectedViruses.includes(s.virus)) &&
+      (selectedDays.length === 0 || selectedDays.includes(s.day))
   )
 
   const titreChangeFiltered = titreChange.filter(
@@ -158,11 +168,12 @@ function SerologyPlots({
 
   // Serology (GMT's for virus/day/vax)
   const serologySummary = rollup(
-    daysFiltered,
+    serologyFiltered,
     (x) => ({
       virusShortName: x.virusShortName,
       day: x.day,
-      prevVac: x.prevVac,
+      prevVac:
+        vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
     }),
     (arr) => summariseLogmean(arr.map((x) => x.titre))
   )
@@ -173,7 +184,11 @@ function SerologyPlots({
   // Seroconversion (for virus/vax)
   const seroconversionSummary = rollup(
     titreChangeFiltered,
-    (x) => ({ prevVac: x.prevVac, virusShortName: x.virusShortName }),
+    (x) => ({
+      prevVac:
+        vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
+      virusShortName: x.virusShortName,
+    }),
     (arr) => summariseProportion(arr.map((a) => a.seroconverted))
   )
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
@@ -182,7 +197,11 @@ function SerologyPlots({
   // Titre rises (virus/vax)
   const titreChangesSummary = rollup(
     titreChangeFiltered,
-    (x) => ({ virusShortName: x.virusShortName, prevVac: x.prevVac }),
+    (x) => ({
+      virusShortName: x.virusShortName,
+      prevVac:
+        vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
+    }),
     (arr) => summariseLogmean(arr.map((v) => v.rise))
   )
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
@@ -264,7 +283,7 @@ function SerologyPlots({
           value={selectedPid}
           onChange={(n) => {
             setSelectedPid(n)
-            const thisPid = pidFiltered.find((d) => d.pid === n)
+            const thisPid = serology.find((d) => d.pid === n)
             if (thisPid?.site !== undefined) {
               setSelectedSites([thisPid.site])
             }

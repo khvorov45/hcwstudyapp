@@ -375,6 +375,7 @@ export default function App() {
                   serology={allTableData?.serologyExtra ?? []}
                   titreChange={allTableData?.titreChanges ?? []}
                   virusTable={allTableData?.virus ?? []}
+                  vaccinationCounts={allTableData?.vaccinationCounts ?? []}
                 />
               </AuthRoute>
             </Switch>
