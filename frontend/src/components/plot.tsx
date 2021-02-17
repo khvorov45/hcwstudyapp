@@ -851,6 +851,10 @@ function GenericBar<T extends Object>({
   xAxisSpec,
   getColor,
   setSettingsAnchor,
+  positionSettings = ({ height, pad }) => ({
+    y: height - pad.axis.bottom,
+    x: 0,
+  }),
 }: {
   data: T[]
   fixedWidth?: number
@@ -862,6 +866,11 @@ function GenericBar<T extends Object>({
   xAxisSpec: AxisSpec<T, string>
   getColor?: (d: T) => string
   setSettingsAnchor?: (el: SVGElement) => void
+  positionSettings?: (d: {
+    pad: PlotPad
+    width: number
+    height: number
+  }) => { x: number; y: number }
 }) {
   const pad = modPad({
     axis: { top: 20, right: 0, bottom: 40, left: 50 },
@@ -904,6 +913,7 @@ function GenericBar<T extends Object>({
     relativeBarWidth === undefined
       ? fixedBarWidth
       : relativeBarWidth * widthPerX
+  const settingsPosition = positionSettings({ pad, width, height })
   return (
     <SinglePlotContainer width={pageWidth} height={height}>
       <svg width={width} height={height}>
@@ -961,8 +971,8 @@ function GenericBar<T extends Object>({
         {/* Control elements */}
         {setSettingsAnchor && (
           <SettingsIconEmbed
-            x={width - pad.axis.left}
-            y={0}
+            x={settingsPosition.x}
+            y={settingsPosition.y}
             onClick={(e) => setSettingsAnchor(e.currentTarget)}
           />
         )}
@@ -1051,6 +1061,10 @@ function PointRange<T extends Object>({
   categorySeparatorXLevel,
   pad,
   setSettingsAnchor,
+  positionSettings = ({ height, pad }) => ({
+    y: height - pad.axis.bottom,
+    x: 0,
+  }),
 }: {
   data: T[]
   minWidthPerX: number
@@ -1062,6 +1076,11 @@ function PointRange<T extends Object>({
   categorySeparatorXLevel?: number
   pad: PlotPad
   setSettingsAnchor?: (el: SVGElement) => void
+  positionSettings?: (d: {
+    pad: PlotPad
+    width: number
+    height: number
+  }) => { x: number; y: number }
 }) {
   const xAxesNotNull = xAxesSpec.filter(filterNotNull)
   const xAccessor = (d: T) =>
@@ -1114,6 +1133,7 @@ function PointRange<T extends Object>({
   // Colors and distances
   const theme = useTheme()
   const xAxesDistance = 15
+  const settingsIconPosition = positionSettings({ pad, width, height })
   return (
     <SinglePlotContainer width={pageWidth} height={height}>
       <svg width={width} height={height}>
@@ -1259,8 +1279,8 @@ function PointRange<T extends Object>({
         {/* Control elements */}
         {setSettingsAnchor && (
           <SettingsIconEmbed
-            x={width - pad.axis.left}
-            y={0}
+            x={settingsIconPosition.x}
+            y={settingsIconPosition.y}
             onClick={(e) => setSettingsAnchor(e.currentTarget)}
           />
         )}
