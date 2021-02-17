@@ -273,17 +273,28 @@ export async function exportVaccination(
   const varNames = years.map((y) => `vac_${y}`)
   const vacLong: any[] = []
 
-  const _ = (
-    await redcapApiReq(config, {
+  const [screeningHistory, studyYearVaccination] = await Promise.all([
+    redcapApiReq(config, {
       content: "record",
-      desc: "vaccination",
-      fields: ["pid", ...varNames].toString(),
+      desc: "vaccination (screening)",
+      fields: ["record_id", "pid", ...varNames].toString(),
       events: "baseline_arm_1",
       type: "flat",
       rawOrLabel: "label",
       exportDataAccessGroups: "false",
-    })
-  ).map((v) =>
+    }),
+    redcapApiReq(config, {
+      content: "record",
+      desc: "vaccination (study year)",
+      fields: ["record_id", "vaccinated"].toString(),
+      events: "vaccination_arm_1",
+      type: "flat",
+      rawOrLabel: "label",
+      exportDataAccessGroups: "false",
+    }),
+  ])
+
+  screeningHistory.forEach((v) =>
     years.reduce((vacLongCurrent, year) => {
       if (!v.pid) {
         return vacLongCurrent
@@ -295,10 +306,41 @@ export async function exportVaccination(
           processRedcapStringLower(v[`vac_${year}`])?.replace("yes - ", "") ??
           null,
         redcapProjectYear: v.redcapProjectYear,
+        redcapRecordId: v.record_id,
       })
       return vacLongCurrent
     }, vacLong)
   )
+
+  studyYearVaccination.forEach((r) => {
+    const pid = vacLong.find(
+      (v) =>
+        v.redcapProjectYear === r.redcapProjectYear &&
+        v.redcapRecordId === r.record_id
+    )?.pid
+    if (!pid) {
+      return
+    }
+    const status =
+      r.vaccinated === "" || r.vaccinated === null || r.vaccinated === undefined
+        ? "unknown"
+        : r.vaccinated === "Yes"
+        ? "australia"
+        : "no"
+    const existingEntryIndex = vacLong.findIndex(
+      (v) => v.pid === pid && v.year === r.redcapProjectYear
+    )
+    if (existingEntryIndex === -1) {
+      vacLong.push({
+        pid,
+        status,
+        year: r.redcapProjectYear,
+        redcapProjectYear: r.redcapProjectYear,
+      })
+    } else {
+      vacLong[existingEntryIndex].status = status
+    }
+  })
 
   return decode(t.array(VaccinationV), uniqueRows(vacLong, ["pid", "year"]))
 }
