@@ -518,7 +518,8 @@ function BaselinePlots({
     },
     prevVac: {
       lab: "Vaccination",
-      getter: (p: ParticipantExtra) => p.prevVac.toString(),
+      getter: (p: ParticipantExtra & { prevVac: number }) =>
+        p.prevVac.toString(),
       sorter: stringSort,
     },
     ageCat: {

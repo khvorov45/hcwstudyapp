@@ -92,19 +92,14 @@ export const ParticipantExtraV = t.intersection([
   ParticipantV,
   t.type({
     ageRecruitment: t.union([t.number, t.null]),
-    prevVac: t.number,
     bmi: t.union([t.number, t.null]),
   }),
 ])
 export type ParticipantExtra = t.TypeOf<typeof ParticipantExtraV>
 
-function genParticipantExtra(
-  participants: Participant[],
-  vaccinationCounts: VaccinationCount[]
-): ParticipantExtra[] {
+function genParticipantExtra(participants: Participant[]): ParticipantExtra[] {
   const participantsExtra = participants.map((p) => ({
     ageRecruitment: dateDiffYears(p.dateScreening, p.dob),
-    prevVac: vaccinationCounts.find((v) => v.pid === p.pid)?.count ?? 0,
     bmi:
       p.weightKG === null || p.heightCM === null
         ? null
@@ -118,7 +113,6 @@ export const SerologyExtraV = t.intersection([
   SerologyV,
   t.type({
     site: SiteV,
-    prevVac: t.number,
     virusShortName: t.string,
     virusClade: t.string,
   }),
@@ -136,7 +130,6 @@ function genSerologyExtra(
     return {
       ...s,
       site: p?.site,
-      prevVac: p?.prevVac,
       virusShortName: v?.shortName,
       virusClade: v?.clade,
     }
@@ -155,7 +148,6 @@ export const TitreChangeV = t.type({
   day2: t.number,
   rise: t.number,
   seroconverted: t.boolean,
-  prevVac: t.number,
 })
 export type TitreChange = t.TypeOf<typeof TitreChangeV>
 
@@ -182,7 +174,6 @@ function genTitreChange(
           virusClade: virus.clade,
           pid: participant.pid,
           site: participant.site,
-          prevVac: participant.prevVac,
           day1: 0,
           day2: 14,
           rise,
@@ -277,7 +268,7 @@ export async function fetchAndProcessAll(
   } = fetchRes
 
   const vaccinationCounts = genVaccinationCounts(vaccination, participants)
-  const participantsExtra = genParticipantExtra(participants, vaccinationCounts)
+  const participantsExtra = genParticipantExtra(participants)
   const serologyExtra = genSerologyExtra(serology, virus, participantsExtra)
   const titreChanges = genTitreChange(participantsExtra, serologyExtra, virus)
 
