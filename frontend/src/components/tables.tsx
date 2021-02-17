@@ -78,6 +78,7 @@ import {
   summariseProportion,
   unique,
 } from "../lib/util"
+import { STUDY_YEARS } from "../lib/config"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -784,7 +785,7 @@ function Summary({
   )
 
   // Filters
-  const [selectedStudyYear, setSelectedStudyYear] = useState<number>(2020)
+  const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
   const firstVirus = viruses[0]
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
     firstVirus ? [firstVirus] : []
