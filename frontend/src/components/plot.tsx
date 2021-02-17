@@ -17,7 +17,7 @@ import {
   Selector,
   SelectorMultiple,
   SiteSelect,
-  SerologyYearSelector,
+  StudyYearSelector,
 } from "./control-ribbon"
 import {
   cut,
@@ -256,7 +256,7 @@ function SerologyPlots({
   return (
     <>
       <ControlRibbon>
-        <SerologyYearSelector
+        <StudyYearSelector
           value={selectedStudyYear}
           onChange={(y) => {
             setSelectedStudyYear(y)
@@ -554,7 +554,7 @@ function BaselinePlots({
   return (
     <>
       <ControlRibbon>
-        <SerologyYearSelector
+        <StudyYearSelector
           value={selectedStudyYear}
           onChange={setSelectedStudyYear}
         />
