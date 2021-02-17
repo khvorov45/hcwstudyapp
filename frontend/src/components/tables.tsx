@@ -13,7 +13,7 @@ import {
   Withdrawn,
   User,
 } from "../lib/data"
-import { Participant } from "../lib/table-data"
+import { Participant, VaccinationCount } from "../lib/table-data"
 import React, {
   CSSProperties,
   ReactNode,
@@ -182,6 +182,7 @@ export default function Tables({
   virus,
   serology,
   titreChange,
+  vaccinationCounts,
   user,
 }: {
   participantsExtra?: ParticipantExtra[]
@@ -192,6 +193,7 @@ export default function Tables({
   virus?: Virus[]
   serology?: SerologyExtra[]
   titreChange?: TitreChange[]
+  vaccinationCounts?: VaccinationCount[]
   user?: User
 }) {
   const commonCols = useMemo(
@@ -324,6 +326,7 @@ export default function Tables({
           participantsExtraFull={participantsExtra}
           serologyFull={serology}
           titreChangeFull={titreChange}
+          vaccinationCountsFull={vaccinationCounts}
         />
       ),
     },
@@ -770,14 +773,16 @@ function Summary({
   participantsExtraFull,
   serologyFull,
   titreChangeFull,
+  vaccinationCountsFull,
 }: {
   participantsExtraFull?: ParticipantExtra[]
   serologyFull?: SerologyExtra[]
   titreChangeFull?: TitreChange[]
+  vaccinationCountsFull?: VaccinationCount[]
 }) {
   // Unique values for filters
   const viruses = unique(serologyFull?.map((s) => s.virus)).sort(stringSort)
-  const vaccinations = unique(serologyFull?.map((s) => s.prevVac)).sort(
+  const vaccinations = unique(vaccinationCountsFull?.map((s) => s.count)).sort(
     numberSort
   )
   const uniqueSites = unique(participantsExtraFull?.map((p) => p.site)).sort(
@@ -801,24 +806,28 @@ function Summary({
   ])
 
   // Apply filters
+
+  const vaccinationCounts = vaccinationCountsFull?.filter(
+    (p) =>
+      p.upto === selectedStudyYear &&
+      (vacSelected.length === 0 || vacSelected.includes(p.count)) &&
+      (sitesSelected.length === 0 || sitesSelected.includes(p.site))
+  )
+  // These PIDs will auto-filter site and previous vaccinations
+  const availablePids = vaccinationCounts?.map((v) => v.pid)
+  const participantsExtra = participantsExtraFull?.filter(
+    (p) => !availablePids || availablePids.includes(p.pid)
+  )
   const serology = serologyFull?.filter(
     (s) =>
       s.redcapProjectYear === selectedStudyYear &&
-      (sitesSelected.length === 0 || sitesSelected.includes(s.site)) &&
-      (virusesSelected.length === 0 || virusesSelected.includes(s.virus)) &&
-      (vacSelected.length === 0 || vacSelected.includes(s.prevVac))
-  )
-  const participantsExtra = participantsExtraFull?.filter(
-    (p) =>
-      p.dateScreening?.getFullYear() === selectedStudyYear &&
-      (sitesSelected.length === 0 || sitesSelected.includes(p.site)) &&
-      (vacSelected.length === 0 || vacSelected.includes(p.prevVac))
+      (!availablePids || availablePids.includes(s.pid)) &&
+      (virusesSelected.length === 0 || virusesSelected.includes(s.virus))
   )
   const titreChange = titreChangeFull?.filter(
     (p) =>
       p.year === selectedStudyYear &&
-      (sitesSelected.length === 0 || sitesSelected.includes(p.site)) &&
-      (vacSelected.length === 0 || vacSelected.includes(p.prevVac)) &&
+      (!availablePids || availablePids.includes(p.pid)) &&
       (virusesSelected.length === 0 || virusesSelected.includes(p.virus))
   )
 
@@ -829,8 +838,8 @@ function Summary({
     summariseCount
   )
   const countsByVac = rollup(
-    participantsExtra ?? [],
-    (d) => ({ prevVac: d.prevVac, split: d.prevVac }),
+    vaccinationCounts ?? [],
+    (d) => ({ prevVac: d.count, split: d.count }),
     summariseCount
   )
   const countsByGender = rollup(
@@ -845,7 +854,12 @@ function Summary({
   )
   const numericsBySplit = rollup(
     participantsExtra ?? [],
-    (d) => ({ split: splitVar === "Site" ? d.site : d.prevVac }),
+    (d) => ({
+      split:
+        splitVar === "Site"
+          ? d.site
+          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+    }),
     (v) => ({
       age: summariseNumeric(v.map((v) => v.ageRecruitment)),
       height: summariseNumeric(v.map((v) => v.heightCM)),
@@ -858,7 +872,10 @@ function Summary({
     (d) => ({
       virus: d.virus,
       day: d.day,
-      split: splitVar === "Site" ? d.site : d.prevVac,
+      split:
+        splitVar === "Site"
+          ? d.site
+          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
     }),
     (v) =>
       summariseLogmean(
@@ -879,7 +896,10 @@ function Summary({
     titreChange ?? [],
     (d) => ({
       virus: d.virus,
-      split: splitVar === "Site" ? d.site : d.prevVac,
+      split:
+        splitVar === "Site"
+          ? d.site
+          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
     }),
     (v) =>
       summariseLogmean(
@@ -900,7 +920,10 @@ function Summary({
     participantsExtra ?? [],
     (d) => ({
       gender: d.gender,
-      split: splitVar === "Site" ? d.site : d.prevVac,
+      split:
+        splitVar === "Site"
+          ? d.site
+          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
     }),
     summariseCount
   )
@@ -908,16 +931,19 @@ function Summary({
     participantsExtra ?? [],
     (d) => ({
       occupation: d.occupation,
-      split: splitVar === "Site" ? d.site : d.prevVac,
+      split:
+        splitVar === "Site"
+          ? d.site
+          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
     }),
     summariseCount
   )
   const countsByVacSite = rollup(
-    participantsExtra ?? [],
+    vaccinationCounts ?? [],
     (d) => ({
-      prevVac: d.prevVac,
+      prevVac: d.count,
       site: d.site,
-      split: splitVar === "Site" ? d.site : d.prevVac,
+      split: splitVar === "Site" ? d.site : d.count,
     }),
     summariseCount
   )
@@ -925,7 +951,10 @@ function Summary({
     titreChange ?? [],
     (d) => ({
       virus: d.virus,
-      split: splitVar === "Site" ? d.site : d.prevVac,
+      split:
+        splitVar === "Site"
+          ? d.site
+          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
     }),
     (v) => summariseProportion(v.map((x) => x.seroconverted))
   )
