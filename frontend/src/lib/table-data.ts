@@ -185,8 +185,7 @@ function genTitreChange(
           year,
         }
       })
-    )
-    .filter((p) => !isNaN(p.rise))
+    ).filter((p) => !isNaN(p.rise))
   )
   return decode(t.array(TitreChangeV), titreChanges)
 }
