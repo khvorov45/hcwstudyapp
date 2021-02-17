@@ -12,6 +12,7 @@ import {
   Selector,
   SelectorMultiple,
   SiteSelect,
+  StudyYearSelector,
 } from "./control-ribbon"
 import {
   cut,
@@ -32,6 +33,7 @@ import {
   getMin,
   filterNotNull,
 } from "../lib/util"
+import { STUDY_YEARS } from "../lib/config"
 
 export default function Plots({
   participantsExtra,
@@ -100,6 +102,7 @@ function SerologyPlots({
   const colorsDays = createDescreteMapping(uniqueDays)
 
   // Filters applied in the order presented
+  const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
   const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
 
@@ -116,7 +119,11 @@ function SerologyPlots({
   )
 
   // Apply filters
-  const siteFiltered = serology.filter(
+  const yearFiltered = serology.filter(
+    (s) => s.redcapProjectYear === selectedStudyYear
+  )
+
+  const siteFiltered = yearFiltered.filter(
     (s) => selectedSites.length === 0 || selectedSites.includes(s.site)
   )
 
@@ -139,8 +146,10 @@ function SerologyPlots({
 
   const titreChangeFiltered = titreChange.filter(
     (t) =>
+      t.year === selectedStudyYear &&
       (selectedPid === null
-        ? availablePids.includes(t.pid)
+        ? // This also takes care of site and vaccinations
+          availablePids.includes(t.pid)
         : t.pid === selectedPid) &&
       (selectedViruses.length === 0 || selectedViruses.includes(t.virus))
   )
@@ -225,6 +234,10 @@ function SerologyPlots({
   return (
     <>
       <ControlRibbon>
+        <StudyYearSelector
+          value={selectedStudyYear}
+          onChange={setSelectedStudyYear}
+        />
         <SiteSelect
           sites={uniqueSites}
           site={selectedSites}
