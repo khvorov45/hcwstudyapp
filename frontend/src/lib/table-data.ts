@@ -21,6 +21,7 @@ import {
 } from "./data"
 import { decode } from "./io"
 import { dateDiffYears, getSum, rollup } from "./util"
+import { STUDY_YEARS } from "./config"
 
 export const ParticipantV = t.union([
   ParticipantFullV,
@@ -144,6 +145,7 @@ export const TitreChangeV = t.type({
   virusClade: t.string,
   pid: t.string,
   site: SiteV,
+  year: t.number,
   day1: t.number,
   day2: t.number,
   rise: t.number,
@@ -158,10 +160,13 @@ function genTitreChange(
   virusTable: Virus[]
 ): TitreChange[] {
   const titreChanges = virusTable.flatMap((virus) =>
-    participantsExtra
-      .map((participant) => {
+    STUDY_YEARS.flatMap((year) =>
+      participantsExtra.map((participant) => {
         const subset = serologyExtra.filter(
-          (s) => s.pid === participant.pid && s.virus === virus.name
+          (s) =>
+            s.pid === participant.pid &&
+            s.virus === virus.name &&
+            s.redcapProjectYear === year
         )
         const d2 = subset.find((s) => s.day === 14)?.titre ?? NaN
         const d1 = subset.find((s) => s.day === 0)?.titre ?? NaN
@@ -177,9 +182,11 @@ function genTitreChange(
           day2: 14,
           rise,
           seroconverted: d1 === 5 ? d2 >= 40 : rise >= 4,
+          year,
         }
       })
-      .filter((p) => !isNaN(p.rise))
+    )
+    .filter((p) => !isNaN(p.rise))
   )
   return decode(t.array(TitreChangeV), titreChanges)
 }

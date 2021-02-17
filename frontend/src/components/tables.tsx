@@ -77,6 +77,7 @@ import {
   summariseProportion,
   unique,
 } from "../lib/util"
+import { STUDY_YEARS } from "../lib/config"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -774,6 +775,7 @@ function Summary({
   titreChangeFull?: TitreChange[]
 }) {
   // Unique values for filters
+  const uniqueStudyYears = STUDY_YEARS
   const viruses = unique(serologyFull?.map((s) => s.virus)).sort(stringSort)
   const vaccinations = unique(serologyFull?.map((s) => s.prevVac)).sort(
     numberSort
@@ -783,6 +785,7 @@ function Summary({
   )
 
   // Filters
+  const [selectedStudyYear, setSelectedStudyYear] = useState<number>(2020)
   const firstVirus = viruses[0]
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
     firstVirus ? [firstVirus] : []
@@ -800,17 +803,20 @@ function Summary({
   // Apply filters
   const serology = serologyFull?.filter(
     (s) =>
+      s.redcapProjectYear === selectedStudyYear &&
       (sitesSelected.length === 0 || sitesSelected.includes(s.site)) &&
       (virusesSelected.length === 0 || virusesSelected.includes(s.virus)) &&
       (vacSelected.length === 0 || vacSelected.includes(s.prevVac))
   )
   const participantsExtra = participantsExtraFull?.filter(
     (p) =>
+      p.dateScreening?.getFullYear() === selectedStudyYear &&
       (sitesSelected.length === 0 || sitesSelected.includes(p.site)) &&
       (vacSelected.length === 0 || vacSelected.includes(p.prevVac))
   )
   const titreChange = titreChangeFull?.filter(
     (p) =>
+      p.year === selectedStudyYear &&
       (sitesSelected.length === 0 || sitesSelected.includes(p.site)) &&
       (vacSelected.length === 0 || vacSelected.includes(p.prevVac)) &&
       (virusesSelected.length === 0 || virusesSelected.includes(p.virus))
@@ -1127,6 +1133,15 @@ function Summary({
   return (
     <div>
       <ControlRibbon>
+        <Selector
+          options={uniqueStudyYears}
+          label="Study year"
+          width={150}
+          value={selectedStudyYear}
+          onChange={(n) => setSelectedStudyYear(n ?? 2020)}
+          inputMode="none"
+          disableClearable
+        />
         <SelectorMultiple
           options={viruses}
           label="Virus"
