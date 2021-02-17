@@ -69,7 +69,10 @@ export default function Plots({
           <Redirect to="/plots/baseline" />
         </Route>
         <Route exact path="/plots/baseline">
-          <BaselinePlots participantsExtra={participantsExtra} />
+          <BaselinePlots
+            participantsExtra={participantsExtra}
+            vaccinationCounts={vaccinationCounts}
+          />
         </Route>
         <Route exact path="/plots/serology">
           <SerologyPlots
@@ -469,11 +472,29 @@ function VirusTick({
 
 function BaselinePlots({
   participantsExtra,
+  vaccinationCounts,
 }: {
   participantsExtra: ParticipantExtra[]
+  vaccinationCounts: VaccinationCount[]
 }) {
-  const sites = Array.from(new Set(participantsExtra.map((p) => p.site)))
-  const [site, setSite] = useState<Site[]>([])
+  const uniqueSites = unique(participantsExtra.map((p) => p.site))
+  const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
+  const [selectedSites, setSelectedSites] = useState<Site[]>([])
+
+  const vaccinationCountsFiltered = vaccinationCounts.filter(
+    (v) =>
+      v.upto === selectedStudyYear &&
+      (selectedSites.length === 0 || selectedSites.includes(v.site))
+  )
+
+  const participantsExtraFiltered = participantsExtra
+    .filter((p) => selectedSites.length === 0 || selectedSites.includes(p.site))
+    .map((p) => ({
+      ...p,
+      prevVac:
+        vaccinationCountsFiltered.find((v) => v.pid === p.pid)?.count ?? -1,
+    }))
+
   type ColorVariable =
     | "gender"
     | "prevVac"
@@ -533,7 +554,15 @@ function BaselinePlots({
   return (
     <>
       <ControlRibbon>
-        <SiteSelect sites={sites} site={site} setSite={setSite} />
+        <SerologyYearSelector
+          value={selectedStudyYear}
+          onChange={setSelectedStudyYear}
+        />
+        <SiteSelect
+          sites={uniqueSites}
+          site={selectedSites}
+          setSite={setSelectedSites}
+        />
         <Selector
           options={[
             "ageCat",
@@ -554,15 +583,11 @@ function BaselinePlots({
       </ControlRibbon>
       <PlotContainer>
         <PlotColumn
-          participantsExtra={participantsExtra.filter(
-            (p) =>
-              site.length === 0 ||
-              (p.site !== undefined && site.includes(p.site))
-          )}
+          participantsExtra={participantsExtraFiltered}
           getColorVariable={
             colorVariable
               ? (p) => options[colorVariable].getter(p)
-              : (p) => "constant"
+              : () => "constant"
           }
           sortColorVariable={
             colorVariable ? options[colorVariable].sorter : stringSort
@@ -586,8 +611,8 @@ function PlotColumn({
   weightThresholds,
   bmiThresholds,
 }: {
-  participantsExtra: ParticipantExtra[]
-  getColorVariable: (p: ParticipantExtra) => string
+  participantsExtra: (ParticipantExtra & { prevVac: number })[]
+  getColorVariable: (p: ParticipantExtra & { prevVac: number }) => string
   sortColorVariable: (a: string, b: string) => number
   ageThresholds: number[]
   heightThresholds: number[]
