@@ -244,6 +244,7 @@ export type AllTableData = {
   virus: Virus[]
   serologyExtra: SerologyExtra[]
   titreChanges: TitreChange[]
+  vaccinationCounts: VaccinationCount[]
 }
 
 export async function fetchAndProcessAll(
@@ -284,6 +285,7 @@ export async function fetchAndProcessAll(
     virus,
     serologyExtra,
     titreChanges,
+    vaccinationCounts,
   }
 }
 
@@ -321,5 +323,6 @@ export function applyTableSettingsAllData(
     virus: allData.virus,
     serologyExtra: applyTableSettings(settings, allData.serologyExtra),
     titreChanges: applyTableSettings(settings, allData.titreChanges),
+    vaccinationCounts: applyTableSettings(settings, allData.vaccinationCounts),
   }
 }
