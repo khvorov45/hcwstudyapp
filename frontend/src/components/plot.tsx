@@ -481,6 +481,11 @@ function BaselinePlots({
   const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
 
+  const [
+    priorVacSettingsAnchor,
+    setPriorVacSettingsAnchor,
+  ] = useState<SVGElement | null>(null)
+
   const vaccinationCountsFiltered = vaccinationCounts.filter(
     (v) =>
       v.upto === selectedStudyYear &&
@@ -555,10 +560,6 @@ function BaselinePlots({
   return (
     <>
       <ControlRibbon>
-        <StudyYearSelector
-          value={selectedStudyYear}
-          onChange={setSelectedStudyYear}
-        />
         <SiteSelect
           sites={uniqueSites}
           site={selectedSites}
@@ -597,8 +598,27 @@ function BaselinePlots({
           heightThresholds={heightThresholds}
           weightThresholds={weightThresholds}
           bmiThresholds={bmiThresholds}
+          setPriorVacSettingsAnchor={setPriorVacSettingsAnchor}
         />
       </PlotContainer>
+      <Popover
+        open={priorVacSettingsAnchor !== null}
+        onClose={() => setPriorVacSettingsAnchor(null)}
+        anchorEl={priorVacSettingsAnchor}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <StudyYearSelector
+          value={selectedStudyYear}
+          onChange={setSelectedStudyYear}
+        />
+      </Popover>
     </>
   )
 }
@@ -611,6 +631,7 @@ function PlotColumn({
   heightThresholds,
   weightThresholds,
   bmiThresholds,
+  setPriorVacSettingsAnchor,
 }: {
   participantsExtra: (ParticipantExtra & { prevVac: number })[]
   getColorVariable: (p: ParticipantExtra & { prevVac: number }) => string
@@ -619,6 +640,7 @@ function PlotColumn({
   heightThresholds: number[]
   weightThresholds: number[]
   bmiThresholds: number[]
+  setPriorVacSettingsAnchor: (el: SVGElement) => void
 }) {
   const colorVarValues = unique(participantsExtra.map(getColorVariable))
   const colorMapping = createDescreteMapping(colorVarValues)
@@ -709,6 +731,7 @@ function PlotColumn({
           accessor: (d) => d.prevVac.toString(),
         }}
         getColor={getColor}
+        setSettingsAnchor={setPriorVacSettingsAnchor}
       />
       <GenericBar
         data={agesBinned}
@@ -827,6 +850,7 @@ function GenericBar<T extends Object>({
   yAxisSpec,
   xAxisSpec,
   getColor,
+  setSettingsAnchor,
 }: {
   data: T[]
   fixedWidth?: number
@@ -837,6 +861,7 @@ function GenericBar<T extends Object>({
   yAxisSpec: AxisSpec<T, number>
   xAxisSpec: AxisSpec<T, string>
   getColor?: (d: T) => string
+  setSettingsAnchor?: (el: SVGElement) => void
 }) {
   const pad = modPad({
     axis: { top: 20, right: 0, bottom: 40, left: 50 },
@@ -932,6 +957,14 @@ function GenericBar<T extends Object>({
               }
             />
           ))
+        )}
+        {/* Control elements */}
+        {setSettingsAnchor && (
+          <SettingsIconEmbed
+            x={width - pad.axis.left}
+            y={0}
+            onClick={(e) => setSettingsAnchor(e.currentTarget)}
+          />
         )}
       </svg>
     </SinglePlotContainer>
