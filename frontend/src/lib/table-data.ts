@@ -64,7 +64,7 @@ export const VaccinationCountV = t.type({
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
 
 function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
-  const counts = [2020, 2021].flatMap((year) =>
+  const counts = STUDY_YEARS.flatMap((year) =>
     rollup(
       vaccination,
       (d) => ({ pid: d.pid }),
