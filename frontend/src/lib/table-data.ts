@@ -57,21 +57,27 @@ export async function tableFetch<T>(
 
 export const VaccinationCountV = t.type({
   pid: t.string,
+  upto: t.number,
   count: t.number,
 })
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
 
 function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
-  const counts = rollup(
-    vaccination,
-    (d) => ({ pid: d.pid }),
-    (v) => ({
-      count: getSum(
-        v.map((v) =>
-          ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
-        )
-      ),
-    })
+  const counts = [2020, 2021].flatMap((year) =>
+    rollup(
+      vaccination,
+      (d) => ({ pid: d.pid }),
+      (v) => ({
+        upto: year,
+        count: getSum(
+          v
+            .filter((v) => v.year < year)
+            .map((v) =>
+              ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
+            )
+        ),
+      })
+    )
   )
   return decode(t.array(VaccinationCountV), counts)
 }
