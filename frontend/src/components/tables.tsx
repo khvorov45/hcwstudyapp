@@ -452,10 +452,6 @@ function Baseline({
         ),
       },
       {
-        Header: "Vaccinations",
-        accessor: (p: any) => p.prevVac,
-      },
-      {
         Header: "Occupation",
         accessor: (p: ParticipantExtra) => p.occupation,
       },
