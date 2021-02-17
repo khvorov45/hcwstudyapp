@@ -255,7 +255,10 @@ function SerologyPlots({
       <ControlRibbon>
         <SerologyYearSelector
           value={selectedStudyYear}
-          onChange={setSelectedStudyYear}
+          onChange={(y) => {
+            setSelectedStudyYear(y)
+            setSelectedPid(null)
+          }}
         />
         <SiteSelect
           sites={uniqueSites}
