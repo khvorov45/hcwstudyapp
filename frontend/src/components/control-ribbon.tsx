@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core"
 import { Autocomplete } from "@material-ui/lab"
 import React, { ReactNode } from "react"
+import { STUDY_YEARS } from "../lib/config"
 import { Site } from "../lib/data"
 import detectScrollbarWidth from "../lib/scrollbar-width"
 
@@ -159,6 +160,26 @@ export function SiteSelect({
       value={site}
       onChange={setSite}
       inputMode="none"
+    />
+  )
+}
+
+export function StudyYearSelector({
+  value,
+  onChange,
+}: {
+  value: number
+  onChange: (x: number) => void
+}) {
+  return (
+    <Selector
+      options={STUDY_YEARS}
+      label="Study year"
+      width={150}
+      value={value}
+      onChange={(n) => onChange(n ?? STUDY_YEARS[0])}
+      inputMode="none"
+      disableClearable
     />
   )
 }

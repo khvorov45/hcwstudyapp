@@ -63,6 +63,7 @@ import {
   Selector,
   SelectorMultiple,
   SiteSelect,
+  StudyYearSelector,
 } from "./control-ribbon"
 import {
   findBreaks,
@@ -77,7 +78,6 @@ import {
   summariseProportion,
   unique,
 } from "../lib/util"
-import { STUDY_YEARS } from "../lib/config"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -775,7 +775,6 @@ function Summary({
   titreChangeFull?: TitreChange[]
 }) {
   // Unique values for filters
-  const uniqueStudyYears = STUDY_YEARS
   const viruses = unique(serologyFull?.map((s) => s.virus)).sort(stringSort)
   const vaccinations = unique(serologyFull?.map((s) => s.prevVac)).sort(
     numberSort
@@ -1133,14 +1132,9 @@ function Summary({
   return (
     <div>
       <ControlRibbon>
-        <Selector
-          options={uniqueStudyYears}
-          label="Study year"
-          width={150}
+        <StudyYearSelector
           value={selectedStudyYear}
-          onChange={(n) => setSelectedStudyYear(n ?? 2020)}
-          inputMode="none"
-          disableClearable
+          onChange={setSelectedStudyYear}
         />
         <SelectorMultiple
           options={viruses}
