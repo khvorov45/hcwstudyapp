@@ -164,7 +164,7 @@ export function SiteSelect({
   )
 }
 
-export function StudyYearSelector({
+export function SerologyYearSelector({
   value,
   onChange,
 }: {
@@ -174,7 +174,7 @@ export function StudyYearSelector({
   return (
     <Selector
       options={STUDY_YEARS}
-      label="Study year"
+      label="Serology year"
       width={150}
       value={value}
       onChange={(n) => onChange(n ?? STUDY_YEARS[0])}

@@ -63,7 +63,7 @@ import {
   Selector,
   SelectorMultiple,
   SiteSelect,
-  StudyYearSelector,
+  SerologyYearSelector,
 } from "./control-ribbon"
 import {
   findBreaks,
@@ -1162,7 +1162,7 @@ function Summary({
   return (
     <div>
       <ControlRibbon>
-        <StudyYearSelector
+        <SerologyYearSelector
           value={selectedStudyYear}
           onChange={setSelectedStudyYear}
         />
