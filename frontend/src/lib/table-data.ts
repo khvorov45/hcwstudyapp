@@ -60,15 +60,20 @@ export const VaccinationCountV = t.type({
   pid: t.string,
   upto: t.number,
   count: t.number,
+  site: SiteV,
 })
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
 
-function genVaccinationCounts(vaccination: Vaccination[]): VaccinationCount[] {
+function genVaccinationCounts(
+  vaccination: Vaccination[],
+  participants: Participant[]
+): VaccinationCount[] {
   const counts = STUDY_YEARS.flatMap((year) =>
     rollup(
       vaccination,
       (d) => ({ pid: d.pid }),
-      (v) => ({
+      (v, k) => ({
+        site: participants.find((p) => p.pid === k.pid)?.site,
         upto: year,
         count: getSum(
           v
@@ -271,7 +276,7 @@ export async function fetchAndProcessAll(
     serology,
   } = fetchRes
 
-  const vaccinationCounts = genVaccinationCounts(vaccination)
+  const vaccinationCounts = genVaccinationCounts(vaccination, participants)
   const participantsExtra = genParticipantExtra(participants, vaccinationCounts)
   const serologyExtra = genSerologyExtra(serology, virus, participantsExtra)
   const titreChanges = genTitreChange(participantsExtra, serologyExtra, virus)
