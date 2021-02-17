@@ -699,6 +699,18 @@ function PlotColumn({
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       <GenericBar
+        data={priorVaccinationCounts}
+        yAxisSpec={{
+          lab: "Count",
+          accessor: (d) => d.count,
+        }}
+        xAxisSpec={{
+          lab: "Known prior vaccinations",
+          accessor: (d) => d.prevVac.toString(),
+        }}
+        getColor={getColor}
+      />
+      <GenericBar
         data={agesBinned}
         yAxisSpec={{
           lab: "Count",
@@ -758,18 +770,7 @@ function PlotColumn({
         }}
         getColor={getColor}
       />
-      <GenericBar
-        data={priorVaccinationCounts}
-        yAxisSpec={{
-          lab: "Count",
-          accessor: (d) => d.count,
-        }}
-        xAxisSpec={{
-          lab: "Known prior vaccinations",
-          accessor: (d) => d.prevVac.toString(),
-        }}
-        getColor={getColor}
-      />
+
       <GenericBar
         data={occupationCounts}
         yAxisSpec={{
