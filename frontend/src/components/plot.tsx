@@ -284,11 +284,14 @@ function SerologyPlots({
           onChange={(n) => {
             setSelectedPid(n)
             const thisPid = serology.find((d) => d.pid === n)
+            const thisCount = vaccinationCounts.find(
+              (v) => v.pid === thisPid?.pid && v.upto === selectedStudyYear
+            )
             if (thisPid?.site !== undefined) {
               setSelectedSites([thisPid.site])
             }
-            if (thisPid?.prevVac !== undefined) {
-              setSelectedVax([thisPid.prevVac])
+            if (thisCount !== undefined) {
+              setSelectedVax([thisCount.count])
             }
           }}
           inputMode="text"
