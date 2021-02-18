@@ -37,6 +37,8 @@ import {
   rangeSort,
   getMin,
   filterNotNull,
+  applyMultiFilter,
+  applySingleFilter,
 } from "../lib/util"
 import { STUDY_YEARS } from "../lib/config"
 
@@ -137,14 +139,14 @@ function SerologyPlots({
   const vaccinationCountsFilterYearSiteVax = vaccinationCounts.filter(
     (v) =>
       v.upto === selectedStudyYear &&
-      (selectedSites.length === 0 || selectedSites.includes(v.site)) &&
-      (selectedVax.length === 0 || selectedVax.includes(v.count))
+      applyMultiFilter(selectedSites, v.site) &&
+      applyMultiFilter(selectedVax, v.count)
   )
   const availablePids = vaccinationCountsFilterYearSiteVax
     .map((v) => v.pid)
     .sort(stringSort)
   const vaccinationCountsFiltered = vaccinationCountsFilterYearSiteVax.filter(
-    (v) => selectedPid === null || selectedPid === v.pid
+    (v) => applySingleFilter(selectedPid, v.pid)
   )
 
   const serologyFiltered = serology.filter(
@@ -153,8 +155,8 @@ function SerologyPlots({
       (selectedPid === null
         ? availablePids.includes(s.pid)
         : s.pid === selectedPid) &&
-      (selectedViruses.length === 0 || selectedViruses.includes(s.virus)) &&
-      (selectedDays.length === 0 || selectedDays.includes(s.day))
+      applyMultiFilter(selectedViruses, s.virus) &&
+      applyMultiFilter(selectedDays, s.day)
   )
 
   const titreChangeFiltered = titreChange.filter(
@@ -164,7 +166,7 @@ function SerologyPlots({
         ? // This also takes care of site and vaccinations
           availablePids.includes(t.pid)
         : t.pid === selectedPid) &&
-      (selectedViruses.length === 0 || selectedViruses.includes(t.virus))
+      applyMultiFilter(selectedViruses, t.virus)
   )
 
   // Summarise the filtered data
@@ -184,7 +186,7 @@ function SerologyPlots({
     .sort((a, b) => numberSort(a.day, b.day))
     .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
 
-  // Seroconversion (for virus/vax)
+  // Seroconversion and titre rises (for virus/vax)
   const seroconversionSummary = rollup(
     titreChangeFiltered,
     (x) => ({
@@ -192,20 +194,10 @@ function SerologyPlots({
         vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
       virusShortName: x.virusShortName,
     }),
-    (arr) => summariseProportion(arr.map((a) => a.seroconverted))
-  )
-    .sort((a, b) => numberSort(a.prevVac, b.prevVac))
-    .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
-
-  // Titre rises (virus/vax)
-  const titreChangesSummary = rollup(
-    titreChangeFiltered,
-    (x) => ({
-      virusShortName: x.virusShortName,
-      prevVac:
-        vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
-    }),
-    (arr) => summariseLogmean(arr.map((v) => v.rise))
+    (arr) => ({
+      seroconverted: summariseProportion(arr.map((a) => a.seroconverted)),
+      titreChanges: summariseLogmean(arr.map((v) => v.rise)),
+    })
   )
     .sort((a, b) => numberSort(a.prevVac, b.prevVac))
     .sort((a, b) => stringSort(a.virusShortName, b.virusShortName))
@@ -356,19 +348,29 @@ function SerologyPlots({
         </FigureContainer>
         <FigureContainer>
           <PointRange
-            data={titreChangesSummary}
+            data={seroconversionSummary}
             minWidthPerX={20}
             maxWidthMultiplier={3}
             height={400}
             yAxisSpec={{
-              min: Math.min(0.5, getMin(titreChangesSummary.map((d) => d.low))),
-              max: Math.max(30, getMax(titreChangesSummary.map((d) => d.high))),
+              min: Math.min(
+                0.5,
+                getMin(seroconversionSummary.map((d) => d.titreChanges.low))
+              ),
+              max: Math.max(
+                30,
+                getMax(seroconversionSummary.map((d) => d.titreChanges.high))
+              ),
               ticks: [0.5, 1, 2, 5, 10, 20, 30],
               lab: selectedPid
                 ? "Fold-rise (14 vs 0)"
                 : "GMR (14 vs 0, 95% CI)",
               type: "log",
-              accessor: (d) => ({ point: d.mean, low: d.low, high: d.high }),
+              accessor: (d) => ({
+                point: d.titreChanges.mean,
+                low: d.titreChanges.low,
+                high: d.titreChanges.high,
+              }),
             }}
             xAxesSpec={[virusAxisSpec(), vaxAxisSpec()]}
             pad={pad(["virus", "vax"])}
@@ -395,7 +397,11 @@ function SerologyPlots({
               lab: selectedPid
                 ? "Seroconverted (14 vs 0)"
                 : "Seroconversion (14 vs 0, 95% CI)",
-              accessor: (d) => ({ point: d.prop, low: d.low, high: d.high }),
+              accessor: (d) => ({
+                point: d.seroconverted.prop,
+                low: d.seroconverted.low,
+                high: d.seroconverted.high,
+              }),
             }}
             xAxesSpec={[virusAxisSpec(), vaxAxisSpec()]}
             pad={pad(["virus", "vax"])}

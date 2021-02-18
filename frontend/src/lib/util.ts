@@ -325,3 +325,17 @@ export function dateDiffYears(d1: Date | null, d2: Date | null): number | null {
   }
   return (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
 }
+
+export function applyMultiFilter(
+  opts: (string | number | null)[],
+  value: string | number | null
+) {
+  return opts.length === 0 || opts.includes(value)
+}
+
+export function applySingleFilter(
+  opt: string | number | null,
+  value: string | number | null
+) {
+  return opt === null || value === opt
+}
