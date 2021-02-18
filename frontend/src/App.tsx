@@ -172,10 +172,13 @@ export default function App() {
 
   const auth = useAsync(
     async (token: AppToken | null) => {
+      if (!token) {
+        throw Error("no token")
+      }
       return await apiReq({
         method: "GET",
         path: "auth/token/verify",
-        token: token?.token,
+        token: token.token,
         success: StatusCodes.OK,
         failure: [StatusCodes.UNAUTHORIZED],
         validator: UserV,
@@ -322,6 +325,7 @@ export default function App() {
               <AuthRoute
                 exact
                 authStatus={auth.status}
+                authLoading={auth.loading}
                 user={auth.result}
                 path="/about"
               >
@@ -338,6 +342,7 @@ export default function App() {
                 exact
                 admin
                 authStatus={auth.status}
+                authLoading={auth.loading}
                 user={auth.result}
                 path="/users"
               >
@@ -348,6 +353,7 @@ export default function App() {
                 />
               </AuthRoute>
               <AuthRoute
+                authLoading={auth.loading}
                 authStatus={auth.status}
                 user={auth.result}
                 path="/tables"
@@ -367,6 +373,7 @@ export default function App() {
               </AuthRoute>
               <AuthRoute
                 authStatus={auth.status}
+                authLoading={auth.loading}
                 user={auth.result}
                 path="/plots"
               >
@@ -390,6 +397,7 @@ function AuthRoute({
   path,
   exact,
   authStatus,
+  authLoading,
   user,
   admin,
   children,
@@ -397,17 +405,22 @@ function AuthRoute({
   path: string
   exact?: boolean
   authStatus: AsyncStateStatus
+  authLoading: boolean
   user: User | null | undefined
   admin?: boolean
   children: ReactNode
 }) {
+  if (
+    authStatus === "loading" ||
+    authStatus === "not-requested" ||
+    (authLoading && authStatus !== "success")
+  ) {
+    return <></>
+  }
   if (authStatus === "error") {
     return <Redirect to="/email" />
   }
-  if (authStatus === "loading" || authStatus === "not-requested" || !user) {
-    return <></>
-  }
-  if (admin && user.accessGroup !== "admin") {
+  if (admin && user?.accessGroup !== "admin") {
     return <Redirect to="/email" />
   }
   return (
