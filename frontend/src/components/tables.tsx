@@ -64,8 +64,10 @@ import {
   SelectorMultiple,
   SiteSelect,
   StudyYearSelector,
+  StudyYearSelectorMultiple,
 } from "./control-ribbon"
 import {
+  applyMultiFilter,
   findBreaks,
   insertInPlace,
   numberSort,
@@ -787,6 +789,9 @@ function Summary({
 
   // Filters
   const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
+  const [selectedRecruitmentYears, setSelectedRecruitmentYears] = useState<
+    number[]
+  >([])
   const firstVirus = viruses[0]
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
     firstVirus ? [firstVirus] : []
@@ -806,10 +811,14 @@ function Summary({
   const vaccinationCounts = vaccinationCountsFull?.filter(
     (p) =>
       p.upto === selectedStudyYear &&
-      (vacSelected.length === 0 || vacSelected.includes(p.count)) &&
-      (sitesSelected.length === 0 || sitesSelected.includes(p.site))
+      applyMultiFilter(
+        selectedRecruitmentYears,
+        p.dateScreening.getFullYear()
+      ) &&
+      applyMultiFilter(vacSelected, p.count) &&
+      applyMultiFilter(sitesSelected, p.site)
   )
-  // These PIDs will auto-filter site and previous vaccinations
+  // These PIDs will auto-filter recruitment year, site and previous vaccinations
   const availablePids = vaccinationCounts?.map((v) => v.pid)
   const participantsExtra = participantsExtraFull?.filter(
     (p) => !availablePids || availablePids.includes(p.pid)
@@ -818,13 +827,13 @@ function Summary({
     (s) =>
       s.redcapProjectYear === selectedStudyYear &&
       (!availablePids || availablePids.includes(s.pid)) &&
-      (virusesSelected.length === 0 || virusesSelected.includes(s.virus))
+      applyMultiFilter(virusesSelected, s.virus)
   )
   const titreChange = titreChangeFull?.filter(
     (p) =>
       p.year === selectedStudyYear &&
       (!availablePids || availablePids.includes(p.pid)) &&
-      (virusesSelected.length === 0 || virusesSelected.includes(p.virus))
+      applyMultiFilter(virusesSelected, p.virus)
   )
 
   // Summarise the filtered data
@@ -1159,9 +1168,15 @@ function Summary({
     <div>
       <ControlRibbon>
         <StudyYearSelector
+          label="Serology year"
           value={selectedStudyYear}
           onChange={(x) => setSelectedStudyYear(x ?? STUDY_YEARS[0])}
           disableClearable
+        />
+        <StudyYearSelectorMultiple
+          label="Recruited in"
+          value={selectedRecruitmentYears}
+          onChange={setSelectedRecruitmentYears}
         />
         <SelectorMultiple
           options={viruses}
