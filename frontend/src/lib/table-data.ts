@@ -18,6 +18,7 @@ import {
   WeeklySurvey,
   Withdrawn,
   ParticipantDeidentifiedV,
+  MyDateV,
 } from "./data"
 import { decode } from "./io"
 import { dateDiffYears, getSum, rollup } from "./util"
@@ -61,6 +62,7 @@ export const VaccinationCountV = t.type({
   upto: t.number,
   count: t.number,
   site: SiteV,
+  dateScreening: MyDateV,
 })
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
 
@@ -72,17 +74,21 @@ function genVaccinationCounts(
     rollup(
       vaccination,
       (d) => ({ pid: d.pid }),
-      (v, k) => ({
-        site: participants.find((p) => p.pid === k.pid)?.site,
-        upto: year,
-        count: getSum(
-          v
-            .filter((v) => v.year < year)
-            .map((v) =>
-              ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
-            )
-        ),
-      })
+      (v, k) => {
+        const p = participants.find((p) => p.pid === k.pid)
+        return {
+          dateScreening: p?.dateScreening,
+          site: p?.site,
+          upto: year,
+          count: getSum(
+            v
+              .filter((v) => v.year < year)
+              .map((v) =>
+                ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
+              )
+          ),
+        }
+      }
     )
   )
   return decode(t.array(VaccinationCountV), counts)

@@ -120,6 +120,9 @@ function SerologyPlots({
 
   // Filters applied in the order presented
   const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
+  const [selectedRecruitmentYear, setSelectedRecruitmentYear] = useState<
+    number | null
+  >(null)
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
   const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
 
@@ -139,6 +142,10 @@ function SerologyPlots({
   const vaccinationCountsFilterYearSiteVax = vaccinationCounts.filter(
     (v) =>
       v.upto === selectedStudyYear &&
+      applySingleFilter(
+        selectedRecruitmentYear,
+        v.dateScreening.getFullYear()
+      ) &&
       applyMultiFilter(selectedSites, v.site) &&
       applyMultiFilter(selectedVax, v.count)
   )
@@ -255,6 +262,14 @@ function SerologyPlots({
             setSelectedPid(null)
           }}
           disableClearable
+        />
+        <StudyYearSelector
+          label="Recruited in"
+          value={selectedRecruitmentYear}
+          onChange={(y) => {
+            setSelectedRecruitmentYear(y)
+            setSelectedPid(null)
+          }}
         />
         <SiteSelect
           sites={uniqueSites}
