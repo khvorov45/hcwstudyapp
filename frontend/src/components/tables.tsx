@@ -1160,7 +1160,8 @@ function Summary({
       <ControlRibbon>
         <StudyYearSelector
           value={selectedStudyYear}
-          onChange={setSelectedStudyYear}
+          onChange={(x) => setSelectedStudyYear(x ?? STUDY_YEARS[0])}
+          disableClearable
         />
         <SelectorMultiple
           options={viruses}

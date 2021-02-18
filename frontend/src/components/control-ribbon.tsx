@@ -168,10 +168,12 @@ export function StudyYearSelector({
   label = "Study year",
   value,
   onChange,
+  disableClearable,
 }: {
   label?: string
-  value: number
-  onChange: (x: number) => void
+  value: number | null
+  onChange: (x: number | null) => void
+  disableClearable?: boolean
 }) {
   return (
     <Selector
@@ -179,9 +181,9 @@ export function StudyYearSelector({
       label={label}
       width={150}
       value={value}
-      onChange={(n) => onChange(n ?? STUDY_YEARS[0])}
+      onChange={onChange}
       inputMode="none"
-      disableClearable
+      disableClearable={disableClearable}
     />
   )
 }

@@ -251,9 +251,10 @@ function SerologyPlots({
         <StudyYearSelector
           value={selectedStudyYear}
           onChange={(y) => {
-            setSelectedStudyYear(y)
+            setSelectedStudyYear(y ?? STUDY_YEARS[0])
             setSelectedPid(null)
           }}
+          disableClearable
         />
         <SiteSelect
           sites={uniqueSites}
@@ -484,7 +485,12 @@ function BaselinePlots({
   vaccinationCounts: VaccinationCount[]
 }) {
   const uniqueSites = unique(participantsExtra.map((p) => p.site))
-  const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
+  const [selectedSerologyYear, setSelectedSerologyYear] = useState(
+    STUDY_YEARS[0]
+  )
+  const [selectedRecruitmentYear, setSelectedRecruitmentYear] = useState<
+    number | null
+  >(null)
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
 
   const [
@@ -494,14 +500,29 @@ function BaselinePlots({
 
   const vaccinationCountsFiltered = vaccinationCounts.filter(
     (v) =>
-      v.upto === selectedStudyYear &&
-      (selectedSites.length === 0 || selectedSites.includes(v.site))
+      applySingleFilter(
+        selectedRecruitmentYear,
+        participantsExtra
+          .find((p) => p.pid === v.pid)
+          ?.dateScreening?.getFullYear() ?? null
+      ) &&
+      v.upto === selectedSerologyYear &&
+      applyMultiFilter(selectedSites, v.site)
   )
 
   const participantsExtraFiltered = participantsExtra
-    .filter((p) => selectedSites.length === 0 || selectedSites.includes(p.site))
+    .filter(
+      (p) =>
+        applyMultiFilter(selectedSites, p.site) &&
+        applySingleFilter(
+          selectedRecruitmentYear,
+          p.dateScreening?.getFullYear() ?? null
+        )
+    )
     .map((p) => ({
       ...p,
+      // If vaccinations aren't found then we know of 0 prior vaccinations I
+      // guess but -1 because it shouldn't happen I don't think
       prevVac:
         vaccinationCountsFiltered.find((v) => v.pid === p.pid)?.count ?? -1,
     }))
@@ -566,6 +587,11 @@ function BaselinePlots({
   return (
     <>
       <ControlRibbon>
+        <StudyYearSelector
+          label="Recruited in"
+          value={selectedRecruitmentYear}
+          onChange={setSelectedRecruitmentYear}
+        />
         <SiteSelect
           sites={uniqueSites}
           site={selectedSites}
@@ -621,8 +647,9 @@ function BaselinePlots({
         }}
       >
         <StudyYearSelector
-          value={selectedStudyYear}
-          onChange={setSelectedStudyYear}
+          value={selectedSerologyYear}
+          onChange={(x) => setSelectedSerologyYear(x ?? STUDY_YEARS[0])}
+          disableClearable
         />
       </Popover>
     </>
