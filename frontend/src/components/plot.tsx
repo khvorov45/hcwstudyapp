@@ -18,6 +18,7 @@ import {
   SelectorMultiple,
   SiteSelect,
   StudyYearSelector,
+  StudyYearSelectorMultiple,
 } from "./control-ribbon"
 import {
   cut,
@@ -120,9 +121,9 @@ function SerologyPlots({
 
   // Filters applied in the order presented
   const [selectedStudyYear, setSelectedStudyYear] = useState(STUDY_YEARS[0])
-  const [selectedRecruitmentYear, setSelectedRecruitmentYear] = useState<
-    number | null
-  >(null)
+  const [selectedRecruitmentYears, setSelectedRecruitmentYears] = useState<
+    number[]
+  >([])
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
   const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
 
@@ -142,8 +143,8 @@ function SerologyPlots({
   const vaccinationCountsFilterYearSiteVax = vaccinationCounts.filter(
     (v) =>
       v.upto === selectedStudyYear &&
-      applySingleFilter(
-        selectedRecruitmentYear,
+      applyMultiFilter(
+        selectedRecruitmentYears,
         v.dateScreening.getFullYear()
       ) &&
       applyMultiFilter(selectedSites, v.site) &&
@@ -263,11 +264,11 @@ function SerologyPlots({
           }}
           disableClearable
         />
-        <StudyYearSelector
+        <StudyYearSelectorMultiple
           label="Recruited in"
-          value={selectedRecruitmentYear}
+          value={selectedRecruitmentYears}
           onChange={(y) => {
-            setSelectedRecruitmentYear(y)
+            setSelectedRecruitmentYears(y)
             setSelectedPid(null)
           }}
         />
@@ -503,9 +504,9 @@ function BaselinePlots({
   const [selectedSerologyYear, setSelectedSerologyYear] = useState(
     STUDY_YEARS[0]
   )
-  const [selectedRecruitmentYear, setSelectedRecruitmentYear] = useState<
-    number | null
-  >(null)
+  const [selectedRecruitmentYears, setSelectedRecruitmentYears] = useState<
+    number[]
+  >([])
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
 
   const [
@@ -515,8 +516,8 @@ function BaselinePlots({
 
   const vaccinationCountsFiltered = vaccinationCounts.filter(
     (v) =>
-      applySingleFilter(
-        selectedRecruitmentYear,
+      applyMultiFilter(
+        selectedRecruitmentYears,
         participantsExtra
           .find((p) => p.pid === v.pid)
           ?.dateScreening?.getFullYear() ?? null
@@ -529,8 +530,8 @@ function BaselinePlots({
     .filter(
       (p) =>
         applyMultiFilter(selectedSites, p.site) &&
-        applySingleFilter(
-          selectedRecruitmentYear,
+        applyMultiFilter(
+          selectedRecruitmentYears,
           p.dateScreening?.getFullYear() ?? null
         )
     )
@@ -602,10 +603,10 @@ function BaselinePlots({
   return (
     <>
       <ControlRibbon>
-        <StudyYearSelector
+        <StudyYearSelectorMultiple
           label="Recruited in"
-          value={selectedRecruitmentYear}
-          onChange={setSelectedRecruitmentYear}
+          value={selectedRecruitmentYears}
+          onChange={setSelectedRecruitmentYears}
         />
         <SiteSelect
           sites={uniqueSites}

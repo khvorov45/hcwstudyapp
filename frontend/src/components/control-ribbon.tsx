@@ -187,3 +187,24 @@ export function StudyYearSelector({
     />
   )
 }
+
+export function StudyYearSelectorMultiple({
+  label = "Study years",
+  value,
+  onChange,
+}: {
+  label?: string
+  value: number[]
+  onChange: (x: number[]) => void
+}) {
+  return (
+    <SelectorMultiple
+      options={STUDY_YEARS}
+      label={label}
+      width={190}
+      value={value}
+      onChange={onChange}
+      inputMode="none"
+    />
+  )
+}
