@@ -796,6 +796,7 @@ function Summary({
   const [virusesSelected, setVirusesSelected] = useState<string[]>(
     firstVirus ? [firstVirus] : []
   )
+  const [vaxInStudyYear, setVaxInStudyYear] = useState<string | null>(null)
   const [vacSelected, setVacSelected] = useState<number[]>([])
   const [splitVar, setSplitVar] = useState<"Site" | "Vaccinations">("Site")
   const [sitesSelected, setSitesSelected] = useState<Site[]>([])
@@ -811,6 +812,10 @@ function Summary({
   const vaccinationCounts = vaccinationCountsFull?.filter(
     (p) =>
       p.upto === selectedStudyYear &&
+      (vaxInStudyYear === null ||
+        (vaxInStudyYear === "yes"
+          ? p.years.includes(selectedStudyYear)
+          : !p.years.includes(selectedStudyYear))) &&
       applyMultiFilter(
         selectedRecruitmentYears,
         p.dateScreening.getFullYear()
@@ -818,7 +823,7 @@ function Summary({
       applyMultiFilter(vacSelected, p.count) &&
       applyMultiFilter(sitesSelected, p.site)
   )
-  // These PIDs will auto-filter recruitment year, site and previous vaccinations
+  // Use PIDs to not repeat some of the filters
   const availablePids = vaccinationCounts?.map((v) => v.pid)
   const participantsExtra = participantsExtraFull?.filter(
     (p) => !availablePids || availablePids.includes(p.pid)
@@ -1195,12 +1200,20 @@ function Summary({
           inputMode="none"
           disableClearable
         />
+        <Selector
+          options={["yes", "no"]}
+          label={`Vax in ${selectedStudyYear}`}
+          value={vaxInStudyYear}
+          width={190}
+          onChange={setVaxInStudyYear}
+          inputMode="none"
+        />
         <SelectorMultiple
           options={vaccinations}
-          label="Vaccinations"
+          label={`Vax prior to ${selectedStudyYear}`}
           value={vacSelected}
-          width={150}
-          onChange={(n) => setVacSelected(n)}
+          width={190}
+          onChange={setVacSelected}
           inputMode="none"
         />
         <SiteSelect

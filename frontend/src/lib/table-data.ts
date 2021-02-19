@@ -21,7 +21,7 @@ import {
   MyDateV,
 } from "./data"
 import { decode } from "./io"
-import { dateDiffYears, getSum, rollup } from "./util"
+import { dateDiffYears, rollup } from "./util"
 import { STUDY_YEARS } from "./config"
 
 export const ParticipantV = t.union([
@@ -63,6 +63,7 @@ export const VaccinationCountV = t.type({
   count: t.number,
   site: SiteV,
   dateScreening: MyDateV,
+  years: t.array(t.number),
 })
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
 
@@ -76,17 +77,15 @@ function genVaccinationCounts(
       (d) => ({ pid: d.pid }),
       (v, k) => {
         const p = participants.find((p) => p.pid === k.pid)
+        const vaxOnly = v.filter((x) =>
+          ["australia", "overseas"].includes(x.status ?? "")
+        )
         return {
           dateScreening: p?.dateScreening,
           site: p?.site,
           upto: year,
-          count: getSum(
-            v
-              .filter((v) => v.year < year)
-              .map((v) =>
-                ["australia", "overseas"].includes(v.status ?? "") ? 1 : 0
-              )
-          ),
+          years: vaxOnly.map((x) => x.year),
+          count: vaxOnly.filter((x) => x.year).length,
         }
       }
     )
