@@ -125,6 +125,7 @@ function SerologyPlots({
     number[]
   >([])
   const [selectedSites, setSelectedSites] = useState<Site[]>([])
+  const [vaxInStudyYear, setVaxInStudyYear] = useState<string | null>(null)
   const [selectedVax, setSelectedVax] = useState<number[]>([0, 5])
 
   // Site and vax determine the selection of pid and set it to null
@@ -143,6 +144,10 @@ function SerologyPlots({
   const vaccinationCountsFilterYearSiteVax = vaccinationCounts.filter(
     (v) =>
       v.upto === selectedStudyYear &&
+      (vaxInStudyYear === null ||
+        (vaxInStudyYear === "yes"
+          ? v.years.includes(selectedStudyYear)
+          : !v.years.includes(selectedStudyYear))) &&
       applyMultiFilter(
         selectedRecruitmentYears,
         v.dateScreening.getFullYear()
@@ -280,9 +285,17 @@ function SerologyPlots({
             setSelectedPid(null)
           }}
         />
+        <Selector
+          options={["yes", "no"]}
+          label={`Vax in ${selectedStudyYear}`}
+          value={vaxInStudyYear}
+          width={190}
+          onChange={setVaxInStudyYear}
+          inputMode="none"
+        />
         <SelectorMultiple
           options={uniqueVax}
-          label="Vaccinations"
+          label={`Vax prior to ${selectedStudyYear}`}
           value={selectedVax}
           onChange={(n) => {
             setSelectedVax(n)
