@@ -155,19 +155,20 @@ function genTitreChange(
   serologyExtra: SerologyExtra[],
   virusTable: Virus[]
 ): TitreChange[] {
-  const titreChanges = virusTable.flatMap((virus) =>
-    STUDY_YEARS.flatMap((year) =>
-      participantsExtra.map((participant) => {
-        const subset = serologyExtra.filter(
-          (s) =>
-            s.pid === participant.pid &&
-            s.virus === virus.name &&
-            s.redcapProjectYear === year
-        )
+  const titreChanges: TitreChange[] = []
+  for (const virus of virusTable) {
+    let subset = serologyExtra.filter((s) => s.virus === virus.name)
+    for (const year of STUDY_YEARS) {
+      subset = subset.filter((s) => s.redcapProjectYear === year)
+      for (const participant of participantsExtra) {
+        subset = subset.filter((s) => s.pid === participant.pid)
         const d2 = subset.find((s) => s.day === 14)?.titre ?? NaN
         const d1 = subset.find((s) => s.day === 0)?.titre ?? NaN
         const rise = d2 / d1
-        return {
+        if (isNaN(rise)) {
+          continue
+        }
+        titreChanges.push({
           virus: virus.name,
           virusShortName: virus.shortName,
           virusClade: virus.clade,
@@ -178,10 +179,10 @@ function genTitreChange(
           rise,
           seroconverted: d1 === 5 ? d2 >= 40 : rise >= 4,
           year,
-        }
-      })
-    ).filter((p) => !isNaN(p.rise))
-  )
+        })
+      }
+    }
+  }
   return decode(t.array(TitreChangeV), titreChanges)
 }
 
