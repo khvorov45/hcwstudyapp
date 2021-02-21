@@ -111,7 +111,7 @@ function SerologyPlots({
 }) {
   const uniqueSites = unique(serology.map((s) => s.site)).sort(stringSort)
   const uniqueDays = unique(serology.map((s) => s.day)).sort(numberSort)
-  const uniqueVax = unique(vaccinationCounts.map((s) => s.count)).sort(
+  const uniqueVax = unique(vaccinationCounts.map((s) => s.years.length)).sort(
     numberSort
   )
   const uniqueViruses = virusTable.map((v) => v.name)
@@ -143,7 +143,6 @@ function SerologyPlots({
   // Apply filters
   const vaccinationCountsFilterYearSiteVax = vaccinationCounts.filter(
     (v) =>
-      v.upto === selectedStudyYear &&
       (vaxInStudyYear === null ||
         (vaxInStudyYear === "yes"
           ? v.years.includes(selectedStudyYear)
@@ -153,7 +152,10 @@ function SerologyPlots({
         v.dateScreening.getFullYear()
       ) &&
       applyMultiFilter(selectedSites, v.site) &&
-      applyMultiFilter(selectedVax, v.count)
+      applyMultiFilter(
+        selectedVax,
+        v.years.filter((y) => y < selectedStudyYear).length
+      )
   )
   const availablePids = vaccinationCountsFilterYearSiteVax
     .map((v) => v.pid)
@@ -161,6 +163,10 @@ function SerologyPlots({
   const vaccinationCountsFiltered = vaccinationCountsFilterYearSiteVax.filter(
     (v) => applySingleFilter(selectedPid, v.pid)
   )
+  const prevVacs = vaccinationCountsFiltered.map((v) => ({
+    pid: v.pid,
+    prevVac: v.years.filter((y) => y < selectedStudyYear).length,
+  }))
 
   const serologyFiltered = serology.filter(
     (s) =>
@@ -184,14 +190,17 @@ function SerologyPlots({
 
   // Summarise the filtered data
 
+  function findPrevVac<T extends { pid: string }>(data: T): number {
+    return prevVacs.find((v) => v.pid === data.pid)?.prevVac ?? -1
+  }
+
   // Serology (GMT's for virus/day/vax)
   const serologySummary = rollup(
     serologyFiltered,
     (x) => ({
       virusShortName: x.virusShortName,
       day: x.day,
-      prevVac:
-        vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
+      prevVac: findPrevVac(x),
     }),
     (arr) => summariseLogmean(arr.map((x) => x.titre))
   )
@@ -203,8 +212,7 @@ function SerologyPlots({
   const seroconversionSummary = rollup(
     titreChangeFiltered,
     (x) => ({
-      prevVac:
-        vaccinationCountsFiltered.find((v) => v.pid === x.pid)?.count ?? -1,
+      prevVac: findPrevVac(x),
       virusShortName: x.virusShortName,
     }),
     (arr) => ({
@@ -312,14 +320,12 @@ function SerologyPlots({
           onChange={(n) => {
             setSelectedPid(n)
             const thisPid = serology.find((d) => d.pid === n)
-            const thisCount = vaccinationCounts.find(
-              (v) => v.pid === thisPid?.pid && v.upto === selectedStudyYear
-            )
+            const thisCount = thisPid ? findPrevVac(thisPid) : undefined
             if (thisPid?.site !== undefined) {
               setSelectedSites([thisPid.site])
             }
             if (thisCount !== undefined) {
-              setSelectedVax([thisCount.count])
+              setSelectedVax([thisCount])
             }
           }}
           inputMode="text"
@@ -534,10 +540,12 @@ function BaselinePlots({
         participantsExtra
           .find((p) => p.pid === v.pid)
           ?.dateScreening?.getFullYear() ?? null
-      ) &&
-      v.upto === selectedSerologyYear &&
-      applyMultiFilter(selectedSites, v.site)
+      ) && applyMultiFilter(selectedSites, v.site)
   )
+  const prevVacs = vaccinationCountsFiltered.map((v) => ({
+    pid: v.pid,
+    prevVac: v.years.filter((y) => y < selectedSerologyYear).length,
+  }))
 
   const participantsExtraFiltered = participantsExtra
     .filter(
@@ -552,8 +560,7 @@ function BaselinePlots({
       ...p,
       // If vaccinations aren't found then we know of 0 prior vaccinations I
       // guess but -1 because it shouldn't happen I don't think
-      prevVac:
-        vaccinationCountsFiltered.find((v) => v.pid === p.pid)?.count ?? -1,
+      prevVac: prevVacs.find((v) => v.pid === p.pid)?.prevVac ?? -1,
     }))
 
   type ColorVariable =

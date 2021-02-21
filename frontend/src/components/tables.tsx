@@ -780,9 +780,9 @@ function Summary({
 }) {
   // Unique values for filters
   const viruses = unique(serologyFull?.map((s) => s.virus)).sort(stringSort)
-  const vaccinations = unique(vaccinationCountsFull?.map((s) => s.count)).sort(
-    numberSort
-  )
+  const vaccinations = unique(
+    vaccinationCountsFull?.map((s) => s.years.length)
+  ).sort(numberSort)
   const uniqueSites = unique(participantsExtraFull?.map((p) => p.site)).sort(
     stringSort
   )
@@ -811,7 +811,6 @@ function Summary({
 
   const vaccinationCounts = vaccinationCountsFull?.filter(
     (p) =>
-      p.upto === selectedStudyYear &&
       (vaxInStudyYear === null ||
         (vaxInStudyYear === "yes"
           ? p.years.includes(selectedStudyYear)
@@ -820,9 +819,17 @@ function Summary({
         selectedRecruitmentYears,
         p.dateScreening.getFullYear()
       ) &&
-      applyMultiFilter(vacSelected, p.count) &&
+      applyMultiFilter(
+        vacSelected,
+        p.years.filter((y) => y < selectedStudyYear).length
+      ) &&
       applyMultiFilter(sitesSelected, p.site)
   )
+  const prevVacs = vaccinationCounts?.map((v) => ({
+    pid: v.pid,
+    site: v.site,
+    prevVac: v.years.filter((y) => y < selectedStudyYear).length,
+  }))
   // Use PIDs to not repeat some of the filters
   const availablePids = vaccinationCounts?.map((v) => v.pid)
   const participantsExtra = participantsExtraFull?.filter(
@@ -848,8 +855,8 @@ function Summary({
     summariseCount
   )
   const countsByVac = rollup(
-    vaccinationCounts ?? [],
-    (d) => ({ prevVac: d.count, split: d.count }),
+    prevVacs ?? [],
+    (d) => ({ prevVac: d.prevVac, split: d.prevVac }),
     summariseCount
   )
   const countsByGender = rollup(
@@ -868,7 +875,7 @@ function Summary({
       split:
         splitVar === "Site"
           ? d.site
-          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
     }),
     (v) => ({
       age: summariseNumeric(v.map((v) => v.ageRecruitment)),
@@ -885,7 +892,7 @@ function Summary({
       split:
         splitVar === "Site"
           ? d.site
-          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
     }),
     (v) =>
       summariseLogmean(
@@ -909,7 +916,7 @@ function Summary({
       split:
         splitVar === "Site"
           ? d.site
-          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
     }),
     (v) =>
       summariseLogmean(
@@ -933,7 +940,7 @@ function Summary({
       split:
         splitVar === "Site"
           ? d.site
-          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
     }),
     summariseCount
   )
@@ -944,16 +951,16 @@ function Summary({
       split:
         splitVar === "Site"
           ? d.site
-          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
     }),
     summariseCount
   )
   const countsByVacSite = rollup(
-    vaccinationCounts ?? [],
+    prevVacs ?? [],
     (d) => ({
-      prevVac: d.count,
+      prevVac: d.prevVac,
       site: d.site,
-      split: splitVar === "Site" ? d.site : d.count,
+      split: splitVar === "Site" ? d.site : d.prevVac,
     }),
     summariseCount
   )
@@ -964,7 +971,7 @@ function Summary({
       split:
         splitVar === "Site"
           ? d.site
-          : vaccinationCounts?.find((v) => v.pid === d.pid)?.count ?? -1,
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
     }),
     (v) => summariseProportion(v.map((x) => x.seroconverted))
   )

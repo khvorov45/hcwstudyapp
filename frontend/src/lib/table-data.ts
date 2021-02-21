@@ -59,8 +59,6 @@ export async function tableFetch<T>(
 
 export const VaccinationCountV = t.type({
   pid: t.string,
-  upto: t.number,
-  count: t.number,
   site: SiteV,
   dateScreening: MyDateV,
   years: t.array(t.number),
@@ -71,24 +69,20 @@ function genVaccinationCounts(
   vaccination: Vaccination[],
   participants: Participant[]
 ): VaccinationCount[] {
-  const counts = STUDY_YEARS.flatMap((year) =>
-    rollup(
-      vaccination,
-      (d) => ({ pid: d.pid }),
-      (v, k) => {
-        const p = participants.find((p) => p.pid === k.pid)
-        const vaxOnly = v.filter((x) =>
-          ["australia", "overseas"].includes(x.status ?? "")
-        )
-        return {
-          dateScreening: p?.dateScreening,
-          site: p?.site,
-          upto: year,
-          years: vaxOnly.map((x) => x.year),
-          count: vaxOnly.filter((x) => x.year).length,
-        }
+  const counts = rollup(
+    vaccination,
+    (d) => ({ pid: d.pid }),
+    (v, k) => {
+      const p = participants.find((p) => p.pid === k.pid)
+      const vaxOnly = v.filter((x) =>
+        ["australia", "overseas"].includes(x.status ?? "")
+      )
+      return {
+        dateScreening: p?.dateScreening,
+        site: p?.site,
+        years: vaxOnly.map((x) => x.year),
       }
-    )
+    }
   )
   return decode(t.array(VaccinationCountV), counts)
 }
