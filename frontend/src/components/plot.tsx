@@ -546,19 +546,21 @@ function BaselinePlots({
     setPriorVacSettingsAnchor,
   ] = useState<SVGElement | null>(null)
 
-  const vaccinationCountsFiltered = vaccinationCounts.filter(
-    (v) =>
-      applyMultiFilter(
-        selectedRecruitmentYears,
-        participantsExtra
-          .find((p) => p.pid === v.pid)
-          ?.dateScreening?.getFullYear() ?? null
-      ) && applyMultiFilter(selectedSites, v.site)
-  )
-  const prevVacs = vaccinationCountsFiltered.map((v) => ({
-    pid: v.pid,
-    prevVac: v.years.filter((y) => y < selectedSerologyYear).length,
-  }))
+  const vaccinationCountsFiltered = vaccinationCounts
+    .filter(
+      (v) =>
+        applyMultiFilter(
+          selectedRecruitmentYears,
+          participantsExtra
+            .find((p) => p.pid === v.pid)
+            ?.dateScreening?.getFullYear() ?? null
+        ) && applyMultiFilter(selectedSites, v.site)
+    )
+    .map((x) =>
+      Object.assign(x, {
+        prevVac: x.years.filter((y) => y < selectedSerologyYear).length,
+      })
+    )
 
   const participantsExtraFiltered = participantsExtra
     .filter(
@@ -569,12 +571,14 @@ function BaselinePlots({
           p.dateScreening?.getFullYear() ?? null
         )
     )
-    .map((p) => ({
-      ...p,
-      // If vaccinations aren't found then we know of 0 prior vaccinations I
-      // guess but -1 because it shouldn't happen I don't think
-      prevVac: prevVacs.find((v) => v.pid === p.pid)?.prevVac ?? -1,
-    }))
+    .map((p) =>
+      Object.assign(p, {
+        // If vaccinations aren't found then we know of 0 prior vaccinations I
+        // guess but -1 because it shouldn't happen I don't think
+        prevVac:
+          vaccinationCountsFiltered.find((v) => v.pid === p.pid)?.prevVac ?? -1,
+      })
+    )
 
   type ColorVariable =
     | "gender"
