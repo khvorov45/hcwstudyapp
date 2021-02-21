@@ -97,14 +97,15 @@ export const ParticipantExtraV = t.intersection([
 export type ParticipantExtra = t.TypeOf<typeof ParticipantExtraV>
 
 function genParticipantExtra(participants: Participant[]): ParticipantExtra[] {
-  const participantsExtra = participants.map((p) => ({
-    ageRecruitment: dateDiffYears(p.dateScreening, p.dob),
-    bmi:
-      p.weightKG === null || p.heightCM === null
-        ? null
-        : p.weightKG / (p.heightCM / 100) ** 2,
-    ...p,
-  }))
+  const participantsExtra = participants.map((p) =>
+    Object.assign(p, {
+      ageRecruitment: dateDiffYears(p.dateScreening, p.dob),
+      bmi:
+        p.weightKG === null || p.heightCM === null
+          ? null
+          : p.weightKG / (p.heightCM / 100) ** 2,
+    })
+  )
   return decode(t.array(ParticipantExtraV), participantsExtra)
 }
 
@@ -126,12 +127,11 @@ function genSerologyExtra(
   const serologyExtra = serology.map((s) => {
     const p = participant.find((p) => p.pid === s.pid)
     const v = virus.find((v) => v.name === s.virus)
-    return {
-      ...s,
+    return Object.assign(s, {
       site: p?.site,
       virusShortName: v?.shortName,
       virusClade: v?.clade,
-    }
+    })
   })
   return decode(t.array(SerologyExtraV), serologyExtra)
 }
