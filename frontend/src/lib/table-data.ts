@@ -157,13 +157,13 @@ function genTitreChange(
 ): TitreChange[] {
   const titreChanges: TitreChange[] = []
   for (const virus of virusTable) {
-    let subset = serologyExtra.filter((s) => s.virus === virus.name)
+    const virusSubset = serologyExtra.filter((s) => s.virus === virus.name)
     for (const year of STUDY_YEARS) {
-      subset = subset.filter((s) => s.redcapProjectYear === year)
+      const yearSubset = virusSubset.filter((s) => s.redcapProjectYear === year)
       for (const participant of participantsExtra) {
-        subset = subset.filter((s) => s.pid === participant.pid)
-        const d2 = subset.find((s) => s.day === 14)?.titre ?? NaN
-        const d1 = subset.find((s) => s.day === 0)?.titre ?? NaN
+        const partSubset = yearSubset.filter((s) => s.pid === participant.pid)
+        const d2 = partSubset.find((s) => s.day === 14)?.titre ?? NaN
+        const d1 = partSubset.find((s) => s.day === 0)?.titre ?? NaN
         const rise = d2 / d1
         if (isNaN(rise)) {
           continue
