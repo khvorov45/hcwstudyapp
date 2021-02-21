@@ -160,39 +160,52 @@ function SerologyPlots({
   const availablePids = vaccinationCountsFilterYearSiteVax
     .map((v) => v.pid)
     .sort(stringSort)
-  const vaccinationCountsFiltered = vaccinationCountsFilterYearSiteVax.filter(
-    (v) => applySingleFilter(selectedPid, v.pid)
-  )
-  const prevVacs = vaccinationCountsFiltered.map((v) => ({
-    pid: v.pid,
-    prevVac: v.years.filter((y) => y < selectedStudyYear).length,
-  }))
+  const vaccinationCountsFiltered = vaccinationCountsFilterYearSiteVax
+    .filter((v) => applySingleFilter(selectedPid, v.pid))
+    .map((x) =>
+      Object.assign(x, {
+        prevVac: x.years.filter((y) => y < selectedStudyYear).length,
+      })
+    )
+  function findPrevVac<T extends { pid: string }>(data: T): number {
+    return (
+      vaccinationCountsFiltered.find((v) => v.pid === data.pid)?.prevVac ?? -1
+    )
+  }
 
-  const serologyFiltered = serology.filter(
-    (s) =>
-      s.redcapProjectYear === selectedStudyYear &&
-      (selectedPid === null
-        ? availablePids.includes(s.pid)
-        : s.pid === selectedPid) &&
-      applyMultiFilter(selectedViruses, s.virus) &&
-      applyMultiFilter(selectedDays, s.day)
-  )
+  const serologyFiltered = serology
+    .filter(
+      (s) =>
+        s.redcapProjectYear === selectedStudyYear &&
+        (selectedPid === null
+          ? availablePids.includes(s.pid)
+          : s.pid === selectedPid) &&
+        applyMultiFilter(selectedViruses, s.virus) &&
+        applyMultiFilter(selectedDays, s.day)
+    )
+    .map((x) =>
+      Object.assign(x, {
+        prevVac: findPrevVac(x),
+      })
+    )
 
-  const titreChangeFiltered = titreChange.filter(
-    (t) =>
-      t.year === selectedStudyYear &&
-      (selectedPid === null
-        ? // This also takes care of site and vaccinations
-          availablePids.includes(t.pid)
-        : t.pid === selectedPid) &&
-      applyMultiFilter(selectedViruses, t.virus)
-  )
+  const titreChangeFiltered = titreChange
+    .filter(
+      (t) =>
+        t.year === selectedStudyYear &&
+        (selectedPid === null
+          ? // This also takes care of site and vaccinations
+            availablePids.includes(t.pid)
+          : t.pid === selectedPid) &&
+        applyMultiFilter(selectedViruses, t.virus)
+    )
+    .map((x) =>
+      Object.assign(x, {
+        prevVac: findPrevVac(x),
+      })
+    )
 
   // Summarise the filtered data
-
-  function findPrevVac<T extends { pid: string }>(data: T): number {
-    return prevVacs.find((v) => v.pid === data.pid)?.prevVac ?? -1
-  }
 
   // Serology (GMT's for virus/day/vax)
   const serologySummary = rollup(
@@ -200,7 +213,7 @@ function SerologyPlots({
     (x) => ({
       virusShortName: x.virusShortName,
       day: x.day,
-      prevVac: findPrevVac(x),
+      prevVac: x.prevVac,
     }),
     (arr) => summariseLogmean(arr.map((x) => x.titre))
   )
@@ -212,7 +225,7 @@ function SerologyPlots({
   const seroconversionSummary = rollup(
     titreChangeFiltered,
     (x) => ({
-      prevVac: findPrevVac(x),
+      prevVac: x.prevVac,
       virusShortName: x.virusShortName,
     }),
     (arr) => ({
