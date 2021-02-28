@@ -196,7 +196,7 @@ export function getRoutes(
   )
   routes.post(
     "/registration-of-interest",
-    cors({ origin: "https://hcwflustudy.com" }),
+    cors(),
     async (req: Request, res: Response) => {
       console.log(req.headers)
       console.log(req.body)
