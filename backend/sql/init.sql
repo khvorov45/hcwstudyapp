@@ -114,5 +114,6 @@ CREATE TABLE "RegistrationOfInterest" (
     "site" hfs_site NOT NULL,
     "name" TEXT,
     "mobile" TEXT,
-    "email" TEXT
+    "email" TEXT,
+    "date" timestamptz NOT NULL
 );

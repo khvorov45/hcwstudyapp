@@ -170,5 +170,6 @@ export const RegistrationOfInterestV = t.type({
   name: t.union([t.string, t.null]),
   email: t.union([t.string, t.null]),
   mobile: t.union([t.string, t.null]),
+  date: MyDateV,
 })
 export type RegistrationOfInterest = t.TypeOf<typeof RegistrationOfInterestV>
