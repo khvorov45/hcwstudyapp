@@ -164,3 +164,11 @@ export const SerologyV = t.type({
   titre: t.number,
 })
 export type Serology = t.TypeOf<typeof SerologyV>
+
+export const RegistrationOfInterestV = t.type({
+  site: SiteV,
+  name: t.union([t.string, t.null]),
+  email: t.union([t.string, t.null]),
+  mobile: t.union([t.string, t.null]),
+})
+export type RegistrationOfInterest = t.TypeOf<typeof RegistrationOfInterestV>

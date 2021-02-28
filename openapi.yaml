@@ -149,6 +149,33 @@ paths:
                 type: string
                 format: date-time
 
+  /registration-of-interest:
+    get:
+      summary: List all registrations of interest
+      security:
+        - User: []
+      responses:
+        "200":
+          description: Array of registrations of interset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistrationsOfInterest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Add registrations of interest
+      requestBody:
+        description: Registrations of interest to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationsOfInterest"
+      responses:
+        "204":
+          description: Successful addition
+
   /participants:
     get:
       summary: List all participants
@@ -427,6 +454,29 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/UserToInsert"
+    RegistrationOfInterest:
+      type: object
+      required:
+        - site
+        - name
+        - email
+        - mobile
+      properties:
+        site:
+          enum: [melbourne, sydney, adelaide, brisbane, newcastle, perth]
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        mobile:
+          type: string
+          nullable: true
+    RegistrationsOfInterest:
+      type: array
+      items:
+        $ref: "#/components/schemas/RegistrationOfInterest"
     Participant:
       type: object
       required:

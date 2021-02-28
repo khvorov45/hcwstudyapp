@@ -8,6 +8,8 @@ import {
   OccupationV,
   Participant,
   RedcapId,
+  RegistrationOfInterest,
+  RegistrationOfInterestV,
   Schedule,
   Serology,
   SerologyV,
@@ -225,6 +227,7 @@ async function insertIntoTable<T>(
     | "Participant"
     | "Virus"
     | "Serology"
+    | "RegistrationOfInterest"
 ) {
   if (e.length === 0) {
     return
@@ -260,6 +263,7 @@ async function insertIntoTable<T>(
     ],
     Virus: Object.keys(VirusV.props),
     Serology: Object.keys(SerologyV.props),
+    RegistrationOfInterest: Object.keys(RegistrationOfInterestV.props),
   }
   await db.any(pgpInit.helpers.insert(e, cols[t], t))
 }
@@ -668,4 +672,26 @@ export async function insertSerology(db: Task, ss: Serology[]): Promise<void> {
 
 export async function deleteAllSerology(db: Task): Promise<void> {
   await db.any('DELETE FROM "Serology"')
+}
+
+// Registration of interest ===================================================
+
+export async function getRegistrationOfInterestSubset(
+  db: Task,
+  a: AccessGroup
+): Promise<RegistrationOfInterest[]> {
+  if (!isSite(a)) {
+    return await db.any(`SELECT * FROM "RegistrationOfInterest"`)
+  }
+  return await db.any(
+    `SELECT * FROM "RegistrationOfInterest" WHERE "site" = $1`,
+    [a]
+  )
+}
+
+export async function insertRegistrationOfInterest(
+  db: Task,
+  ss: RegistrationOfInterest[]
+): Promise<void> {
+  await insertIntoTable(db, ss, "RegistrationOfInterest")
 }

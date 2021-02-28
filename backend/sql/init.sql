@@ -109,3 +109,10 @@ CREATE TABLE "Serology" (
     "titre" integer NOT NULL,
     PRIMARY KEY ("pid", "redcapProjectYear", "day", "virus")
 );
+
+CREATE TABLE "RegistrationOfInterest" (
+    "site" hfs_site NOT NULL,
+    "name" TEXT,
+    "mobile" TEXT,
+    "email" TEXT
+);

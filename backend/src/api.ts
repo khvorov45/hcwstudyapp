@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import Router from "express-promise-router"
 import * as t from "io-ts"
 import StatusCodes from "http-status-codes"
+import cors from "cors"
 import {
   getUsers,
   DB,
@@ -34,9 +35,12 @@ import {
   reset,
   Task,
   getParticipantsDeidentifiedSubset,
+  getRegistrationOfInterestSubset,
+  insertRegistrationOfInterest,
 } from "./db"
 import {
   ParticipantV,
+  RegistrationOfInterestV,
   SerologyV,
   TokenTypeV,
   User,
@@ -175,6 +179,33 @@ export function getRoutes(
         db,
         async (tsk) => await deleteUserTokens(tsk, extractToken(req))
       )
+      res.status(StatusCodes.NO_CONTENT).end()
+    }
+  )
+
+  // Registrations of interst
+  routes.get(
+    "/registration-of-interest",
+    async (req: Request, res: Response) => {
+      const roi = await transaction(db, async (tsk) => {
+        const u = await validateUser(req, tsk)
+        return await getRegistrationOfInterestSubset(tsk, u.accessGroup)
+      })
+      res.json(roi)
+    }
+  )
+  routes.post(
+    "/registration-of-interest",
+    cors({ origin: "https://hcwflustudy.com" }),
+    async (req: Request, res: Response) => {
+      console.log(req.headers)
+      console.log(req.body)
+      await transaction(db, async (tsk) => {
+        return await insertRegistrationOfInterest(
+          tsk,
+          decode(t.array(RegistrationOfInterestV), req.body)
+        )
+      })
       res.status(StatusCodes.NO_CONTENT).end()
     }
   )
