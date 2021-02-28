@@ -198,8 +198,6 @@ export function getRoutes(
     "/registration-of-interest",
     cors(),
     async (req: Request, res: Response) => {
-      console.log(req.headers)
-      console.log(req.body)
       await transaction(db, async (tsk) => {
         return await insertRegistrationOfInterest(
           tsk,
