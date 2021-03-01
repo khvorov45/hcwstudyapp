@@ -115,6 +115,7 @@ export const RedcapIdV = t.type({
   redcapRecordId: t.string,
   redcapProjectYear: t.number,
   pid: t.string,
+  pidPreformat: t.string,
 })
 export type RedcapId = t.TypeOf<typeof RedcapIdV>
 

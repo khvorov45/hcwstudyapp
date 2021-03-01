@@ -8,6 +8,7 @@ import {
   OccupationV,
   Participant,
   RedcapId,
+  RedcapIdV,
   RegistrationOfInterest,
   RegistrationOfInterestV,
   Schedule,
@@ -242,7 +243,7 @@ async function insertIntoTable<T>(
     User: ["email", "accessGroup", "kind", "deidentifiedExport"],
     Token: ["user", "hash", "type", "expires"],
     Vaccination: ["pid", "year", "status"],
-    RedcapId: ["pid", "redcapRecordId", "redcapProjectYear"],
+    RedcapId: Object.keys(RedcapIdV.props),
     Withdrawn: ["pid", "date"],
     Schedule: ["pid", "day", "redcapProjectYear", "date"],
     WeeklySurvey: [

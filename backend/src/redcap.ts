@@ -245,6 +245,7 @@ export async function exportRedcapIds(
     .map((r: any) => ({
       redcapRecordId: processRedcapString(r.record_id),
       pid: processPid(r.pid),
+      pidPreformat: processRedcapString(r.pid),
       redcapProjectYear: r.redcapProjectYear,
     }))
     .filter((r) => r.pid)

@@ -62,6 +62,11 @@ CREATE TABLE "RedcapId" (
     "redcapRecordId" text,
     "redcapProjectYear" int NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
     "pid" text NOT NULL REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
+    -- Some pids get modified by adding `-123`-like endings. I only look at
+    -- the first group of digits to generate the pid and I format them
+    -- consistently.
+    -- Keep track of original pids here.
+    "pidPreformat" text NOT NULL,
     PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
 );
 
