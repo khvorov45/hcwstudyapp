@@ -137,30 +137,8 @@ export async function reset(
     tokenDaysToLive: number
   }
 ) {
-  // The data
-  const [
-    users,
-    tokens,
-    participants,
-    redcapIds,
-    withdrawn,
-    vaccinations,
-    schedules,
-    weeklySurveys,
-    viruses,
-    serology,
-  ] = await Promise.all([
-    getUsers(db),
-    getTokens(db),
-    getParticipantsSubset(db, "admin"),
-    getRedcapIdSubset(db, "admin"),
-    getWithdrawnSubset(db, "admin"),
-    getVaccinationSubset(db, "admin"),
-    getScheduleSubset(db, "admin"),
-    getWeeklySurveySubset(db, "admin"),
-    getViruses(db),
-    getSerologySubset(db, "admin"),
-  ])
+  const data = await getAllData(db)
+
   const [lastParticipantUpdate, lastUserUpdate] = await Promise.all([
     getLastParticipantUpdate(db),
     getLastUserUpdate(db),
@@ -173,23 +151,51 @@ export async function reset(
   // The restoration
   await db.any('DELETE FROM "User"')
   await Promise.all([
-    insertIntoTable(db, users, "User"),
-    insertIntoTable(db, participants, "Participant"),
-    insertIntoTable(db, viruses, "Virus"),
+    insertIntoTable(db, data.users, "User"),
+    insertIntoTable(db, data.participants, "Participant"),
+    insertIntoTable(db, data.viruses, "Virus"),
+    insertIntoTable(db, data.roi, "RegistrationOfInterest"),
   ])
   await Promise.all([
-    insertIntoTable(db, tokens, "Token"),
-    insertIntoTable(db, redcapIds, "RedcapId"),
-    insertIntoTable(db, withdrawn, "Withdrawn"),
-    insertIntoTable(db, vaccinations, "Vaccination"),
-    insertIntoTable(db, schedules, "Schedule"),
-    insertIntoTable(db, weeklySurveys, "WeeklySurvey"),
-    insertIntoTable(db, serology, "Serology"),
+    insertIntoTable(db, data.tokens, "Token"),
+    insertIntoTable(db, data.redcapIds, "RedcapId"),
+    insertIntoTable(db, data.withdrawn, "Withdrawn"),
+    insertIntoTable(db, data.vaccinations, "Vaccination"),
+    insertIntoTable(db, data.schedules, "Schedule"),
+    insertIntoTable(db, data.weeklySurveys, "WeeklySurvey"),
+    insertIntoTable(db, data.serology, "Serology"),
   ])
   await Promise.all([
     setLastParticipantUpdate(db, lastParticipantUpdate),
     setLastUserUpdate(db, lastUserUpdate),
   ])
+}
+
+async function getAllData(db: Task) {
+  const users = getUsers(db)
+  const tokens = getTokens(db)
+  const participants = getParticipantsSubset(db, "admin")
+  const redcapIds = getRedcapIdSubset(db, "admin")
+  const withdrawn = getWithdrawnSubset(db, "admin")
+  const vaccinations = getVaccinationSubset(db, "admin")
+  const schedules = getScheduleSubset(db, "admin")
+  const weeklySurveys = getWeeklySurveySubset(db, "admin")
+  const viruses = getViruses(db)
+  const serology = getSerologySubset(db, "admin")
+  const roi = getRegistrationOfInterestSubset(db, "admin")
+  return {
+    users: await users,
+    tokens: await tokens,
+    participants: await participants,
+    redcapIds: await redcapIds,
+    withdrawn: await withdrawn,
+    vaccinations: await vaccinations,
+    schedules: await schedules,
+    weeklySurveys: await weeklySurveys,
+    viruses: await viruses,
+    serology: await serology,
+    roi: await roi,
+  }
 }
 
 /** Get site subset for tables with PID as FK */
