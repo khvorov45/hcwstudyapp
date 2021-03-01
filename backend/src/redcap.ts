@@ -137,6 +137,25 @@ function processRedcapNumber(n: string | null | undefined): number | null {
   return nParsed
 }
 
+function processPid(pid: string | null | undefined): string | null {
+  const step1 = processRedcapString(pid)
+  if (step1 === null) {
+    return null
+  }
+  // The first 3 are site
+  const site = step1.slice(0, 3).toUpperCase()
+  // Any digits are id
+  const idMatch = step1.match(/\d+/)
+  if (idMatch === null) {
+    return null
+  }
+  const id = idMatch[0]?.padStart(3, "0")
+  if (id === null || id === undefined) {
+    return null
+  }
+  return `${site}-${id}`
+}
+
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
   const users = (
     await redcapApiReq(config, { content: "user", desc: "users" })
@@ -188,7 +207,7 @@ export async function exportParticipants(
     })
   )
     .map((r: any) => ({
-      pid: processRedcapString(r.pid),
+      pid: processPid(r.pid),
       site: processRedcapDataAccessGroup(r.redcap_data_access_group),
       dateScreening: processRedcapString(r.date_screening),
       email: processRedcapStringLower(r.email),
@@ -225,7 +244,7 @@ export async function exportRedcapIds(
   )
     .map((r: any) => ({
       redcapRecordId: processRedcapString(r.record_id),
-      pid: processRedcapString(r.pid),
+      pid: processPid(r.pid),
       redcapProjectYear: r.redcapProjectYear,
     }))
     .filter((r) => r.pid)
@@ -300,7 +319,7 @@ export async function exportVaccination(
         return vacLongCurrent
       }
       vacLongCurrent.push({
-        pid: processRedcapString(v.pid),
+        pid: processPid(v.pid),
         year: year,
         status:
           processRedcapStringLower(v[`vac_${year}`])?.replace("yes - ", "") ??
@@ -368,7 +387,7 @@ export async function exportSchedule(
         return scheduleLongCurrent
       }
       scheduleLongCurrent.push({
-        pid: processRedcapString(r.pid),
+        pid: processPid(r.pid),
         day: day,
         redcapProjectYear: r.redcapProjectYear,
         date: processRedcapString(r[`scheduled_date_v${day}`]),
