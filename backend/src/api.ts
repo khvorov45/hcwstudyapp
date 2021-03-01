@@ -183,7 +183,7 @@ export function getRoutes(
     }
   )
 
-  // Registrations of interst
+  // Registrations of interest
   routes.get(
     "/registration-of-interest",
     async (req: Request, res: Response) => {
@@ -192,6 +192,13 @@ export function getRoutes(
         return await getRegistrationOfInterestSubset(tsk, u.accessGroup)
       })
       res.json(roi)
+    }
+  )
+  routes.options(
+    "/registration-of-interest",
+    cors(),
+    (req: Request, res: Response) => {
+      res.send()
     }
   )
   routes.post(
