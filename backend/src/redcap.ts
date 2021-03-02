@@ -158,6 +158,32 @@ function processPid(pid: string | null | undefined): string | null {
   return `${site}-${id}`
 }
 
+function processNested(
+  consent: string,
+  addBleed: string,
+  studyGroupVacc: string,
+  consentUnvacc: string
+): boolean | null {
+  if (consent === "1") {
+    if (addBleed === "1") {
+      return true
+      // The ineligible don't see this field
+    } else {
+      return false
+    }
+  }
+  if (studyGroupVacc === "2") {
+    return true
+  } else if (studyGroupVacc === "1") {
+    return false
+  }
+  // Unvaccinated can only be in main
+  if (consentUnvacc === "1") {
+    return false
+  }
+  return null
+}
+
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
   const users = (
     await redcapApiReq(config, { content: "user", desc: "users" })
@@ -237,7 +263,14 @@ export async function exportRedcapIds(
     await redcapApiReq(config, {
       content: "record",
       desc: "redcap ids",
-      fields: ["record_id", "pid"].toString(),
+      fields: [
+        "record_id",
+        "pid",
+        "consent",
+        "add_bleed",
+        "study_group_vacc",
+        "consent_unvacc",
+      ].toString(),
       events: "baseline_arm_1",
       type: "flat",
       rawOrLabel: "raw",
@@ -248,6 +281,12 @@ export async function exportRedcapIds(
       redcapRecordId: processRedcapString(r.record_id),
       pid: processPid(r.pid),
       pidPreformat: processRedcapString(r.pid),
+      nested: processNested(
+        r.consent,
+        r.add_bleed,
+        r.study_group_vacc,
+        r.consent_unvacc
+      ),
       redcapProjectYear: r.redcapProjectYear,
     }))
     .filter((r) => r.pid)

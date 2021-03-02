@@ -67,6 +67,10 @@ CREATE TABLE "RedcapId" (
     -- consistently.
     -- Keep track of original pids here.
     "pidPreformat" text NOT NULL,
+    -- Whether or not the participant is in the nested study.
+    -- Could conceivably have one with incomplete consent forms, so null
+    -- is possible here
+    "nested" boolean,
     PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
 );
 

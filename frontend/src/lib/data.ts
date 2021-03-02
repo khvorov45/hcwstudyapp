@@ -116,6 +116,7 @@ export const RedcapIdV = t.type({
   redcapProjectYear: t.number,
   pid: t.string,
   pidPreformat: t.string,
+  nested: t.union([t.boolean, t.null]),
 })
 export type RedcapId = t.TypeOf<typeof RedcapIdV>
 
