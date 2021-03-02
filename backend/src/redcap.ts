@@ -12,6 +12,8 @@ import {
   VaccinationV,
   Schedule,
   ScheduleV,
+  RegistrationOfInterest,
+  SiteV,
 } from "./data"
 import { decode } from "./io"
 
@@ -450,4 +452,35 @@ export async function exportWeeklySurvey(
     .filter((r) => r.ari !== null)
   // With the year in PK don't need to enforce uniqueness
   return decode(t.array(RedcapWeeklySurveyV), surv)
+}
+
+export async function sendRoi(
+  config: RedcapConfig,
+  roi: RegistrationOfInterest[]
+) {
+  const before = new Date()
+  const res = await axios.post(
+    config.url,
+    new URLSearchParams({
+      token: config.token2021,
+      format: "json",
+      content: "record",
+      data: JSON.stringify(
+        roi.map((r, i) => ({
+          record_id: i,
+          roi_site: (
+            Object.keys(SiteV.keys).findIndex((k) => k === r.site) + 1
+          ).toString(),
+          roi_name: r.name,
+          roi_mobile: r.mobile,
+          roi_email: r.email,
+        }))
+      ),
+      forceAutoNumber: "true",
+    }),
+    { validateStatus: () => true }
+  )
+  console.log(res.data)
+  const after = new Date()
+  console.log(`REDCap send ROI - ${after.getTime() - before.getTime()} ms`)
 }

@@ -51,7 +51,7 @@ import {
 } from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
-import { RedcapConfig } from "./redcap"
+import { RedcapConfig, sendRoi } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
 import { pipe } from "fp-ts/lib/function"
@@ -205,12 +205,12 @@ export function getRoutes(
     "/registration-of-interest",
     cors(),
     async (req: Request, res: Response) => {
-      await transaction(db, async (tsk) => {
-        return await insertRegistrationOfInterest(
-          tsk,
-          decode(t.array(RegistrationOfInterestV), req.body)
-        )
+      const roi = decode(t.array(RegistrationOfInterestV), req.body)
+      const dbInsertPromise = transaction(db, async (tsk) => {
+        return await insertRegistrationOfInterest(tsk, roi)
       })
+      const redcapInsertPromise = sendRoi(redcapConfig, roi)
+      await Promise.all([dbInsertPromise, redcapInsertPromise])
       res.status(StatusCodes.NO_CONTENT).end()
     }
   )
