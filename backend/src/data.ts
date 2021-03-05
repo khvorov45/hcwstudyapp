@@ -41,6 +41,13 @@ export const VaccinationStatusV = t.keyof({
 })
 export type VaccinationStatus = t.TypeOf<typeof VaccinationStatusV>
 
+export const CovidVaccineBrandV = t.keyof({
+  pfizer: null,
+  astra: null,
+  other: null,
+})
+export type CovidVaccineBrand = t.TypeOf<typeof CovidVaccineBrandV>
+
 export const OccupationV = t.keyof({
   nursing: null,
   medical: null,
@@ -132,6 +139,17 @@ export const VaccinationV = t.type({
   status: t.union([VaccinationStatusV, t.null]),
 })
 export type Vaccination = t.TypeOf<typeof VaccinationV>
+
+export const VaccinationCovidV = t.type({
+  pid: t.string,
+  year: t.number,
+  dose: t.number,
+  date: t.union([MyDateV, t.null]),
+  brand: t.union([CovidVaccineBrandV, t.null]),
+  brandOther: t.union([t.string, t.null]),
+  batch: t.union([t.string, t.null]),
+})
+export type VaccinationCovid = t.TypeOf<typeof VaccinationCovidV>
 
 export const ScheduleV = t.type({
   pid: t.string,

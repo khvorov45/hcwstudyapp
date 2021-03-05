@@ -3,6 +3,7 @@
         "TIMESTAMPTZ",
         "Unvacc",
         "Withdrawns",
+        "covax",
         "deidentified",
         "hcwflustudy",
         "pharmac",

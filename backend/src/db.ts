@@ -3,6 +3,7 @@ import pg from "pg-promise/typescript/pg-subset"
 import {
   AccessGroup,
   AccessGroupV,
+  CovidVaccineBrandV,
   GenderV,
   isSite,
   OccupationV,
@@ -20,6 +21,8 @@ import {
   User,
   UserToInsert,
   Vaccination,
+  VaccinationCovid,
+  VaccinationCovidV,
   Virus,
   VirusV,
   WeeklySurvey,
@@ -119,6 +122,7 @@ async function init(
     firstAdminTokenExpires: addDays(new Date(), tokenDaysToLive),
     sites: Object.keys(SiteV.keys),
     occupations: Object.keys(OccupationV.keys),
+    covidVaccineBrands: Object.keys(CovidVaccineBrandV.keys),
   })
   console.log("initialization successful")
 }
@@ -162,6 +166,7 @@ export async function reset(
     insertIntoTable(db, data.redcapIds, "RedcapId"),
     insertIntoTable(db, data.withdrawn, "Withdrawn"),
     insertIntoTable(db, data.vaccinations, "Vaccination"),
+    insertIntoTable(db, data.vaccinationsCovid, "VaccinationCovid"),
     insertIntoTable(db, data.schedules, "Schedule"),
     insertIntoTable(db, data.weeklySurveys, "WeeklySurvey"),
     insertIntoTable(db, data.serology, "Serology"),
@@ -179,6 +184,7 @@ async function getAllData(db: Task) {
   const redcapIds = getRedcapIdSubset(db, "admin")
   const withdrawn = getWithdrawnSubset(db, "admin")
   const vaccinations = getVaccinationSubset(db, "admin")
+  const vaccinationsCovid = getVaccinationCovidSubset(db, "admin")
   const schedules = getScheduleSubset(db, "admin")
   const weeklySurveys = getWeeklySurveySubset(db, "admin")
   const viruses = getViruses(db)
@@ -191,6 +197,7 @@ async function getAllData(db: Task) {
     redcapIds: await redcapIds,
     withdrawn: await withdrawn,
     vaccinations: await vaccinations,
+    vaccinationsCovid: await vaccinationsCovid,
     schedules: await schedules,
     weeklySurveys: await weeklySurveys,
     viruses: await viruses,
@@ -205,6 +212,7 @@ async function getTableSubset(
   a: AccessGroup,
   t:
     | "Vaccination"
+    | "VaccinationCovid"
     | "RedcapId"
     | "Withdrawn"
     | "Schedule"
@@ -227,6 +235,7 @@ async function insertIntoTable<T>(
     | "User"
     | "Token"
     | "Vaccination"
+    | "VaccinationCovid"
     | "RedcapId"
     | "Withdrawn"
     | "Schedule"
@@ -243,6 +252,7 @@ async function insertIntoTable<T>(
     User: ["email", "accessGroup", "kind", "deidentifiedExport"],
     Token: ["user", "hash", "type", "expires"],
     Vaccination: ["pid", "year", "status"],
+    VaccinationCovid: Object.keys(VaccinationCovidV.props),
     RedcapId: Object.keys(RedcapIdV.props),
     Withdrawn: ["pid", "date"],
     Schedule: ["pid", "day", "redcapProjectYear", "date"],
@@ -564,8 +574,15 @@ export async function syncRedcapParticipants(
     insertWithdrawn(db, withdrawn.map(findPid).filter(isInParticipant)),
     insertVaccination(db, vac.filter(isInParticipant)),
     insertSchedule(db, schedule.filter(isInParticipant)),
-    insertWeeklySurvey(db, weeklySurvey.map(findPid).filter(isInParticipant)),
+    insertWeeklySurvey(
+      db,
+      weeklySurvey.weeklySurvey.map(findPid).filter(isInParticipant)
+    ),
     insertSerology(db, serology.filter(isInParticipant)),
+    insertVaccinationCovid(
+      db,
+      weeklySurvey.vaccinationCovid.map(findPid).filter(isInParticipant)
+    ),
   ])
   await setLastParticipantUpdate(db, new Date())
 }
@@ -622,6 +639,20 @@ export async function getVaccinationSubset(
 
 async function insertVaccination(db: Task, v: Vaccination[]): Promise<void> {
   await insertIntoTable(db, v, "Vaccination")
+}
+
+export async function getVaccinationCovidSubset(
+  db: Task,
+  a: AccessGroup
+): Promise<VaccinationCovid[]> {
+  return await getTableSubset(db, a, "VaccinationCovid")
+}
+
+async function insertVaccinationCovid(
+  db: Task,
+  v: VaccinationCovid[]
+): Promise<void> {
+  await insertIntoTable(db, v, "VaccinationCovid")
 }
 
 // Schedule ===================================================================

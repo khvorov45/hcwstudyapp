@@ -14,6 +14,9 @@ import {
   ScheduleV,
   RegistrationOfInterest,
   SiteV,
+  MyDateV,
+  CovidVaccineBrandV,
+  CovidVaccineBrand,
 } from "./data"
 import { decode } from "./io"
 
@@ -95,6 +98,24 @@ function uniqueRows<T extends { redcapProjectYear: number }>(
 
 function processRedcapString(s: string | null | undefined): string | null {
   return s === undefined || s === null || s === "" ? null : s
+}
+
+function processRedcapBoolean(s: string | null | undefined): boolean | null {
+  const step1 = processRedcapString(s)
+  if (step1 === null) {
+    return null
+  }
+  return step1 === "1"
+}
+
+function processRedcapCovidVaccineBrand(
+  s: string | null | undefined
+): CovidVaccineBrand | null {
+  const step1 = processRedcapString(s)
+  if (step1 === null) {
+    return null
+  }
+  return step1 === "1" ? "pfizer" : step1 === "2" ? "astra" : "other"
 }
 
 function processRedcapStringLower(s: string | null | undefined): string | null {
@@ -451,9 +472,24 @@ export const RedcapWeeklySurveyV = t.type({
 })
 export type RedcapWeeklySurvey = t.TypeOf<typeof RedcapWeeklySurveyV>
 
+export const RedcapVaccinationCovidV = t.type({
+  redcapRecordId: t.string,
+  redcapProjectYear: t.number,
+  year: t.number,
+  dose: t.number,
+  date: t.union([MyDateV, t.null]),
+  brand: t.union([CovidVaccineBrandV, t.null]),
+  brandOther: t.union([t.string, t.null]),
+  batch: t.union([t.string, t.null]),
+})
+export type RedcapVaccinationCovid = t.TypeOf<typeof RedcapVaccinationCovidV>
+
 export async function exportWeeklySurvey(
   config: RedcapConfig
-): Promise<RedcapWeeklySurvey[]> {
+): Promise<{
+  weeklySurvey: RedcapWeeklySurvey[]
+  vaccinationCovid: RedcapVaccinationCovid[]
+}> {
   const surv = (
     await redcapApiReq(config, {
       content: "record",
@@ -463,6 +499,12 @@ export async function exportWeeklySurvey(
         "ari_definition",
         "date_symptom_survey",
         "swab_collection",
+        "recent_covax",
+        "covax_rec",
+        "covax_rec_other",
+        "covax_dose",
+        "covax_date",
+        "covax_batch",
       ].toString(),
       events: Array.from(Array(52).keys())
         .map((n) => `weekly_survey_${n + 1}_arm_1`)
@@ -471,26 +513,42 @@ export async function exportWeeklySurvey(
       rawOrLabel: "raw",
       exportDataAccessGroups: "false",
     })
-  )
-    .map((r) => ({
-      ari: processRedcapString(r.ari_definition),
-      swabCollection: processRedcapString(r.swab_collection),
-      ...r,
-    }))
-    .map((r: any) => ({
-      redcapRecordId: r.record_id,
-      redcapProjectYear: r.redcapProjectYear,
-      index: parseInt(
-        r.redcap_event_name.match(/weekly_survey_(\d+)_arm_1/)[1]
-      ),
-      date: processRedcapString(r.date_symptom_survey),
-      ari: r.ari ? r.ari === "1" : null,
-      swabCollection: r.swabCollection ? r.swabCollection === "1" : null,
-    }))
-    // Remove incomplete surveys
-    .filter((r) => r.ari !== null)
+  ).map((r) => ({
+    ari: processRedcapBoolean(r.ari_definition),
+    swabCollection: processRedcapBoolean(r.swab_collection),
+    covidVaccineReceived: processRedcapBoolean(r.recent_covax),
+    brand: processRedcapCovidVaccineBrand(r.covax_rec),
+    brandOther: processRedcapString(r.covax_rec_other),
+    dose: processRedcapNumber(r.covax_dose),
+    covidVaccineDate: processRedcapString(r.covax_date),
+    batch: processRedcapString(r.covax_batch),
+    redcapRecordId: r.record_id,
+    redcapProjectYear: r.redcapProjectYear,
+    index: parseInt(r.redcap_event_name.match(/weekly_survey_(\d+)_arm_1/)[1]),
+    date: processRedcapString(r.date_symptom_survey),
+  }))
   // With the year in PK don't need to enforce uniqueness
-  return decode(t.array(RedcapWeeklySurveyV), surv)
+  return {
+    weeklySurvey: decode(
+      t.array(RedcapWeeklySurveyV),
+      surv.filter((r) => r.ari !== null)
+    ),
+    vaccinationCovid: decode(
+      t.array(RedcapVaccinationCovidV),
+      surv
+        .filter((s) => s.covidVaccineReceived)
+        .map((s) => ({
+          redcapRecordId: s.redcapRecordId,
+          redcapProjectYear: s.redcapProjectYear,
+          year: s.redcapProjectYear,
+          dose: s.dose,
+          date: s.covidVaccineDate,
+          brand: s.brand,
+          brandOther: s.brandOther,
+          batch: s.batch,
+        }))
+    ),
+  }
 }
 
 export async function sendRoi(

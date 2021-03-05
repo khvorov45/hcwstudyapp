@@ -5,6 +5,7 @@ CREATE TYPE hfs_vaccination_status AS ENUM ('australia', 'overseas', 'no', 'unkn
 CREATE TYPE hfs_token_type AS ENUM ('session', 'api');
 CREATE TYPE hfs_user_kind AS ENUM ('redcap', 'manual');
 CREATE TYPE hfs_occupation AS ENUM (${occupations:csv});
+CREATE TYPE hfs_covid_vaccine_brand AS ENUM (${covidVaccineBrands:csv});
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -83,6 +84,17 @@ CREATE TABLE "Vaccination" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
     "year" integer CHECK ("year" >= 2015 and "year" <= 2020),
     "status" hfs_vaccination_status,
+    PRIMARY KEY ("pid", "year")
+);
+
+CREATE TABLE "VaccinationCovid" (
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
+    "year" integer CHECK ("year" >= 2020 and "year" <= 2023),
+    "dose" int NOT NULL CHECK ("dose" = 1 or "dose" = 2),
+    "date" timestamptz,
+    "brand" hfs_covid_vaccine_brand,
+    "brandOther" text CHECK("brand" != 'other' and "brandOther" = null),
+    "batch" text,
     PRIMARY KEY ("pid", "year")
 );
 
