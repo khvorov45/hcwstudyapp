@@ -19,6 +19,7 @@ import {
   CovidVaccineBrand,
 } from "./data"
 import { decode } from "./io"
+import { justDateString } from "./util"
 
 export type RedcapConfig = {
   url: string
@@ -527,27 +528,31 @@ export async function exportWeeklySurvey(
     index: parseInt(r.redcap_event_name.match(/weekly_survey_(\d+)_arm_1/)[1]),
     date: processRedcapString(r.date_symptom_survey),
   }))
-  // With the year in PK don't need to enforce uniqueness
+
+  const vaccinationCovid = decode(
+    t.array(RedcapVaccinationCovidV),
+    surv
+      .filter((s) => s.covidVaccineReceived)
+      .map((s) => ({
+        redcapRecordId: s.redcapRecordId,
+        redcapProjectYear: s.redcapProjectYear,
+        year: s.redcapProjectYear,
+        dose: s.dose,
+        date: s.covidVaccineDate,
+        brand: s.brand,
+        brandOther: s.brandOther,
+        batch: s.batch,
+      }))
+  )
+
+  await sendCovidVaccination(config, vaccinationCovid)
+
   return {
     weeklySurvey: decode(
       t.array(RedcapWeeklySurveyV),
       surv.filter((r) => r.ari !== null)
     ),
-    vaccinationCovid: decode(
-      t.array(RedcapVaccinationCovidV),
-      surv
-        .filter((s) => s.covidVaccineReceived)
-        .map((s) => ({
-          redcapRecordId: s.redcapRecordId,
-          redcapProjectYear: s.redcapProjectYear,
-          year: s.redcapProjectYear,
-          dose: s.dose,
-          date: s.covidVaccineDate,
-          brand: s.brand,
-          brandOther: s.brandOther,
-          batch: s.batch,
-        }))
-    ),
+    vaccinationCovid,
   }
 }
 
@@ -580,4 +585,40 @@ export async function sendRoi(
   console.log(res.data)
   const after = new Date()
   console.log(`REDCap send ROI - ${after.getTime() - before.getTime()} ms`)
+}
+
+export async function sendCovidVaccination(
+  config: RedcapConfig,
+  data: RedcapVaccinationCovid[]
+) {
+  const before = new Date()
+  const res = await axios.post(
+    config.url,
+    new URLSearchParams({
+      token: config.token2021,
+      format: "json",
+      content: "record",
+      data: JSON.stringify(
+        data.map((r, i) => ({
+          record_id: r.redcapRecordId,
+          redcap_event_name: "vaccination_arm_1",
+          covid_vac_brand:
+            r.brand === "pfizer" ? 1 : r.brand === "astra" ? 2 : 3,
+          other_covax_brand: r.brandOther,
+          covid_vac_dose1_rec: r.dose === 1 ? "1" : "",
+          covid_vac_dose2_rec: r.dose === 2 ? "2" : "",
+          covid_vacc_date1: r.dose === 1 ? justDateString(r.date) : "",
+          covid_vacc_date2: r.dose === 2 ? justDateString(r.date) : "",
+          covid_vac_batch1: r.dose === 1 ? r.batch : "",
+          covid_vac_batch2: r.dose === 2 ? r.batch : "",
+        }))
+      ),
+    }),
+    { validateStatus: () => true }
+  )
+  console.log(res.data)
+  const after = new Date()
+  console.log(
+    `REDCap send covid vaccination - ${after.getTime() - before.getTime()} ms`
+  )
 }
