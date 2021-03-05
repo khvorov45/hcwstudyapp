@@ -82,7 +82,7 @@ CREATE TABLE "Withdrawn" (
 
 CREATE TABLE "Vaccination" (
     "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
-    "year" integer CHECK ("year" >= 2015 and "year" <= 2020),
+    "year" integer CHECK ("year" >= 2015 and "year" <= 2023),
     "status" hfs_vaccination_status,
     PRIMARY KEY ("pid", "year")
 );
