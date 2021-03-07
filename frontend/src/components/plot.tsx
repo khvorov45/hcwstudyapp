@@ -1033,26 +1033,49 @@ function GenericBar<T extends Object>({
           angle={xAxisSpec.angle}
         />
         {xValueSubsets.map((xValueSubset, i) =>
-          xValueSubset.dataSubset.map((d, j) => (
-            <rect
-              key={`bar-${i}-${j}`}
-              x={scaleX(xValueSubset.xValue) - barWidth / 2}
-              y={scaleY(xValueSubset.cumsum[j])}
-              width={barWidth}
-              height={
-                height -
-                scaleY(yAxisSpec.accessor(d)) -
-                pad.axis.bottom -
-                pad.data.bottom
-              }
-              fill={
-                getColor?.(d) ??
-                theme.palette.primary[
-                  theme.palette.type === "dark" ? "light" : "dark"
-                ]
-              }
-            />
-          ))
+          xValueSubset.dataSubset.map((d, j) => {
+            const x = scaleX(xValueSubset.xValue)
+            const labelY = height - pad.axis.bottom - 5
+            return (
+              <g>
+                <rect
+                  key={`bar-${i}-${j}`}
+                  x={x - barWidth / 2}
+                  y={scaleY(xValueSubset.cumsum[j])}
+                  width={barWidth}
+                  height={
+                    height -
+                    scaleY(yAxisSpec.accessor(d)) -
+                    pad.axis.bottom -
+                    pad.data.bottom
+                  }
+                  fill={
+                    getColor?.(d) ??
+                    theme.palette.primary[
+                      theme.palette.type === "dark" ? "light" : "dark"
+                    ]
+                  }
+                />
+                <text
+                  x={x}
+                  y={labelY}
+                  paintOrder="stroke"
+                  stroke={theme.palette.text.primary}
+                  strokeWidth="2px"
+                  strokeLinecap="butt"
+                  strokeLinejoin="miter"
+                  fontWeight={800}
+                  fontSize={18}
+                  fill={theme.palette.background.default}
+                  dominantBaseline="middle"
+                  transform={`rotate(-90, ${x}, ${labelY})`}
+                  opacity={0.8}
+                >
+                  {xValueSubset.total}
+                </text>
+              </g>
+            )
+          })
         )}
         {/* Control elements */}
         {setSettingsAnchor && (
