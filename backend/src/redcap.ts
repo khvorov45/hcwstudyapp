@@ -482,6 +482,7 @@ export const RedcapVaccinationCovidV = t.type({
   brand: t.union([CovidVaccineBrandV, t.null]),
   brandOther: t.union([t.string, t.null]),
   batch: t.union([t.string, t.null]),
+  surveyIndex: t.union([t.number, t.null]),
 })
 export type RedcapVaccinationCovid = t.TypeOf<typeof RedcapVaccinationCovidV>
 
@@ -542,6 +543,7 @@ export async function exportWeeklySurvey(
         brand: s.brand,
         brandOther: s.brandOther,
         batch: s.batch,
+        surveyIndex: s.index,
       }))
   )
 
@@ -611,6 +613,7 @@ export async function sendCovidVaccination(
           covid_vacc_date2: r.dose === 2 ? justDateString(r.date) : "",
           covid_vac_batch1: r.dose === 1 ? r.batch : "",
           covid_vac_batch2: r.dose === 2 ? r.batch : "",
+          covid_vac_survey_index: r.surveyIndex,
         }))
       ),
     }),

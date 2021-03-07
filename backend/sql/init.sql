@@ -95,6 +95,7 @@ CREATE TABLE "VaccinationCovid" (
     "brand" hfs_covid_vaccine_brand,
     "brandOther" text CHECK("brand" != 'other' and "brandOther" = null),
     "batch" text,
+    "surveyIndex" int,
     PRIMARY KEY ("pid", "year")
 );
 

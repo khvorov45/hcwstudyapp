@@ -148,6 +148,7 @@ export const VaccinationCovidV = t.type({
   brand: t.union([CovidVaccineBrandV, t.null]),
   brandOther: t.union([t.string, t.null]),
   batch: t.union([t.string, t.null]),
+  surveyIndex: t.union([t.number, t.null]),
 })
 export type VaccinationCovid = t.TypeOf<typeof VaccinationCovidV>
 
