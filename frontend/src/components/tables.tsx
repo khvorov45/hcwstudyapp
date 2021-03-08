@@ -68,6 +68,8 @@ import {
 } from "./control-ribbon"
 import {
   applyMultiFilter,
+  booleanSort,
+  booleanToString,
   findBreaks,
   insertInPlace,
   numberSort,
@@ -864,6 +866,11 @@ function Summary({
     (d) => ({ gender: d.gender }),
     summariseCount
   )
+  const countsByAtsi = rollup(
+    participantsExtra ?? [],
+    (d) => ({ atsi: d.atsi }),
+    summariseCount
+  )
   const countsByOccupation = rollup(
     participantsExtra ?? [],
     (d) => ({ occupation: d.occupation }),
@@ -937,6 +944,17 @@ function Summary({
     participantsExtra ?? [],
     (d) => ({
       gender: d.gender,
+      split:
+        splitVar === "Site"
+          ? d.site
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
+    }),
+    summariseCount
+  )
+  const countsByAtsiSplit = rollup(
+    participantsExtra ?? [],
+    (d) => ({
+      atsi: d.atsi,
       split:
         splitVar === "Site"
           ? d.site
@@ -1071,6 +1089,16 @@ function Summary({
     })
   ).sort((a, b) => stringSort(a.label, b.label))
 
+  const countsByAtsiSplitWithMarginal = rollup(
+    countsByAtsiSplit,
+    (d) => ({ atsi: d.atsi }),
+    (v, k) => ({
+      label: booleanToString(k.atsi),
+      total: countsByAtsi.find((c) => c.atsi === k.atsi),
+      ...widenSplit(v),
+    })
+  ).sort((a, b) => booleanSort(a.label, b.label))
+
   const countsByOccupationSplitWithMarginal = rollup(
     countsByOccupationSplit,
     (d) => ({ occupation: d.occupation }),
@@ -1140,6 +1168,8 @@ function Summary({
     .concat(countsByGenderSiteWithMarginal)
     .concat(genEmptyRow("Occupation count", "", ""))
     .concat(countsByOccupationSplitWithMarginal)
+    .concat(genEmptyRow("Aboriginal count", "", ""))
+    .concat(countsByAtsiSplitWithMarginal)
     .concat(bottomRow)
 
   const splitSelected =

@@ -26,6 +26,22 @@ export function stringSort(a: string | null, b: string | null) {
   return a > b ? 1 : a < b ? -1 : 0
 }
 
+export function booleanSort(a: string | null, b: string | null) {
+  if (a === b) {
+    return 0
+  }
+  if (a === "(missing)" || a === null) {
+    return 1
+  }
+  if (b === "(missing)" || b === null) {
+    return -1
+  }
+  if (a === "yes") {
+    return -1
+  }
+  return 1
+}
+
 export function numberSort(a: number | null, b: number | null) {
   if (a === b) {
     return 0
@@ -338,4 +354,11 @@ export function applySingleFilter(
   value: string | number | null
 ) {
   return opt === null || value === opt
+}
+
+export function booleanToString(b: boolean | null | undefined): string {
+  if (b === null || b === undefined) {
+    return "(missing)"
+  }
+  return b ? "yes" : "no"
 }
