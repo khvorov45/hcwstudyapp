@@ -8,8 +8,8 @@ import {
   isSite,
   OccupationV,
   Participant,
-  RedcapId,
-  RedcapIdV,
+  YearChange,
+  YearChangeV,
   RegistrationOfInterest,
   RegistrationOfInterestV,
   Schedule,
@@ -33,7 +33,7 @@ import {
   exportUsers,
   RedcapConfig,
   exportParticipants,
-  exportRedcapIds,
+  exportYearChanges,
   exportWithdrawn,
   exportVaccination,
   exportSchedule,
@@ -163,7 +163,7 @@ export async function reset(
   ])
   await Promise.all([
     insertIntoTable(db, data.tokens, "Token"),
-    insertIntoTable(db, data.redcapIds, "RedcapId"),
+    insertIntoTable(db, data.redcapIds, "YearChange"),
     insertIntoTable(db, data.withdrawn, "Withdrawn"),
     insertIntoTable(db, data.vaccinations, "Vaccination"),
     insertIntoTable(db, data.vaccinationsCovid, "VaccinationCovid"),
@@ -181,7 +181,7 @@ async function getAllData(db: Task) {
   const users = getUsers(db)
   const tokens = getTokens(db)
   const participants = getParticipantsSubset(db, "admin")
-  const redcapIds = getRedcapIdSubset(db, "admin")
+  const redcapIds = getYearChangeSubset(db, "admin")
   const withdrawn = getWithdrawnSubset(db, "admin")
   const vaccinations = getVaccinationSubset(db, "admin")
   const vaccinationsCovid = getVaccinationCovidSubset(db, "admin")
@@ -213,7 +213,7 @@ async function getTableSubset(
   t:
     | "Vaccination"
     | "VaccinationCovid"
-    | "RedcapId"
+    | "YearChange"
     | "Withdrawn"
     | "Schedule"
     | "WeeklySurvey"
@@ -236,7 +236,7 @@ async function insertIntoTable<T>(
     | "Token"
     | "Vaccination"
     | "VaccinationCovid"
-    | "RedcapId"
+    | "YearChange"
     | "Withdrawn"
     | "Schedule"
     | "WeeklySurvey"
@@ -253,7 +253,7 @@ async function insertIntoTable<T>(
     Token: ["user", "hash", "type", "expires"],
     Vaccination: ["pid", "year", "status"],
     VaccinationCovid: Object.keys(VaccinationCovidV.props),
-    RedcapId: Object.keys(RedcapIdV.props),
+    YearChange: Object.keys(YearChangeV.props),
     Withdrawn: ["pid", "date"],
     Schedule: ["pid", "day", "redcapProjectYear", "date"],
     WeeklySurvey: [
@@ -532,7 +532,7 @@ export async function syncRedcapParticipants(
     serology,
   ] = await Promise.all([
     exportParticipants(redcapConfig),
-    exportRedcapIds(redcapConfig),
+    exportYearChanges(redcapConfig),
     exportWithdrawn(redcapConfig),
     exportVaccination(redcapConfig),
     exportSchedule(redcapConfig),
@@ -570,7 +570,7 @@ export async function syncRedcapParticipants(
   }
 
   await Promise.all([
-    insertRedcapIds(db, redcapIds.filter(isInParticipant)),
+    insertYearChanges(db, redcapIds.filter(isInParticipant)),
     insertWithdrawn(db, withdrawn.map(findPid).filter(isInParticipant)),
     insertVaccination(db, vac.filter(isInParticipant)),
     insertSchedule(db, schedule.filter(isInParticipant)),
@@ -604,15 +604,15 @@ async function setLastParticipantUpdate(
 
 // Redcap ids =================================================================
 
-export async function getRedcapIdSubset(
+export async function getYearChangeSubset(
   db: Task,
   a: AccessGroup
-): Promise<RedcapId[]> {
-  return await getTableSubset(db, a, "RedcapId")
+): Promise<YearChange[]> {
+  return await getTableSubset(db, a, "YearChange")
 }
 
-async function insertRedcapIds(db: Task, ids: RedcapId[]): Promise<void> {
-  await insertIntoTable(db, ids, "RedcapId")
+async function insertYearChanges(db: Task, ids: YearChange[]): Promise<void> {
+  await insertIntoTable(db, ids, "YearChange")
 }
 
 // Withdrawn =================================================================
@@ -620,7 +620,7 @@ async function insertRedcapIds(db: Task, ids: RedcapId[]): Promise<void> {
 export async function getWithdrawnSubset(
   db: Task,
   a: AccessGroup
-): Promise<RedcapId[]> {
+): Promise<YearChange[]> {
   return await getTableSubset(db, a, "Withdrawn")
 }
 

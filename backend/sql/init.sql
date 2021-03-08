@@ -59,10 +59,10 @@ CREATE TABLE "Participant" (
     "baselineQuestComplete" boolean NOT NULL
 );
 
-CREATE TABLE "RedcapId" (
-    "redcapRecordId" text,
-    "redcapProjectYear" int NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+CREATE TABLE "YearChange" (
     "pid" text NOT NULL REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
+    "redcapProjectYear" int NOT NULL CHECK ("redcapProjectYear" >= 2020 and "redcapProjectYear" <= 2021),
+    "redcapRecordId" text NOT NULL,
     -- Some pids get modified by adding `-123`-like endings. I only look at
     -- the first group of digits to generate the pid and I format them
     -- consistently.
@@ -72,7 +72,7 @@ CREATE TABLE "RedcapId" (
     -- Could conceivably have one with incomplete consent forms, so null
     -- is possible here
     "nested" boolean,
-    PRIMARY KEY ("redcapRecordId", "redcapProjectYear")
+    PRIMARY KEY ("pid", "redcapProjectYear")
 );
 
 CREATE TABLE "Withdrawn" (

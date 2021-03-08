@@ -17,7 +17,7 @@ import {
   syncRedcapParticipants,
   getLastUserUpdate,
   getVaccinationSubset,
-  getRedcapIdSubset,
+  getYearChangeSubset,
   getWithdrawnSubset,
   getScheduleSubset,
   getWeeklySurveySubset,
@@ -268,7 +268,7 @@ export function getRoutes(
   routes.get("/redcap-id", async (req: Request, res: Response) => {
     const ids = await transaction(db, async (tsk) => {
       const u = await validateUser(req, tsk)
-      return await getRedcapIdSubset(tsk, u.accessGroup)
+      return await getYearChangeSubset(tsk, u.accessGroup)
     })
     res.json(ids)
   })

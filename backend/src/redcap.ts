@@ -6,8 +6,8 @@ import {
   UserV,
   Participant,
   ParticipantV,
-  RedcapId,
-  RedcapIdV,
+  YearChange,
+  YearChangeV,
   Vaccination,
   VaccinationV,
   Schedule,
@@ -278,9 +278,9 @@ export async function exportParticipants(
   )
 }
 
-export async function exportRedcapIds(
+export async function exportYearChanges(
   config: RedcapConfig
-): Promise<RedcapId[]> {
+): Promise<YearChange[]> {
   const redcapIds = (
     await redcapApiReq(config, {
       content: "record",
@@ -313,7 +313,7 @@ export async function exportRedcapIds(
     }))
     .filter((r) => r.pid)
   // We should never have the same id-year combination, can trust REDCap on that
-  return decode(t.array(RedcapIdV), redcapIds)
+  return decode(t.array(YearChangeV), redcapIds)
 }
 
 const RedcapWithdrawnV = t.type({

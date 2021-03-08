@@ -118,14 +118,14 @@ export const ParticipantV = t.intersection([
 ])
 export type Participant = t.TypeOf<typeof ParticipantV>
 
-export const RedcapIdV = t.type({
+export const YearChangeV = t.type({
   redcapRecordId: t.string,
   redcapProjectYear: t.number,
   pid: t.string,
   pidPreformat: t.string,
   nested: t.union([t.boolean, t.null]),
 })
-export type RedcapId = t.TypeOf<typeof RedcapIdV>
+export type YearChange = t.TypeOf<typeof YearChangeV>
 
 export const WithdrawnV = t.type({
   pid: t.string,
