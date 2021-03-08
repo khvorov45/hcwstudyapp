@@ -50,7 +50,6 @@ CREATE TABLE "Participant" (
     "dateScreening" timestamptz,
     "email" text UNIQUE CHECK ("email" = lower("email")),
     "mobile" text UNIQUE,
-    "addBleed" boolean,
     "dob" timestamptz,
     "gender" hfs_gender,
     "heightCM" real,

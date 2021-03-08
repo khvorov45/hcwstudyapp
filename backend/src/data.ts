@@ -99,7 +99,6 @@ export const ParticipantDeidentifiedV = t.type({
   pid: t.string,
   site: SiteV,
   dateScreening: t.union([MyDateV, t.null]),
-  addBleed: t.union([t.boolean, t.null]),
   dob: t.union([MyDateV, t.null]),
   gender: t.union([GenderV, t.null]),
   baselineQuestComplete: t.boolean,

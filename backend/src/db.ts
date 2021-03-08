@@ -28,6 +28,7 @@ import {
   WeeklySurvey,
   Withdrawn,
   ParticipantV,
+  ParticipantDeidentifiedV,
 } from "./data"
 import { generateToken, hash } from "./auth"
 import {
@@ -455,18 +456,7 @@ export async function getParticipantsDeidentifiedSubset(
   db: Task,
   a: AccessGroup
 ): Promise<Participant[]> {
-  const cols = [
-    "pid",
-    "site",
-    "dateScreening",
-    "addBleed",
-    "dob",
-    "gender",
-    "baselineQuestComplete",
-    "heightCM",
-    "weightKG",
-    "occupation",
-  ]
+  const cols = Object.keys(ParticipantDeidentifiedV.props)
     .map((x) => `"${x}"`)
     .join(",")
   return isSite(a)
