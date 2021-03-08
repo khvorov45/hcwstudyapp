@@ -27,6 +27,7 @@ import {
   VirusV,
   WeeklySurvey,
   Withdrawn,
+  ParticipantV,
 } from "./data"
 import { generateToken, hash } from "./auth"
 import {
@@ -264,20 +265,7 @@ async function insertIntoTable<T>(
       "ari",
       "swabCollection",
     ],
-    Participant: [
-      "pid",
-      "site",
-      "dateScreening",
-      "email",
-      "mobile",
-      "addBleed",
-      "dob",
-      "gender",
-      "baselineQuestComplete",
-      "heightCM",
-      "weightKG",
-      "occupation",
-    ],
+    Participant: ParticipantV.types.flatMap((t) => Object.keys(t.props)),
     Virus: Object.keys(VirusV.props),
     Serology: Object.keys(SerologyV.props),
     RegistrationOfInterest: Object.keys(RegistrationOfInterestV.props),

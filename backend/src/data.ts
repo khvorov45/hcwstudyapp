@@ -105,6 +105,7 @@ export const ParticipantDeidentifiedV = t.type({
   baselineQuestComplete: t.boolean,
   heightCM: t.union([t.number, t.null]),
   weightKG: t.union([t.number, t.null]),
+  atsi: t.union([t.boolean, t.null]),
   occupation: t.union([OccupationV, t.null]),
 })
 export type ParticipantDeidentified = t.TypeOf<typeof ParticipantDeidentifiedV>

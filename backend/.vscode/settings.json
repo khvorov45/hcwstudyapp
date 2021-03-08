@@ -3,6 +3,7 @@
         "TIMESTAMPTZ",
         "Unvacc",
         "Withdrawns",
+        "atsi",
         "covax",
         "deidentified",
         "hcwflustudy",

@@ -109,6 +109,16 @@ function processRedcapBoolean(s: string | null | undefined): boolean | null {
   return step1 === "1"
 }
 
+function processRedcapBooleanLabel(
+  s: string | null | undefined
+): boolean | null {
+  const step1 = processRedcapStringLower(s)
+  if (step1 === null) {
+    return null
+  }
+  return step1 === "yes"
+}
+
 function processRedcapCovidVaccineBrand(
   s: string | null | undefined
 ): CovidVaccineBrand | null {
@@ -242,6 +252,7 @@ export async function exportParticipants(
         "mobile_number",
         "a1_gender",
         "a2_dob",
+        "a3_atsi",
         "a5_height",
         "a6_weight",
         "c3_occupation",
@@ -270,6 +281,7 @@ export async function exportParticipants(
       heightCM: processRedcapNumber(r.a5_height),
       weightKG: processRedcapNumber(r.a6_weight),
       occupation: processRedcapOccupation(r.c3_occupation, r.c3_spec),
+      atsi: processRedcapBooleanLabel(r.a3_atsi),
     }))
     .filter((r) => r.pid)
 

@@ -56,6 +56,7 @@ CREATE TABLE "Participant" (
     "heightCM" real,
     "weightKG" real,
     "occupation" hfs_occupation,
+    "atsi" boolean,
     "baselineQuestComplete" boolean NOT NULL
 );
 
