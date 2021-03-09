@@ -1218,7 +1218,7 @@ function Summary({
     <div>
       <ControlRibbon>
         <StudyYearSelector
-          label="Serology year"
+          label="Study year"
           value={selectedStudyYear}
           onChange={(x) => setSelectedStudyYear(x ?? STUDY_YEARS[0])}
           disableClearable
