@@ -333,6 +333,7 @@ export default function Tables({
           serologyFull={serology}
           titreChangeFull={titreChange}
           vaccinationCountsFull={vaccinationCounts}
+          weeklySurveyFull={weeklySurvey}
         />
       ),
     },
@@ -782,11 +783,13 @@ function Summary({
   serologyFull,
   titreChangeFull,
   vaccinationCountsFull,
+  weeklySurveyFull,
 }: {
   participantsExtraFull?: ParticipantExtra[]
   serologyFull?: SerologyExtra[]
   titreChangeFull?: TitreChange[]
   vaccinationCountsFull?: VaccinationCount[]
+  weeklySurveyFull?: WeeklySurvey[]
 }) {
   // Unique values for filters
   const viruses = unique(serologyFull?.map((s) => s.virus)).sort(stringSort)
@@ -856,6 +859,11 @@ function Summary({
       p.year === selectedStudyYear &&
       (!availablePids || availablePids.includes(p.pid)) &&
       applyMultiFilter(virusesSelected, p.virus)
+  )
+  const weeklySurvey = weeklySurveyFull?.filter(
+    (s) =>
+      s.redcapProjectYear === selectedStudyYear &&
+      (!availablePids || availablePids.includes(s.pid))
   )
 
   // Summarise the filtered data
@@ -1006,6 +1014,51 @@ function Summary({
     (d) => ({ virus: d.virus }),
     (v) => summariseProportion(v.map((x) => x.seroconverted))
   )
+
+  const swabsAll = weeklySurvey?.filter(
+    (r) => r.swabCollection || r.swabResult.length > 0
+  )
+  const countsSwabBySplit = rollup(
+    swabsAll ?? [],
+    (d) => ({
+      split:
+        splitVar === "Site"
+          ? (participantsExtra?.find((v) => v.pid === d.pid)?.site as Site)
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
+    }),
+    summariseCount
+  )
+  const countsSwabRow = {
+    label: <RowLabel label={"Swabs collected"} top="" bottom="" />,
+    total: summariseCount(swabsAll ?? []),
+    ...widenSplit(countsSwabBySplit),
+  } as Row
+
+  const countsBySwabResult = rollup(
+    swabsAll ?? [],
+    (d) => ({ result: d.swabResult.join("; ") }),
+    summariseCount
+  )
+  const countsBySplitSwabResult = rollup(
+    swabsAll ?? [],
+    (d) => ({
+      result: d.swabResult.join("; "),
+      split:
+        splitVar === "Site"
+          ? (participantsExtra?.find((v) => v.pid === d.pid)?.site as Site)
+          : prevVacs?.find((v) => v.pid === d.pid)?.prevVac ?? -1,
+    }),
+    summariseCount
+  )
+  const countsBySplitSwabResultWithMarginal = rollup(
+    countsBySplitSwabResult,
+    (d) => ({ result: d.result }),
+    (v, k) => ({
+      label: k.result === "" ? "(missing)" : k.result,
+      total: countsBySwabResult.find((c) => c.result === k.result),
+      ...widenSplit(v),
+    })
+  ).sort((a, b) => stringSort(a.label, b.label))
 
   // Convert the summaries above to the appropriate table
 
@@ -1179,6 +1232,9 @@ function Summary({
     .concat(genEmptyRow("Aboriginal count", "", ""))
     .concat(countsByAtsiSplitWithMarginal)
     .concat(bottomRow)
+    .concat(genEmptyRow("Swab results count", "", ""))
+    .concat(countsBySplitSwabResultWithMarginal)
+    .concat(countsSwabRow)
 
   const splitSelected =
     splitVar === "Site"
