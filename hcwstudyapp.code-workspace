@@ -8,6 +8,9 @@
     },
     {
       "path": "frontend-sapper"
+    },
+    {
+      "path": "backend-rust"
     }
   ],
   "settings": {
