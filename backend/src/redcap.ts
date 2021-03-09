@@ -17,6 +17,7 @@ import {
   MyDateV,
   CovidVaccineBrandV,
   CovidVaccineBrand,
+  SwabResultV,
 } from "./data"
 import { decode } from "./io"
 import { justDateString } from "./util"
@@ -214,6 +215,29 @@ function processNested(
     return false
   }
   return null
+}
+
+function processSwabResult(r: any): string[] {
+  const possible = Object.keys(SwabResultV.keys)
+  const res = []
+  for (let [key, status] of Object.entries(r)) {
+    if (
+      status === "0" ||
+      status === null ||
+      status === undefined ||
+      status === ""
+    ) {
+      continue
+    }
+    let matchRes = key.match(/swab_result___(\d+)/)
+    if (matchRes === null) {
+      continue
+    }
+    let i = matchRes[1]
+
+    res.push(possible[parseInt(i) - 1])
+  }
+  return res
 }
 
 export async function exportUsers(config: RedcapConfig): Promise<User[]> {
@@ -479,6 +503,7 @@ export const RedcapWeeklySurveyV = t.type({
   date: t.union([DateFromISOString, t.null]),
   ari: t.boolean,
   swabCollection: t.union([t.boolean, t.null]),
+  swabResult: t.array(SwabResultV),
 })
 export type RedcapWeeklySurvey = t.TypeOf<typeof RedcapWeeklySurveyV>
 
@@ -510,6 +535,7 @@ export async function exportWeeklySurvey(
         "ari_definition",
         "date_symptom_survey",
         "swab_collection",
+        "swab_result",
         "recent_covax",
         "covax_rec",
         "covax_rec_other",
@@ -527,6 +553,7 @@ export async function exportWeeklySurvey(
   ).map((r) => ({
     ari: processRedcapBoolean(r.ari_definition),
     swabCollection: processRedcapBoolean(r.swab_collection),
+    swabResult: processSwabResult(r),
     covidVaccineReceived: processRedcapBoolean(r.recent_covax),
     brand: processRedcapCovidVaccineBrand(r.covax_rec),
     brandOther: processRedcapString(r.covax_rec_other),

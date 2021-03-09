@@ -114,6 +114,9 @@ CREATE TABLE "WeeklySurvey" (
     "date" timestamptz,
     "ari" boolean NOT NULL,
     "swabCollection" boolean,
+    -- pgpromise inserts text arrays as text[] and postgres will just reject
+    -- it if this type is enum[]
+    "swabResult" text[] NOT NULL,
     PRIMARY KEY ("pid", "index", "redcapProjectYear")
 );
 

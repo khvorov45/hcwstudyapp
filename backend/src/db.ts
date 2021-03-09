@@ -29,6 +29,7 @@ import {
   Withdrawn,
   ParticipantV,
   ParticipantDeidentifiedV,
+  WeeklySurveyV,
 } from "./data"
 import { generateToken, hash } from "./auth"
 import {
@@ -258,14 +259,7 @@ async function insertIntoTable<T>(
     YearChange: Object.keys(YearChangeV.props),
     Withdrawn: ["pid", "date"],
     Schedule: ["pid", "day", "redcapProjectYear", "date"],
-    WeeklySurvey: [
-      "pid",
-      "index",
-      "redcapProjectYear",
-      "date",
-      "ari",
-      "swabCollection",
-    ],
+    WeeklySurvey: Object.keys(WeeklySurveyV.props),
     Participant: ParticipantV.types.flatMap((t) => Object.keys(t.props)),
     Virus: Object.keys(VirusV.props),
     Serology: Object.keys(SerologyV.props),

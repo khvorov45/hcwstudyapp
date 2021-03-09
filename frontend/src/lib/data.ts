@@ -60,6 +60,25 @@ export const OccupationV = t.keyof({
 })
 export type Occupation = t.TypeOf<typeof OccupationV>
 
+export const SwabResultV = t.keyof({
+  "Influenza A (unsubtyped)": null,
+  "Influenza A H3": null,
+  "Influenza A H1": null,
+  "Influenza B (no lineage)": null,
+  "Influenza B Vic": null,
+  "Influenza B Yam": null,
+  "Influenza C": null,
+  Parainfluenza: null,
+  "Human metapneumovirus": null,
+  Picornavirus: null,
+  Adenovirus: null,
+  "Coronavirus OC43, 229E, NL63, HKU, SARS": null,
+  "Coronavirus SARS-CoV-2": null,
+  Other: null,
+  Negative: null,
+})
+export type SwabResult = t.TypeOf<typeof SwabResultV>
+
 export const TokenTypeV = t.keyof({
   session: null,
   api: null,
@@ -167,6 +186,7 @@ export const WeeklySurveyV = t.type({
   date: t.union([MyDateV, t.null]),
   ari: t.boolean,
   swabCollection: t.union([t.boolean, t.null]),
+  swabResult: t.array(SwabResultV),
 })
 export type WeeklySurvey = t.TypeOf<typeof WeeklySurveyV>
 
