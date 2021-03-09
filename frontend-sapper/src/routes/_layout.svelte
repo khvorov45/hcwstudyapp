@@ -23,22 +23,45 @@
     if ($token === null) {
       $loginStatus.status = "error"
       $loginStatus.user = null
-      $loginStatus.error = "token is missing"
+      $loginStatus.error = "UNAUTHORIZED: token is missing"
+      return
     }
+
     $loginStatus.status = "loading"
     $loginStatus.error = null
-    const res = await fetch("http://localhost:7001/auth/token/verify", {
-      headers: {
-        Authorization: `Bearer ${$token}`,
-      },
-    })
-    if (res.status !== 200) {
+
+    let res: any
+    try {
+      res = await fetch("http://localhost:7001/auth/token/verify", {
+        headers: {
+          Authorization: `Bearer ${$token}`,
+        },
+      })
+    } catch (e) {
       $loginStatus.status = "error"
       $loginStatus.user = null
-      $loginStatus.error = await res.json()
-    } else {
+      $loginStatus.error = "NETWORK_ERROR: " + e.message
+      return
+    }
+
+    let res_body: any
+    try {
+      res_body = await res.json()
+    } catch (e) {
+      res_body = await res.text()
+    }
+
+    if (res.status === 200) {
       $loginStatus.status = "success"
-      $loginStatus.user = await res.json()
+      $loginStatus.user = res_body
+    } else {
+      $loginStatus.status = "error"
+      $loginStatus.user = null
+      if (res.status === 401) {
+        $loginStatus.error = "UNAUTHORIZED" + res_body
+      } else {
+        $loginStatus.error = "UNEXPECTED" + res_body
+      }
     }
   }
 
@@ -54,9 +77,15 @@
   {#if segmentIsProtected}
     {#if $loginStatus.status === "error"}
       <p>
-        Unauthorized to access this page. Get an access link on the <a
-          href="email">email page</a
-        >.
+        {#if $loginStatus.error.startsWith("UNAUTHORIZED")}
+          Unauthorized to access this page. Get an access link on the <a
+            href="email">email page</a
+          >.
+        {:else if $loginStatus.error.startsWith("NETWORK")}
+          Network error, check back later
+        {:else}
+          Unexpected error, check back later
+        {/if}
       </p>
     {:else if $loginStatus.status === "success"}
       <slot />
