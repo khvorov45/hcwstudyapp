@@ -15,14 +15,12 @@ function createLocalStore<T>(
     update,
     localStorageInit,
     useLocalStorage: () => {
-      console.log("use local storage")
       const json = localStorage.getItem(key)
       if (json) {
         set(fromString(json))
       }
 
       subscribe((current) => {
-        console.log("subscribed")
         localStorage.setItem(key, toString(current))
       })
       localStorageInit = true
