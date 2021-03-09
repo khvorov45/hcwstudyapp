@@ -15,6 +15,7 @@
       if (newToken !== null && newToken !== $token) {
         token.set(newToken)
         await login()
+        await refreshToken()
       }
     }
   })
@@ -63,6 +64,25 @@
         $loginStatus.error = "UNEXPECTED" + res_body
       }
     }
+  }
+
+  async function refreshToken() {
+    if ($loginStatus.status !== "success") {
+      return
+    }
+    let res: any
+    try {
+      res = await fetch("http://localhost:7001/auth/token", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${$token}`,
+        },
+      })
+    } catch (e) {
+      console.error("NETWORK_ERROR on refresh: " + e.message)
+      return
+    }
+    $token = await res.json()
   }
 
   const protectedRoutes = ["protected"]
