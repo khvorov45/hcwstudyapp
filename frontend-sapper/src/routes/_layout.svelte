@@ -45,12 +45,7 @@
       return
     }
 
-    let res_body: any
-    try {
-      res_body = await res.json()
-    } catch (e) {
-      res_body = await res.text()
-    }
+    let res_body = await res.json()
 
     if (res.status === 200) {
       $loginStatus.status = "success"
