@@ -1,0 +1,31 @@
+<script lang="ts">
+  import type { AsyncStatus } from "../lib/util"
+
+  let email = ""
+
+  let emailStatus: { status: AsyncStatus; error: string | null } = {
+    status: "not-requested",
+    error: null,
+  }
+
+  async function handleSend() {
+    emailStatus.status = "loading"
+    emailStatus.error = null
+    const res = await fetch(
+      `http://localhost:7001/auth/token/send?email=${email}&type=session`,
+      { method: "POST" }
+    )
+    if (res.status !== 204) {
+      emailStatus.status = "error"
+      emailStatus.error = await res.json()
+    } else {
+      emailStatus.status = "error"
+      emailStatus.error = await res.json()
+    }
+  }
+</script>
+
+<input bind:value={email} />
+<button on:click={handleSend}>Sumbit</button>
+<p>email status: {emailStatus.status}</p>
+<p>email error: {emailStatus.error}</p>
