@@ -110,7 +110,7 @@
     {:else if $loginStatus.status === "success"}
       <slot />
     {:else}
-      Waiting for login
+      <p>Waiting for login</p>
     {/if}
   {:else}
     <slot />
