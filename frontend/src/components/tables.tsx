@@ -244,10 +244,12 @@ export default function Tables({
         name,
         header,
         missing,
+        width = 75,
       }: {
         name: string
         header: string
         missing: boolean
+        width: number
       }) => ({
         Header: header,
         accessor: (p: any) => {
@@ -258,7 +260,7 @@ export default function Tables({
           }
           return p[name].toString()
         },
-        width: 75,
+        width,
         Filter: getSelectColumnFilter(
           missing ? ["true", "false", "(missing)"] : ["true", "false"]
         ),
@@ -514,9 +516,15 @@ function WeeklySurveyTable({
       commonCols.bool({ name: "ari", header: "ARI", missing: false }),
       commonCols.bool({
         name: "swabCollection",
-        header: "Swab",
+        header: "Swab collected",
         missing: true,
+        width: 120,
       }),
+      {
+        Header: "Swab result",
+        accessor: (p: WeeklySurvey) => p.swabResult.join("; "),
+        width: 400,
+      },
     ]
   }, [commonCols])
 
