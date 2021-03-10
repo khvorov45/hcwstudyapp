@@ -17,14 +17,14 @@
     <hr class="element" />
     {#if $loginStatus.status === "success"}
       <div class="element">
-        <a href="tables"><Table /></a>
+        <a class:active={segment === "tables"} href="tables"><Table /></a>
       </div>
     {/if}
   </div>
 
   <div class="group">
     <div class="element">
-      <a href="email"><Email /></a>
+      <a class:active={segment === "email"} href="email"><Email /></a>
     </div>
     <div class="element">
       <a class:active={segment === "search"} href="/search"><Search /></a>
