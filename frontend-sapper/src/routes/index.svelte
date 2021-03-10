@@ -1,9 +1,12 @@
 <script lang="ts">
   import Link from "../components/Link.svelte"
+  import TextContainer from "../components/TextContainer.svelte"
 </script>
 
-<h1>Reports for HCW flu study</h1>
+<TextContainer>
+  <h1>Reports for HCW flu study</h1>
 
-<p>Main site is <Link href="https://hcwflustudy.com">here</Link>.</p>
+  <p>Main site is <Link href="https://hcwflustudy.com">here</Link>.</p>
 
-<p>Site map is <Link href="search">here</Link>.</p>
+  <p>Site map is <Link href="search">here</Link>.</p>
+</TextContainer>
