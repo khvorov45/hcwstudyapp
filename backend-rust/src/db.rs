@@ -7,7 +7,6 @@ use std::path::{Path, PathBuf};
 
 pub struct Db {
     pub dir: PathBuf,
-    pub version: i32,
     pub users: Table<data::User>,
 }
 
@@ -24,27 +23,8 @@ impl Db {
             fs::create_dir(dir.as_path())
                 .context(format!("Failed to create db root directory at {:?}", dir))?;
         }
-        // Version
-        let version: i32;
-        let version_file_path = dir.join("VERSION");
-        if version_file_path.is_file() {
-            let version_string = fs::read_to_string(version_file_path.as_path()).context(
-                format!("Failed to read version file at {:?}", version_file_path),
-            )?;
-            version = version_string.parse().context(format!(
-                "Failed to parse version file with contents, {}",
-                version_string,
-            ))?;
-        } else {
-            fs::write(version_file_path.as_path(), "1".as_bytes()).context(format!(
-                "Failed to create version file at {:?}",
-                version_file_path
-            ))?;
-            version = 1;
-        }
         // Create empty and read the data in
         let mut db = Self {
-            version,
             users: Table::new("User", dir.as_path())?,
             dir,
         };
