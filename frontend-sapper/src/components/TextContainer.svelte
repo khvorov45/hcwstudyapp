@@ -13,5 +13,7 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 </style>
