@@ -1,29 +1,35 @@
 <script lang="ts">
   import { loginStatus } from "../lib/state"
   import Link from "./Link.svelte"
+  import Home from "./icons/Report.svelte"
+  import Settings from "./icons/Settings.svelte"
+  import Search from "./icons/Search.svelte"
 
   export let segment: string | undefined
 </script>
 
 <nav>
   <div class="group">
-    <div class:active={segment === undefined} class="element">
-      <Link href="/">Home</Link>
+    <div class="element">
+      <a class:active={segment === undefined} href="/"><Home /></a>
     </div>
     <hr class="element" />
     {#if $loginStatus.status === "success"}
-      <div class:active={segment === "protected"} class="element">
+      <div class="element">
         <Link href="protected">Protected</Link>
       </div>
     {/if}
   </div>
 
   <div class="group">
-    <div class:active={segment === "email"} class="element">
+    <div class="element">
       <Link href="email">Email</Link>
     </div>
+    <div class="element">
+      <a class:active={segment === "search"} href="/search"><Search /></a>
+    </div>
     <hr class="element" />
-    <div class="element">Settings</div>
+    <div class="element"><Settings /></div>
   </div>
 </nav>
 
@@ -56,5 +62,17 @@
     margin-right: 5px;
     color: var(--color-bg-2);
     height: calc(var(--size-nav) - 1px);
+  }
+  a {
+    height: calc(var(--size-nav) - var(--size-nav-border));
+    border-bottom: var(--size-nav-border) solid rgba(0, 0, 0, 0);
+    transition: border-bottom var(--time-transition);
+  }
+  a:hover,
+  a:focus {
+    border-bottom: var(--size-nav-border) solid var(--color-primary-3);
+  }
+  a.active {
+    border-bottom: var(--size-nav-border) solid var(--color-primary-3);
   }
 </style>
