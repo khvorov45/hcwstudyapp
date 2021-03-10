@@ -1,10 +1,10 @@
 <script lang="ts">
   import { loginStatus } from "../lib/state"
-  import Link from "./Link.svelte"
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
   import Search from "./icons/Search.svelte"
   import Table from "./icons/Table.svelte"
+  import Email from "./icons/Send.svelte"
 
   export let segment: string | undefined
 </script>
@@ -24,7 +24,7 @@
 
   <div class="group">
     <div class="element">
-      <Link href="email">Email</Link>
+      <a href="email"><Email /></a>
     </div>
     <div class="element">
       <a class:active={segment === "search"} href="/search"><Search /></a>
