@@ -59,14 +59,6 @@ impl<T: Serialize + DeserializeOwned> Table<T> {
         })
     }
     pub fn read(&mut self) -> Result<()> {
-        if !self.path.is_file() {
-            log::debug!(
-                "table {} file {:?} does not exist, not reading",
-                self.name,
-                self.path
-            );
-            return Ok(());
-        }
         let file = File::open(self.path.as_path()).context(format!(
             "table {} file {:?} failed to open",
             self.name, self.path
