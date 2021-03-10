@@ -6,25 +6,55 @@
 </script>
 
 <nav>
-  <div class:active={segment === undefined}><Link href="/">Home</Link></div>
-
-  <div class:active={segment === "email"}><Link href="email">Email</Link></div>
-
-  {#if $loginStatus.status === "success"}
-    <div class:active={segment === "protected"}>
-      <Link href="protected">Protected</Link>
+  <div class="group">
+    <div class:active={segment === undefined} class="element">
+      <Link href="/">Home</Link>
     </div>
-  {/if}
+    <hr class="element" />
+    {#if $loginStatus.status === "success"}
+      <div class:active={segment === "protected"} class="element">
+        <Link href="protected">Protected</Link>
+      </div>
+    {/if}
+  </div>
+
+  <div class="group">
+    <div class:active={segment === "email"} class="element">
+      <Link href="email">Email</Link>
+    </div>
+    <hr class="element" />
+    <div class="element">Settings</div>
+  </div>
 </nav>
 
 <style>
+  :root {
+    --size-nav-border: 2px;
+  }
   nav {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: calc(var(--size-nav) - var(--size-nav-border));
+    border-bottom: var(--size-nav-border) solid var(--color-bg-2);
   }
-  nav > * {
+  .group,
+  .element {
+    display: flex;
+    align-items: center;
+    height: var(--size-nav);
+  }
+  .element {
     margin-left: 5px;
   }
-  nav > *:last-child {
+  .group:last-child > .element:last-child {
     margin-right: 5px;
+  }
+  hr.element {
+    padding: 0;
+    margin-left: 5px;
+    margin-right: 5px;
+    color: var(--color-bg-2);
+    height: calc(var(--size-nav) - 1px);
   }
 </style>
