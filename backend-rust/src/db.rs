@@ -45,7 +45,7 @@ impl Db {
         // Create empty and read the data in
         let mut db = Self {
             version,
-            users: Table::new("User", dir.as_path()),
+            users: Table::new("User", dir.as_path())?,
             dir,
         };
         db.read_from_disk()?;
@@ -64,15 +64,19 @@ impl Db {
 }
 
 impl<T: Serialize + DeserializeOwned> Table<T> {
-    pub fn new<P: AsRef<Path>>(name: &str, root_dir: P) -> Self {
-        Self {
-            name: name.to_string(),
-            path: root_dir
-                .as_ref()
-                .to_path_buf()
-                .join(format!("{}.json", name)),
-            data: Vec::new(),
+    pub fn new<P: AsRef<Path>>(name: &str, root_dir: P) -> Result<Self> {
+        let path = root_dir
+            .as_ref()
+            .to_path_buf()
+            .join(format!("{}.json", name));
+        if !path.is_file() {
+            fs::write(path.as_path(), "[]")?;
         }
+        Ok(Self {
+            name: name.to_string(),
+            path,
+            data: Vec::new(),
+        })
     }
     pub fn read(&mut self) -> Result<()> {
         if !self.path.is_file() {
