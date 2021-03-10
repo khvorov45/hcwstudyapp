@@ -4,6 +4,7 @@
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
   import Search from "./icons/Search.svelte"
+  import Table from "./icons/Table.svelte"
 
   export let segment: string | undefined
 </script>
@@ -16,7 +17,7 @@
     <hr class="element" />
     {#if $loginStatus.status === "success"}
       <div class="element">
-        <Link href="protected">Protected</Link>
+        <a href="tables"><Table /></a>
       </div>
     {/if}
   </div>
@@ -64,6 +65,8 @@
     height: calc(var(--size-nav) - 1px);
   }
   a {
+    display: flex;
+    align-items: center;
     height: calc(var(--size-nav) - var(--size-nav-border));
     border-bottom: var(--size-nav-border) solid rgba(0, 0, 0, 0);
     transition: border-bottom var(--time-transition);
