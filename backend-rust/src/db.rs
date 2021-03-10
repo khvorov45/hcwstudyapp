@@ -6,8 +6,14 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 pub struct Db {
-    pub dir: PathBuf,
+    pub dirs: DbDirs,
     pub users: Table<data::User>,
+}
+
+pub struct DbDirs {
+    pub root: PathBuf,
+    pub previous: PathBuf,
+    pub current: PathBuf,
 }
 
 pub struct Table<T: Serialize + DeserializeOwned> {
@@ -18,15 +24,9 @@ pub struct Table<T: Serialize + DeserializeOwned> {
 
 impl Db {
     pub fn new(dir: PathBuf) -> Result<Self> {
-        // Root directory
-        if !dir.is_dir() {
-            fs::create_dir(dir.as_path())
-                .context(format!("Failed to create db root directory at {:?}", dir))?;
-        }
-        // Create empty and read the data in
         let mut db = Self {
+            dirs: DbDirs::new(dir.as_path())?,
             users: Table::new("User", dir.as_path())?,
-            dir,
         };
         db.read_from_disk()?;
         Ok(db)
@@ -82,5 +82,27 @@ impl<T: Serialize + DeserializeOwned> Table<T> {
             self.name, self.path
         ))?;
         Ok(())
+    }
+}
+
+impl DbDirs {
+    pub fn new<P: AsRef<Path>>(root: P) -> Result<Self> {
+        let root = root.as_ref().to_path_buf();
+        let previous = root.join("previous");
+        let current = root.join("current");
+        if !root.is_dir() {
+            fs::create_dir(root.as_path())?;
+        }
+        if !previous.is_dir() {
+            fs::create_dir(previous.as_path())?;
+        }
+        if !current.is_dir() {
+            fs::create_dir(current.as_path())?;
+        }
+        Ok(Self {
+            root,
+            previous,
+            current,
+        })
     }
 }
