@@ -56,16 +56,26 @@ impl Db {
 
         let mut db = Self { dirs, users };
 
-        if db.dirs.init_state == DbDirsInitState::Previous {
-            match db.read(Version::Previous) {
-                Ok(()) => {}
-                Err(e) => {
-                    fs::remove_dir_all(db.dirs.current.as_path())?;
-                    return Err(e);
-                }
-            };
-        } else if db.dirs.init_state == DbDirsInitState::Current {
-            db.read(Version::Current)?;
+        match db.dirs.init_state {
+            DbDirsInitState::Previous => {
+                match db.read(Version::Previous) {
+                    Ok(()) => {
+                        db.convert();
+                        if !db.dirs.current.is_dir() {
+                            fs::create_dir(db.dirs.current.as_path())?;
+                        }
+                        db.write()?;
+                    }
+                    Err(e) => {
+                        fs::remove_dir_all(db.dirs.current.as_path())?;
+                        return Err(e);
+                    }
+                };
+            }
+            DbDirsInitState::Current => {
+                db.read(Version::Current)?;
+            }
+            DbDirsInitState::None => {}
         }
 
         Ok(db)
@@ -75,24 +85,32 @@ impl Db {
         self.users.read(version)?;
         Ok(())
     }
-    pub fn write_to_disk(&self) -> Result<()> {
+    pub fn write(&self) -> Result<()> {
         log::debug!("writing db to disk");
         self.users.write()?;
         Ok(())
+    }
+    pub fn convert(&mut self) {
+        log::debug!("converting db");
+        self.users.convert();
     }
 }
 
 impl<P: Serialize + DeserializeOwned + ToCurrent<C>, C: Serialize + DeserializeOwned> Table<P, C> {
     /// Creates table with empty data
     pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
+        log::debug!("creating table {}", name);
         let file_name = format!("{}.json", name);
         let previous = dirs.previous.join(file_name.as_str());
         let current = dirs.current.join(file_name);
-        if dirs.init_state == DbDirsInitState::Previous && !previous.is_file() {
-            fs::write(previous.as_path(), "[]")?;
-        }
-        if !current.is_file() {
-            fs::write(current.as_path(), "[]")?;
+        if dirs.init_state == DbDirsInitState::Previous {
+            if !previous.is_file() {
+                fs::write(previous.as_path(), "[]")
+                    .context(format!("could not write file {:?}", previous))?;
+            }
+        } else if !current.is_file() {
+            fs::write(current.as_path(), "[]")
+                .context(format!("could not write file {:?}", current))?;
         }
         Ok(Self {
             name: name.to_string(),
@@ -104,7 +122,6 @@ impl<P: Serialize + DeserializeOwned + ToCurrent<C>, C: Serialize + DeserializeO
         match version {
             Version::Previous => {
                 self.previous.read()?;
-                self.convert();
             }
             Version::Current => {
                 self.current.read()?;
@@ -148,8 +165,6 @@ impl DbDirs {
 
         if !root.is_dir() {
             fs::create_dir(root.as_path())?;
-        }
-        if !current.is_dir() {
             fs::create_dir(current.as_path())?;
         }
 

@@ -20,7 +20,7 @@ fn main() -> Result<()> {
         output.flush()?;
         input.read_line(&mut line)?;
         match line.trim() {
-            "write" => db.write_to_disk()?,
+            "write" => db.write()?,
             line => println!("unrecognized: {}", line),
         }
     }
