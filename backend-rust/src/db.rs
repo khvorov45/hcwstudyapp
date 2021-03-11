@@ -157,6 +157,9 @@ impl<P: Serialize + DeserializeOwned + ToCurrent<C>, C: Serialize + DeserializeO
         }
         self.current.data = converted;
     }
+    pub fn insert(&mut self, data: C) {
+        self.current.data.push(data);
+    }
 }
 
 impl DbDirs {
