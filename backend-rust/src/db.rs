@@ -48,6 +48,8 @@ pub enum Version {
 
 impl Db {
     /// Will read in the data depending on the initial state of the directories
+    /// By the time it's done, the root directory and the current directory
+    /// inside it should be created. The previous directory isn't used post-creation.
     pub fn new(dir: PathBuf) -> Result<Self> {
         log::debug!("initializing db at root directory {:?}", dir);
 
@@ -58,23 +60,17 @@ impl Db {
 
         match db.dirs.init_state {
             DbDirsInitState::Previous => {
-                match db.read(Version::Previous) {
-                    Ok(()) => {
-                        db.convert();
-                        if !db.dirs.current.is_dir() {
-                            fs::create_dir(db.dirs.current.as_path())?;
-                        }
-                        db.write()?;
-                    }
-                    Err(e) => {
-                        fs::remove_dir_all(db.dirs.current.as_path())?;
-                        return Err(e);
-                    }
-                };
+                db.read(Version::Previous)?;
+                db.convert();
+                // Create directory right before writing so that there isn't anything to
+                // clean up if any step before this fails
+                fs::create_dir(db.dirs.current.as_path())?;
+                db.write()?;
             }
             DbDirsInitState::Current => {
                 db.read(Version::Current)?;
             }
+            // The data is empty by default anyway, don't need to read
             DbDirsInitState::None => {}
         }
 
@@ -165,6 +161,9 @@ impl DbDirs {
 
         if !root.is_dir() {
             fs::create_dir(root.as_path())?;
+        }
+
+        if init_state == DbDirsInitState::None {
             fs::create_dir(current.as_path())?;
         }
 
