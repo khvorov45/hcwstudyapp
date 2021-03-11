@@ -42,6 +42,7 @@ pub enum TokenType {
 pub struct Token {
     pub user: String,
     pub token: String,
+    #[serde(rename = "type")]
     pub type_: TokenType,
     pub expires: DateTime<Utc>,
 }
