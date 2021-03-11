@@ -48,3 +48,24 @@ impl ToCurrent<current::User> for previous::User {
         }
     }
 }
+
+impl ToCurrent<current::TokenType> for previous::TokenType {
+    fn to_current(&self) -> current::TokenType {
+        use previous::TokenType::*;
+        match self {
+            Session => current::TokenType::Session,
+            Api => current::TokenType::Api,
+        }
+    }
+}
+
+impl ToCurrent<current::Token> for previous::Token {
+    fn to_current(&self) -> current::Token {
+        current::Token {
+            user: self.user.clone(),
+            token: self.token.clone(),
+            type_: self.type_.to_current(),
+            expires: self.expires,
+        }
+    }
+}

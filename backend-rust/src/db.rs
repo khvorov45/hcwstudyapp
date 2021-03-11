@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 pub struct Db {
     pub dirs: DbDirs,
     pub users: Table<previous::User, current::User>,
+    pub tokens: Table<previous::Token, current::Token>,
 }
 
 pub struct DbDirs {
@@ -41,7 +42,7 @@ pub struct TableData<T> {
     pub data: Vec<T>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Version {
     Previous,
     Current,
@@ -57,9 +58,15 @@ impl Db {
         log::debug!("initializing db at root directory {:?}", dir);
 
         let dirs = DbDirs::new(dir.as_path())?;
-        let users = Table::new("User", &dirs)?;
 
-        let mut db = Self { dirs, users };
+        let users = Table::new("User", &dirs)?;
+        let tokens = Table::new("Token", &dirs)?;
+
+        let mut db = Self {
+            dirs,
+            users,
+            tokens,
+        };
 
         match db.dirs.init_state {
             DbDirsInitState::Previous => {
@@ -82,16 +89,19 @@ impl Db {
     pub fn read(&mut self, version: Version) -> Result<()> {
         log::debug!("reading db version {:?} from disk", version);
         self.users.read(version)?;
+        self.tokens.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
         log::debug!("writing db to disk");
         self.users.write()?;
+        self.tokens.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
         log::debug!("converting db");
         self.users.convert();
+        self.tokens.convert();
     }
 }
 
