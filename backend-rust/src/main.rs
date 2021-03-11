@@ -72,11 +72,11 @@ fn process_insert_message(message: &str, db: &mut Db, rl: &mut Input) -> Result<
     match message {
         "User" => {
             let data = message_loop_return(db, process_data_message::<current::User>, rl, prompt)?;
-            db.users.insert(data);
+            db.insert_user(data)?;
         }
         "Token" => {
             let data = message_loop_return(db, process_data_message::<current::Token>, rl, prompt)?;
-            db.tokens.insert(data);
+            db.insert_token(data)?;
         }
         line => println!("unrecognized table: {}", line),
     };

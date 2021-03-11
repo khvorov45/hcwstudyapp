@@ -103,6 +103,14 @@ impl Db {
         self.users.convert();
         self.tokens.convert();
     }
+    pub fn insert_user(&mut self, user: current::User) -> Result<()> {
+        self.users.insert(user);
+        Ok(())
+    }
+    pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
+        self.tokens.insert(token);
+        Ok(())
+    }
 }
 
 impl<P: Serialize + DeserializeOwned + ToCurrent<C>, C: Serialize + DeserializeOwned> Table<P, C> {
