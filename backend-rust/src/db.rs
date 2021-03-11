@@ -11,9 +11,19 @@ pub struct Db {
 }
 
 pub struct DbDirs {
+    pub init_state: DbDirsInitState,
     pub root: PathBuf,
     pub previous: PathBuf,
     pub current: PathBuf,
+}
+
+pub enum DbDirsInitState {
+    /// No directories present at init
+    None,
+    /// Only the previous directory present at init
+    Previous,
+    /// Current directory present at init
+    Current,
 }
 
 pub struct Table<T: Serialize + DeserializeOwned> {
@@ -90,19 +100,26 @@ impl DbDirs {
         let root = root.as_ref().to_path_buf();
         let previous = root.join("previous");
         let current = root.join("current");
+        let mut init_state = DbDirsInitState::None;
+
+        if current.is_dir() {
+            init_state = DbDirsInitState::Current;
+        } else if previous.is_dir() {
+            init_state = DbDirsInitState::Previous;
+        }
+
         if !root.is_dir() {
             fs::create_dir(root.as_path())?;
-        }
-        if !previous.is_dir() {
-            fs::create_dir(previous.as_path())?;
         }
         if !current.is_dir() {
             fs::create_dir(current.as_path())?;
         }
+
         Ok(Self {
             root,
             previous,
             current,
+            init_state,
         })
     }
 }
