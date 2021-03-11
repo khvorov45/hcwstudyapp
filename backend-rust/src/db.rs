@@ -1,4 +1,7 @@
-use crate::{data, Result};
+use crate::{
+    data::{current, previous},
+    Result,
+};
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs::{self, File};
@@ -7,7 +10,7 @@ use std::path::{Path, PathBuf};
 
 pub struct Db {
     pub dirs: DbDirs,
-    pub users: Table<data::User, data::User>,
+    pub users: Table<previous::User, current::User>,
 }
 
 pub struct DbDirs {

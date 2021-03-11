@@ -25,14 +25,8 @@ pub enum UserKind {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct User {
-    email: String,
-    access_group: AccessGroup,
-    kind: UserKind,
-    deidentified_export: bool,
-}
-
-impl crate::db::ToCurrent<User> for User {
-    fn to_current(&self) -> User {
-        self.clone()
-    }
+    pub email: String,
+    pub access_group: AccessGroup,
+    pub kind: UserKind,
+    pub deidentified_export: bool,
 }
