@@ -106,15 +106,19 @@ impl Db {
     }
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
-        self.users.verify()?;
-        self.tokens.verify()?;
+        self.users.verify_pk()?;
+        self.tokens.verify_pk()?;
+        self.tokens.verify_fk(&self.users)?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
+        self.users.check_row_pk(&user)?;
         self.users.insert(user)?;
         Ok(())
     }
     pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
+        self.tokens.check_row_pk(&token)?;
+        self.tokens.check_row_fk(&token, &self.users)?;
         self.tokens.insert(token)?;
         Ok(())
     }
@@ -177,14 +181,53 @@ impl<
         self.current.data = converted;
     }
     pub fn insert(&mut self, data: C) -> Result<()> {
-        check_pk(self.name.as_str(), &data, &self.current.data)?;
         self.current.data.push(data);
         Ok(())
     }
-    pub fn verify(&self) -> Result<()> {
+    pub fn check_row_pk(&self, row: &C) -> Result<()> {
+        self.check_row_pk_subset(row, &self.current.data)?;
+        Ok(())
+    }
+    fn check_row_pk_subset(&self, row: &C, data: &[C]) -> Result<()> {
+        let row_pk = row.get_pk();
+        if data.iter().any(|r| row_pk == r.get_pk()) {
+            Err(anyhow::Error::new(Error::PrimaryKeyConflict(
+                self.name.clone(),
+                row_pk,
+            )))
+        } else {
+            Ok(())
+        }
+    }
+    pub fn verify_pk(&self) -> Result<()> {
         for (i, row) in self.current.data.iter().enumerate() {
-            check_pk(self.name.as_str(), row, &self.current.data[..i])?;
-            check_pk(self.name.as_str(), row, &self.current.data[(i + 1)..])?;
+            self.check_row_pk_subset(row, &self.current.data[..i])?;
+            self.check_row_pk_subset(row, &self.current.data[(i + 1)..])?;
+        }
+        Ok(())
+    }
+}
+
+impl<P, C: ForeignKey<String>> Table<P, C> {
+    pub fn check_row_fk<A, B: PrimaryKey<String>>(
+        &self,
+        row: &C,
+        parent: &Table<A, B>,
+    ) -> Result<()> {
+        let row_fk = row.get_fk();
+        if !parent.current.data.iter().any(|r| row_fk == r.get_pk()) {
+            Err(anyhow::Error::new(Error::ForeignKeyConflict(
+                self.name.clone(),
+                parent.name.clone(),
+                row_fk,
+            )))
+        } else {
+            Ok(())
+        }
+    }
+    pub fn verify_fk<A, B: PrimaryKey<String>>(&self, parent: &Table<A, B>) -> Result<()> {
+        for row in &self.current.data {
+            self.check_row_fk(row, parent)?;
         }
         Ok(())
     }
@@ -250,14 +293,6 @@ pub trait PrimaryKey<K> {
     fn get_pk(&self) -> K;
 }
 
-pub fn check_pk<T: PrimaryKey<String>>(table: &str, row: &T, data: &[T]) -> Result<()> {
-    let row_pk = row.get_pk();
-    if data.iter().any(|r| row_pk == r.get_pk()) {
-        Err(anyhow::Error::new(Error::PrimaryKeyConflict(
-            table.to_string(),
-            row_pk,
-        )))
-    } else {
-        Ok(())
-    }
+pub trait ForeignKey<K> {
+    fn get_fk(&self) -> K;
 }

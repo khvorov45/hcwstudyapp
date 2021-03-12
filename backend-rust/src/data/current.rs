@@ -1,4 +1,4 @@
-use crate::db::PrimaryKey;
+use crate::db::{ForeignKey, PrimaryKey};
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 
@@ -57,5 +57,11 @@ impl PrimaryKey<String> for User {
 impl PrimaryKey<String> for Token {
     fn get_pk(&self) -> String {
         self.token.clone()
+    }
+}
+
+impl ForeignKey<String> for Token {
+    fn get_fk(&self) -> String {
+        self.user.clone()
     }
 }
