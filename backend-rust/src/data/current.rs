@@ -1,3 +1,4 @@
+use crate::db::PrimaryKey;
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 
@@ -45,4 +46,16 @@ pub struct Token {
     #[serde(rename = "type")]
     pub type_: TokenType,
     pub expires: DateTime<Utc>,
+}
+
+impl PrimaryKey<String> for User {
+    fn get_pk(&self) -> String {
+        self.email.clone()
+    }
+}
+
+impl PrimaryKey<String> for Token {
+    fn get_pk(&self) -> String {
+        self.token.clone()
+    }
 }

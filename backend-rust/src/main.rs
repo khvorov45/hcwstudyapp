@@ -31,7 +31,7 @@ fn message_loop_forever<T: std::fmt::Debug>(
     loop {
         let line = read_input(prompt, rl)?;
         match process(line.as_str(), db, rl) {
-            Ok(_) => println!("success"),
+            Ok(_) => {}
             Err(e) => println!("{}", e),
         }
     }

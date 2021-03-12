@@ -1,5 +1,6 @@
 use crate::{
     data::{current, previous},
+    error::Error,
     Result,
 };
 use anyhow::Context;
@@ -104,16 +105,20 @@ impl Db {
         self.tokens.convert();
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
-        self.users.insert(user);
+        self.users.insert(user)?;
         Ok(())
     }
     pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
-        self.tokens.insert(token);
+        self.tokens.insert(token)?;
         Ok(())
     }
 }
 
-impl<P: Serialize + DeserializeOwned + ToCurrent<C>, C: Serialize + DeserializeOwned> Table<P, C> {
+impl<
+        P: Serialize + DeserializeOwned + ToCurrent<C>,
+        C: Serialize + DeserializeOwned + PrimaryKey<String>,
+    > Table<P, C>
+{
     /// Creates table with empty data
     pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
         log::debug!("creating table {}", name);
@@ -165,8 +170,20 @@ impl<P: Serialize + DeserializeOwned + ToCurrent<C>, C: Serialize + DeserializeO
         }
         self.current.data = converted;
     }
-    pub fn insert(&mut self, data: C) {
+    pub fn insert(&mut self, data: C) -> Result<()> {
+        if let Some(r) = self
+            .current
+            .data
+            .iter()
+            .find(|r| r.get_pk() == data.get_pk())
+        {
+            return Err(anyhow::Error::new(Error::PrimaryKeyConflict(
+                self.name.clone(),
+                r.get_pk(),
+            )));
+        }
         self.current.data.push(data);
+        Ok(())
     }
 }
 
@@ -224,4 +241,8 @@ impl<T: Serialize + DeserializeOwned> TableData<T> {
 
 pub trait ToCurrent<C> {
     fn to_current(&self) -> C;
+}
+
+pub trait PrimaryKey<K> {
+    fn get_pk(&self) -> K;
 }

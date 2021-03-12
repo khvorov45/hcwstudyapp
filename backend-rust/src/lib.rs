@@ -6,6 +6,7 @@ use structopt::StructOpt;
 
 pub mod data;
 pub mod db;
+pub mod error;
 
 pub type Result<T> = anyhow::Result<T>;
 
