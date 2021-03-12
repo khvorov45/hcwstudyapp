@@ -1,5 +1,5 @@
 use backend_rust::data::current;
-use backend_rust::db::Db;
+use backend_rust::db::{Db, Version};
 use backend_rust::{Opt, Result};
 use rustyline::Editor;
 use serde::de::DeserializeOwned;
@@ -60,8 +60,10 @@ fn read_input(prompt: &str, rl: &mut Input) -> Result<String> {
 
 fn process_db_message(message: &str, db: &mut Db, rl: &mut Input) -> Result<()> {
     match message {
+        "read" => db.read(Version::Current)?,
         "write" => db.write()?,
         "insert" => message_loop_forever(db, process_insert_message, rl, "table")?,
+        "verify" => db.verify()?,
         line => println!("unrecognized: {}", line),
     };
     Ok(())

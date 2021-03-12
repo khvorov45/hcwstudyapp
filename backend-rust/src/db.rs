@@ -104,6 +104,12 @@ impl Db {
         self.users.convert();
         self.tokens.convert();
     }
+    pub fn verify(&mut self) -> Result<()> {
+        log::debug!("verifying db");
+        self.users.verify()?;
+        self.tokens.verify()?;
+        Ok(())
+    }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
         self.users.insert(user)?;
         Ok(())
@@ -171,18 +177,15 @@ impl<
         self.current.data = converted;
     }
     pub fn insert(&mut self, data: C) -> Result<()> {
-        if let Some(r) = self
-            .current
-            .data
-            .iter()
-            .find(|r| r.get_pk() == data.get_pk())
-        {
-            return Err(anyhow::Error::new(Error::PrimaryKeyConflict(
-                self.name.clone(),
-                r.get_pk(),
-            )));
-        }
+        check_pk(self.name.as_str(), &data, &self.current.data)?;
         self.current.data.push(data);
+        Ok(())
+    }
+    pub fn verify(&self) -> Result<()> {
+        for (i, row) in self.current.data.iter().enumerate() {
+            check_pk(self.name.as_str(), row, &self.current.data[..i])?;
+            check_pk(self.name.as_str(), row, &self.current.data[(i + 1)..])?;
+        }
         Ok(())
     }
 }
@@ -245,4 +248,16 @@ pub trait ToCurrent<C> {
 
 pub trait PrimaryKey<K> {
     fn get_pk(&self) -> K;
+}
+
+pub fn check_pk<T: PrimaryKey<String>>(table: &str, row: &T, data: &[T]) -> Result<()> {
+    let row_pk = row.get_pk();
+    if data.iter().any(|r| row_pk == r.get_pk()) {
+        Err(anyhow::Error::new(Error::PrimaryKeyConflict(
+            table.to_string(),
+            row_pk,
+        )))
+    } else {
+        Ok(())
+    }
 }
