@@ -22,6 +22,10 @@ pub struct Opt {
     #[structopt(long, default_value = "hcwflustudy_rust_backend_data")]
     #[serde(default)]
     pub root_dir: PathBuf,
+    /// Port to listen to
+    #[structopt(long, default_value = "7300")]
+    #[serde(default)]
+    pub port: u16,
 }
 
 impl Opt {
