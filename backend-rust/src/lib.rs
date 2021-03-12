@@ -4,6 +4,7 @@ use std::fs;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
+pub mod api;
 pub mod data;
 pub mod db;
 pub mod error;
