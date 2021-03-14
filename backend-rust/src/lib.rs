@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 pub mod api;
+pub mod auth;
 pub mod data;
 pub mod db;
 pub mod error;

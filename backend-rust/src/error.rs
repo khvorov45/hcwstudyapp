@@ -1,9 +1,23 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum Error {
+pub enum Conflict {
     #[error("PK in table {0} conflict; value: {1}")]
-    PrimaryKeyConflict(String, String),
+    PrimaryKey(String, String),
     #[error("FK in table {0} (parent table {1}) conflict; value: {2}")]
-    ForeignKeyConflict(String, String, String),
+    ForeignKey(String, String, String),
 }
+
+#[derive(Error, Debug)]
+pub enum Unauthorized {
+    #[error("Wrong auth type, expected Bearer, got {0}")]
+    WrongAuthType(String),
+    #[error("No such token")]
+    NoSuchToken(String),
+    #[error("TokenExpired")]
+    TokenExpired(String),
+    #[error("NoUserWithToken")]
+    NoUserWithToken(String),
+}
+
+impl warp::reject::Reject for Unauthorized {}

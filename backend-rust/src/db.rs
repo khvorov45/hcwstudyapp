@@ -1,7 +1,6 @@
 use crate::{
     data::{current, previous},
-    error::Error,
-    Result,
+    error, Result,
 };
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Serialize};
@@ -122,6 +121,23 @@ impl Db {
         self.tokens.insert(token)?;
         Ok(())
     }
+
+    pub fn token_verify(
+        &self,
+        token: &str,
+    ) -> std::result::Result<current::User, error::Unauthorized> {
+        let token_row = match self.tokens.lookup(token) {
+            Some(t) => t,
+            None => return Err(error::Unauthorized::NoSuchToken(token.to_string())),
+        };
+        if token_row.expires > chrono::Utc::now() {
+            return Err(error::Unauthorized::TokenExpired(token.to_string()));
+        }
+        match self.users.lookup(token_row.user.as_str()) {
+            Some(u) => Ok(u.clone()),
+            None => Err(error::Unauthorized::NoUserWithToken(token.to_string())),
+        }
+    }
 }
 
 impl<
@@ -188,13 +204,10 @@ impl<
         self.check_row_pk_subset(row, &self.current.data)?;
         Ok(())
     }
-    fn check_row_pk_subset(&self, row: &C, data: &[C]) -> Result<()> {
+    fn check_row_pk_subset(&self, row: &C, data: &[C]) -> std::result::Result<(), error::Conflict> {
         let row_pk = row.get_pk();
         if data.iter().any(|r| row_pk == r.get_pk()) {
-            Err(anyhow::Error::new(Error::PrimaryKeyConflict(
-                self.name.clone(),
-                row_pk,
-            )))
+            Err(error::Conflict::PrimaryKey(self.name.clone(), row_pk))
         } else {
             Ok(())
         }
@@ -206,6 +219,9 @@ impl<
         }
         Ok(())
     }
+    pub fn lookup(&self, pk: &str) -> Option<&C> {
+        self.current.data.iter().find(|r| r.get_pk() == pk)
+    }
 }
 
 impl<P, C: ForeignKey<String>> Table<P, C> {
@@ -213,14 +229,14 @@ impl<P, C: ForeignKey<String>> Table<P, C> {
         &self,
         row: &C,
         parent: &Table<A, B>,
-    ) -> Result<()> {
+    ) -> std::result::Result<(), error::Conflict> {
         let row_fk = row.get_fk();
         if !parent.current.data.iter().any(|r| row_fk == r.get_pk()) {
-            Err(anyhow::Error::new(Error::ForeignKeyConflict(
+            Err(error::Conflict::ForeignKey(
                 self.name.clone(),
                 parent.name.clone(),
                 row_fk,
-            )))
+            ))
         } else {
             Ok(())
         }
