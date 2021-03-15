@@ -58,6 +58,34 @@ impl Opt {
             );
             self.root_dir = config_opts.root_dir;
         }
+        if matches.occurrences_of("port") == 0 && config_opts.port != u16::default() {
+            log::debug!(
+                "overriding default port {} with config {}",
+                self.port,
+                config_opts.port
+            );
+            self.port = config_opts.port;
+        }
+        if matches.occurrences_of("auth_token_length") == 0
+            && config_opts.auth_token_length != usize::default()
+        {
+            log::debug!(
+                "overriding default auth token length {} with config {}",
+                self.auth_token_length,
+                config_opts.auth_token_length
+            );
+            self.auth_token_length = config_opts.auth_token_length;
+        }
+        if matches.occurrences_of("auth_token_days_to_live") == 0
+            && config_opts.auth_token_days_to_live != i64::default()
+        {
+            log::debug!(
+                "overriding default auth token days to live {} with config {}",
+                self.auth_token_days_to_live,
+                config_opts.auth_token_days_to_live
+            );
+            self.auth_token_days_to_live = config_opts.auth_token_days_to_live;
+        }
         Ok(())
     }
 }
