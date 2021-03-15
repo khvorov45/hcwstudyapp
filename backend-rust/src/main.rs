@@ -10,7 +10,7 @@ async fn main() -> Result<()> {
     let mut opt = Opt::from_args();
     opt.read_config()?;
 
-    let db = Db::new(opt.root_dir.as_path())?;
+    let db = Db::new(opt.root_dir.as_path(), opt.default_admin_email.as_str())?;
     let db_ref = Arc::new(Mutex::new(db));
 
     let routes = api::routes(

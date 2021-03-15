@@ -55,7 +55,7 @@ impl Db {
     /// Will read in the data depending on the initial state of the directories
     /// By the time it's done, the root directory and the current directory
     /// inside it should be created. The previous directory isn't used post-creation.
-    pub fn new(dir: &Path) -> Result<Self> {
+    pub fn new(dir: &Path, default_admin_email: &str) -> Result<Self> {
         log::debug!("initializing db at root directory {:?}", dir);
 
         let dirs = DbDirs::new(dir)?;
@@ -71,7 +71,7 @@ impl Db {
 
         match db.dirs.init_state {
             DbDirsInitState::Previous => {
-                db.read(Version::Previous)?;
+                db.read(Version::Previous, default_admin_email)?;
                 db.convert();
                 // Create directory right before writing so that there isn't anything to
                 // clean up if any step before this fails
@@ -79,7 +79,7 @@ impl Db {
                 db.write()?;
             }
             DbDirsInitState::Current => {
-                db.read(Version::Current)?;
+                db.read(Version::Current, default_admin_email)?;
             }
             // The data is empty by default anyway, don't need to read
             DbDirsInitState::None => {}
@@ -87,9 +87,17 @@ impl Db {
 
         Ok(db)
     }
-    pub fn read(&mut self, version: Version) -> Result<()> {
+    pub fn read(&mut self, version: Version, default_admin_email: &str) -> Result<()> {
         log::debug!("reading db version {:?} from disk", version);
         self.users.read(version)?;
+        if self.users.current.data.is_empty() {
+            self.users.insert(current::User {
+                email: default_admin_email.to_string(),
+                access_group: current::AccessGroup::Admin,
+                kind: current::UserKind::Manual,
+                deidentified_export: false,
+            })
+        }
         self.tokens.read(version)?;
         Ok(())
     }

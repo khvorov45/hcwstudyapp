@@ -35,6 +35,10 @@ pub struct Opt {
     #[structopt(long, default_value = "30")]
     #[serde(default)]
     pub auth_token_days_to_live: i64,
+    /// Default admin email
+    #[structopt(long, default_value = "admin@example.com")]
+    #[serde(default)]
+    pub default_admin_email: String,
 }
 
 impl Opt {
@@ -85,6 +89,16 @@ impl Opt {
                 config_opts.auth_token_days_to_live
             );
             self.auth_token_days_to_live = config_opts.auth_token_days_to_live;
+        }
+        if matches.occurrences_of("default_admin_email") == 0
+            && config_opts.default_admin_email != String::default()
+        {
+            log::debug!(
+                "overriding default admin email {} with config {}",
+                self.default_admin_email,
+                config_opts.default_admin_email
+            );
+            self.default_admin_email = config_opts.default_admin_email;
         }
         Ok(())
     }
