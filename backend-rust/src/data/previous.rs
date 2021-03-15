@@ -48,7 +48,7 @@ pub struct Token {
     pub token: String,
     #[serde(rename = "type")]
     pub type_: TokenType,
-    pub expires: DateTime<Utc>,
+    pub expires: Option<DateTime<Utc>>,
 }
 
 impl PrimaryKey<String> for User {
@@ -73,8 +73,8 @@ impl Token {
     pub fn new(email: &str, type_: TokenType, len: usize, days_to_live: i64) -> (String, Self) {
         let before_hash = auth::random_string(len);
         let expires = match type_ {
-            TokenType::Session => chrono::Utc::now() + chrono::Duration::days(days_to_live),
-            TokenType::Api => chrono::Utc::now() + chrono::Duration::weeks(999),
+            TokenType::Session => Some(chrono::Utc::now() + chrono::Duration::days(days_to_live)),
+            TokenType::Api => None,
         };
         let token = Self {
             user: email.to_string(),
@@ -83,5 +83,11 @@ impl Token {
             expires,
         };
         (before_hash, token)
+    }
+    pub fn is_expired(&self) -> bool {
+        if self.expires.is_none() {
+            return false;
+        }
+        self.expires.unwrap() < chrono::Utc::now()
     }
 }

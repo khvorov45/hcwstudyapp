@@ -1,3 +1,4 @@
 target
 hsf_config.toml
 hsf-db-dev
+*.sh
