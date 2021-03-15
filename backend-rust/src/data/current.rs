@@ -72,11 +72,15 @@ impl ForeignKey<String> for Token {
 impl Token {
     pub fn new(email: &str, type_: TokenType, len: usize, days_to_live: i64) -> (String, Self) {
         let before_hash = auth::random_string(len);
+        let expires = match type_ {
+            TokenType::Session => chrono::Utc::now() + chrono::Duration::days(days_to_live),
+            TokenType::Api => chrono::Utc::now() + chrono::Duration::weeks(999),
+        };
         let token = Self {
             user: email.to_string(),
             token: auth::hash(before_hash.as_str()),
             type_,
-            expires: chrono::Utc::now() + chrono::Duration::days(days_to_live),
+            expires,
         };
         (before_hash, token)
     }
