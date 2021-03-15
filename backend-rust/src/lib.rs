@@ -31,6 +31,10 @@ pub struct Opt {
     #[structopt(long, default_value = "30")]
     #[serde(default)]
     pub auth_token_length: usize,
+    /// Auth token days to live
+    #[structopt(long, default_value = "30")]
+    #[serde(default)]
+    pub auth_token_days_to_live: i64,
 }
 
 impl Opt {

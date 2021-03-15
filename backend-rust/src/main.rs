@@ -13,7 +13,11 @@ async fn main() -> Result<()> {
     let db = Db::new(opt.root_dir.as_path())?;
     let db_ref = Arc::new(Mutex::new(db));
 
-    let routes = api::routes(db_ref.clone(), opt.auth_token_length);
+    let routes = api::routes(
+        db_ref.clone(),
+        opt.auth_token_length,
+        opt.auth_token_days_to_live,
+    );
 
     let server = tokio::spawn(async move {
         warp::serve(routes).run(([127, 0, 0, 1], opt.port)).await;

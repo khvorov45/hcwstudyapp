@@ -7,10 +7,14 @@ use warp::{http::StatusCode, Filter, Rejection, Reply};
 
 type Db = Arc<Mutex<db::Db>>;
 
-pub fn routes(db: Db, len: usize) -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
+pub fn routes(
+    db: Db,
+    token_len: usize,
+    token_days_to_live: i64,
+) -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
     get_users(db.clone())
         .or(auth_token_verify(db.clone()))
-        .or(auth_token_send(db, len))
+        .or(auth_token_send(db, token_len, token_days_to_live))
         .recover(handle_rejection)
 }
 
@@ -53,6 +57,7 @@ fn auth_header() -> impl Filter<Extract = (String,), Error = Rejection> + Clone 
 fn auth_token_send(
     db: Db,
     len: usize,
+    days_to_live: i64,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     #[derive(Deserialize)]
     struct Query {
@@ -65,7 +70,8 @@ fn auth_token_send(
         .and(warp::query())
         .and(with_db(db))
         .and_then(move |query: Query, db: Db| async move {
-            let (before_hash, token) = current::Token::new(query.email.as_str(), query.type_, len);
+            let (before_hash, token) =
+                current::Token::new(query.email.as_str(), query.type_, len, days_to_live);
             log::info!("TEMPORARY: token to be sent is {}", before_hash);
             match db.lock().await.insert_token(token) {
                 Ok(()) => Ok(reply_no_content()),
