@@ -1,4 +1,5 @@
 use crate::{
+    auth,
     data::{current, previous},
     error, Result,
 };
@@ -129,7 +130,7 @@ impl Db {
         &self,
         token: &str,
     ) -> std::result::Result<current::User, error::Unauthorized> {
-        let token_row = match self.tokens.lookup(token) {
+        let token_row = match self.tokens.lookup(auth::hash(token).as_str()) {
             Some(t) => t,
             None => return Err(error::Unauthorized::NoSuchToken(token.to_string())),
         };
