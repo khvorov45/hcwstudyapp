@@ -23,3 +23,4 @@ warp = "0.3"
 rand = "0.8"
 sha2 = "0.9"
 hex = "0.4"
+http-api-problem = {version="0.21", features=["warp"]}

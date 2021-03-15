@@ -1,9 +1,11 @@
-use crate::error;
+use crate::{error, Result};
 
-pub fn parse_bearer_header(raw: &str) -> Result<&str, error::Unauthorized> {
+pub fn parse_bearer_header(raw: &str) -> Result<&str> {
     let header: Vec<&str> = raw.splitn(2, ' ').collect();
     if header[0] != "Bearer" {
-        return Err(error::Unauthorized::WrongAuthType(header[0].to_string()));
+        return Err(anyhow::Error::new(error::Unauthorized::WrongAuthType(
+            header[0].to_string(),
+        )));
     }
     Ok(header[1])
 }

@@ -1,4 +1,6 @@
+use http_api_problem::HttpApiProblem;
 use thiserror::Error;
+use warp::http::StatusCode;
 
 #[derive(Error, Debug)]
 pub enum Conflict {
@@ -22,3 +24,17 @@ pub enum Unauthorized {
 
 impl warp::reject::Reject for Unauthorized {}
 impl warp::reject::Reject for Conflict {}
+
+pub fn from_anyhow(err: anyhow::Error) -> HttpApiProblem {
+    if let Some(e) = err.downcast_ref::<HttpApiProblem>() {
+        return e.clone();
+    }
+
+    let status = match &err {
+        _ if err.is::<Unauthorized>() => StatusCode::UNAUTHORIZED,
+        _ if err.is::<Conflict>() => StatusCode::CONFLICT,
+        _ => StatusCode::INTERNAL_SERVER_ERROR,
+    };
+
+    HttpApiProblem::with_title_and_type_from_status(status).set_detail(format!("{}", err))
+}

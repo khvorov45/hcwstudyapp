@@ -36,6 +36,13 @@ pub struct Table<P, C> {
     pub name: String,
     pub previous: TableData<P>,
     pub current: TableData<C>,
+    pub insert_behavior: InsertBehavior,
+}
+
+#[derive(PartialEq)]
+pub enum InsertBehavior {
+    Write,
+    NoWrite,
 }
 
 pub struct TableData<T> {
@@ -60,8 +67,8 @@ impl Db {
 
         let dirs = DbDirs::new(dir)?;
 
-        let users = Table::new("User", &dirs)?;
-        let tokens = Table::new("Token", &dirs)?;
+        let users = Table::new("User", &dirs, InsertBehavior::Write)?;
+        let tokens = Table::new("Token", &dirs, InsertBehavior::Write)?;
 
         let mut db = Self {
             dirs,
@@ -96,7 +103,7 @@ impl Db {
                 access_group: current::AccessGroup::Admin,
                 kind: current::UserKind::Manual,
                 deidentified_export: false,
-            })
+            })?;
         }
         self.tokens.read(version)?;
         Ok(())
@@ -119,35 +126,37 @@ impl Db {
         self.tokens.verify_fk(&self.users)?;
         Ok(())
     }
-    pub fn insert_user(&mut self, user: current::User) -> std::result::Result<(), error::Conflict> {
+    pub fn insert_user(&mut self, user: current::User) -> Result<()> {
         self.users.check_row_pk(&user)?;
-        self.users.insert(user);
+        self.users.insert(user)?;
         Ok(())
     }
-    pub fn insert_token(
-        &mut self,
-        token: current::Token,
-    ) -> std::result::Result<(), error::Conflict> {
+    pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
         self.tokens.check_row_pk(&token)?;
         self.tokens.check_row_fk(&token, &self.users)?;
-        self.tokens.insert(token);
+        self.tokens.insert(token)?;
         Ok(())
     }
 
-    pub fn token_verify(
-        &self,
-        token: &str,
-    ) -> std::result::Result<current::User, error::Unauthorized> {
+    pub fn token_verify(&self, token: &str) -> Result<current::User> {
         let token_row = match self.tokens.lookup(auth::hash(token).as_str()) {
             Some(t) => t,
-            None => return Err(error::Unauthorized::NoSuchToken(token.to_string())),
+            None => {
+                return Err(anyhow::Error::new(error::Unauthorized::NoSuchToken(
+                    token.to_string(),
+                )))
+            }
         };
         if token_row.is_expired() {
-            return Err(error::Unauthorized::TokenExpired(token.to_string()));
+            return Err(anyhow::Error::new(error::Unauthorized::TokenExpired(
+                token.to_string(),
+            )));
         }
         match self.users.lookup(token_row.user.as_str()) {
             Some(u) => Ok(u.clone()),
-            None => Err(error::Unauthorized::NoUserWithToken(token.to_string())),
+            None => Err(anyhow::Error::new(error::Unauthorized::NoUserWithToken(
+                token.to_string(),
+            ))),
         }
     }
 }
@@ -158,7 +167,7 @@ impl<
     > Table<P, C>
 {
     /// Creates table with empty data
-    pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
+    pub fn new(name: &str, dirs: &DbDirs, insert_behavior: InsertBehavior) -> Result<Self> {
         log::debug!("creating table {}", name);
         let file_name = format!("{}.json", name);
         let previous = dirs.previous.join(file_name.as_str());
@@ -176,6 +185,7 @@ impl<
             name: name.to_string(),
             previous: TableData::new(previous),
             current: TableData::new(current),
+            insert_behavior,
         })
     }
     pub fn read(&mut self, version: Version) -> Result<()> {
@@ -208,17 +218,24 @@ impl<
         }
         self.current.data = converted;
     }
-    pub fn insert(&mut self, data: C) {
+    pub fn insert(&mut self, data: C) -> Result<()> {
         self.current.data.push(data);
+        if self.insert_behavior == InsertBehavior::Write {
+            self.write()?;
+        }
+        Ok(())
     }
-    pub fn check_row_pk(&self, row: &C) -> std::result::Result<(), error::Conflict> {
+    pub fn check_row_pk(&self, row: &C) -> Result<()> {
         self.check_row_pk_subset(row, &self.current.data)?;
         Ok(())
     }
-    fn check_row_pk_subset(&self, row: &C, data: &[C]) -> std::result::Result<(), error::Conflict> {
+    fn check_row_pk_subset(&self, row: &C, data: &[C]) -> Result<()> {
         let row_pk = row.get_pk();
         if data.iter().any(|r| row_pk == r.get_pk()) {
-            Err(error::Conflict::PrimaryKey(self.name.clone(), row_pk))
+            Err(anyhow::Error::new(error::Conflict::PrimaryKey(
+                self.name.clone(),
+                row_pk,
+            )))
         } else {
             Ok(())
         }
@@ -240,14 +257,14 @@ impl<P, C: ForeignKey<String>> Table<P, C> {
         &self,
         row: &C,
         parent: &Table<A, B>,
-    ) -> std::result::Result<(), error::Conflict> {
+    ) -> Result<()> {
         let row_fk = row.get_fk();
         if !parent.current.data.iter().any(|r| row_fk == r.get_pk()) {
-            Err(error::Conflict::ForeignKey(
+            Err(anyhow::Error::new(error::Conflict::ForeignKey(
                 self.name.clone(),
                 parent.name.clone(),
                 row_fk,
-            ))
+            )))
         } else {
             Ok(())
         }
