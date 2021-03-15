@@ -54,10 +54,10 @@ impl Db {
     /// Will read in the data depending on the initial state of the directories
     /// By the time it's done, the root directory and the current directory
     /// inside it should be created. The previous directory isn't used post-creation.
-    pub fn new(dir: PathBuf) -> Result<Self> {
+    pub fn new(dir: &Path) -> Result<Self> {
         log::debug!("initializing db at root directory {:?}", dir);
 
-        let dirs = DbDirs::new(dir.as_path())?;
+        let dirs = DbDirs::new(dir)?;
 
         let users = Table::new("User", &dirs)?;
         let tokens = Table::new("Token", &dirs)?;
