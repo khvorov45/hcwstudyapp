@@ -1,4 +1,7 @@
-use crate::db::{ForeignKey, PrimaryKey};
+use crate::{
+    auth,
+    db::{ForeignKey, PrimaryKey},
+};
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 
@@ -63,5 +66,16 @@ impl PrimaryKey<String> for Token {
 impl ForeignKey<String> for Token {
     fn get_fk(&self) -> String {
         self.user.clone()
+    }
+}
+
+impl Token {
+    pub fn new(email: &str, type_: TokenType, len: usize) -> Self {
+        Self {
+            user: email.to_string(),
+            token: auth::random_string(len),
+            type_,
+            expires: chrono::Utc::now(),
+        }
     }
 }

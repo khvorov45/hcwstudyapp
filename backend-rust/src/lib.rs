@@ -27,6 +27,10 @@ pub struct Opt {
     #[structopt(long, default_value = "7300")]
     #[serde(default)]
     pub port: u16,
+    /// Auth token length
+    #[structopt(long, default_value = "30")]
+    #[serde(default)]
+    pub auth_token_length: usize,
 }
 
 impl Opt {

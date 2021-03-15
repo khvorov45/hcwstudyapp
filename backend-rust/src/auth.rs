@@ -7,3 +7,12 @@ pub fn parse_bearer_header(raw: &str) -> Result<&str, error::Unauthorized> {
     }
     Ok(header[1])
 }
+
+pub fn random_string(len: usize) -> String {
+    use rand::Rng;
+    rand::thread_rng()
+        .sample_iter(&rand::distributions::Alphanumeric)
+        .take(len)
+        .map(|x| x as char)
+        .collect()
+}

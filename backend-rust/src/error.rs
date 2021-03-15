@@ -21,3 +21,4 @@ pub enum Unauthorized {
 }
 
 impl warp::reject::Reject for Unauthorized {}
+impl warp::reject::Reject for Conflict {}

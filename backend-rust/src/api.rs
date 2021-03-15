@@ -1,4 +1,5 @@
-use crate::{auth, db, error};
+use crate::{auth, data::current, db, error};
+use serde_derive::Deserialize;
 use std::convert::Infallible;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -6,9 +7,10 @@ use warp::{http::StatusCode, Filter, Rejection, Reply};
 
 type Db = Arc<Mutex<db::Db>>;
 
-pub fn routes(db: Db) -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
+pub fn routes(db: Db, len: usize) -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
     get_users(db.clone())
-        .or(auth_token_verify(db))
+        .or(auth_token_verify(db.clone()))
+        .or(auth_token_send(db, len))
         .recover(handle_rejection)
 }
 
@@ -48,6 +50,33 @@ fn auth_header() -> impl Filter<Extract = (String,), Error = Rejection> + Clone 
     })
 }
 
+fn auth_token_send(
+    db: Db,
+    len: usize,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    #[derive(Deserialize)]
+    struct Query {
+        email: String,
+        #[serde(rename = "type")]
+        type_: current::TokenType,
+    }
+    warp::path!("auth" / "token" / "send")
+        .and(warp::post())
+        .and(warp::query())
+        .and(with_db(db))
+        .and_then(move |query: Query, db: Db| async move {
+            let token = current::Token::new(query.email.as_str(), query.type_, len);
+            match db.lock().await.insert_token(token) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(warp::reject::custom(e)),
+            }
+        })
+}
+
+fn reply_no_content() -> impl warp::Reply {
+    warp::reply::with_status(warp::reply(), StatusCode::NO_CONTENT)
+}
+
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
     let status;
     let message;
@@ -55,6 +84,9 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
 
     if let Some(e) = err.find::<error::Unauthorized>() {
         status = StatusCode::UNAUTHORIZED;
+        message = format!("{:?}", e);
+    } else if let Some(e) = err.find::<error::Conflict>() {
+        status = StatusCode::CONFLICT;
         message = format!("{:?}", e);
     } else {
         status = StatusCode::INTERNAL_SERVER_ERROR;

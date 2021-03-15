@@ -110,15 +110,18 @@ impl Db {
         self.tokens.verify_fk(&self.users)?;
         Ok(())
     }
-    pub fn insert_user(&mut self, user: current::User) -> Result<()> {
+    pub fn insert_user(&mut self, user: current::User) -> std::result::Result<(), error::Conflict> {
         self.users.check_row_pk(&user)?;
-        self.users.insert(user)?;
+        self.users.insert(user);
         Ok(())
     }
-    pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
+    pub fn insert_token(
+        &mut self,
+        token: current::Token,
+    ) -> std::result::Result<(), error::Conflict> {
         self.tokens.check_row_pk(&token)?;
         self.tokens.check_row_fk(&token, &self.users)?;
-        self.tokens.insert(token)?;
+        self.tokens.insert(token);
         Ok(())
     }
 
@@ -196,11 +199,10 @@ impl<
         }
         self.current.data = converted;
     }
-    pub fn insert(&mut self, data: C) -> Result<()> {
+    pub fn insert(&mut self, data: C) {
         self.current.data.push(data);
-        Ok(())
     }
-    pub fn check_row_pk(&self, row: &C) -> Result<()> {
+    pub fn check_row_pk(&self, row: &C) -> std::result::Result<(), error::Conflict> {
         self.check_row_pk_subset(row, &self.current.data)?;
         Ok(())
     }

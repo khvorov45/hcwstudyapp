@@ -12,7 +12,7 @@ async fn main() -> Result<()> {
 
     let db = Db::new(opt.root_dir)?;
 
-    let routes = api::routes(Arc::new(Mutex::new(db)));
+    let routes = api::routes(Arc::new(Mutex::new(db)), opt.auth_token_length);
 
     warp::serve(routes).run(([127, 0, 0, 1], opt.port)).await;
 

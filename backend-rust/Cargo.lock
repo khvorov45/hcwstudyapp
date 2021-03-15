@@ -49,6 +49,7 @@ dependencies = [
  "chrono",
  "log",
  "pretty_env_logger",
+ "rand 0.8.3",
  "rustyline",
  "serde",
  "serde_derive",
