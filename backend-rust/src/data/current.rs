@@ -45,7 +45,7 @@ pub enum TokenType {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Token {
     pub user: String,
-    pub token: String,
+    pub hash: String,
     #[serde(rename = "type")]
     pub type_: TokenType,
     pub expires: Option<DateTime<Utc>>,
@@ -59,7 +59,7 @@ impl PrimaryKey<String> for User {
 
 impl PrimaryKey<String> for Token {
     fn get_pk(&self) -> String {
-        self.token.clone()
+        self.hash.clone()
     }
 }
 
@@ -78,7 +78,7 @@ impl Token {
         };
         let token = Self {
             user: email.to_string(),
-            token: auth::hash(before_hash.as_str()),
+            hash: auth::hash(before_hash.as_str()),
             type_,
             expires,
         };
