@@ -70,12 +70,14 @@ impl ForeignKey<String> for Token {
 }
 
 impl Token {
-    pub fn new(email: &str, type_: TokenType, len: usize) -> Self {
-        Self {
+    pub fn new(email: &str, type_: TokenType, len: usize) -> (String, Self) {
+        let before_hash = auth::random_string(len);
+        let token = Self {
             user: email.to_string(),
-            token: auth::random_string(len),
+            token: auth::hash(before_hash.as_str()),
             type_,
             expires: chrono::Utc::now(),
-        }
+        };
+        (before_hash, token)
     }
 }

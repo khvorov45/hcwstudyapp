@@ -21,3 +21,5 @@ thiserror="1"
 tokio = { version = "1", features = ["full"] }
 warp = "0.3"
 rand = "0.8"
+sha2 = "0.9"
+hex = "0.4"

@@ -16,3 +16,11 @@ pub fn random_string(len: usize) -> String {
         .map(|x| x as char)
         .collect()
 }
+
+pub fn hash(s: &str) -> String {
+    use sha2::Digest;
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(s.as_bytes());
+    let hash_result = hasher.finalize();
+    hex::encode(&hash_result)
+}

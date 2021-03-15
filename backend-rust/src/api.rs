@@ -65,7 +65,8 @@ fn auth_token_send(
         .and(warp::query())
         .and(with_db(db))
         .and_then(move |query: Query, db: Db| async move {
-            let token = current::Token::new(query.email.as_str(), query.type_, len);
+            let (before_hash, token) = current::Token::new(query.email.as_str(), query.type_, len);
+            log::info!("TEMPORARY: token to be sent is {}", before_hash);
             match db.lock().await.insert_token(token) {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(warp::reject::custom(e)),
