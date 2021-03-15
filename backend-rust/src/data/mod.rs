@@ -65,7 +65,7 @@ impl ToCurrent<current::Token> for previous::Token {
             user: self.user.clone(),
             token: self.token.clone(),
             type_: self.type_.to_current(),
-            expires: self.expires,
+            expires: Some(self.expires),
         }
     }
 }

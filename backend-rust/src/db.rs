@@ -133,7 +133,7 @@ impl Db {
             Some(t) => t,
             None => return Err(error::Unauthorized::NoSuchToken(token.to_string())),
         };
-        if token_row.expires > chrono::Utc::now() {
+        if token_row.is_expired() {
             return Err(error::Unauthorized::TokenExpired(token.to_string()));
         }
         match self.users.lookup(token_row.user.as_str()) {
