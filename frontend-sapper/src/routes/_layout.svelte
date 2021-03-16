@@ -80,7 +80,7 @@
     $token = await res.json()
   }
 
-  const protectedRoutes = ["protected"]
+  const protectedRoutes = ["tables"]
   $: segmentIsProtected = protectedRoutes.some(
     (r) => segment !== undefined && segment.startsWith(r)
   )
