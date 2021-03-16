@@ -32,6 +32,11 @@ export default {
         values: {
           "process.browser": true,
           "process.env.NODE_ENV": JSON.stringify(mode),
+          "process.env.HFS_API_ROOT": JSON.stringify(
+            dev
+              ? "http://localhost:7300"
+              : "https://reports.hcwflustudy.com/api"
+          ),
         },
       }),
       svelte({

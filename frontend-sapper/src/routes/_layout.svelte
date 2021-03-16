@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import Nav from "../components/Nav.svelte"
+  import { API_ROOT } from "../lib/config"
   import { token, loginStatus } from "../lib/state"
 
   export let segment: string | undefined
@@ -33,7 +34,7 @@
 
     let res: any
     try {
-      res = await fetch("http://localhost:7001/auth/token/verify", {
+      res = await fetch(`${API_ROOT}/auth/token/verify`, {
         headers: {
           Authorization: `Bearer ${$token}`,
         },

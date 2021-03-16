@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { API_ROOT } from "../lib/config"
+
   import type { AsyncStatus } from "../lib/util"
 
   let email = ""
@@ -11,16 +13,23 @@
   async function handleSend() {
     emailStatus.status = "loading"
     emailStatus.error = null
-    const res = await fetch(
-      `http://localhost:7001/auth/token/send?email=${email}&type=session`,
-      { method: "POST" }
-    )
+    let res: any
+    try {
+      res = await fetch(
+        `${API_ROOT}/auth/token/send?email=${email}&type=Session`,
+        { method: "POST" }
+      )
+    } catch (e) {
+      emailStatus.status = "error"
+      emailStatus.error = "NETWORK_ERROR: " + e.message
+      return
+    }
     if (res.status !== 204) {
       emailStatus.status = "error"
       emailStatus.error = await res.json()
     } else {
-      emailStatus.status = "error"
-      emailStatus.error = await res.json()
+      emailStatus.status = "success"
+      emailStatus.error = null
     }
   }
 </script>
