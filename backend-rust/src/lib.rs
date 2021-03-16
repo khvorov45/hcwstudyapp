@@ -8,6 +8,7 @@ pub mod api;
 pub mod auth;
 pub mod data;
 pub mod db;
+pub mod email;
 pub mod error;
 
 pub type Result<T> = anyhow::Result<T>;
@@ -39,6 +40,22 @@ pub struct Opt {
     #[structopt(long, default_value = "admin@example.com")]
     #[serde(default)]
     pub default_admin_email: String,
+    /// Email host
+    #[structopt(long, default_value = "smtp.example.com")]
+    #[serde(default)]
+    pub email_host: String,
+    /// Email account name
+    #[structopt(long, default_value = "email@example.com")]
+    #[serde(default)]
+    pub email_username: String,
+    /// Email password
+    #[structopt(long, default_value = "password")]
+    #[serde(default)]
+    pub email_password: String,
+    /// Frontend root (for access links)
+    #[structopt(long, default_value = "https://reports.hcwflustudy.com")]
+    #[serde(default)]
+    pub frontend_root: String,
 }
 
 impl Opt {
@@ -99,6 +116,45 @@ impl Opt {
                 config_opts.default_admin_email
             );
             self.default_admin_email = config_opts.default_admin_email;
+        }
+        if matches.occurrences_of("email_host") == 0 && config_opts.email_host != String::default()
+        {
+            log::debug!(
+                "overriding default email host {} with config {}",
+                self.email_host,
+                config_opts.email_host
+            );
+            self.email_host = config_opts.email_host;
+        }
+        if matches.occurrences_of("email_username") == 0
+            && config_opts.email_username != String::default()
+        {
+            log::debug!(
+                "overriding default email username {} with config {}",
+                self.email_username,
+                config_opts.email_username
+            );
+            self.email_username = config_opts.email_username;
+        }
+        if matches.occurrences_of("email_password") == 0
+            && config_opts.email_password != String::default()
+        {
+            log::debug!(
+                "overriding default email password {} with config {}",
+                self.email_password,
+                config_opts.email_password
+            );
+            self.email_password = config_opts.email_password;
+        }
+        if matches.occurrences_of("frontend_root") == 0
+            && config_opts.frontend_root != String::default()
+        {
+            log::debug!(
+                "overriding default frontend root {} with config {}",
+                self.frontend_root,
+                config_opts.frontend_root
+            );
+            self.frontend_root = config_opts.frontend_root;
         }
         Ok(())
     }

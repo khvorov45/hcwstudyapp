@@ -1,4 +1,10 @@
-use crate::{auth, data::current, db, error};
+use crate::{
+    auth,
+    data::current,
+    db,
+    email::{self, Email},
+    error,
+};
 use http_api_problem::HttpApiProblem;
 use serde_derive::Deserialize;
 use std::convert::Infallible;
@@ -7,15 +13,17 @@ use tokio::sync::Mutex;
 use warp::{http::StatusCode, Filter, Rejection, Reply};
 
 type Db = Arc<Mutex<db::Db>>;
+type Mailer = Arc<email::Mailer>;
+type Opt = Arc<crate::Opt>;
 
 pub fn routes(
     db: Db,
-    token_len: usize,
-    token_days_to_live: i64,
+    opt: Opt,
+    mailer: Mailer,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     get_users(db.clone())
         .or(auth_token_verify(db.clone()))
-        .or(auth_token_send(db, token_len, token_days_to_live))
+        .or(auth_token_send(db, opt, mailer))
         .recover(handle_rejection)
 }
 
@@ -31,6 +39,14 @@ fn get_users(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + C
 
 fn with_db(db: Db) -> impl Filter<Extract = (Db,), Error = Infallible> + Clone {
     warp::any().map(move || db.clone())
+}
+
+fn with_mailer(mailer: Mailer) -> impl Filter<Extract = (Mailer,), Error = Infallible> + Clone {
+    warp::any().map(move || mailer.clone())
+}
+
+fn with_opt(opt: Opt) -> impl Filter<Extract = (Opt,), Error = Infallible> + Clone {
+    warp::any().map(move || opt.clone())
 }
 
 fn auth_token_verify(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
@@ -57,8 +73,8 @@ fn auth_header() -> impl Filter<Extract = (String,), Error = Rejection> + Clone 
 
 fn auth_token_send(
     db: Db,
-    len: usize,
-    days_to_live: i64,
+    opt: Opt,
+    mailer: Mailer,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     #[derive(Deserialize)]
     struct Query {
@@ -70,15 +86,36 @@ fn auth_token_send(
         .and(warp::post())
         .and(warp::query())
         .and(with_db(db))
-        .and_then(move |query: Query, db: Db| async move {
-            let (before_hash, token) =
-                current::Token::new(query.email.as_str(), query.type_, len, days_to_live);
-            log::info!("TEMPORARY: token to be sent is {}", before_hash);
-            match db.lock().await.insert_token(token) {
-                Ok(()) => Ok(reply_no_content()),
-                Err(e) => Err(reject(e)),
-            }
-        })
+        .and(with_opt(opt))
+        .and(with_mailer(mailer))
+        .and_then(
+            move |query: Query, db: Db, opt: Opt, mailer: Mailer| async move {
+                let (before_hash, token) = current::Token::new(
+                    query.email.as_str(),
+                    query.type_,
+                    opt.auth_token_length,
+                    opt.auth_token_days_to_live,
+                );
+                match db.lock().await.insert_token(token) {
+                    Ok(()) => {
+                        let link = format!("{}/?token={}", opt.frontend_root, before_hash);
+                        let email = Email {
+                            to: query.email,
+                            subject: "NIH HCW Study Access Link".to_string(),
+                            body: format!(
+                                "<p>NIH HCW Flu study access link:</p><br/><a href={0}>{0}</a>",
+                                link
+                            ),
+                        };
+                        match email.send(mailer).await {
+                            Ok(()) => Ok(reply_no_content()),
+                            Err(e) => Err(reject(e)),
+                        }
+                    }
+                    Err(e) => Err(reject(e)),
+                }
+            },
+        )
 }
 
 fn reply_no_content() -> impl warp::Reply {
