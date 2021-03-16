@@ -67,7 +67,7 @@
     }
     let res: any
     try {
-      res = await fetch("http://localhost:7001/auth/token", {
+      res = await fetch(`${API_ROOT}/auth/token`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${$token}`,
