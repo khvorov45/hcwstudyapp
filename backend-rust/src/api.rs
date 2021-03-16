@@ -10,7 +10,10 @@ use serde_derive::Deserialize;
 use std::convert::Infallible;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use warp::{http::StatusCode, Filter, Rejection, Reply};
+use warp::{
+    http::{Method, StatusCode},
+    Filter, Rejection, Reply,
+};
 
 type Db = Arc<Mutex<db::Db>>;
 type Mailer = Arc<email::Mailer>;
@@ -21,10 +24,16 @@ pub fn routes(
     opt: Opt,
     mailer: Mailer,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_methods(&[Method::GET, Method::POST, Method::DELETE, Method::PUT])
+        .allow_headers(vec!["Authorization", "Content-Type"]);
     get_users(db.clone())
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db, opt, mailer))
+        .with(cors.clone())
         .recover(handle_rejection)
+        .with(cors)
 }
 
 fn get_users(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
