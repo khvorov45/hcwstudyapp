@@ -59,7 +59,6 @@ dependencies = [
  "anyhow",
  "chrono",
  "hex",
- "http-api-problem",
  "lettre",
  "log",
  "pretty_env_logger",
@@ -480,18 +479,6 @@ dependencies = [
  "bytes",
  "fnv",
  "itoa",
-]
-
-[[package]]
-name = "http-api-problem"
-version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d8a118014b18349bb3a25d7a45bd7449bbdc74dfd5ee6cc63ff85fffd608e88"
-dependencies = [
- "http",
- "serde",
- "serde_json",
- "warp",
 ]
 
 [[package]]
@@ -1269,9 +1256,6 @@ name = "serde"
 version = "1.0.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd761ff957cb2a45fbb9ab3da6512de9de55872866160b23c25f1a841e99d29f"
-dependencies = [
- "serde_derive",
-]
 
 [[package]]
 name = "serde_derive"

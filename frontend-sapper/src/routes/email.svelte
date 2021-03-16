@@ -26,7 +26,7 @@
     }
     if (res.status !== 204) {
       emailStatus.status = "error"
-      emailStatus.error = await res.json()
+      emailStatus.error = await res.text()
     } else {
       emailStatus.status = "success"
       emailStatus.error = null

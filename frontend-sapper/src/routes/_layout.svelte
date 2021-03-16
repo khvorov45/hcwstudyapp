@@ -46,14 +46,13 @@
       return
     }
 
-    let res_body = await res.json()
-
     if (res.status === 200) {
       $loginStatus.status = "success"
-      $loginStatus.user = res_body
+      $loginStatus.user = await res.json()
     } else {
       $loginStatus.status = "error"
       $loginStatus.user = null
+      const res_body = await res.text()
       if (res.status === 401) {
         $loginStatus.error = "UNAUTHORIZED" + res_body
       } else {

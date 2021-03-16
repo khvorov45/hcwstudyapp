@@ -5,7 +5,6 @@ use crate::{
     email::{self, Email},
     error,
 };
-use http_api_problem::HttpApiProblem;
 use serde_derive::Deserialize;
 use std::convert::Infallible;
 use std::sync::Arc;
@@ -140,15 +139,8 @@ fn reject(e: anyhow::Error) -> Rejection {
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
     log::debug!("recover filter error: {:?}", err);
 
-    if let Some(e) = err.find::<HttpApiProblem>() {
-        let code = e.status.unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
-        let reply = warp::reply::json(e);
-        let reply = warp::reply::with_status(reply, code);
-        let reply = warp::reply::with_header(
-            reply,
-            warp::http::header::CONTENT_TYPE,
-            http_api_problem::PROBLEM_JSON_MEDIA_TYPE,
-        );
+    if let Some(e) = err.find::<error::ApiProblem>() {
+        let reply = warp::reply::with_status(e.detail.clone(), e.status);
         return Ok(reply);
     }
 
