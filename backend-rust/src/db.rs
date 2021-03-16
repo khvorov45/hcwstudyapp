@@ -78,7 +78,8 @@ impl Db {
 
         match db.dirs.init_state {
             DbDirsInitState::Previous => {
-                db.read(Version::Previous, default_admin_email)?;
+                log::debug!("only previous data found, will attempt to convert");
+                db.read(Version::Previous)?;
                 db.convert();
                 // Create directory right before writing so that there isn't anything to
                 // clean up if any step before this fails
@@ -86,25 +87,31 @@ impl Db {
                 db.write()?;
             }
             DbDirsInitState::Current => {
-                db.read(Version::Current, default_admin_email)?;
+                log::debug!("current data found, reading");
+                db.read(Version::Current)?;
             }
             // The data is empty by default anyway, don't need to read
-            DbDirsInitState::None => {}
+            DbDirsInitState::None => {
+                log::debug!("no data found, not reading")
+            }
         }
 
-        Ok(db)
-    }
-    pub fn read(&mut self, version: Version, default_admin_email: &str) -> Result<()> {
-        log::debug!("reading db version {:?} from disk", version);
-        self.users.read(version)?;
-        if self.users.current.data.is_empty() {
-            self.users.insert(current::User {
+        // Make sure one admin exists
+        if db.users.current.data.is_empty() {
+            log::debug!("users empty, inserting default admin");
+            db.users.insert(current::User {
                 email: default_admin_email.to_string(),
                 access_group: current::AccessGroup::Admin,
                 kind: current::UserKind::Manual,
                 deidentified_export: false,
             })?;
         }
+
+        Ok(db)
+    }
+    pub fn read(&mut self, version: Version) -> Result<()> {
+        log::debug!("reading db version {:?} from disk", version);
+        self.users.read(version)?;
         self.tokens.read(version)?;
         Ok(())
     }
