@@ -10,6 +10,7 @@ pub mod data;
 pub mod db;
 pub mod email;
 pub mod error;
+pub mod redcap;
 
 pub type Result<T> = anyhow::Result<T>;
 
@@ -56,6 +57,14 @@ pub struct Opt {
     #[structopt(long, default_value = "https://reports.hcwflustudy.com")]
     #[serde(default)]
     pub frontend_root: String,
+    /// Redcap 2020 token
+    #[structopt(long, default_value = "")]
+    #[serde(default)]
+    pub redcap_token_2020: String,
+    /// Redcap 2021 token
+    #[structopt(long, default_value = "")]
+    #[serde(default)]
+    pub redcap_token_2021: String,
 }
 
 impl Opt {
@@ -140,9 +149,8 @@ impl Opt {
             && config_opts.email_password != String::default()
         {
             log::debug!(
-                "overriding default email password {} with config {}",
+                "overriding default email password {} with config's",
                 self.email_password,
-                config_opts.email_password
             );
             self.email_password = config_opts.email_password;
         }
@@ -155,6 +163,24 @@ impl Opt {
                 config_opts.frontend_root
             );
             self.frontend_root = config_opts.frontend_root;
+        }
+        if matches.occurrences_of("redcap_token_2020") == 0
+            && config_opts.redcap_token_2020 != String::default()
+        {
+            log::debug!(
+                "overriding default redcap token 2020 {} with config's",
+                self.redcap_token_2020,
+            );
+            self.redcap_token_2020 = config_opts.redcap_token_2020;
+        }
+        if matches.occurrences_of("redcap_token_2021") == 0
+            && config_opts.redcap_token_2021 != String::default()
+        {
+            log::debug!(
+                "overriding default redcap token 2021 {} with config's",
+                self.redcap_token_2021,
+            );
+            self.redcap_token_2021 = config_opts.redcap_token_2021;
         }
         Ok(())
     }
