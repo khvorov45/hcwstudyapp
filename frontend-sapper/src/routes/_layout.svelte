@@ -20,7 +20,6 @@
       }
     }
   })
-
   async function login() {
     if ($token === null) {
       $loginStatus.status = "error"
@@ -54,9 +53,9 @@
       $loginStatus.user = null
       const res_body = await res.text()
       if (res.status === 401) {
-        $loginStatus.error = "UNAUTHORIZED" + res_body
+        $loginStatus.error = "UNAUTHORIZED: " + res_body
       } else {
-        $loginStatus.error = "UNEXPECTED" + res_body
+        $loginStatus.error = "UNEXPECTED: " + res_body
       }
     }
   }
@@ -74,10 +73,10 @@
         },
       })
     } catch (e) {
-      console.error("NETWORK_ERROR on refresh: " + e.message)
+      console.error("NETWORK ERROR on refresh: " + e.message)
       return
     }
-    $token = await res.json()
+    $token = await res.text()
   }
 
   const protectedRoutes = ["tables"]
@@ -92,11 +91,11 @@
   {#if segmentIsProtected}
     {#if $loginStatus.status === "error"}
       <p>
-        {#if $loginStatus.error.startsWith("UNAUTHORIZED")}
+        {#if $loginStatus.error?.startsWith("UNAUTHORIZED")}
           Unauthorized to access this page. Get an access link on the <a
             href="email">email page</a
           >.
-        {:else if $loginStatus.error.startsWith("NETWORK")}
+        {:else if $loginStatus.error?.startsWith("NETWORK")}
           Network error, check back later
         {:else}
           Unexpected error, check back later
