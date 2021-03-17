@@ -3,7 +3,7 @@ use lettre::transport::smtp::authentication::Credentials;
 use lettre::{AsyncSmtpTransport, Tokio1Executor};
 use std::sync::Arc;
 use structopt::StructOpt;
-use tokio::{signal, sync::Mutex};
+use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,23 +28,9 @@ async fn main() -> Result<()> {
 
     let routes = api::routes(db_ref.clone(), opt_ref.clone(), mailer_ref);
 
-    let server = tokio::spawn(async move {
-        warp::serve(routes)
-            .run(([127, 0, 0, 1], opt_ref.port))
-            .await;
-    });
-
-    let shutdown_listener = tokio::spawn(async move {
-        signal::ctrl_c().await.expect("failed to listen to ctrl+c");
-    });
-
-    tokio::select! {
-        _ = shutdown_listener => {
-            log::info!("shutting down");
-            db_ref.lock().await.write()?;
-        }
-        _ = server => {}
-    }
+    warp::serve(routes)
+        .run(([127, 0, 0, 1], opt_ref.port))
+        .await;
 
     Ok(())
 }
