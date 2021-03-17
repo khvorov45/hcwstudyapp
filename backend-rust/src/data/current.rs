@@ -36,7 +36,7 @@ pub struct User {
     pub deidentified_export: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
 pub enum TokenType {
     Session,
     Api,

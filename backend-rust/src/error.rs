@@ -1,3 +1,4 @@
+use crate::data::current;
 use thiserror::Error;
 use warp::http::StatusCode;
 
@@ -7,6 +8,8 @@ pub enum Conflict {
     PrimaryKey(String, String),
     #[error("FK in table {0} (parent table {1}) conflict; value: {2}")]
     ForeignKey(String, String, String),
+    #[error("Wrong token type: {0:?}")]
+    WrongTokenType(current::TokenType),
 }
 
 #[derive(Error, Debug)]

@@ -166,6 +166,27 @@ impl Db {
             ))),
         }
     }
+
+    pub fn token_refresh(&mut self, token: &str, len: usize, dtl: i64) -> Result<String> {
+        let token_row = match self.tokens.lookup_mut(auth::hash(token).as_str()) {
+            Some(t) => t,
+            None => {
+                return Err(anyhow::Error::new(error::Unauthorized::NoSuchToken(
+                    token.to_string(),
+                )))
+            }
+        };
+        if token_row.type_ == current::TokenType::Api {
+            return Err(anyhow::Error::new(error::Conflict::WrongTokenType(
+                current::TokenType::Api,
+            )));
+        }
+        let before_hash = auth::random_string(len);
+        token_row.hash = auth::hash(before_hash.as_str());
+        token_row.expires = Some(chrono::Utc::now() + chrono::Duration::days(dtl));
+        self.tokens.write()?;
+        Ok(before_hash)
+    }
 }
 
 impl<
@@ -256,6 +277,9 @@ impl<
     }
     pub fn lookup(&self, pk: &str) -> Option<&C> {
         self.current.data.iter().find(|r| r.get_pk() == pk)
+    }
+    pub fn lookup_mut(&mut self, pk: &str) -> Option<&mut C> {
+        self.current.data.iter_mut().find(|r| r.get_pk() == pk)
     }
 }
 

@@ -29,7 +29,8 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     get_users(db.clone())
         .or(auth_token_verify(db.clone()))
-        .or(auth_token_send(db, opt, mailer))
+        .or(auth_token_send(db.clone(), opt.clone(), mailer))
+        .or(auth_token_refresh(db, opt))
         .with(cors.clone())
         .recover(handle_rejection)
         .with(cors)
@@ -124,6 +125,27 @@ fn auth_token_send(
                 }
             },
         )
+}
+
+fn auth_token_refresh(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("auth" / "token")
+        .and(warp::put())
+        .and(auth_header())
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |old_token: String, db: Db, opt: Opt| async move {
+            match db.lock().await.token_refresh(
+                old_token.as_str(),
+                opt.auth_token_length,
+                opt.auth_token_days_to_live,
+            ) {
+                Ok(token) => Ok(token),
+                Err(e) => Err(reject(e)),
+            }
+        })
 }
 
 fn reply_no_content() -> impl warp::Reply {
