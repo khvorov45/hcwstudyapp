@@ -37,16 +37,6 @@ pub fn routes(
         .with(cors)
 }
 
-fn get_users(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
-        Ok(warp::reply::json(&db.lock().await.users.current.data))
-    }
-    warp::path!("users")
-        .and(warp::get())
-        .and(with_db(db))
-        .and_then(handler)
-}
-
 fn with_db(db: Db) -> impl Filter<Extract = (Db,), Error = Infallible> + Clone {
     warp::any().map(move || db.clone())
 }
@@ -59,19 +49,6 @@ fn with_opt(opt: Opt) -> impl Filter<Extract = (Opt,), Error = Infallible> + Clo
     warp::any().map(move || opt.clone())
 }
 
-fn auth_token_verify(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    warp::path!("auth" / "token" / "verify")
-        .and(warp::get())
-        .and(auth_header())
-        .and(with_db(db))
-        .and_then(move |token: String, db: Db| async move {
-            match db.lock().await.token_verify(token.as_str()) {
-                Ok(u) => Ok(warp::reply::json(&u)),
-                Err(e) => Err(reject(e)),
-            }
-        })
-}
-
 fn auth_header() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {
     warp::header::<String>("Authorization").and_then(move |tok_raw: String| async move {
         match auth::parse_bearer_header(tok_raw.as_str()) {
@@ -79,6 +56,70 @@ fn auth_header() -> impl Filter<Extract = (String,), Error = Rejection> + Clone 
             Err(e) => Err(reject(e)),
         }
     })
+}
+
+fn reply_no_content() -> impl warp::Reply {
+    warp::reply::with_status(warp::reply(), StatusCode::NO_CONTENT)
+}
+
+/// Makes sure all rejections are HttpApiProblem
+fn reject(e: anyhow::Error) -> Rejection {
+    warp::reject::custom(error::from_anyhow(e))
+}
+
+/// Expect all rejections to be HttpApiProblem
+async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
+    log::debug!("recover filter error: {:?}", err);
+
+    if let Some(e) = err.find::<error::ApiProblem>() {
+        let reply = warp::reply::with_status(e.detail.clone(), e.status);
+        return Ok(reply);
+    }
+
+    Err(err)
+}
+
+fn sufficient_access(
+    db: Db,
+    req_access: current::AccessGroup,
+) -> impl Filter<Extract = (current::User,), Error = warp::Rejection> + Clone {
+    auth_header()
+        .and(with_db(db))
+        .and_then(move |tok: String, db: Db| async move {
+            let u = match db.lock().await.token_verify(tok.as_str()) {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            if u.access_group < req_access {
+                return Err(reject(anyhow::Error::new(
+                    error::Unauthorized::InsufficientAccess(u.access_group, req_access),
+                )));
+            }
+            Ok(u)
+        })
+}
+
+// Tokens =========================================================================================
+
+fn auth_token_refresh(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("auth" / "token")
+        .and(warp::put())
+        .and(auth_header())
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |old_token: String, db: Db, opt: Opt| async move {
+            match db.lock().await.token_refresh(
+                old_token.as_str(),
+                opt.auth_token_length,
+                opt.auth_token_days_to_live,
+            ) {
+                Ok(token) => Ok(token),
+                Err(e) => Err(reject(e)),
+            }
+        })
 }
 
 fn auth_token_send(
@@ -128,69 +169,30 @@ fn auth_token_send(
         )
 }
 
-fn auth_token_refresh(
-    db: Db,
-    opt: Opt,
-) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    warp::path!("auth" / "token")
-        .and(warp::put())
+fn auth_token_verify(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("auth" / "token" / "verify")
+        .and(warp::get())
         .and(auth_header())
         .and(with_db(db))
-        .and(with_opt(opt))
-        .and_then(move |old_token: String, db: Db, opt: Opt| async move {
-            match db.lock().await.token_refresh(
-                old_token.as_str(),
-                opt.auth_token_length,
-                opt.auth_token_days_to_live,
-            ) {
-                Ok(token) => Ok(token),
+        .and_then(move |token: String, db: Db| async move {
+            match db.lock().await.token_verify(token.as_str()) {
+                Ok(u) => Ok(warp::reply::json(&u)),
                 Err(e) => Err(reject(e)),
             }
         })
 }
 
-fn reply_no_content() -> impl warp::Reply {
-    warp::reply::with_status(warp::reply(), StatusCode::NO_CONTENT)
-}
-
-/// Makes sure all rejections are HttpApiProblem
-fn reject(e: anyhow::Error) -> Rejection {
-    warp::reject::custom(error::from_anyhow(e))
-}
-
-/// Expect all rejections to be HttpApiProblem
-async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
-    log::debug!("recover filter error: {:?}", err);
-
-    if let Some(e) = err.find::<error::ApiProblem>() {
-        let reply = warp::reply::with_status(e.detail.clone(), e.status);
-        return Ok(reply);
-    }
-
-    Err(err)
-}
-
-fn sufficient_access(
-    db: Db,
-    req_access: current::AccessGroup,
-) -> impl Filter<Extract = (current::User,), Error = warp::Rejection> + Clone {
-    auth_header()
-        .and(with_db(db))
-        .and_then(move |tok: String, db: Db| async move {
-            let u = match db.lock().await.token_verify(tok.as_str()) {
-                Ok(u) => u,
-                Err(e) => return Err(reject(e)),
-            };
-            if u.access_group < req_access {
-                return Err(reject(anyhow::Error::new(
-                    error::Unauthorized::InsufficientAccess(u.access_group, req_access),
-                )));
-            }
-            Ok(u)
-        })
-}
-
 // Users ==========================================================================================
+
+fn get_users(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
+        Ok(warp::reply::json(&db.lock().await.users.current.data))
+    }
+    warp::path!("users")
+        .and(warp::get())
+        .and(with_db(db))
+        .and_then(handler)
+}
 
 fn users_redcap_sync(
     db: Db,
