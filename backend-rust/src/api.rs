@@ -33,7 +33,6 @@ pub fn routes(
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db.clone(), opt.clone(), mailer))
         .or(auth_token_refresh(db, opt))
-        .with(cors.clone())
         .recover(handle_rejection)
         .with(cors)
         .with(log)
