@@ -27,6 +27,7 @@ pub fn routes(
         .allow_any_origin()
         .allow_methods(&[Method::GET, Method::POST, Method::DELETE, Method::PUT])
         .allow_headers(vec!["Authorization", "Content-Type"]);
+    let log = warp::log("api");
     get_users(db.clone())
         .or(users_redcap_sync(db.clone(), opt.clone()))
         .or(auth_token_verify(db.clone()))
@@ -35,6 +36,7 @@ pub fn routes(
         .with(cors.clone())
         .recover(handle_rejection)
         .with(cors)
+        .with(log)
 }
 
 fn with_db(db: Db) -> impl Filter<Extract = (Db,), Error = Infallible> + Clone {
