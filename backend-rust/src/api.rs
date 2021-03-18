@@ -152,14 +152,21 @@ fn auth_token_send(
                     Ok(()) => {}
                     Err(e) => return Err(reject(e)),
                 }
-                let link = format!("{}/?token={}", opt.frontend_root, before_hash);
+                let content = match query.type_ {
+                    current::TokenType::Session => {
+                        let link = format!("{}/?token={}", opt.frontend_root, before_hash);
+                        format!("<a href={0}>{0}</a>", link)
+                    }
+                    current::TokenType::Api => before_hash,
+                };
+                let title = match query.type_ {
+                    current::TokenType::Session => "access link",
+                    current::TokenType::Api => "API token",
+                };
                 let email = Email {
                     to: query.email,
                     subject: "NIH HCW Study Access Link".to_string(),
-                    body: format!(
-                        "<p>NIH HCW Flu study access link:</p><br/><a href={0}>{0}</a>",
-                        link
-                    ),
+                    body: format!("<p>NIH HCW Flu study {}:</p><br/>{}", title, content),
                 };
                 match email.send(mailer).await {
                     Ok(()) => Ok(reply_no_content()),
