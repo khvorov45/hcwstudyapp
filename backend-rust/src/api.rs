@@ -148,21 +148,20 @@ fn auth_token_send(
                     opt.auth_token_days_to_live,
                 );
                 match db.lock().await.insert_token(token) {
-                    Ok(()) => {
-                        let link = format!("{}/?token={}", opt.frontend_root, before_hash);
-                        let email = Email {
-                            to: query.email,
-                            subject: "NIH HCW Study Access Link".to_string(),
-                            body: format!(
-                                "<p>NIH HCW Flu study access link:</p><br/><a href={0}>{0}</a>",
-                                link
-                            ),
-                        };
-                        match email.send(mailer).await {
-                            Ok(()) => Ok(reply_no_content()),
-                            Err(e) => Err(reject(e)),
-                        }
-                    }
+                    Ok(()) => {}
+                    Err(e) => return Err(reject(e)),
+                }
+                let link = format!("{}/?token={}", opt.frontend_root, before_hash);
+                let email = Email {
+                    to: query.email,
+                    subject: "NIH HCW Study Access Link".to_string(),
+                    body: format!(
+                        "<p>NIH HCW Flu study access link:</p><br/><a href={0}>{0}</a>",
+                        link
+                    ),
+                };
+                match email.send(mailer).await {
+                    Ok(()) => Ok(reply_no_content()),
                     Err(e) => Err(reject(e)),
                 }
             },
