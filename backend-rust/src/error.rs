@@ -10,6 +10,8 @@ pub enum Conflict {
     ForeignKey(String, String, String),
     #[error("Wrong token type: {0:?}")]
     WrongTokenType(current::TokenType),
+    #[error("Unexpected redcap data: {0:#?}, expected: {1}")]
+    UnexpectedRedcapData(serde_json::Value, String),
 }
 
 #[derive(Error, Debug)]
@@ -18,10 +20,12 @@ pub enum Unauthorized {
     WrongAuthType(String),
     #[error("No such token")]
     NoSuchToken(String),
-    #[error("TokenExpired")]
+    #[error("Token expired")]
     TokenExpired(String),
-    #[error("NoUserWithToken")]
+    #[error("No user with the supplied token")]
     NoUserWithToken(String),
+    #[error("Insufficient access: {0:?}, expected at least: {1:?}")]
+    InsufficientAccess(current::AccessGroup, current::AccessGroup),
 }
 
 #[derive(Debug)]

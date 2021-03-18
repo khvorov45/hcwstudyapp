@@ -65,6 +65,10 @@ pub struct Opt {
     #[structopt(long, default_value = "")]
     #[serde(default)]
     pub redcap_token_2021: String,
+    /// Redcap API URL
+    #[structopt(long, default_value = "https://biredcap.mh.org.au/api/")]
+    #[serde(default)]
+    pub redcap_api_url: String,
 }
 
 impl Opt {

@@ -3,7 +3,7 @@ use crate::{
     data::current,
     db,
     email::{self, Email},
-    error,
+    error, redcap,
 };
 use serde_derive::Deserialize;
 use std::convert::Infallible;
@@ -28,6 +28,7 @@ pub fn routes(
         .allow_methods(&[Method::GET, Method::POST, Method::DELETE, Method::PUT])
         .allow_headers(vec!["Authorization", "Content-Type"]);
     get_users(db.clone())
+        .or(users_redcap_sync(db.clone(), opt.clone()))
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db.clone(), opt.clone(), mailer))
         .or(auth_token_refresh(db, opt))
@@ -167,4 +168,47 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
     }
 
     Err(err)
+}
+
+fn sufficient_access(
+    db: Db,
+    req_access: current::AccessGroup,
+) -> impl Filter<Extract = (current::User,), Error = warp::Rejection> + Clone {
+    auth_header()
+        .and(with_db(db))
+        .and_then(move |tok: String, db: Db| async move {
+            let u = match db.lock().await.token_verify(tok.as_str()) {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            if u.access_group < req_access {
+                return Err(reject(anyhow::Error::new(
+                    error::Unauthorized::InsufficientAccess(u.access_group, req_access),
+                )));
+            }
+            Ok(u)
+        })
+}
+
+// Users ==========================================================================================
+
+fn users_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("users" / "redcap" / "sync")
+        .and(warp::put())
+        .and(sufficient_access(db.clone(), current::AccessGroup::Admin))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_users = match redcap::export_users(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db.lock().await.sync_redcap_users(redcap_users) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
 }

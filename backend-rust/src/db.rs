@@ -187,6 +187,27 @@ impl Db {
         self.tokens.write()?;
         Ok(before_hash)
     }
+
+    pub fn sync_redcap_users(&mut self, mut redcap_users: Vec<current::User>) -> Result<()> {
+        let users = &mut self.users.current.data;
+
+        users.retain(|u| u.kind == current::UserKind::Manual);
+        redcap_users.retain(|redcap_user| {
+            users
+                .iter()
+                .all(|manual_user| redcap_user.email != manual_user.email)
+        });
+        users.append(&mut redcap_users);
+
+        let tokens = &mut self.tokens.current.data;
+
+        tokens.retain(|t| users.iter().any(|u| u.email == t.user));
+
+        self.users.write()?;
+        self.tokens.write()?;
+
+        Ok(())
+    }
 }
 
 impl<

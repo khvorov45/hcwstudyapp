@@ -24,3 +24,4 @@ rand = "0.8"
 sha2 = "0.9"
 hex = "0.4"
 lettre = {version = "0.10.0-beta.2", features=["tokio1", "tokio1-native-tls"]}
+reqwest = { version = "0.11", features = ["json"] }

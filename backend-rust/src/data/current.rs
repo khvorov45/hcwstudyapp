@@ -5,7 +5,7 @@ use crate::{
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Copy)]
 pub enum Site {
     Melbourne,
     Sydney,
@@ -15,20 +15,20 @@ pub enum Site {
     Perth,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Copy)]
 pub enum AccessGroup {
     Site(Site),
     Unrestricted,
     Admin,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum UserKind {
     Redcap,
     Manual,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct User {
     pub email: String,
     pub access_group: AccessGroup,
@@ -42,7 +42,7 @@ pub enum TokenType {
     Api,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Token {
     pub user: String,
     pub hash: String,
