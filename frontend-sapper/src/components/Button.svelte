@@ -32,7 +32,7 @@
     {:else if success}
       <slot name="success" />
     {:else}
-      <slot name="standard" />
+      <slot />
     {/if}
   </div>
   <div class="error-message">{errorMsg}</div>

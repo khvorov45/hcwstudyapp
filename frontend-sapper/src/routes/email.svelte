@@ -64,9 +64,7 @@
     success={emailStatus.status === "success"}
     disabled={email === ""}
     errorMsg={emailStatus.error ?? ""}
-    ><span slot="standard">Submit</span><span slot="success"
-      >Successfully sent</span
-    ></Button
+    >Submit<span slot="success">Successfully sent</span></Button
   >
 </div>
 

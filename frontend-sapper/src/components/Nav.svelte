@@ -5,6 +5,7 @@
   import Search from "./icons/Search.svelte"
   import Table from "./icons/Table.svelte"
   import Email from "./icons/Send.svelte"
+  import Button from "./Button.svelte"
 
   export let segment: string | undefined
 </script>
@@ -30,7 +31,7 @@
       <a class:active={segment === "search"} href="/search"><Search /></a>
     </div>
     <hr class="element" />
-    <div class="element"><Settings /></div>
+    <div class="element"><Button variant="icon"><Settings /></Button></div>
   </div>
 </nav>
 
