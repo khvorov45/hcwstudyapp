@@ -143,7 +143,7 @@ fn auth_token_send(
         .and_then(
             move |query: Query, db: Db, opt: Opt, mailer: Mailer| async move {
                 let (before_hash, token) = current::Token::new(
-                    query.email.as_str(),
+                    query.email.to_lowercase().as_str(),
                     query.type_,
                     opt.auth_token_length,
                     opt.auth_token_days_to_live,
