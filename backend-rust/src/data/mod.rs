@@ -62,7 +62,7 @@ impl ToCurrent<current::TokenType> for previous::TokenType {
 impl ToCurrent<current::Token> for previous::Token {
     fn to_current(&self) -> current::Token {
         current::Token {
-            user: self.user.clone(),
+            user: self.user.to_lowercase(),
             hash: self.hash.clone(),
             type_: self.type_.to_current(),
             expires: self.expires,
