@@ -64,7 +64,10 @@
     success={emailStatus.status === "success"}
     disabled={email === ""}
     errorMsg={emailStatus.error ?? ""}
-    >Submit<span slot="success">Successfully sent</span></Button
+    ><span class="button-content">Submit</span><span
+      class="button-content"
+      slot="success">Successfully sent</span
+    ></Button
   >
 </div>
 
@@ -74,5 +77,8 @@
     margin-left: auto;
     margin-right: auto;
     max-width: 300px;
+  }
+  .button-content {
+    transition: color var(--time-transition);
   }
 </style>

@@ -2,12 +2,13 @@
   import { onMount } from "svelte"
   import Nav from "../components/Nav.svelte"
   import { API_ROOT } from "../lib/config"
-  import { token, loginStatus } from "../lib/state"
+  import { token, loginStatus, theme } from "../lib/state"
 
   export let segment: string | undefined
 
   onMount(async () => {
     token.useLocalStorage()
+    theme.useLocalStorage()
     await login()
     // Attempt to pull token from url
     if ($loginStatus.status === "error") {

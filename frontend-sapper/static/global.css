@@ -61,6 +61,8 @@ hr {
   color: var(--color-bg-2);
   background-color: var(--color-bg-2);
   border-color: var(--color-bg-2);
+  transition: color var(--time-transition),
+    background-color var(--time-transition), border-color var(--time-transition);
 }
 
 body {

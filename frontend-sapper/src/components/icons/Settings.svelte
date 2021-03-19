@@ -13,5 +13,6 @@
 <style>
   g {
     stroke: var(--color-font-1);
+    transition: stroke var(--time-transition);
   }
 </style>

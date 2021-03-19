@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loginStatus } from "../lib/state"
+  import { loginStatus, theme } from "../lib/state"
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
   import Search from "./icons/Search.svelte"
@@ -12,6 +12,8 @@
   export let segment: string | undefined
 
   let settingsVisible = false
+
+  $: darkMode = $theme === "dark"
 </script>
 
 <nav>
@@ -43,7 +45,11 @@
         left="-147px"
         top="calc(var(--size-nav) / 2)"
       >
-        <Button width="140px"><Switch checked={true}>Dark mode</Switch></Button>
+        <Button
+          width="140px"
+          action={() => ($theme = $theme === "dark" ? "light" : "dark")}
+          ><Switch checked={darkMode}>Dark mode</Switch></Button
+        >
       </Popover>
     </div>
   </div>
@@ -59,6 +65,7 @@
     justify-content: space-between;
     height: calc(var(--size-nav) - var(--size-nav-border));
     border-bottom: var(--size-nav-border) solid var(--color-bg-2);
+    transition: border-color var(--time-transition);
   }
   .group,
   .element {

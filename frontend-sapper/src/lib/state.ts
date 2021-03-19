@@ -1,6 +1,10 @@
 import { writable } from "svelte/store"
 
-function createLocalStore<T>(key: string, startValue: T | null) {
+function createLocalStore<T>(
+  key: string,
+  startValue: T | null,
+  onSet: (value: T) => void = () => {}
+) {
   const { subscribe, set, update } = writable(startValue)
 
   return {
@@ -15,6 +19,7 @@ function createLocalStore<T>(key: string, startValue: T | null) {
 
       subscribe((current) => {
         localStorage.setItem(key, JSON.stringify(current))
+        onSet(current)
       })
     },
   }
@@ -31,3 +36,7 @@ export const loginStatus = writable({
   user: any | null
   error: string | null
 })
+
+export const theme = createLocalStore("theme", "dark", (theme) =>
+  document.documentElement.setAttribute("theme", theme)
+)
