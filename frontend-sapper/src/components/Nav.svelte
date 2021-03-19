@@ -8,6 +8,7 @@
   import Button from "./Button.svelte"
   import Popover from "./Popover.svelte"
   import Switch from "./Switch.svelte"
+  import Users from "./icons/Users.svelte"
 
   export let segment: string | undefined
 
@@ -30,6 +31,9 @@
   </div>
 
   <div class="group">
+    <div class="element">
+      <a class:active={segment === "users"} href="users"><Users /></a>
+    </div>
     <div class="element">
       <a class:active={segment === "email"} href="email"><Email /></a>
     </div>
