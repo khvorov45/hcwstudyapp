@@ -6,8 +6,12 @@
   import Table from "./icons/Table.svelte"
   import Email from "./icons/Send.svelte"
   import Button from "./Button.svelte"
+  import Popover from "./Popover.svelte"
+  import Switch from "./Switch.svelte"
 
   export let segment: string | undefined
+
+  let settingsVisible = false
 </script>
 
 <nav>
@@ -31,7 +35,17 @@
       <a class:active={segment === "search"} href="/search"><Search /></a>
     </div>
     <hr class="element" />
-    <div class="element"><Button variant="icon"><Settings /></Button></div>
+    <div class="element">
+      <Button variant="icon" action={() => (settingsVisible = !settingsVisible)}
+        ><Settings /></Button
+      ><Popover
+        bind:visible={settingsVisible}
+        left="-147px"
+        top="calc(var(--size-nav) / 2)"
+      >
+        <Button width="140px"><Switch checked={true}>Dark mode</Switch></Button>
+      </Popover>
+    </div>
   </div>
 </nav>
 
