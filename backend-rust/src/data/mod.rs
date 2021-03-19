@@ -41,7 +41,7 @@ impl ToCurrent<current::AccessGroup> for previous::AccessGroup {
 impl ToCurrent<current::User> for previous::User {
     fn to_current(&self) -> current::User {
         current::User {
-            email: self.email.clone(),
+            email: self.email.to_lowercase(),
             access_group: self.access_group.to_current(),
             kind: self.kind.to_current(),
             deidentified_export: self.deidentified_export,
@@ -63,7 +63,7 @@ impl ToCurrent<current::Token> for previous::Token {
     fn to_current(&self) -> current::Token {
         current::Token {
             user: self.user.clone(),
-            hash: self.token.clone(),
+            hash: self.hash.clone(),
             type_: self.type_.to_current(),
             expires: self.expires,
         }

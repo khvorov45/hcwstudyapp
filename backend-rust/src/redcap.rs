@@ -61,7 +61,7 @@ fn extract_access_group(v: &serde_json::Value) -> Option<current::AccessGroup> {
 fn extract_user(v: &serde_json::Value) -> Option<current::User> {
     let v = v.as_object()?;
     let user = current::User {
-        email: v.get("email")?.as_str()?.to_string(),
+        email: v.get("email")?.as_str()?.to_lowercase(),
         access_group: extract_access_group(v.get("data_access_group")?)?,
         kind: current::UserKind::Redcap,
         deidentified_export: v.get("data_export")?.as_i64()? == 2,

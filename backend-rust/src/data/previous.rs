@@ -5,7 +5,7 @@ use crate::{
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Copy)]
 pub enum Site {
     Melbourne,
     Sydney,
@@ -15,20 +15,20 @@ pub enum Site {
     Perth,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Copy)]
 pub enum AccessGroup {
     Site(Site),
     Unrestricted,
     Admin,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum UserKind {
     Redcap,
     Manual,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct User {
     pub email: String,
     pub access_group: AccessGroup,
@@ -36,16 +36,16 @@ pub struct User {
     pub deidentified_export: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
 pub enum TokenType {
     Session,
     Api,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Token {
     pub user: String,
-    pub token: String,
+    pub hash: String,
     #[serde(rename = "type")]
     pub type_: TokenType,
     pub expires: Option<DateTime<Utc>>,
@@ -59,7 +59,7 @@ impl PrimaryKey<String> for User {
 
 impl PrimaryKey<String> for Token {
     fn get_pk(&self) -> String {
-        self.token.clone()
+        self.hash.clone()
     }
 }
 
@@ -78,7 +78,7 @@ impl Token {
         };
         let token = Self {
             user: email.to_string(),
-            token: auth::hash(before_hash.as_str()),
+            hash: auth::hash(before_hash.as_str()),
             type_,
             expires,
         };

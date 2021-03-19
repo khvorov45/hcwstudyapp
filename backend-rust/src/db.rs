@@ -100,7 +100,7 @@ impl Db {
         if db.users.current.data.is_empty() {
             log::debug!("users empty, inserting default admin");
             db.users.insert(current::User {
-                email: default_admin_email.to_string(),
+                email: default_admin_email.to_lowercase(),
                 access_group: current::AccessGroup::Admin,
                 kind: current::UserKind::Manual,
                 deidentified_export: false,
