@@ -1,7 +1,9 @@
 <script lang="ts">
   import { usersTable, loginStatus, token } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
+  import { Sort, nextSort, stringSort } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
+  import type { User } from "$lib/data"
   import { onMount } from "svelte"
 
   const api = process.env.API_ROOT
@@ -59,32 +61,44 @@
 
   $: fetchTable($token, $loginStatus.status, mounted)
 
-  $: console.log($usersTable.data)
+  let emailSort: Sort = Sort.Up
+  function sortEmail() {
+    emailSort = nextSort(emailSort)
+  }
+
+  function processTable(data: User[], emailSort: Sort) {
+    if (emailSort === Sort.No) {
+      return data
+    }
+    return data.sort(stringSort((x) => x.email, emailSort === Sort.Down))
+  }
+
+  $: displayData = processTable($usersTable.data?.slice(0) ?? [], emailSort)
 </script>
 
 <div class="table-container">
   <div class="table">
     <div class="thead">
       <div class="header-row">
-        <div class="th email"><span class="cell-content">Email</span></div>
+        <div class="th email" on:click={sortEmail}>
+          <span class="cell-content">Email {emailSort}</span>
+        </div>
         <div class="th access"><span class="cell-content">Access</span></div>
       </div>
     </div>
     <div class="tbody">
-      {#if $usersTable.data !== null}
-        {#each $usersTable.data as user}
-          <div class="data-row">
-            <div class="td email">
-              <span class="cell-content">{user.email}</span>
-            </div>
-            <div class="td access">
-              <span class="cell-content"
-                >{accessGroupToString(user.access_group)}</span
-              >
-            </div>
+      {#each displayData as user}
+        <div class="data-row">
+          <div class="td email">
+            <span class="cell-content">{user.email}</span>
           </div>
-        {/each}
-      {/if}
+          <div class="td access">
+            <span class="cell-content"
+              >{accessGroupToString(user.access_group)}</span
+            >
+          </div>
+        </div>
+      {/each}
     </div>
   </div>
 </div>
