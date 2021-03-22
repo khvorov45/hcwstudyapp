@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores"
-  import { loginStatus, theme } from "$lib/state"
+  import { loginStatus, theme, token, usersTable } from "$lib/state"
+  import type { AsyncStatus } from "$lib/util"
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
   import Search from "./icons/Search.svelte"
@@ -12,8 +13,49 @@
   import Users from "./icons/Users.svelte"
 
   let settingsVisible = false
+  let api = process.env.API_ROOT
 
   $: darkMode = $theme === "dark"
+
+  let syncUsersStatus: {
+    status: AsyncStatus
+    error: string | null
+  } = {
+    status: "not-requested",
+    error: null,
+  }
+  async function syncUsers() {
+    if (
+      $loginStatus.status !== "success" ||
+      $loginStatus.user?.access_group !== "Admin" ||
+      $token === null
+    ) {
+      return
+    }
+    syncUsersStatus.status = "loading"
+    syncUsersStatus.error = null
+
+    let res: any
+    try {
+      res = await fetch(`${api}/users/redcap/sync`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${$token}`,
+        },
+      })
+    } catch (e) {
+      syncUsersStatus.status = "error"
+      syncUsersStatus.error = "network error, try again later"
+      return
+    }
+
+    if (res.status !== 204) {
+      syncUsersStatus.status = "error"
+      syncUsersStatus.error = await res.text()
+    } else {
+      syncUsersStatus.status = "success"
+    }
+  }
 </script>
 
 <nav>
@@ -55,6 +97,13 @@
           action={() => ($theme = $theme === "dark" ? "light" : "dark")}
           ><Switch checked={darkMode}>Dark mode</Switch></Button
         >
+        {#if $loginStatus.user?.access_group === "Admin"}
+          <Button
+            loading={syncUsersStatus.status === "loading"}
+            errorMsg={syncUsersStatus.error ?? ""}
+            action={syncUsers}>Sync users</Button
+          >
+        {/if}
       </Popover>
     </div>
   </div>
