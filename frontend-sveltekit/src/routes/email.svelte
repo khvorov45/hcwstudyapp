@@ -25,7 +25,7 @@
       )
     } catch (e) {
       emailStatus.status = "error"
-      emailStatus.error = "NETWORK_ERROR: " + e.message
+      emailStatus.error = "network error, try again later"
       return
     }
     if (res.status !== 204) {
