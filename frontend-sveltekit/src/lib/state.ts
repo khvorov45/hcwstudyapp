@@ -39,7 +39,7 @@ export const loginStatus = writable({
   error: null,
 } as {
   status: AsyncStatus
-  user: any | null
+  user: User | null
   error: string | null
 })
 

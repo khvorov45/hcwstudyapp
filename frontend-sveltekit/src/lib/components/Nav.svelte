@@ -30,9 +30,11 @@
   </div>
 
   <div class="group">
-    <div class="element">
-      <a class:active={$page.path === "/users"} href="users"><Users /></a>
-    </div>
+    {#if $loginStatus.user?.access_group === "Admin"}
+      <div class="element">
+        <a class:active={$page.path === "/users"} href="users"><Users /></a>
+      </div>
+    {/if}
     <div class="element">
       <a class:active={$page.path === "/email"} href="email"><Email /></a>
     </div>
