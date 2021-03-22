@@ -12,8 +12,8 @@ module.exports = {
       [
         "process.env.API_ROOT",
         process.env.NODE_ENV === "development"
-          ? JSON.stringify("http://localhost:7300/")
-          : JSON.stringify("https://reports.hcwflustudy.com/api/"),
+          ? JSON.stringify("http://localhost:7300")
+          : JSON.stringify("https://reports.hcwflustudy.com/api"),
       ],
     ],
   }),
