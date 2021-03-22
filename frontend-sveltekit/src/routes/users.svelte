@@ -4,6 +4,8 @@
   import { accessGroupToString } from "$lib/data"
   import { onMount } from "svelte"
 
+  const api = process.env.API_ROOT
+
   let mounted = false
   onMount(() => (mounted = true))
 
@@ -32,7 +34,7 @@
 
     let res: any
     try {
-      res = await fetch(`${process.env.API_ROOT}/users`, {
+      res = await fetch(`${api}/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

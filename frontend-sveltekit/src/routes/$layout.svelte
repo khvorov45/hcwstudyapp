@@ -5,6 +5,8 @@
   import { page } from "$app/stores"
   import Link from "$lib/components/Link.svelte"
 
+  const api = process.env.API_ROOT
+
   onMount(async () => {
     token.useLocalStorage()
     theme.useLocalStorage()
@@ -33,7 +35,7 @@
 
     let res: any
     try {
-      res = await fetch(`${process.env.API_ROOT}/auth/token/verify`, {
+      res = await fetch(`${api}/auth/token/verify`, {
         headers: {
           Authorization: `Bearer ${$token}`,
         },
@@ -66,7 +68,7 @@
     }
     let res: any
     try {
-      res = await fetch(`${process.env.API_ROOT}/auth/token`, {
+      res = await fetch(`${api}/auth/token`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${$token}`,

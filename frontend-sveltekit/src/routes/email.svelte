@@ -4,6 +4,8 @@
   import type { AsyncStatus } from "$lib/util"
   import MultipleChoice from "$lib/components/MultipleChoice.svelte"
 
+  const api = process.env.API_ROOT
+
   let email = ""
   let whatToSend = "Access link"
 
@@ -18,7 +20,7 @@
     let res: any
     try {
       res = await fetch(
-        `${process.env.API_ROOT}/auth/token/send?email=${email}&type=${
+        `${api}/auth/token/send?email=${email}&type=${
           whatToSend === "Access link" ? "Session" : "Api"
         }`,
         { method: "POST" }
