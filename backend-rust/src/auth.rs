@@ -21,7 +21,7 @@ pub fn random_string(len: usize) -> String {
 
 pub fn hash(s: &str) -> String {
     use sha2::Digest;
-    let mut hasher = sha2::Sha256::new();
+    let mut hasher = sha2::Sha512::new();
     hasher.update(s.as_bytes());
     let hash_result = hasher.finalize();
     hex::encode(&hash_result)
