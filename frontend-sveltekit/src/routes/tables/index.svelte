@@ -5,5 +5,5 @@
 
 <TextContainer>
   <h1>Tables</h1>
-  <ul><li><Link href="tables/contact">Contact</Link></li></ul>
+  <ul><li><Link href="/tables/contact">Contact</Link></li></ul>
 </TextContainer>

@@ -9,9 +9,9 @@
 
   <p>Main site is <Link href="https://hcwflustudy.com">here</Link>.</p>
 
-  <p>Site map is <Link href="search">here</Link>.</p>
+  <p>Site map is <Link href="/search">here</Link>.</p>
 
   {#if $loginStatus.status === "error"}
-    <p>Access link can be obtained <Link href="email">here</Link></p>
+    <p>Access link can be obtained <Link href="/email">here</Link></p>
   {/if}
 </TextContainer>

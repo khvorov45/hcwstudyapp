@@ -10,10 +10,10 @@
   <ul>
     <li><Link href="/">Home page</Link></li>
     {#if $loginStatus.status === "success"}
-      <li><Link href="tables">Tables</Link></li>
+      <li><Link href="/tables">Tables</Link></li>
     {/if}
-    <li><Link href="email">Email (get access links)</Link></li>
-    <li><Link href="search">Search (this page)</Link></li>
+    <li><Link href="/email">Email (get access links)</Link></li>
+    <li><Link href="/search">Search (this page)</Link></li>
   </ul>
 </TextContainer>
 

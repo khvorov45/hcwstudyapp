@@ -91,7 +91,7 @@
       <p>
         {#if $loginStatus.error?.startsWith("UNAUTHORIZED")}
           Unauthorized to access this page. Get an access link on the <Link
-            href="email">email page</Link
+            href="/email">email page</Link
           >.
         {:else if $loginStatus.error?.startsWith("NETWORK")}
           Network error, check back later

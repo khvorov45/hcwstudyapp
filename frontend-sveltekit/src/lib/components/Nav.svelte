@@ -24,7 +24,7 @@
     <hr class="element" />
     {#if $loginStatus.status === "success"}
       <div class="element">
-        <a class:active={$page.path === "/tables"} href="tables"><Table /></a>
+        <a class:active={$page.path === "/tables"} href="/tables"><Table /></a>
       </div>
     {/if}
   </div>
@@ -32,11 +32,11 @@
   <div class="group">
     {#if $loginStatus.user?.access_group === "Admin"}
       <div class="element">
-        <a class:active={$page.path === "/users"} href="users"><Users /></a>
+        <a class:active={$page.path === "/users"} href="/users"><Users /></a>
       </div>
     {/if}
     <div class="element">
-      <a class:active={$page.path === "/email"} href="email"><Email /></a>
+      <a class:active={$page.path === "/email"} href="/email"><Email /></a>
     </div>
     <div class="element">
       <a class:active={$page.path === "/search"} href="/search"><Search /></a>
