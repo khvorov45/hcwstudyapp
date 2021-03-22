@@ -1,8 +1,17 @@
 <script lang="ts">
+  import Link from "$lib/components/Link.svelte"
+  import TextContainer from "$lib/components/TextContainer.svelte"
+  import { loginStatus } from "$lib/state"
 </script>
 
-<main>
-  <p>{process.env.NODE_ENV}</p>
+<TextContainer>
+  <h1>Reports for HCW flu study</h1>
 
-  <p>{process.env.API_ROOT}</p>
-</main>
+  <p>Main site is <Link href="https://hcwflustudy.com">here</Link>.</p>
+
+  <p>Site map is <Link href="search">here</Link>.</p>
+
+  {#if $loginStatus.status === "error"}
+    <p>Access link can be obtained <Link href="email">here</Link></p>
+  {/if}
+</TextContainer>
