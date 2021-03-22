@@ -81,7 +81,7 @@
     $token = await res.text()
   }
 
-  const protectedRoutes = ["/tables"]
+  const protectedRoutes = ["/tables", "/users"]
   $: segmentIsProtected = protectedRoutes.some((r) => $page.path === r)
 </script>
 
