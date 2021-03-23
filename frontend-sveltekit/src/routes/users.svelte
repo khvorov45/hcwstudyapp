@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { usersTable, loginStatus, token } from "$lib/state"
+  import { usersTable, loginReq, token } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
   import { Sort, nextSort, stringSort } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
@@ -59,7 +59,7 @@
     $usersTable.data = await res.json()
   }
 
-  $: fetchTable($token, $loginStatus.status, mounted)
+  $: fetchTable($token, $loginReq.status, mounted)
 
   let emailSort: Sort = Sort.Up
   function sortEmail() {

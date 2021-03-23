@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import Nav from "$lib/components/Nav.svelte"
-  import { token, loginStatus, theme } from "../lib/state"
+  import { token, theme, loginReq } from "../lib/state"
   import { page } from "$app/stores"
   import Link from "$lib/components/Link.svelte"
-
-  const api = process.env.API_ROOT
+  import { apiErrorToString, apiReq } from "$lib/util"
 
   onMount(async () => {
     token.useLocalStorage()
     theme.useLocalStorage()
     await login()
     // Attempt to pull token from url
-    if ($loginStatus.status === "error") {
+    if ($loginReq.status === "error") {
+      // @TODO pull from page
       const params = new URLSearchParams(document.location.search)
       const newToken = params.get("token")
       if (newToken !== null && newToken !== $token) {
@@ -22,63 +22,45 @@
       }
     }
   })
+
   async function login() {
     if ($token === null) {
-      $loginStatus.status = "error"
-      $loginStatus.user = null
-      $loginStatus.error = "UNAUTHORIZED: token is missing"
-      return
-    }
-
-    $loginStatus.status = "loading"
-    $loginStatus.error = null
-
-    let res: any
-    try {
-      res = await fetch(`${api}/auth/token/verify`, {
-        headers: {
-          Authorization: `Bearer ${$token}`,
+      $loginReq.status = "error"
+      $loginReq.result = {
+        data: null,
+        error: {
+          type: "backend",
+          status: 401,
+          message: "token is missing",
         },
-      })
-    } catch (e) {
-      $loginStatus.status = "error"
-      $loginStatus.user = null
-      $loginStatus.error = "NETWORK_ERROR: " + e.message
+      }
       return
     }
 
-    if (res.status === 200) {
-      $loginStatus.status = "success"
-      $loginStatus.user = await res.json()
-    } else {
-      $loginStatus.status = "error"
-      $loginStatus.user = null
-      const res_body = await res.text()
-      if (res.status === 401) {
-        $loginStatus.error = "UNAUTHORIZED: " + res_body
-      } else {
-        $loginStatus.error = "UNEXPECTED: " + res_body
-      }
+    await loginReq.execute({ token: $token })
+
+    const e = $loginReq.result.error
+    if (e !== null && !(e.type === "backend" && e.status === 401)) {
+      console.error("login error: " + apiErrorToString(e))
     }
   }
 
   async function refreshToken() {
-    if ($loginStatus.status !== "success") {
+    if ($loginReq.status !== "success") {
       return
     }
-    let res: any
-    try {
-      res = await fetch(`${api}/auth/token`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${$token}`,
-        },
-      })
-    } catch (e) {
-      console.error("NETWORK ERROR on refresh: " + e.message)
-      return
+
+    const res = await apiReq({
+      url: "auth/token",
+      method: "PUT",
+      token: $token,
+      expectContent: "text",
+    })
+    if (res.error !== null) {
+      console.error("refresh error: " + apiErrorToString(res.error))
+    } else {
+      $token = res.data
     }
-    $token = await res.text()
   }
 
   const protectedRoutes = ["/tables", "/users"]
@@ -89,19 +71,17 @@
 
 <main>
   {#if segmentIsProtected}
-    {#if $loginStatus.status === "error"}
+    {#if $loginReq.status === "error"}
       <p>
-        {#if $loginStatus.error?.startsWith("UNAUTHORIZED")}
+        {#if $loginReq.result.error?.type === "backend" && $loginReq.result.error?.status === 401}
           Unauthorized to access this page. Get an access link on the <Link
             href="/email">email page</Link
           >.
-        {:else if $loginStatus.error?.startsWith("NETWORK")}
-          Network error, check back later
         {:else}
-          Unexpected error, check back later
+          Login error, check back later
         {/if}
       </p>
-    {:else if $loginStatus.status === "success"}
+    {:else if $loginReq.status === "success"}
       <slot />
     {:else}
       <p>Waiting for login</p>

@@ -2,6 +2,11 @@ const sveltePreprocess = require("svelte-preprocess")
 const static = require("@sveltejs/adapter-static")
 const pkg = require("./package.json")
 
+const apiRoot =
+  process.env.NODE_ENV === "development"
+    ? JSON.stringify("http://localhost:7300")
+    : JSON.stringify("https://reports.hcwflustudy.com/api")
+
 /** @type {import('@sveltejs/kit').Config} */
 module.exports = {
   // Consult https://github.com/sveltejs/svelte-preprocess
@@ -9,12 +14,7 @@ module.exports = {
   preprocess: sveltePreprocess({
     replace: [
       ["process.env.NODE_ENV", JSON.stringify(process.env.NODE_ENV)],
-      [
-        "process.env.API_ROOT",
-        process.env.NODE_ENV === "development"
-          ? JSON.stringify("http://localhost:7300")
-          : JSON.stringify("https://reports.hcwflustudy.com/api"),
-      ],
+      ["process.env.API_ROOT", apiRoot],
     ],
   }),
   kit: {
@@ -27,6 +27,9 @@ module.exports = {
     target: "#svelte",
 
     vite: {
+      define: {
+        "process.env.API_ROOT": apiRoot,
+      },
       ssr: {
         noExternal: Object.keys(pkg.dependencies || {}),
       },

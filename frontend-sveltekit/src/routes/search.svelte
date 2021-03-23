@@ -1,7 +1,7 @@
 <script lang="ts">
   import Link from "$lib/components/Link.svelte"
   import TextContainer from "$lib/components/TextContainer.svelte"
-  import { loginStatus } from "$lib/state"
+  import { loginReq } from "$lib/state"
 </script>
 
 <TextContainer>
@@ -9,7 +9,7 @@
 
   <ul>
     <li><Link href="/">Home page</Link></li>
-    {#if $loginStatus.status === "success"}
+    {#if $loginReq.status === "success"}
       <li><Link href="/tables">Tables</Link></li>
     {/if}
     <li><Link href="/email">Email (get access links)</Link></li>

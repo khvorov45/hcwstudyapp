@@ -30,3 +30,100 @@ export function stringSort<T>(
     return i * c
   }
 }
+
+export type NetworkError = {
+  type: "network"
+  message: string
+}
+
+export type DecodeError = {
+  type: "decode"
+  message: string
+}
+
+export type BackendError = {
+  type: "backend"
+  status: number
+  message: string
+}
+
+export type ApiResponseError = NetworkError | DecodeError | BackendError
+
+export function apiErrorToString(e: ApiResponseError): string {
+  let s = `type: ${e.type}; `
+  if (e.type === "backend") {
+    s += `status: ${e.status}; `
+  }
+  s += `message: ${e.message}`
+  return s
+}
+
+export type ApiRequest = {
+  url: string
+  token?: string | null
+  method?: "GET" | "POST" | "PUT" | "DELETE"
+  expectContent?: "none" | "json" | "text"
+}
+
+export type ApiReturn = {
+  data: any
+  error: ApiResponseError | null
+}
+
+export type ApiResult = {
+  status: AsyncStatus
+  result: ApiReturn | null
+}
+
+export async function apiReq({
+  url,
+  token = null,
+  method = "GET",
+  expectContent = "json",
+}: ApiRequest): Promise<ApiReturn> {
+  let headers = {}
+  if (token !== null) {
+    headers = { Authorization: `Bearer ${token}` }
+  }
+
+  let res: any
+  let data: any = null
+  try {
+    res = await fetch(`${process.env.API_ROOT}/${url}`, { method, headers })
+  } catch (e) {
+    return {
+      data,
+      error: { type: "network", message: e.message },
+    }
+  }
+
+  const successCode = expectContent === "none" ? 204 : 200
+
+  const status = res.status
+  if (status !== successCode) {
+    return {
+      data,
+      error: { status, type: "backend", message: await res.text() },
+    }
+  }
+
+  switch (expectContent) {
+    case "json": {
+      try {
+        data = await res.json()
+      } catch (e) {
+        return { data, error: { type: "decode", message: e.message } }
+      }
+      break
+    }
+    case "text": {
+      data = await res.text()
+      break
+    }
+    case "none": {
+      break
+    }
+  }
+
+  return { data, error: null }
+}

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { page } from "$app/stores"
-  import { loginStatus, theme, token, usersTable } from "$lib/state"
-  import type { AsyncStatus } from "$lib/util"
+  import { loginReq, theme, token } from "$lib/state"
+  import { apiReq } from "$lib/util"
+  import type { ApiResponseError, AsyncStatus } from "$lib/util"
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
   import Search from "./icons/Search.svelte"
@@ -13,21 +14,20 @@
   import Users from "./icons/Users.svelte"
 
   let settingsVisible = false
-  let api = process.env.API_ROOT
 
   $: darkMode = $theme === "dark"
 
   let syncUsersStatus: {
     status: AsyncStatus
-    error: string | null
+    error: ApiResponseError | null
   } = {
     status: "not-requested",
     error: null,
   }
   async function syncUsers() {
     if (
-      $loginStatus.status !== "success" ||
-      $loginStatus.user?.access_group !== "Admin" ||
+      $loginReq.status !== "success" ||
+      $loginReq.result?.data?.access_group !== "Admin" ||
       $token === null
     ) {
       return
@@ -35,23 +35,16 @@
     syncUsersStatus.status = "loading"
     syncUsersStatus.error = null
 
-    let res: any
-    try {
-      res = await fetch(`${api}/users/redcap/sync`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${$token}`,
-        },
-      })
-    } catch (e) {
-      syncUsersStatus.status = "error"
-      syncUsersStatus.error = "network error, try again later"
-      return
-    }
+    const res = await apiReq({
+      url: "users/redcap/sync",
+      method: "PUT",
+      token: $token,
+      expectContent: "none",
+    })
 
-    if (res.status !== 204) {
+    if (res.error !== null) {
       syncUsersStatus.status = "error"
-      syncUsersStatus.error = await res.text()
+      syncUsersStatus.error = res.error
     } else {
       syncUsersStatus.status = "success"
     }
@@ -64,7 +57,7 @@
       <a class:active={$page.path === "/"} href="/"><Home /></a>
     </div>
     <hr class="element" />
-    {#if $loginStatus.status === "success"}
+    {#if $loginReq.status === "success"}
       <div class="element">
         <a class:active={$page.path === "/tables"} href="/tables"><Table /></a>
       </div>
@@ -72,7 +65,7 @@
   </div>
 
   <div class="group">
-    {#if $loginStatus.user?.access_group === "Admin"}
+    {#if $loginReq.result?.data?.access_group === "Admin"}
       <div class="element">
         <a class:active={$page.path === "/users"} href="/users"><Users /></a>
       </div>
@@ -97,10 +90,10 @@
           action={() => ($theme = $theme === "dark" ? "light" : "dark")}
           ><Switch checked={darkMode}>Dark mode</Switch></Button
         >
-        {#if $loginStatus.user?.access_group === "Admin"}
+        {#if $loginReq.result?.data?.access_group === "Admin"}
           <Button
             loading={syncUsersStatus.status === "loading"}
-            errorMsg={syncUsersStatus.error ?? ""}
+            errorMsg={syncUsersStatus.error?.message ?? ""}
             action={syncUsers}>Sync users</Button
           >
         {/if}

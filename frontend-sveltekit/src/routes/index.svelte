@@ -1,7 +1,7 @@
 <script lang="ts">
   import Link from "$lib/components/Link.svelte"
   import TextContainer from "$lib/components/TextContainer.svelte"
-  import { loginStatus } from "$lib/state"
+  import { loginReq } from "$lib/state"
 </script>
 
 <TextContainer>
@@ -11,7 +11,7 @@
 
   <p>Site map is <Link href="/search">here</Link>.</p>
 
-  {#if $loginStatus.status === "error"}
+  {#if $loginReq.status === "error"}
     <p>Access link can be obtained <Link href="/email">here</Link>.</p>
   {/if}
 </TextContainer>

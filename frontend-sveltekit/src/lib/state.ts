@@ -1,6 +1,7 @@
 import { writable } from "svelte/store"
 import type { User } from "$lib/data"
-import type { AsyncStatus } from "$lib/util"
+import { apiReq } from "$lib/util"
+import type { ApiRequest, ApiResult, AsyncStatus } from "$lib/util"
 
 function createLocalStore<T>(
   key: string,
@@ -33,15 +34,38 @@ export const theme = createLocalStore("theme", "dark", (theme) =>
   document.documentElement.setAttribute("theme", theme)
 )
 
-export const loginStatus = writable({
-  status: "not-requested",
-  user: null,
-  error: null,
-} as {
-  status: AsyncStatus
-  user: User | null
-  error: string | null
-})
+function createApiStore<T>(argsToReq: (x: T) => ApiRequest) {
+  const { subscribe, set, update } = writable<ApiResult>({
+    status: "not-requested",
+    result: null,
+  })
+  return {
+    subscribe,
+    set,
+    update,
+    execute: async (args: T) => {
+      update((current) => {
+        current.status = "loading"
+        return current
+      })
+      let res = await apiReq(argsToReq(args))
+      update((current) => {
+        current.status = res.error === null ? "success" : "error"
+        current.result = res
+        return current
+      })
+    },
+  }
+}
+
+export const loginReq = createApiStore(
+  ({ token }: { token: string | null }) => ({
+    method: "GET",
+    token: token,
+    url: "auth/token/verify",
+    expectContent: "json",
+  })
+)
 
 export const usersTable = writable({
   status: "not-requested",
