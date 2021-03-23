@@ -12,9 +12,7 @@
     await login()
     // Attempt to pull token from url
     if ($loginReq.status === "error") {
-      // @TODO pull from page
-      const params = new URLSearchParams(document.location.search)
-      const newToken = params.get("token")
+      const newToken = $page.query.get("token") ?? null
       if (newToken !== null && newToken !== $token) {
         token.set(newToken)
         await login()
