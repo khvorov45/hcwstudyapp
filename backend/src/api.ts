@@ -48,13 +48,15 @@ import {
   UserToInsertV,
   UserV,
   VirusV,
+  WeeklySurvey,
 } from "./data"
 import { decode } from "./io"
 import { createToken } from "./auth"
-import { RedcapConfig, sendRoi } from "./redcap"
+import { exportWeeklySurveyLink, RedcapConfig, sendRoi } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
 import { pipe } from "fp-ts/lib/function"
+import { seq, unique } from "./util"
 
 export function getRoutes(
   db: DB,
@@ -308,6 +310,121 @@ export function getRoutes(
     })
     res.json(weeklySurveys)
   })
+  routes.get(
+    "/weekly-survey/send-summaries",
+    async (req: Request, res: Response) => {
+      const { surveys, withdrawn, redcapIds, participants } = await transaction(
+        db,
+        async (tsk) => {
+          await validateAdmin(req, tsk)
+          return {
+            surveys: await getWeeklySurveySubset(tsk, "admin"),
+            withdrawn: await getWithdrawnSubset(tsk, "admin"),
+            redcapIds: await getYearChangeSubset(tsk, "admin"),
+            participants: await getParticipantsSubset(tsk, "admin"),
+          }
+        }
+      )
+
+      const redcapIds2021 = redcapIds.filter(
+        (r) => r.redcapProjectYear === 2021
+      )
+
+      type Summary = {
+        pid: string
+        redcapRecordId: string
+        email: string
+        year: number
+        completed: number[]
+        gaps: number[]
+      }
+
+      function summariseOneParticipantYear(
+        participantData: WeeklySurvey[]
+      ): Summary | null {
+        if (participantData.length === 0) {
+          return null
+        }
+        const pid = participantData[0].pid
+        const email = participants.find((p) => p.pid === pid)?.email ?? null
+        if (email === null) {
+          return null
+        }
+        const completed = participantData
+          .map((p) => p.index)
+          .sort((a, b) => a - b)
+        let full: number[]
+        if (completed.length === 0) {
+          full = []
+        } else if (completed.length === 1) {
+          full = completed
+        } else {
+          full = seq(completed[0], completed[completed.length - 1])
+        }
+        return {
+          pid,
+          redcapRecordId: redcapIds2021.find((r) => r.pid === pid)
+            ?.redcapRecordId!,
+          email,
+          year: participantData[0].redcapProjectYear,
+          completed,
+          gaps: full.filter((x) => !completed.includes(x)),
+        }
+      }
+
+      const relevantYear = 2021
+
+      async function getLink(redcapRecordId: string, index: number) {
+        const link = await exportWeeklySurveyLink(
+          redcapConfig,
+          redcapRecordId,
+          index
+        )
+        return { index, link }
+      }
+
+      async function sendEmail(s: Summary) {
+        const links = await Promise.all(
+          s.gaps.map((i) => getLink(s.redcapRecordId, i))
+        )
+
+        let content = `NIH HCW study weekly symptom survey summary:\n
+Completed weeks: ${s.completed.join(", ")}\n
+Incomplete weeks:\n\n${links.map((l) => `${l.index}: ${l.link}`).join("\n\n")}`
+
+        await emailConfig.emailer.transporter.sendMail({
+          from: emailConfig.emailer.from,
+          to: s.email,
+          subject: "NIH HCW Study Summary of Weekly Surveys",
+          text: content,
+          html: content.replace(/\n/g, "<br/>"),
+        })
+      }
+
+      const withdrawnPid = withdrawn.map((w) => w.pid)
+      const summariesToSend = unique(surveys.map((s) => s.pid))
+        .filter((pid) => !withdrawnPid.includes(pid))
+        .map((pid) =>
+          surveys.filter(
+            (s) => s.pid === pid && s.redcapProjectYear === relevantYear
+          )
+        )
+        .map(summariseOneParticipantYear)
+        .filter((s) => s !== null && s.gaps.length > 0)
+
+      const emails = summariesToSend
+        // @ts-ignore
+        .map(sendEmail)
+
+      await Promise.all(emails)
+
+      res.send(
+        `Sent ${summariesToSend.length} summar${
+          summariesToSend.length === 1 ? "y" : "ies"
+        }`
+      )
+    }
+  )
 
   // Viruses
   routes.get("/virus", async (req: Request, res: Response) => {

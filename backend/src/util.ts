@@ -41,3 +41,15 @@ export function getWeek(d: Date) {
   // Return array of year and week number
   return [d.getUTCFullYear(), weekNo]
 }
+
+export function seq(min: number, max: number): number[] {
+  let arr: number[] = []
+  for (let i = min; i < max; i++) {
+    arr.push(i)
+  }
+  return arr
+}
+
+export function unique<T>(arr: T[]): T[] {
+  return Array.from(new Set(arr))
+}

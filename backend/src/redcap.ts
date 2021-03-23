@@ -661,3 +661,22 @@ export async function sendCovidVaccination(
     `REDCap send covid vaccination - ${after.getTime() - before.getTime()} ms`
   )
 }
+
+export async function exportWeeklySurveyLink(
+  config: RedcapConfig,
+  redcapRecordId: string,
+  index: number
+) {
+  const res = await axios.post(
+    config.url,
+    new URLSearchParams({
+      token: config.token2021,
+      returnFormat: "json",
+      content: "surveyLink",
+      record: redcapRecordId,
+      instrument: "weekly_symptom_survey",
+      event: `weekly_survey_${index}_arm_1`,
+    })
+  )
+  return await res.data
+}

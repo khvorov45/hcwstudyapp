@@ -645,7 +645,7 @@ async function insertSchedule(db: Task, v: Schedule[]): Promise<void> {
 export async function getWeeklySurveySubset(
   db: Task,
   a: AccessGroup
-): Promise<Schedule[]> {
+): Promise<WeeklySurvey[]> {
   return await getTableSubset(db, a, "WeeklySurvey")
 }
 
