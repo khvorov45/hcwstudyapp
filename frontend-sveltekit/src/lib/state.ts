@@ -34,8 +34,8 @@ export const theme = createLocalStore("theme", "dark", (theme) =>
   document.documentElement.setAttribute("theme", theme)
 )
 
-function createApiStore<T>(argsToReq: (x: T) => ApiRequest) {
-  const { subscribe, set, update } = writable<ApiResult>({
+function createApiStore<A, R>(argsToReq: (x: A) => ApiRequest) {
+  const { subscribe, set, update } = writable<ApiResult<R>>({
     status: "not-requested",
     result: null,
   })
@@ -43,12 +43,12 @@ function createApiStore<T>(argsToReq: (x: T) => ApiRequest) {
     subscribe,
     set,
     update,
-    execute: async (args: T) => {
+    execute: async (args: A) => {
       update((current) => {
         current.status = "loading"
         return current
       })
-      let res = await apiReq(argsToReq(args))
+      let res = await apiReq<R>(argsToReq(args))
       update((current) => {
         current.status = res.error === null ? "success" : "error"
         current.result = res
@@ -58,8 +58,8 @@ function createApiStore<T>(argsToReq: (x: T) => ApiRequest) {
   }
 }
 
-export const loginReq = createApiStore(
-  ({ token }: { token: string | null }) => ({
+export const loginReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
     method: "GET",
     token: token,
     url: "auth/token/verify",

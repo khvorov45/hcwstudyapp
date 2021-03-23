@@ -65,29 +65,29 @@ export type ApiRequest = {
   expectContent?: "none" | "json" | "text"
 }
 
-export type ApiReturn = {
-  data: any
+export type ApiReturn<T> = {
+  data: T | null
   error: ApiResponseError | null
 }
 
-export type ApiResult = {
+export type ApiResult<T> = {
   status: AsyncStatus
-  result: ApiReturn | null
+  result: ApiReturn<T> | null
 }
 
-export async function apiReq({
+export async function apiReq<T>({
   url,
   token = null,
   method = "GET",
   expectContent = "json",
-}: ApiRequest): Promise<ApiReturn> {
+}: ApiRequest): Promise<ApiReturn<T>> {
   let headers = {}
   if (token !== null) {
     headers = { Authorization: `Bearer ${token}` }
   }
 
   let res: any
-  let data: any = null
+  let data: T | null = null
   try {
     res = await fetch(`${process.env.API_ROOT}/${url}`, { method, headers })
   } catch (e) {
