@@ -149,7 +149,7 @@ function SerologyPlots({
           : !v.years.includes(selectedStudyYear))) &&
       applyMultiFilter(
         selectedRecruitmentYears,
-        v.dateScreening.getFullYear()
+        v.dateScreening?.getFullYear() ?? null
       ) &&
       applyMultiFilter(selectedSites, v.site) &&
       applyMultiFilter(

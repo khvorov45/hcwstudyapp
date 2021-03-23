@@ -60,7 +60,7 @@ export async function tableFetch<T>(
 export const VaccinationCountV = t.type({
   pid: t.string,
   site: SiteV,
-  dateScreening: MyDateV,
+  dateScreening: t.union([MyDateV, t.null]),
   years: t.array(t.number),
 })
 export type VaccinationCount = t.TypeOf<typeof VaccinationCountV>
@@ -78,7 +78,7 @@ function genVaccinationCounts(
         ["australia", "overseas"].includes(x.status ?? "")
       )
       return {
-        dateScreening: p?.dateScreening,
+        dateScreening: p?.dateScreening ?? null,
         site: p?.site,
         years: vaxOnly.map((x) => x.year),
       }

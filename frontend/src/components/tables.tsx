@@ -830,7 +830,7 @@ function Summary({
           : !p.years.includes(selectedStudyYear))) &&
       applyMultiFilter(
         selectedRecruitmentYears,
-        p.dateScreening.getFullYear()
+        p.dateScreening?.getFullYear() ?? null
       ) &&
       applyMultiFilter(
         vacSelected,
