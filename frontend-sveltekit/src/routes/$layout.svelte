@@ -62,16 +62,18 @@
   }
 
   const protectedRoutes = ["/tables", "/users"]
+  const adminRoutes = ["/users"]
   $: segmentIsProtected = protectedRoutes.some((r) => $page.path === r)
+  $: segmentIsAdmin = adminRoutes.some((r) => $page.path === r)
 </script>
 
 <Nav />
 
 <main>
-  {#if segmentIsProtected}
+  {#if segmentIsProtected || segmentIsAdmin}
     {#if $loginReq.status === "error"}
       <p>
-        {#if $loginReq.result.error?.type === "backend" && $loginReq.result.error?.status === 401}
+        {#if $loginReq.result?.error?.type === "backend" && $loginReq.result?.error?.status === 401}
           Unauthorized to access this page. Get an access link on the <Link
             href="/email">email page</Link
           >.
@@ -80,7 +82,15 @@
         {/if}
       </p>
     {:else if $loginReq.status === "success"}
-      <slot />
+      {#if segmentIsAdmin}
+        {#if $loginReq.result?.data?.access_group !== "Admin"}
+          <p>Admin-only page.</p>
+        {:else}
+          <slot />
+        {/if}
+      {:else}
+        <slot />
+      {/if}
     {:else}
       <p>Waiting for login</p>
     {/if}
