@@ -114,11 +114,12 @@
   }
   .table-container {
     width: 100%;
+    white-space: nowrap;
   }
   .table {
     margin-left: auto;
     margin-right: auto;
-    max-width: 400px;
+    max-width: 370px;
   }
   .tbody {
     height: calc(100vh - var(--size-header) - var(--size-nav));
@@ -129,11 +130,6 @@
     height: var(--size-header);
     box-sizing: border-box;
   }
-  .header-row {
-    border-right: 1px solid var(--color-bg-2);
-    border-left: 1px solid var(--color-bg-2);
-    border-bottom: 1px solid var(--color-bg-2);
-  }
   .th,
   .td {
     display: inline-block;
@@ -143,10 +139,13 @@
   }
   .th {
     border-right: 1px solid var(--color-bg-2);
+    border-bottom: 1px solid var(--color-bg-2);
     height: var(--size-header);
+    cursor: pointer;
+    font-weight: bold;
   }
-  .th:last-child {
-    border-right: 0px;
+  .th:first-child {
+    border-left: 1px solid var(--color-bg-2);
   }
   .email {
     width: 250px;
