@@ -1,7 +1,7 @@
 <script lang="ts">
   import { usersTable, loginReq, token } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
-  import { Sort, nextSort, stringSort } from "$lib/util"
+  import { Sort, nextSort, stringSort, sortToString } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
   import type { User } from "$lib/data"
   import { onMount } from "svelte"
@@ -81,7 +81,7 @@
     <div class="thead">
       <div class="header-row">
         <div class="th email" on:click={sortEmail}>
-          <span class="cell-content">Email {emailSort}</span>
+          <span class="cell-content">Email {sortToString(emailSort)}</span>
         </div>
         <div class="th access"><span class="cell-content">Access</span></div>
       </div>

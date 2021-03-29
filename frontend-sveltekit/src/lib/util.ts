@@ -10,6 +10,10 @@ export function nextSort(s: Sort): Sort {
   return (s + 1) % 3
 }
 
+export function sortToString(s: Sort): string {
+  return s === Sort.Up ? "up" : s === Sort.Down ? "down" : "no"
+}
+
 export function stringSort<T>(
   accessor: (x: T) => string,
   rev: boolean = false
