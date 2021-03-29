@@ -5,6 +5,7 @@
   import { accessGroupToString } from "$lib/data"
   import type { User } from "$lib/data"
   import { onMount } from "svelte"
+  import SortIcon from "$lib/components/icons/Sort.svelte"
 
   const api = process.env.API_ROOT
 
@@ -81,7 +82,10 @@
     <div class="thead">
       <div class="header-row">
         <div class="th email" on:click={sortEmail}>
-          <span class="cell-content">Email {sortToString(emailSort)}</span>
+          <span class="cell-content"
+            >Email
+            <SortIcon sortOrder={emailSort} /></span
+          >
         </div>
         <div class="th access"><span class="cell-content">Access</span></div>
       </div>
