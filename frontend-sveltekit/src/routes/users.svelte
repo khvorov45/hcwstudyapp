@@ -112,8 +112,8 @@
 
 <style>
   :root {
-    --size-header: 50px;
-    --size-data-cell: 30px;
+    --height-header: 50px;
+    --height-data-cell: 30px;
   }
   .table-container {
     width: 100%;
@@ -129,24 +129,24 @@
     max-width: calc(350px + var(--scrollbar-width));
   }
   .tbody {
-    height: calc(100vh - var(--size-header) - var(--size-nav));
+    height: calc(100vh - var(--height-header) - var(--size-nav));
     overflow-y: scroll;
   }
   .thead,
   .thead * {
-    height: var(--size-header);
+    height: var(--height-header);
   }
   .header-row,
   .data-row {
     display: flex;
   }
   .td {
-    height: var(--size-data-cell);
+    height: var(--height-data-cell);
   }
   .th {
     border-right: 1px solid var(--color-bg-2);
     border-bottom: 1px solid var(--color-bg-2);
-    height: var(--size-header);
+    height: var(--height-header);
     cursor: pointer;
     font-weight: bold;
   }
@@ -170,7 +170,7 @@
     justify-content: center;
   }
   .td > .cell-content {
-    height: var(--size-data-cell);
+    height: var(--height-data-cell);
     padding-left: 10px;
   }
 </style>
