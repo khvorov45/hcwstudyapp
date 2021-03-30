@@ -67,12 +67,11 @@ export const loginReq = createApiStore<{ token: string | null }, User>(
   })
 )
 
-export const usersTable = writable({
-  status: "not-requested",
-  data: null,
-  error: null,
-} as {
-  status: AsyncStatus
-  data: User[] | null
-  error: string | null
-})
+export const usersReq = createApiStore<{ token: string | null }, User[]>(
+  ({ token }) => ({
+    method: "GET",
+    token,
+    url: "users",
+    expectContent: "json",
+  })
+)

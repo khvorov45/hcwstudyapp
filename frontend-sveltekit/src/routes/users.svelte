@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { usersTable, loginReq, token } from "$lib/state"
+  import { loginReq, token, usersReq } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
   import { Sort, nextSort, stringSort, detectScrollbarWidth } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
@@ -7,60 +7,36 @@
   import { onMount } from "svelte"
   import SortIcon from "$lib/components/icons/Sort.svelte"
 
-  const api = process.env.API_ROOT
-
   let mounted = false
   onMount(() => (mounted = true))
 
-  async function fetchTable(
+  async function fetchUsers(
     token: string | null,
     loginStatus: AsyncStatus,
     mounted: boolean
   ) {
     if (
-      $usersTable.status === "success" ||
-      $usersTable.status === "loading" ||
+      $usersReq.status === "success" ||
+      $usersReq.status === "loading" ||
       !mounted
     ) {
       return
     }
-
     if (token === null || loginStatus !== "success") {
-      $usersTable.status === "not-requested"
-      $usersTable.data = null
-      $usersTable.error = null
+      $usersReq.status === "not-requested"
+      $usersReq.result.data = null
+      $usersReq.result.error = null
       return
     }
 
-    $usersTable.status = "loading"
-    $usersTable.error = null
+    await usersReq.execute({ token })
 
-    let res: any
-    try {
-      res = await fetch(`${api}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-    } catch (e) {
-      $usersTable.status = "error"
-      $usersTable.data = null
-      $usersTable.error = "NETWORK_ERROR: " + e.message
-      return
+    if ($usersReq.result?.error !== null) {
+      console.error($usersReq.result.error)
     }
-
-    if (res.status !== 200) {
-      $usersTable.status = "error"
-      $usersTable.data = null
-      $usersTable.error = "FETCH_ERROR: " + (await res.text())
-      return
-    }
-
-    $usersTable.status = "success"
-    $usersTable.data = await res.json()
   }
 
-  $: fetchTable($token, $loginReq.status, mounted)
+  $: fetchUsers($token, $loginReq.status, mounted)
 
   let emailSort: Sort = Sort.Up
   function sortEmail() {
@@ -74,7 +50,10 @@
     return data.sort(stringSort((x) => x.email, emailSort === Sort.Down))
   }
 
-  $: displayData = processTable($usersTable.data?.slice(0) ?? [], emailSort)
+  $: displayData = processTable(
+    $usersReq.result?.data?.slice(0) ?? [],
+    emailSort
+  )
 </script>
 
 <div
