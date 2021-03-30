@@ -114,7 +114,7 @@
   :root {
     --height-header: 50px;
     --height-data-cell: 30px;
-    --width-email: 250px;
+    --width-email: 270px;
     --width-access: 100px;
   }
   .table-container {
