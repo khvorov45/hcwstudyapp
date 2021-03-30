@@ -18,6 +18,8 @@ import {
   CovidVaccineBrandV,
   CovidVaccineBrand,
   SwabResultV,
+  BloodSample,
+  BloodSampleV,
 } from "./data"
 import { decode } from "./io"
 import { justDateString } from "./util"
@@ -679,4 +681,72 @@ export async function exportWeeklySurveyLink(
     })
   )
   return await res.data
+}
+
+export async function exportBloodSamples(
+  config: RedcapConfig
+): Promise<BloodSample[]> {
+  const bloodSamplesWide = await redcapApiReq(config, {
+    content: "record",
+    desc: "blood sample",
+    fields: [
+      "pid",
+      "date_baseline_blood",
+      "date_7d_blood",
+      "date_14d_blood",
+      "date_end_season_blood",
+    ].toString(),
+    events: "baseline_arm_1",
+    type: "flat",
+    rawOrLabel: "raw",
+    exportDataAccessGroups: "false",
+  })
+  const bloodSamples: any[] = []
+  for (let bloodSampleWide of bloodSamplesWide) {
+    const pid = processPid(bloodSampleWide.pid)
+    const year = bloodSampleWide.redcapProjectYear
+    const baselineDate = processRedcapString(
+      bloodSampleWide.date_baseline_blood
+    )
+    const day7Date = processRedcapString(bloodSampleWide.date_7d_blood)
+    const day14Date = processRedcapString(bloodSampleWide.date_14d_blood)
+    const postSeasonDate = processRedcapString(
+      bloodSampleWide.date_end_season_blood
+    )
+    if (baselineDate !== null) {
+      bloodSamples.push({
+        pid,
+        year,
+        timepoint: "prevax",
+        date: baselineDate,
+      })
+    }
+    if (day7Date !== null) {
+      bloodSamples.push({
+        pid,
+        year,
+        timepoint: "postvax7d",
+        date: day7Date,
+      })
+    }
+
+    if (day14Date !== null) {
+      bloodSamples.push({
+        pid,
+        year,
+        timepoint: "postvax14d",
+        date: day14Date,
+      })
+    }
+
+    if (postSeasonDate !== null) {
+      bloodSamples.push({
+        pid,
+        year,
+        timepoint: "postseason",
+        date: postSeasonDate,
+      })
+    }
+  }
+  return decode(t.array(BloodSampleV), bloodSamples)
 }

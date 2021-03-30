@@ -6,6 +6,7 @@ CREATE TYPE hfs_token_type AS ENUM ('session', 'api');
 CREATE TYPE hfs_user_kind AS ENUM ('redcap', 'manual');
 CREATE TYPE hfs_occupation AS ENUM (${occupations:csv});
 CREATE TYPE hfs_covid_vaccine_brand AS ENUM (${covidVaccineBrands:csv});
+CREATE TYPE hfs_timepoint AS ENUM (${timepoints:csv});
 
 CREATE TABLE "LastRedcapSync" (
     "user" timestamptz,
@@ -141,4 +142,12 @@ CREATE TABLE "RegistrationOfInterest" (
     "mobile" TEXT,
     "email" TEXT,
     "date" timestamptz NOT NULL
+);
+
+CREATE TABLE "BloodSample" (
+    "pid" text REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
+    "year" integer NOT NULL CHECK ("year" >= 2020 and "year" <= 2021),
+    "timepoint" hfs_timepoint NOT NULL,
+    "date" timestamptz NOT NULL,
+    PRIMARY KEY ("pid", "year", "timepoint")
 );

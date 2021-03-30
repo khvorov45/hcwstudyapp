@@ -30,6 +30,8 @@ import {
   ParticipantV,
   ParticipantDeidentifiedV,
   WeeklySurveyV,
+  BloodSampleV,
+  TimepointV,
 } from "./data"
 import { generateToken, hash } from "./auth"
 import {
@@ -41,6 +43,7 @@ import {
   exportVaccination,
   exportSchedule,
   exportWeeklySurvey,
+  exportBloodSamples,
 } from "./redcap"
 import { addDays } from "./util"
 import { retryAsync } from "ts-retry"
@@ -126,6 +129,7 @@ async function init(
     sites: Object.keys(SiteV.keys),
     occupations: Object.keys(OccupationV.keys),
     covidVaccineBrands: Object.keys(CovidVaccineBrandV.keys),
+    timepoints: Object.keys(TimepointV.keys),
   })
   console.log("initialization successful")
 }
@@ -173,6 +177,7 @@ export async function reset(
     insertIntoTable(db, data.schedules, "Schedule"),
     insertIntoTable(db, data.weeklySurveys, "WeeklySurvey"),
     insertIntoTable(db, data.serology, "Serology"),
+    insertIntoTable(db, data.bloodSamples, "BloodSample"),
   ])
   await Promise.all([
     setLastParticipantUpdate(db, lastParticipantUpdate),
@@ -193,6 +198,7 @@ async function getAllData(db: Task) {
   const viruses = getViruses(db)
   const serology = getSerologySubset(db, "admin")
   const roi = getRegistrationOfInterestSubset(db, "admin")
+  const bloodSamples = getTableSubset(db, "admin", "BloodSample")
   return {
     users: await users,
     tokens: await tokens,
@@ -206,6 +212,7 @@ async function getAllData(db: Task) {
     viruses: await viruses,
     serology: await serology,
     roi: await roi,
+    bloodSamples: await bloodSamples,
   }
 }
 
@@ -221,6 +228,7 @@ async function getTableSubset(
     | "Schedule"
     | "WeeklySurvey"
     | "Serology"
+    | "BloodSample"
 ) {
   return isSite(a)
     ? await db.any(
@@ -247,6 +255,7 @@ async function insertIntoTable<T>(
     | "Virus"
     | "Serology"
     | "RegistrationOfInterest"
+    | "BloodSample"
 ) {
   if (e.length === 0) {
     return
@@ -264,6 +273,7 @@ async function insertIntoTable<T>(
     Virus: Object.keys(VirusV.props),
     Serology: Object.keys(SerologyV.props),
     RegistrationOfInterest: Object.keys(RegistrationOfInterestV.props),
+    BloodSample: Object.keys(BloodSampleV.props),
   }
   await db.any(pgpInit.helpers.insert(e, cols[t], t))
 }
@@ -501,6 +511,7 @@ export async function syncRedcapParticipants(
     vac,
     schedule,
     weeklySurvey,
+    bloodSamples,
     serology,
   ] = await Promise.all([
     exportParticipants(redcapConfig),
@@ -509,6 +520,7 @@ export async function syncRedcapParticipants(
     exportVaccination(redcapConfig),
     exportSchedule(redcapConfig),
     exportWeeklySurvey(redcapConfig),
+    exportBloodSamples(redcapConfig),
     getSerologySubset(db, "admin"),
   ])
   const redcapParticipantIds = redcapParticipants.map((r) => r.pid)
@@ -555,6 +567,7 @@ export async function syncRedcapParticipants(
       db,
       weeklySurvey.vaccinationCovid.map(findPid).filter(isInParticipant)
     ),
+    insertIntoTable(db, bloodSamples.filter(isInParticipant), "BloodSample"),
   ])
   await setLastParticipantUpdate(db, new Date())
 }
