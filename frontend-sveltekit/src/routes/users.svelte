@@ -94,7 +94,7 @@
     --height-header: 50px;
     --height-data-cell: 30px;
     --width-email: 270px;
-    --width-access: 100px;
+    --width-access: 110px;
   }
   .table-container {
     width: 100%;
