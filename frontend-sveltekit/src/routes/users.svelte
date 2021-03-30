@@ -1,7 +1,7 @@
 <script lang="ts">
   import { usersTable, loginReq, token } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
-  import { Sort, nextSort, stringSort, sortToString } from "$lib/util"
+  import { Sort, nextSort, stringSort, detectScrollbarWidth } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
   import type { User } from "$lib/data"
   import { onMount } from "svelte"
@@ -77,7 +77,10 @@
   $: displayData = processTable($usersTable.data?.slice(0) ?? [], emailSort)
 </script>
 
-<div class="table-container">
+<div
+  class="table-container"
+  style="--scrollbar-width: {detectScrollbarWidth()}px"
+>
   <div class="table">
     <div class="thead">
       <div class="header-row">
@@ -116,10 +119,14 @@
     width: 100%;
     white-space: nowrap;
   }
+  .table-container,
+  .table-container * {
+    box-sizing: border-box;
+  }
   .table {
     margin-left: auto;
     margin-right: auto;
-    max-width: 370px;
+    max-width: calc(350px + var(--scrollbar-width));
   }
   .tbody {
     height: calc(100vh - var(--size-header) - var(--size-nav));
@@ -128,11 +135,10 @@
   .thead,
   .thead * {
     height: var(--size-header);
-    box-sizing: border-box;
   }
-  .th,
-  .td {
-    display: inline-block;
+  .header-row,
+  .data-row {
+    display: flex;
   }
   .td {
     height: var(--size-data-cell);
@@ -152,6 +158,9 @@
   }
   .access {
     width: 100px;
+  }
+  .access {
+    width: calc(100px + var(--scrollbar-width));
   }
   .cell-content {
     display: flex;
