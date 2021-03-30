@@ -8,8 +8,8 @@ pub enum Conflict {
     PrimaryKey(String, String),
     #[error("FK in table {0} (parent table {1}) conflict; value: {2}")]
     ForeignKey(String, String, String),
-    #[error("Wrong token type: {0:?}")]
-    WrongTokenType(current::TokenType),
+    #[error("Wrong token kind: {0:?}")]
+    WrongTokenKind(current::TokenKind),
     #[error("Unexpected redcap data: {0:#?}, expected: {1}")]
     UnexpectedRedcapData(serde_json::Value, String),
 }

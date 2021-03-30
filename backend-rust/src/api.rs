@@ -131,8 +131,7 @@ fn auth_token_send(
     #[derive(Deserialize)]
     struct Query {
         email: String,
-        #[serde(rename = "type")]
-        type_: current::TokenType,
+        kind: current::TokenKind,
     }
     warp::path!("auth" / "token" / "send")
         .and(warp::post())
@@ -144,7 +143,7 @@ fn auth_token_send(
             move |query: Query, db: Db, opt: Opt, mailer: Mailer| async move {
                 let (before_hash, token) = current::Token::new(
                     query.email.to_lowercase().as_str(),
-                    query.type_,
+                    query.kind,
                     opt.auth_token_length,
                     opt.auth_token_days_to_live,
                 );
@@ -152,16 +151,16 @@ fn auth_token_send(
                     Ok(()) => {}
                     Err(e) => return Err(reject(e)),
                 }
-                let content = match query.type_ {
-                    current::TokenType::Session => {
+                let content = match query.kind {
+                    current::TokenKind::Session => {
                         let link = format!("{}/?token={}", opt.frontend_root, before_hash);
                         format!("<a href={0}>{0}</a>", link)
                     }
-                    current::TokenType::Api => before_hash,
+                    current::TokenKind::Api => before_hash,
                 };
-                let title = match query.type_ {
-                    current::TokenType::Session => "access link",
-                    current::TokenType::Api => "API token",
+                let title = match query.kind {
+                    current::TokenKind::Session => "access link",
+                    current::TokenKind::Api => "API token",
                 };
                 let email = Email {
                     to: query.email,

@@ -49,12 +49,12 @@ impl ToCurrent<current::User> for previous::User {
     }
 }
 
-impl ToCurrent<current::TokenType> for previous::TokenType {
-    fn to_current(&self) -> current::TokenType {
+impl ToCurrent<current::TokenKind> for previous::TokenType {
+    fn to_current(&self) -> current::TokenKind {
         use previous::TokenType::*;
         match self {
-            Session => current::TokenType::Session,
-            Api => current::TokenType::Api,
+            Session => current::TokenKind::Session,
+            Api => current::TokenKind::Api,
         }
     }
 }
@@ -64,7 +64,7 @@ impl ToCurrent<current::Token> for previous::Token {
         current::Token {
             user: self.user.to_lowercase(),
             hash: self.hash.clone(),
-            type_: self.type_.to_current(),
+            kind: self.type_.to_current(),
             expires: self.expires,
         }
     }

@@ -176,9 +176,9 @@ impl Db {
                 )))
             }
         };
-        if token_row.type_ == current::TokenType::Api {
-            return Err(anyhow::Error::new(error::Conflict::WrongTokenType(
-                current::TokenType::Api,
+        if token_row.kind == current::TokenKind::Api {
+            return Err(anyhow::Error::new(error::Conflict::WrongTokenKind(
+                current::TokenKind::Api,
             )));
         }
         let before_hash = auth::random_string(len);
