@@ -58,7 +58,7 @@ import { exportWeeklySurveyLink, RedcapConfig, sendRoi } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
 import { pipe } from "fp-ts/lib/function"
-import { getWeek, seq, unique } from "./util"
+import { getWeek, getWeekBounds, justDateString, seq, unique } from "./util"
 import { map } from "fp-ts/lib/ReadonlyRecord"
 
 export function getRoutes(
@@ -375,11 +375,6 @@ export function getRoutes(
         } else {
           let startWeek = getWeek(startDate)[1]
           let endWeek = getWeek(endDate)[1]
-          //* This is the first week for which surveys are set to go out in
-          //* Redcap
-          if (startWeek < 10) {
-            startWeek = 10
-          }
           //* This is the last index for which surveys are set to go out in
           //* Redcap
           if (endWeek > 42) {
@@ -390,6 +385,11 @@ export function getRoutes(
           const minStartWeek = endWeek - 4
           if (startWeek < minStartWeek) {
             startWeek = minStartWeek
+          }
+          //* This is the first week for which surveys are set to go out in
+          //* Redcap
+          if (startWeek < 10) {
+            startWeek = 10
           }
           full = seq(startWeek, endWeek)
         }
@@ -410,7 +410,11 @@ export function getRoutes(
           redcapRecordId,
           index
         )
-        return { index, link }
+        return {
+          index,
+          link,
+          bounds: getWeekBounds({ week: index, year: relevantYear }),
+        }
       }
 
       async function sendEmail(s: Summary) {
@@ -418,9 +422,18 @@ export function getRoutes(
           s.gaps.map((i) => getLink(s.redcapRecordId, i))
         )
 
+        const completedString = s.completed.join(", ")
+
         let content = `NIH HCW study weekly symptom survey summary:\n
-Completed weeks: ${s.completed.join(", ")}\n
-Incomplete weeks:\n\n${links.map((l) => `${l.index}: ${l.link}`).join("\n\n")}`
+Completed weeks: ${completedString === "" ? "none" : completedString}\n
+Incomplete weeks:\n\n${links
+          .map(
+            (l) =>
+              `${l.index} (${justDateString(l.bounds[0])} - ${justDateString(
+                l.bounds[1]
+              )}): ${l.link}`
+          )
+          .join("\n\n")}`
 
         await emailConfig.emailer.transporter.sendMail({
           from: emailConfig.emailer.from,

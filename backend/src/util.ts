@@ -42,6 +42,26 @@ export function getWeek(d: Date) {
   return [d.getUTCFullYear(), weekNo]
 }
 
+export function getWeekBounds({
+  week,
+  year,
+}: {
+  week: number
+  year: number
+}): [Date, Date] {
+  //* Set to year start
+  const d = new Date(Date.UTC(year, 0, 1))
+  //* Set yearStart to the nearest Thursday
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
+  //* Set to target Thursday
+  d.setDate(d.getDate() + week * 7)
+  //* Set to target Monday
+  d.setDate(d.getDate() - 3)
+  const targetSunday = new Date(d)
+  targetSunday.setDate(targetSunday.getDate() + 6)
+  return [d, targetSunday]
+}
+
 export function seq(min: number, max: number): number[] {
   let arr: number[] = []
   for (let i = min; i < max; i++) {
