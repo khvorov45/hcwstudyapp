@@ -114,6 +114,8 @@
   :root {
     --height-header: 50px;
     --height-data-cell: 30px;
+    --width-email: 250px;
+    --width-access: 100px;
   }
   .table-container {
     width: 100%;
@@ -126,7 +128,9 @@
   .table {
     margin-left: auto;
     margin-right: auto;
-    max-width: calc(350px + var(--scrollbar-width));
+    max-width: calc(
+      var(--width-access) + var(--width-email) + var(--scrollbar-width)
+    );
   }
   .tbody {
     height: calc(100vh - var(--height-header) - var(--size-nav));
@@ -154,13 +158,10 @@
     border-left: 1px solid var(--color-bg-2);
   }
   .email {
-    width: 250px;
+    width: var(--width-email);
   }
   .access {
-    width: 100px;
-  }
-  .access {
-    width: calc(100px + var(--scrollbar-width));
+    width: calc(var(--width-access) + var(--scrollbar-width));
   }
   .cell-content {
     display: flex;
