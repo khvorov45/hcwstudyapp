@@ -13,6 +13,7 @@ pub struct Db {
     pub dirs: DbDirs,
     pub users: Table<previous::User, current::User>,
     pub tokens: Table<previous::Token, current::Token>,
+    pub participants: Table<previous::Participant, current::Participant>,
 }
 
 pub struct DbDirs {
@@ -69,11 +70,13 @@ impl Db {
 
         let users = Table::new("User", &dirs, InsertBehavior::Write)?;
         let tokens = Table::new("Token", &dirs, InsertBehavior::Write)?;
+        let participants = Table::new("Participant", &dirs, InsertBehavior::Write)?;
 
         let mut db = Self {
             dirs,
             users,
             tokens,
+            participants,
         };
 
         match db.dirs.init_state {

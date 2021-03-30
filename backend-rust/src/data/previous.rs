@@ -37,7 +37,7 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
-pub enum TokenType {
+pub enum TokenKind {
     Session,
     Api,
 }
@@ -46,9 +46,50 @@ pub enum TokenType {
 pub struct Token {
     pub user: String,
     pub hash: String,
-    #[serde(rename = "type")]
-    pub type_: TokenType,
+    pub kind: TokenKind,
     pub expires: Option<DateTime<Utc>>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum Gender {
+    Female,
+    Male,
+    Other,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum Occupation {
+    Nursing,
+    Medical,
+    Administrative,
+    AlliedHealth,
+    Laboratory,
+    Ancillary,
+    Research,
+    Other,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Participant {
+    pub pid: String,
+    pub site: Site,
+    pub email: Option<String>,
+    pub mobile: Option<String>,
+    pub date_screening: Option<DateTime<Utc>>,
+    pub dob: Option<DateTime<Utc>>,
+    pub gender: Option<Gender>,
+    pub height_cm: Option<f32>,
+    pub weight_kg: Option<f32>,
+    pub atsi: Option<bool>,
+    pub occupation: Option<Occupation>,
+}
+
+// ================================================================================================
+
+impl PrimaryKey<String> for Participant {
+    fn get_pk(&self) -> String {
+        self.pid.clone()
+    }
 }
 
 impl PrimaryKey<String> for User {
@@ -70,16 +111,16 @@ impl ForeignKey<String> for Token {
 }
 
 impl Token {
-    pub fn new(email: &str, type_: TokenType, len: usize, days_to_live: i64) -> (String, Self) {
+    pub fn new(email: &str, kind: TokenKind, len: usize, days_to_live: i64) -> (String, Self) {
         let before_hash = auth::random_string(len);
-        let expires = match type_ {
-            TokenType::Session => Some(chrono::Utc::now() + chrono::Duration::days(days_to_live)),
-            TokenType::Api => None,
+        let expires = match kind {
+            TokenKind::Session => Some(chrono::Utc::now() + chrono::Duration::days(days_to_live)),
+            TokenKind::Api => None,
         };
         let token = Self {
             user: email.to_string(),
             hash: auth::hash(before_hash.as_str()),
-            type_,
+            kind,
             expires,
         };
         (before_hash, token)
