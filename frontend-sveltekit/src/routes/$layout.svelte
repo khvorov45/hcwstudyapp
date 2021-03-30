@@ -104,7 +104,7 @@
     --color-font-1: rgb(230, 230, 230);
     --color-font-2: rgb(200, 200, 200);
     --color-bg-1: rgb(0, 0, 0);
-    --color-bg-2: rgb(50, 50, 50);
+    --color-bg-2: rgb(45, 45, 45);
     --color-bg-3: rgb(100, 100, 100);
     --color-primary-1: #303f9f;
     --color-primary-1-fade: #303f9f78;
