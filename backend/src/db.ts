@@ -217,7 +217,7 @@ async function getAllData(db: Task) {
 }
 
 /** Get site subset for tables with PID as FK */
-async function getTableSubset(
+export async function getTableSubset<T>(
   db: Task,
   a: AccessGroup,
   t:
@@ -229,7 +229,7 @@ async function getTableSubset(
     | "WeeklySurvey"
     | "Serology"
     | "BloodSample"
-) {
+): Promise<T[]> {
   return isSite(a)
     ? await db.any(
         `SELECT * FROM "${t}" WHERE "pid" IN

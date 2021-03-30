@@ -37,8 +37,10 @@ import {
   getParticipantsDeidentifiedSubset,
   getRegistrationOfInterestSubset,
   insertRegistrationOfInterest,
+  getTableSubset,
 } from "./db"
 import {
+  BloodSample,
   ParticipantV,
   RegistrationOfInterestV,
   SerologyV,
@@ -56,7 +58,8 @@ import { exportWeeklySurveyLink, RedcapConfig, sendRoi } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
 import { pipe } from "fp-ts/lib/function"
-import { seq, unique } from "./util"
+import { getWeek, seq, unique } from "./util"
+import { map } from "fp-ts/lib/ReadonlyRecord"
 
 export function getRoutes(
   db: DB,
@@ -313,21 +316,31 @@ export function getRoutes(
   routes.get(
     "/weekly-survey/send-summaries",
     async (req: Request, res: Response) => {
-      const { surveys, withdrawn, redcapIds, participants } = await transaction(
-        db,
-        async (tsk) => {
-          await validateAdmin(req, tsk)
-          return {
-            surveys: await getWeeklySurveySubset(tsk, "admin"),
-            withdrawn: await getWithdrawnSubset(tsk, "admin"),
-            redcapIds: await getYearChangeSubset(tsk, "admin"),
-            participants: await getParticipantsSubset(tsk, "admin"),
-          }
+      const {
+        surveys,
+        withdrawn,
+        redcapIds,
+        participants,
+        bloodSamples,
+      } = await transaction(db, async (tsk) => {
+        await validateAdmin(req, tsk)
+        return {
+          surveys: await getWeeklySurveySubset(tsk, "admin"),
+          withdrawn: await getWithdrawnSubset(tsk, "admin"),
+          redcapIds: await getYearChangeSubset(tsk, "admin"),
+          participants: await getParticipantsSubset(tsk, "admin"),
+          bloodSamples: await getTableSubset<BloodSample>(
+            tsk,
+            "admin",
+            "BloodSample"
+          ),
         }
-      )
+      })
+
+      const relevantYear = 2021
 
       const redcapIds2021 = redcapIds.filter(
-        (r) => r.redcapProjectYear === 2021
+        (r) => r.redcapProjectYear === relevantYear
       )
 
       type Summary = {
@@ -339,40 +352,57 @@ export function getRoutes(
         gaps: number[]
       }
 
-      function summariseOneParticipantYear(
-        participantData: WeeklySurvey[]
-      ): Summary | null {
-        if (participantData.length === 0) {
-          return null
-        }
-        const pid = participantData[0].pid
+      function summariseOneParticipantYear({
+        pid,
+        surveys,
+      }: {
+        pid: string
+        surveys: WeeklySurvey[]
+      }): Summary | null {
         const email = participants.find((p) => p.pid === pid)?.email ?? null
         if (email === null) {
           return null
         }
-        const completed = participantData
-          .map((p) => p.index)
-          .sort((a, b) => a - b)
+        const completed = surveys.map((p) => p.index).sort((a, b) => a - b)
+        const startDate = bloodSamples.find(
+          (s) =>
+            s.pid === pid && s.timepoint === "prevax" && s.year === relevantYear
+        )?.date
+        const endDate = new Date()
         let full: number[]
-        if (completed.length === 0) {
+        if (startDate === undefined) {
           full = []
-        } else if (completed.length === 1) {
-          full = completed
         } else {
-          full = seq(completed[0], completed[completed.length - 1])
+          let startWeek = getWeek(startDate)[1]
+          let endWeek = getWeek(endDate)[1]
+          //* This is the first week for which surveys are set to go out in
+          //* Redcap
+          if (startWeek < 10) {
+            startWeek = 10
+          }
+          //* This is the last index for which surveys are set to go out in
+          //* Redcap
+          if (endWeek > 42) {
+            endWeek = 42
+          }
+          //* Don't necessarily want to send out links to surveys that are
+          //* too far back
+          const minStartWeek = endWeek - 4
+          if (startWeek < minStartWeek) {
+            startWeek = minStartWeek
+          }
+          full = seq(startWeek, endWeek)
         }
         return {
           pid,
           redcapRecordId: redcapIds2021.find((r) => r.pid === pid)
             ?.redcapRecordId!,
           email,
-          year: participantData[0].redcapProjectYear,
+          year: relevantYear,
           completed,
           gaps: full.filter((x) => !completed.includes(x)),
         }
       }
-
-      const relevantYear = 2021
 
       async function getLink(redcapRecordId: string, index: number) {
         const link = await exportWeeklySurveyLink(
@@ -402,13 +432,14 @@ Incomplete weeks:\n\n${links.map((l) => `${l.index}: ${l.link}`).join("\n\n")}`
       }
 
       const withdrawnPid = withdrawn.map((w) => w.pid)
-      const summariesToSend = unique(surveys.map((s) => s.pid))
+      const summariesToSend = unique(participants.map((s) => s.pid))
         .filter((pid) => !withdrawnPid.includes(pid))
-        .map((pid) =>
-          surveys.filter(
+        .map((pid) => ({
+          pid,
+          surveys: surveys.filter(
             (s) => s.pid === pid && s.redcapProjectYear === relevantYear
-          )
-        )
+          ),
+        }))
         .map(summariseOneParticipantYear)
         .filter((s) => s !== null && s.gaps.length > 0)
 
