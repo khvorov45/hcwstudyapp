@@ -144,6 +144,9 @@
   .data-row {
     display: flex;
   }
+  .data-row:nth-child(even) {
+    background-color: var(--color-bg-2);
+  }
   .td {
     height: var(--height-data-cell);
   }
