@@ -153,6 +153,7 @@ impl TryAs for serde_json::Value {
     fn try_as_participant(&self) -> Result<current::Participant> {
         let v = self.try_as_object()?;
         let participant = current::Participant {
+            // TODO Better PID parsing (need to conform to XXX-000 format)
             pid: v.try_get("pid")?.try_as_str()?.to_string(),
             site: v.try_get("redcap_data_access_group")?.try_as_site()?,
             email: v
@@ -216,6 +217,10 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
     )
     .await?;
     let mut participants = Vec::new();
+    // TODO
+    // Better logging of errors
+    // empty pid - log::info the count
+    // Anything else - log in full but try to make compact
     for redcap_participant in participants2020 {
         match redcap_participant.try_as_participant() {
             Ok(p) => participants.push(p),
