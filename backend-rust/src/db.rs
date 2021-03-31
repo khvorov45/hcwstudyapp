@@ -37,13 +37,6 @@ pub struct Table<P, C> {
     pub name: String,
     pub previous: TableData<P>,
     pub current: TableData<C>,
-    pub insert_behavior: InsertBehavior,
-}
-
-#[derive(PartialEq)]
-pub enum InsertBehavior {
-    Write,
-    NoWrite,
 }
 
 pub struct TableData<T> {
@@ -68,9 +61,9 @@ impl Db {
 
         let dirs = DbDirs::new(dir)?;
 
-        let users = Table::new("User", &dirs, InsertBehavior::Write)?;
-        let tokens = Table::new("Token", &dirs, InsertBehavior::Write)?;
-        let participants = Table::new("Participant", &dirs, InsertBehavior::Write)?;
+        let users = Table::new("User", &dirs)?;
+        let tokens = Table::new("Token", &dirs)?;
+        let participants = Table::new("Participant", &dirs)?;
 
         let mut db = Self {
             dirs,
@@ -102,12 +95,13 @@ impl Db {
         // Make sure one admin exists
         if db.users.current.data.is_empty() {
             log::debug!("users empty, inserting default admin");
-            db.users.insert(current::User {
+            db.users.current.data.push(current::User {
                 email: default_admin_email.to_lowercase(),
                 access_group: current::AccessGroup::Admin,
                 kind: current::UserKind::Manual,
                 deidentified_export: false,
-            })?;
+            });
+            db.users.write()?;
         }
 
         Ok(db)
@@ -138,13 +132,15 @@ impl Db {
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
         self.users.check_row_pk(&user)?;
-        self.users.insert(user)?;
+        self.users.current.data.push(user);
+        self.users.write()?;
         Ok(())
     }
     pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
         self.tokens.check_row_pk(&token)?;
         self.tokens.check_row_fk(&token, &self.users)?;
-        self.tokens.insert(token)?;
+        self.tokens.current.data.push(token);
+        self.tokens.write()?;
         Ok(())
     }
 
@@ -228,7 +224,7 @@ impl<
     > Table<P, C>
 {
     /// Creates table with empty data
-    pub fn new(name: &str, dirs: &DbDirs, insert_behavior: InsertBehavior) -> Result<Self> {
+    pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
         log::debug!("creating table {}", name);
         let file_name = format!("{}.json", name);
         let previous = dirs.previous.join(file_name.as_str());
@@ -246,7 +242,6 @@ impl<
             name: name.to_string(),
             previous: TableData::new(previous),
             current: TableData::new(current),
-            insert_behavior,
         })
     }
     pub fn read(&mut self, version: Version) -> Result<()> {
@@ -278,13 +273,6 @@ impl<
             converted.push(row.to_current());
         }
         self.current.data = converted;
-    }
-    pub fn insert(&mut self, data: C) -> Result<()> {
-        self.current.data.push(data);
-        if self.insert_behavior == InsertBehavior::Write {
-            self.write()?;
-        }
-        Ok(())
     }
     pub fn check_row_pk(&self, row: &C) -> Result<()> {
         self.check_row_pk_subset(row, &self.current.data)?;
