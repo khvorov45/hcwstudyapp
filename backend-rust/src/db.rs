@@ -217,6 +217,7 @@ impl Db {
         redcap_participants: Vec<current::Participant>,
     ) -> Result<()> {
         self.participants.current.data = redcap_participants;
+        self.participants.write()?;
         Ok(())
     }
 }
