@@ -67,6 +67,7 @@ trait TryAs {
     fn try_as_site(&self) -> Result<current::Site>;
     fn try_as_access_group(&self) -> Result<current::AccessGroup>;
     fn try_as_user(&self) -> Result<current::User>;
+    fn try_as_pid(&self) -> Result<String>;
     fn try_as_participant(&self) -> Result<current::Participant>;
 }
 
@@ -150,11 +151,54 @@ impl TryAs for serde_json::Value {
         };
         Ok(user)
     }
+    /// The expected format is XXX-DDD-XXX-DDD where X is a letter and D is a digit.
+    /// The dash is optional, the letters and numbers after the first pair are also optional.
+    fn try_as_pid(&self) -> Result<String> {
+        let mut pid = String::new();
+        let itr = self.try_as_str()?.chars();
+        #[derive(PartialEq)]
+        enum State {
+            First,
+            Transition,
+            Second,
+        }
+        let mut state = State::First;
+        for c in itr {
+            match &state {
+                State::First => {
+                    if c.is_alphabetic() {
+                        pid.push(c);
+                    } else {
+                        pid.push('-');
+                        state = State::Transition;
+                    }
+                }
+                State::Transition => {
+                    if c.is_digit(10) {
+                        pid.push(c);
+                        state = State::Second
+                    } else {
+                        continue;
+                    }
+                }
+                State::Second => {
+                    if c.is_digit(10) {
+                        pid.push(c);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        if state != State::Second {
+            return Err(self.error("PID"));
+        }
+        Ok(pid.to_uppercase())
+    }
     fn try_as_participant(&self) -> Result<current::Participant> {
         let v = self.try_as_object()?;
         let participant = current::Participant {
-            // TODO Better PID parsing (need to conform to XXX-000 format)
-            pid: v.try_get("pid")?.try_as_str()?.to_string(),
+            pid: v.try_get("pid")?.try_as_pid()?,
             site: v.try_get("redcap_data_access_group")?.try_as_site()?,
             email: v
                 .try_get("email")?
