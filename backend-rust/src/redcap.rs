@@ -233,11 +233,11 @@ impl TryAs for serde_json::Value {
 pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
     let (users2020, users2021) = redcap_api_request(opt, &[("content", "user")]).await?;
     let mut users = Vec::new();
-    // Emails won't repeat in first year
+    //* Emails won't repeat in first year
     for redcap_user in users2020 {
         users.push(redcap_user.try_as_user()?);
     }
-    // Need to check that user isn't already in for subsequent years
+    //* Need to check that user isn't already in for subsequent years
     for redcap_user in users2021 {
         let user = redcap_user.try_as_user()?;
         if !users.iter().any(|u| u.email == user.email) {
