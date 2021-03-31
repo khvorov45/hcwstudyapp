@@ -41,6 +41,22 @@ async fn redcap_api_request(
     Ok((res2020?, res2021?))
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ExpectedJson {
+    String,
+    StringOrNull,
+    Integer,
+    Real,
+    Date,
+    DateOrNull,
+    Object,
+    Site,
+    AccessGroup,
+    Pid,
+    User,
+    Participant,
+}
+
 trait TryGet {
     fn try_get(&self, name: &str) -> Result<&serde_json::Value>;
 }
@@ -57,7 +73,7 @@ impl TryGet for serde_json::Map<String, serde_json::Value> {
 }
 
 trait TryAs {
-    fn error(&self, expected: &str) -> anyhow::Error;
+    fn error(&self, expected: ExpectedJson) -> anyhow::Error;
     fn try_as_object(&self) -> Result<&serde_json::Map<String, serde_json::Value>>;
     fn try_as_str(&self) -> Result<&str>;
     fn try_as_str_or_null(&self) -> Result<Option<&str>>;
@@ -72,22 +88,22 @@ trait TryAs {
 }
 
 impl TryAs for serde_json::Value {
-    fn error(&self, expected: &str) -> anyhow::Error {
+    fn error(&self, expected: ExpectedJson) -> anyhow::Error {
         anyhow::Error::new(error::RedcapExtraction::UnexpectedJsonValue(
-            expected.to_string(),
+            expected,
             self.clone(),
         ))
     }
     fn try_as_object(&self) -> Result<&serde_json::Map<String, serde_json::Value>> {
         match self.as_object() {
             Some(v) => Ok(v),
-            None => Err(self.error("object")),
+            None => Err(self.error(ExpectedJson::Object)),
         }
     }
     fn try_as_str(&self) -> Result<&str> {
         match self.as_str() {
             Some(v) => Ok(v),
-            None => Err(self.error("string")),
+            None => Err(self.error(ExpectedJson::String)),
         }
     }
     fn try_as_str_or_null(&self) -> Result<Option<&str>> {
@@ -95,14 +111,14 @@ impl TryAs for serde_json::Value {
             Some(v) => Ok(Some(v)),
             None => match self.as_null() {
                 Some(()) => Ok(None),
-                None => Err(self.error("string | null")),
+                None => Err(self.error(ExpectedJson::StringOrNull)),
             },
         }
     }
     fn try_as_i64(&self) -> Result<i64> {
         match self.as_i64() {
             Some(v) => Ok(v),
-            None => Err(self.error("integer")),
+            None => Err(self.error(ExpectedJson::Integer)),
         }
     }
     fn try_as_date(&self) -> Result<chrono::DateTime<chrono::Utc>> {
@@ -116,7 +132,7 @@ impl TryAs for serde_json::Value {
             Ok(d) => Ok(Some(d)),
             Err(_) => match self.as_null() {
                 Some(()) => Ok(None),
-                None => Err(self.error("date | null")),
+                None => Err(self.error(ExpectedJson::DateOrNull)),
             },
         }
     }
@@ -129,7 +145,7 @@ impl TryAs for serde_json::Value {
             "perth" => Perth,
             "newcastle" => Newcastle,
             "brisbane" => Brisbane,
-            _ => return Err(self.error("Site")),
+            _ => return Err(self.error(ExpectedJson::Site)),
         };
         Ok(v)
     }
@@ -191,7 +207,7 @@ impl TryAs for serde_json::Value {
             }
         }
         if state != State::Second {
-            return Err(self.error("PID"));
+            return Err(self.error(ExpectedJson::Pid));
         }
         Ok(pid.to_uppercase())
     }
@@ -261,38 +277,86 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
     )
     .await?;
     let mut participants = Vec::new();
-    // TODO
-    // Better logging of errors
-    // empty pid - log::info the count
-    // Anything else - log in full but try to make compact
+    struct Counts {
+        empty_pid: (i32, i32),
+        parsed: (i32, i32),
+        added: (i32, i32),
+    }
+    let mut counts = Counts {
+        empty_pid: (0, 0),
+        parsed: (0, 0),
+        added: (0, 0),
+    };
+    fn handle_error(e: anyhow::Error, redcap_participant: &serde_json::Value) -> i32 {
+        fn log_full_error(e: String, redcap_participant: &serde_json::Value) {
+            log::error!(
+                "Failed to parse participant: {}, at\n{}",
+                e,
+                serde_json::to_string_pretty(redcap_participant)
+                    .unwrap_or_else(|_| "could not print particpant".to_string())
+            )
+        }
+        fn log_pid_error(pid: &serde_json::Value) {
+            log::error!("Failed to parse pid: {}", pid);
+        }
+        let mut empty_pid_count = 0;
+        if let Some(e) = e.downcast_ref::<error::RedcapExtraction>() {
+            if let error::RedcapExtraction::UnexpectedJsonValue(expected, got) = e {
+                if expected == &ExpectedJson::Pid {
+                    if let Some(pid) = got.as_str() {
+                        if pid.is_empty() {
+                            empty_pid_count += 1;
+                        } else {
+                            log_pid_error(got);
+                        }
+                    } else {
+                        log_pid_error(got);
+                    }
+                } else {
+                    log_full_error(e.to_string(), &redcap_participant);
+                }
+            } else {
+                log_full_error(e.to_string(), &redcap_participant);
+            }
+        } else {
+            log_full_error(e.to_string(), &redcap_participant);
+        }
+        empty_pid_count
+    }
     for redcap_participant in participants2020 {
         match redcap_participant.try_as_participant() {
-            Ok(p) => participants.push(p),
-            Err(e) => log::error!(
-                "participant parsing failure: {}\nOn value: {:#?}",
-                e,
-                redcap_participant
-            ),
+            Ok(p) => {
+                counts.parsed.0 += 1;
+                counts.added.0 += 1;
+                participants.push(p)
+            }
+            Err(e) => counts.empty_pid.0 += handle_error(e, &redcap_participant),
         }
     }
     for redcap_participant in participants2021 {
         let participant = match redcap_participant.try_as_participant() {
-            Ok(p) => p,
+            Ok(p) => {
+                counts.parsed.1 += 1;
+                p
+            }
             Err(e) => {
-                log::error!(
-                    "participant parsing failure: {}\nOn value: {:#?}",
-                    e,
-                    redcap_participant
-                );
+                counts.empty_pid.1 += handle_error(e, &redcap_participant);
                 continue;
             }
         };
         if !participants.iter().any(|p| p.pid == participant.pid) {
+            counts.added.1 += 1;
             participants.push(participant);
         }
         // TODO
         // Handle the case when a participant is present in the subsequent year
         // but their info is (potentially) different
     }
+    fn log_count(msg: &str, c: (i32, i32)) {
+        log::info!("Participants {}: {} (2020), {} (2021)", msg, c.0, c.1);
+    }
+    log_count("with empty pid", counts.empty_pid);
+    log_count("parsed", counts.parsed);
+    log_count("added", counts.added);
     Ok(participants)
 }

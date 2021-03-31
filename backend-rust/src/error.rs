@@ -1,4 +1,4 @@
-use crate::data::current;
+use crate::{data::current, redcap};
 use thiserror::Error;
 use warp::http::StatusCode;
 
@@ -34,8 +34,8 @@ pub enum RedcapExtraction {
     FieldNotFound(String),
     #[error("Redcap extraction failed, expected: {0}; got: {1}")]
     ExtractionFailed(String, String),
-    #[error("Unexpected json value, expected {0}, got {1}")]
-    UnexpectedJsonValue(String, serde_json::Value),
+    #[error("Unexpected json value, expected {0:?}, got {1}")]
+    UnexpectedJsonValue(redcap::ExpectedJson, serde_json::Value),
 }
 
 #[derive(Debug)]
