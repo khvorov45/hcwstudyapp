@@ -164,7 +164,7 @@ fn auth_token_send(
                 };
                 let email = Email {
                     to: query.email,
-                    subject: "NIH HCW Study Access Link".to_string(),
+                    subject: format!("NIH HCW Study {}", title),
                     body: format!("<p>NIH HCW Flu study {}:</p><br/>{}", title, content),
                 };
                 match email.send(mailer).await {
