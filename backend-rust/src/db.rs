@@ -211,6 +211,14 @@ impl Db {
 
         Ok(())
     }
+
+    pub fn sync_redcap_participants(
+        &mut self,
+        redcap_participants: Vec<current::Participant>,
+    ) -> Result<()> {
+        self.participants.current.data = redcap_participants;
+        Ok(())
+    }
 }
 
 impl<

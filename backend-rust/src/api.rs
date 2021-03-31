@@ -29,6 +29,8 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     let log = warp::log("api");
     get_users(db.clone())
+        .or(get_participants(db.clone()))
+        .or(participants_redcap_sync(db.clone(), opt.clone()))
         .or(users_redcap_sync(db.clone(), opt.clone()))
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db.clone(), opt.clone(), mailer))
@@ -80,24 +82,31 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
     Err(err)
 }
 
-fn sufficient_access(
+fn user_from_token(
     db: Db,
-    req_access: current::AccessGroup,
 ) -> impl Filter<Extract = (current::User,), Error = warp::Rejection> + Clone {
     auth_header()
         .and(with_db(db))
         .and_then(move |tok: String, db: Db| async move {
-            let u = match db.lock().await.token_verify(tok.as_str()) {
-                Ok(u) => u,
-                Err(e) => return Err(reject(e)),
-            };
-            if u.access_group < req_access {
-                return Err(reject(anyhow::Error::new(
-                    error::Unauthorized::InsufficientAccess(u.access_group, req_access),
-                )));
+            match db.lock().await.token_verify(tok.as_str()) {
+                Ok(u) => Ok(u),
+                Err(e) => Err(reject(e)),
             }
-            Ok(u)
         })
+}
+
+fn sufficient_access(
+    db: Db,
+    req_access: current::AccessGroup,
+) -> impl Filter<Extract = (current::User,), Error = warp::Rejection> + Clone {
+    user_from_token(db).and_then(move |u: current::User| async move {
+        if u.access_group < req_access {
+            return Err(reject(anyhow::Error::new(
+                error::Unauthorized::InsufficientAccess(u.access_group, req_access),
+            )));
+        }
+        Ok(u)
+    })
 }
 
 // Tokens =========================================================================================
@@ -215,6 +224,45 @@ fn users_redcap_sync(
                 Err(e) => return Err(reject(e)),
             };
             match db.lock().await.sync_redcap_users(redcap_users) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Particiapants ==================================================================================
+
+fn get_participants(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
+        Ok(warp::reply::json(
+            &db.lock().await.participants.current.data,
+        ))
+    }
+    warp::path!("participants")
+        .and(warp::get())
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn participants_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("participants" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_participants = match redcap::export_participants(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db
+                .lock()
+                .await
+                .sync_redcap_participants(redcap_participants)
+            {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(reject(e)),
             }

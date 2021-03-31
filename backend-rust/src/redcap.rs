@@ -215,10 +215,27 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
     .await?;
     let mut participants = Vec::new();
     for redcap_participant in participants2020 {
-        participants.push(redcap_participant.try_as_participant()?);
+        match redcap_participant.try_as_participant() {
+            Ok(p) => participants.push(p),
+            Err(e) => log::error!(
+                "participant parsing failure: {}\nOn value: {:#?}",
+                e,
+                redcap_participant
+            ),
+        }
     }
     for redcap_participant in participants2021 {
-        let participant = redcap_participant.try_as_participant()?;
+        let participant = match redcap_participant.try_as_participant() {
+            Ok(p) => p,
+            Err(e) => {
+                log::error!(
+                    "participant parsing failure: {}\nOn value: {:#?}",
+                    e,
+                    redcap_participant
+                );
+                continue;
+            }
+        };
         if !participants.iter().any(|p| p.pid == participant.pid) {
             participants.push(participant);
         }
