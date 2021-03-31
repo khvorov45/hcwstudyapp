@@ -20,7 +20,7 @@
     let res: any
     try {
       res = await fetch(
-        `${api}/auth/token/send?email=${email}&type=${
+        `${api}/auth/token/send?email=${email}&kind=${
           whatToSend === "Access link" ? "Session" : "Api"
         }`,
         { method: "POST" }
