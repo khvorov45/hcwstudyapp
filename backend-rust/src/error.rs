@@ -28,6 +28,16 @@ pub enum Unauthorized {
     InsufficientAccess(current::AccessGroup, current::AccessGroup),
 }
 
+#[derive(Error, Debug)]
+pub enum RedcapExtraction {
+    #[error("Field {0} not found")]
+    FieldNotFound(String),
+    #[error("Redcap extraction failed, expected: {0}; got: {1}")]
+    ExtractionFailed(String, String),
+    #[error("Unexpected json value, expected {0}, got {1}")]
+    UnexpectedJsonValue(String, serde_json::Value),
+}
+
 #[derive(Debug)]
 pub struct ApiProblem {
     pub status: StatusCode,

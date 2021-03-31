@@ -105,12 +105,6 @@ impl ToCurrent<current::Participant> for previous::Participant {
             email: self.email.clone(),
             mobile: self.mobile.clone(),
             date_screening: self.date_screening,
-            dob: self.dob,
-            gender: self.gender.clone().map(|g| g.to_current()),
-            height_cm: self.height_cm,
-            weight_kg: self.weight_kg,
-            atsi: self.atsi,
-            occupation: self.occupation.clone().map(|o| o.to_current()),
         }
     }
 }
