@@ -105,8 +105,10 @@ impl TryAs for serde_json::Value {
         }
     }
     fn try_as_date(&self) -> Result<chrono::DateTime<chrono::Utc>> {
-        let date = serde_json::from_value(self.clone())?;
-        Ok(date)
+        let date: chrono::NaiveDate = serde_json::from_value(self.clone())?;
+        let datetime = date.and_time(chrono::NaiveTime::from_hms(0, 0, 0));
+        let datetime_tz = chrono::DateTime::from_utc(datetime, chrono::Utc);
+        Ok(datetime_tz)
     }
     fn try_as_date_or_null(&self) -> Result<Option<chrono::DateTime<chrono::Utc>>> {
         match self.try_as_date() {
