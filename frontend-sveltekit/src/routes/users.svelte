@@ -1,6 +1,7 @@
 <script lang="ts">
   import { loginReq, token, usersReq } from "$lib/state"
   import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
+  import { fetchTable } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
   import type { User } from "$lib/data"
   import { onMount } from "svelte"
@@ -14,25 +15,7 @@
     loginStatus: AsyncStatus,
     mounted: boolean
   ) {
-    if (
-      $usersReq.status === "success" ||
-      $usersReq.status === "loading" ||
-      !mounted
-    ) {
-      return
-    }
-    if (token === null || loginStatus !== "success") {
-      $usersReq.status === "not-requested"
-      $usersReq.result.data = null
-      $usersReq.result.error = null
-      return
-    }
-
-    await usersReq.execute({ token })
-
-    if ($usersReq.result?.error !== null) {
-      console.error($usersReq.result.error)
-    }
+    await fetchTable(usersReq, token, loginStatus, mounted)
   }
 
   $: fetchUsers($token, $loginReq.status, mounted)

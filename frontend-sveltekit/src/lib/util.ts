@@ -157,3 +157,40 @@ export type TableDisplayData<T> = {
   headers: TableDisplayHeader<T>[]
   rows: T[]
 }
+
+export async function fetchTable(
+  // TODO: Better type for store
+  store: any,
+  token: string | null,
+  loginStatus: AsyncStatus,
+  mounted: boolean
+) {
+  let content: any
+  let unsubscribe = store.subscribe((c: any) => (content = c))
+  unsubscribe()
+
+  if (
+    content.status === "success" ||
+    content.status === "loading" ||
+    !mounted
+  ) {
+    return
+  }
+  if (token === null || loginStatus !== "success") {
+    content.update((c) => {
+      c.status === "not-requested"
+      c.result.data = null
+      c.result.error = null
+    })
+    return
+  }
+
+  await store.execute({ token })
+
+  unsubscribe = store.subscribe((c: any) => (content = c))
+  unsubscribe()
+
+  if (content.result?.error !== null) {
+    console.error(content.result.error)
+  }
+}
