@@ -55,7 +55,7 @@
             }}
           >
             <span class="cell-content"
-              >{header.title}
+              ><span class="title">{header.title}</span>
               <SortIcon
                 sortOrder={sortStatus.header === i
                   ? sortStatus.status
@@ -101,8 +101,7 @@
     height: calc(100vh - var(--height-header) - var(--size-nav));
     overflow-y: scroll;
   }
-  .thead,
-  .thead * {
+  .thead {
     height: var(--height-header);
   }
   .header-row,
@@ -126,6 +125,7 @@
     border-left: 1px solid var(--color-bg-2);
   }
   .cell-content {
+    height: var(--height-header);
     display: flex;
     align-items: center;
   }
