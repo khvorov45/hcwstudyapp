@@ -94,6 +94,7 @@
                 <InputField
                   bind:value={filterStatuses[i].value}
                   width={`${headerWidth(header, i) - 40}px`}
+                  placeholder="search..."
                 />
               </div>
             </span>

@@ -3,6 +3,7 @@
   export let value = ""
 
   export let width = "auto"
+  export let placeholder = ""
 </script>
 
 <div class="container" style="width: {width}">
@@ -12,6 +13,7 @@
     bind:value
     class:filled={value !== ""}
     on:input
+    {placeholder}
   />
 </div>
 
