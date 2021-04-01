@@ -1,11 +1,18 @@
 <script lang="ts">
   export let label = ""
   export let value = ""
+
+  export let width = "auto"
 </script>
 
-<div class="container">
+<div class="container" style="width: {width}">
   <div class="label">{label}</div>
-  <input bind:value class:filled={value !== ""} on:input />
+  <input
+    style="width: {width}"
+    bind:value
+    class:filled={value !== ""}
+    on:input
+  />
 </div>
 
 <style>

@@ -2,6 +2,7 @@
   import { detectScrollbarWidth, Sort, nextSort, stringSort } from "$lib/util"
   import type { TableDisplayData, TableDisplayHeader } from "$lib/util"
   import SortIcon from "$lib/components/icons/Sort.svelte"
+  import InputField from "$lib/components/InputField.svelte"
 
   export let data: TableDisplayData<any> = { rows: [], headers: [] }
 
@@ -18,9 +19,32 @@
 
   const sortStatus: SortStatus = { header: 0, status: Sort.Up }
 
-  function processTable<T>(rows: T[], sortStatus: SortStatus) {
+  type FilterStatus = {
+    header: number
+    value: string
+  }
+
+  const filterStatuses: FilterStatus[] = []
+  for (let i = 0; i < data.headers.length; i++) {
+    filterStatuses.push({ header: i, value: "" })
+  }
+
+  function processTable<T>(
+    rows: T[],
+    sortStatus: SortStatus,
+    filterStatuses: FilterStatus[]
+  ) {
     if (sortStatus.status === Sort.No) {
       return rows
+    }
+    for (let filterStatus of filterStatuses) {
+      if (filterStatus.value === "") {
+        continue
+      }
+      const thisHeader = data.headers[filterStatus.header]
+      rows = rows.filter((r) =>
+        thisHeader.filterFun(thisHeader.accessor(r), filterStatus.value)
+      )
     }
     return rows.sort(
       stringSort(
@@ -30,7 +54,7 @@
     )
   }
 
-  $: displayData = processTable(data.rows.slice(0), sortStatus)
+  $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
 </script>
 
 <div class="table-container">
@@ -45,22 +69,33 @@
           <div
             class="th {header.title}"
             style="width: {headerWidth(header, i)}px"
-            on:click={() => {
-              if (sortStatus.header === i) {
-                sortStatus.status = nextSort(sortStatus.status)
-              } else {
-                sortStatus.header = i
-                sortStatus.status = nextSort(Sort.No)
-              }
-            }}
           >
-            <span class="cell-content"
-              ><span class="title">{header.title}</span>
-              <SortIcon
-                sortOrder={sortStatus.header === i
-                  ? sortStatus.status
-                  : Sort.No}
-              />
+            <span class="cell-content header-content"
+              ><div
+                class="click-to-sort"
+                style="width: {headerWidth(header, i)}px"
+                on:click={() => {
+                  if (sortStatus.header === i) {
+                    sortStatus.status = nextSort(sortStatus.status)
+                  } else {
+                    sortStatus.header = i
+                    sortStatus.status = nextSort(Sort.No)
+                  }
+                }}
+              >
+                <span class="title">{header.title}</span>
+                <SortIcon
+                  sortOrder={sortStatus.header === i
+                    ? sortStatus.status
+                    : Sort.No}
+                />
+              </div>
+              <div class="filter">
+                <InputField
+                  bind:value={filterStatuses[i].value}
+                  width={`${headerWidth(header, i) - 40}px`}
+                />
+              </div>
             </span>
           </div>
         {/each}
@@ -82,7 +117,7 @@
 
 <style>
   :root {
-    --height-header: 50px;
+    --height-header: 70px;
     --height-data-cell: 30px;
   }
   .table-container {
@@ -118,7 +153,6 @@
     border-right: 1px solid var(--color-bg-2);
     border-bottom: 1px solid var(--color-bg-2);
     height: var(--height-header);
-    cursor: pointer;
     font-weight: bold;
   }
   .th:first-child {
@@ -128,6 +162,15 @@
     height: var(--height-header);
     display: flex;
     align-items: center;
+  }
+  .header-content {
+    flex-direction: column;
+  }
+  .click-to-sort {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
   .th > .cell-content {
     justify-content: center;

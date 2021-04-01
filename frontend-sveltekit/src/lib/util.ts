@@ -150,6 +150,7 @@ export type TableDisplayHeader<T> = {
   title: string
   accessor: (row: T) => string
   width: number
+  filterFun: (v: string, comp: string) => boolean
 }
 
 export type TableDisplayData<T> = {

@@ -42,11 +42,13 @@
       title: "Email",
       accessor: (u) => u.email,
       width: 270,
+      filterFun: (v, c) => v.startsWith(c),
     },
     {
       title: "Access",
       accessor: (u) => accessGroupToString(u.access_group),
       width: 110,
+      filterFun: (v, c) => v.startsWith(c),
     },
   ]
 </script>
