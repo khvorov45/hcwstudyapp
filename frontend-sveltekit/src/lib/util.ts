@@ -145,3 +145,14 @@ export function detectScrollbarWidth(): number {
   document.body.removeChild(scrollDiv)
   return scrollbarWidth
 }
+
+export type TableDisplayHeader<T> = {
+  title: string
+  accessor: (row: T) => string
+  width: number
+}
+
+export type TableDisplayData<T> = {
+  headers: TableDisplayHeader<T>[]
+  rows: T[]
+}
