@@ -2,8 +2,8 @@ export type AsyncStatus = "success" | "error" | "loading" | "not-requested"
 
 export enum Sort {
   No = 0,
-  Down = 1,
-  Up = 2,
+  Up = 1,
+  Down = 2,
 }
 
 export function nextSort(s: Sort): Sort {
