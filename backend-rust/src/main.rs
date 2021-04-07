@@ -2,15 +2,13 @@ use backend_rust::{api, db::Db, email::Mailer, Opt, Result};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{AsyncSmtpTransport, Tokio1Executor};
 use std::sync::Arc;
-use structopt::StructOpt;
 use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     pretty_env_logger::init();
 
-    let mut opt = Opt::from_args();
-    opt.read_config()?;
+    let opt = Opt::new()?;
 
     let db = Db::new(opt.root_dir.as_path(), opt.default_admin_email.as_str())?;
     let email_cred = Credentials::new(opt.email_username.clone(), opt.email_password.clone());
