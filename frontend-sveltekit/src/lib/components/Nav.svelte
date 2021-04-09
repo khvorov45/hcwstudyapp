@@ -59,7 +59,9 @@
     <hr class="element" />
     {#if $loginReq.status === "success"}
       <div class="element">
-        <a class:active={$page.path === "/tables"} href="/tables"><Table /></a>
+        <a class:active={$page.path.startsWith("/tables")} href="/tables"
+          ><Table /></a
+        >
       </div>
     {/if}
   </div>

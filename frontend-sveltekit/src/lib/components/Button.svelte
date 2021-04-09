@@ -9,14 +9,15 @@
   export let loading = false
   export let success = false
   export let errorMsg = ""
+  export let height = "auto"
 
   $: cantPress = disabled || loading || success
 </script>
 
-<div class="container">
+<div class="container" style="height: {height}">
   <div
     class="button"
-    style="max-width: {maxWidth}; min-width: {minWidth}; width: {width}"
+    style="max-width: {maxWidth}; min-width: {minWidth}; width: {width}; height: {height}"
     class:icon={variant === "icon"}
     class:text={variant === "text"}
     class:active
@@ -40,6 +41,7 @@
 
 <style>
   .button {
+    box-sizing: border-box;
     display: flex;
     cursor: pointer;
     user-select: none;

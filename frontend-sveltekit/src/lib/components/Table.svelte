@@ -6,6 +6,7 @@
   import { onMount } from "svelte"
 
   export let data: TableDisplayData<any> = { rows: [], headers: [] }
+  export let occupiedHeight = "var(--size-nav)"
 
   let scrollbarWidth = 0
   onMount(() => (scrollbarWidth = detectScrollbarWidth()))
@@ -59,7 +60,7 @@
   $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
 </script>
 
-<div class="table-container">
+<div class="table-container" style="--occupied-height: {occupiedHeight}">
   <div
     class="table"
     style="width: {data.headers.reduce((s, x) => (s += x.width), 0) +
@@ -136,7 +137,7 @@
     margin-right: auto;
   }
   .tbody {
-    height: calc(100vh - var(--height-header) - var(--size-nav));
+    height: calc(100vh - var(--height-header) - var(--occupied-height));
     overflow-y: scroll;
   }
   .thead {

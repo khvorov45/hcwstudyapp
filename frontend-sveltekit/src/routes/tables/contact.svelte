@@ -47,4 +47,7 @@
   ]
 </script>
 
-<Table data={{ rows: $participantsReq.result?.data ?? [], headers }} />
+<Table
+  data={{ rows: $participantsReq.result?.data ?? [], headers }}
+  occupiedHeight={"calc(var(--size-nav) * 2)"}
+/>
