@@ -18,3 +18,11 @@ export type User = {
   kind: "Redcap" | "Manual"
   deidentified_export: boolean
 }
+
+export type Participant = {
+  pid: string
+  site: Site
+  email: string | null
+  mobile: string | null
+  date_screening: Date | null
+}

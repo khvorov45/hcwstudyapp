@@ -3,10 +3,12 @@
   import type { TableDisplayData, TableDisplayHeader } from "$lib/util"
   import SortIcon from "$lib/components/icons/Sort.svelte"
   import InputField from "$lib/components/InputField.svelte"
+  import { onMount } from "svelte"
 
   export let data: TableDisplayData<any> = { rows: [], headers: [] }
 
-  const scrollbarWidth = detectScrollbarWidth()
+  let scrollbarWidth = 0
+  onMount(() => (scrollbarWidth = detectScrollbarWidth()))
 
   function headerWidth(header: TableDisplayHeader<any>, i: number) {
     return header.width + (i + 1 === data.headers.length ? scrollbarWidth : 0)

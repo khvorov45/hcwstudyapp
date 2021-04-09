@@ -177,10 +177,10 @@ export async function fetchTable(
     return
   }
   if (token === null || loginStatus !== "success") {
-    content.update((c) => {
-      c.status === "not-requested"
-      c.result.data = null
-      c.result.error = null
+    store.update((c) => {
+      c.status = "not-requested"
+      c.result = null
+      return c
     })
     return
   }

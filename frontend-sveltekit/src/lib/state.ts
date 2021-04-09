@@ -75,3 +75,12 @@ export const usersReq = createApiStore<{ token: string | null }, User[]>(
     expectContent: "json",
   })
 )
+
+export const participantsReq = createApiStore<{ token: string | null }, User[]>(
+  ({ token }) => ({
+    method: "GET",
+    token,
+    url: "participants",
+    expectContent: "json",
+  })
+)
