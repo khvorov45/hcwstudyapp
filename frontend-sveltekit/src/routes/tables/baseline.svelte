@@ -64,19 +64,19 @@
     {
       title: "Height",
       accessor: (u) => u.height?.toFixed(1) ?? "",
-      width: 150,
+      width: 130,
       filter: filt2,
     },
     {
       title: "Weight",
       accessor: (u) => u.weight?.toFixed(1) ?? "",
-      width: 150,
+      width: 130,
       filter: filt2,
     },
     {
       title: "BMI",
       accessor: (u) => u.weight?.toFixed(1) ?? "",
-      width: 150,
+      width: 130,
       filter: filt2,
     },
   ]

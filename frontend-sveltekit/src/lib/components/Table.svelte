@@ -107,13 +107,13 @@
                   {:else}
                     <InputField
                       bind:value={filterStatuses[i].value[0]}
-                      width={`${headerWidth(header, i) / 2 - 40}px`}
+                      width={`${headerWidth(header, i) / 2 - 20}px`}
                       placeholder="from"
                     />
                     <br />
                     <InputField
                       bind:value={filterStatuses[i].value[1]}
-                      width={`${headerWidth(header, i) / 2 - 40}px`}
+                      width={`${headerWidth(header, i) / 2 - 20}px`}
                       placeholder="to"
                     />
                   {/if}
