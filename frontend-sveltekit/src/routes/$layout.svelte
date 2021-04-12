@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import Nav from "$lib/components/Nav.svelte"
-  import { token, theme, loginReq } from "../lib/state"
+  import { token, theme, loginReq, scrollbarWidth } from "../lib/state"
   import { page } from "$app/stores"
   import Link from "$lib/components/Link.svelte"
-  import { apiErrorToString, apiReq } from "$lib/util"
+  import { apiErrorToString, apiReq, detectScrollbarWidth } from "$lib/util"
 
   onMount(async () => {
+    $scrollbarWidth = detectScrollbarWidth()
     token.useLocalStorage()
     theme.useLocalStorage()
     await login()

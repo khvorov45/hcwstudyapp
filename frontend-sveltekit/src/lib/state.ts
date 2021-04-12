@@ -1,7 +1,9 @@
 import { writable } from "svelte/store"
 import type { User } from "$lib/data"
 import { apiReq } from "$lib/util"
-import type { ApiRequest, ApiResult, AsyncStatus } from "$lib/util"
+import type { ApiRequest, ApiResult } from "$lib/util"
+
+export const scrollbarWidth = writable(0)
 
 function createLocalStore<T>(
   key: string,

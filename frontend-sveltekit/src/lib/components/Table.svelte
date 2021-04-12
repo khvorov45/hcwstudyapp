@@ -1,18 +1,15 @@
 <script lang="ts">
-  import { detectScrollbarWidth, Sort, nextSort, stringSort } from "$lib/util"
+  import { Sort, nextSort, stringSort } from "$lib/util"
   import type { TableDisplayData, TableDisplayHeader } from "$lib/util"
   import SortIcon from "$lib/components/icons/Sort.svelte"
   import InputField from "$lib/components/InputField.svelte"
-  import { onMount } from "svelte"
+  import { scrollbarWidth } from "$lib/state"
 
   export let data: TableDisplayData<any> = { rows: [], headers: [] }
   export let occupiedHeight = "var(--size-nav)"
 
-  let scrollbarWidth = 0
-  onMount(() => (scrollbarWidth = detectScrollbarWidth()))
-
   function headerWidth(header: TableDisplayHeader<any>, i: number) {
-    return header.width + (i + 1 === data.headers.length ? scrollbarWidth : 0)
+    return header.width + (i + 1 === data.headers.length ? $scrollbarWidth : 0)
   }
 
   type SortStatus = {
@@ -64,7 +61,7 @@
   <div
     class="table"
     style="width: {data.headers.reduce((s, x) => (s += x.width), 0) +
-      scrollbarWidth}px"
+      $scrollbarWidth}px"
   >
     <div class="thead">
       <div class="header-row">
