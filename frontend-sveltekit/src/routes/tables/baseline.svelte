@@ -46,19 +46,37 @@
     {
       title: "Screened",
       accessor: (u) => u.date_screening?.slice(0, 10) ?? "",
-      width: 270,
+      width: 230,
       filter: filt2,
     },
     {
       title: "DoB",
       accessor: (u) => u.date_birth?.slice(0, 10) ?? "",
-      width: 270,
+      width: 230,
       filter: filt2,
     },
     {
       title: "Age at screening",
       accessor: (u) => u.age_recruitment?.toFixed(1) ?? "",
-      width: 270,
+      width: 170,
+      filter: filt2,
+    },
+    {
+      title: "Height",
+      accessor: (u) => u.height?.toFixed(1) ?? "",
+      width: 150,
+      filter: filt2,
+    },
+    {
+      title: "Weight",
+      accessor: (u) => u.weight?.toFixed(1) ?? "",
+      width: 150,
+      filter: filt2,
+    },
+    {
+      title: "BMI",
+      accessor: (u) => u.weight?.toFixed(1) ?? "",
+      width: 150,
       filter: filt2,
     },
   ]

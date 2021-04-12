@@ -27,4 +27,7 @@ export type Participant = {
   date_screening: string | null
   date_birth: string | null
   age_recruitment: number | null
+  height: number | null
+  weight: number | null
+  bmi: number | null
 }
