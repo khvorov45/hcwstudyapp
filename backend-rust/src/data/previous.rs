@@ -81,6 +81,7 @@ pub struct Participant {
     pub height: Option<f64>,
     pub weight: Option<f64>,
     pub bmi: Option<f64>,
+    pub gender: Option<Gender>,
 }
 
 // ================================================================================================

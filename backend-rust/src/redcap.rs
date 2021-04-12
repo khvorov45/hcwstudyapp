@@ -56,6 +56,8 @@ pub enum ExpectedJson {
     Pid,
     Gender,
     GenderOrNull,
+    Occupation,
+    OccupationOrNull,
     User,
     Participant,
 }
@@ -91,6 +93,11 @@ trait TryAs {
     fn try_as_pid(&self) -> Result<String>;
     fn try_as_gender(&self) -> Result<current::Gender>;
     fn try_as_gender_or_null(&self) -> Result<Option<current::Gender>>;
+    fn try_as_occupation(&self, other: &serde_json::Value) -> Result<current::Occupation>;
+    fn try_as_occupation_or_null(
+        &self,
+        other: &serde_json::Value,
+    ) -> Result<Option<current::Occupation>>;
     fn try_as_participant(&self) -> Result<current::Participant>;
 }
 
@@ -274,6 +281,41 @@ impl TryAs for serde_json::Value {
             },
         }
     }
+    fn try_as_occupation(&self, other: &serde_json::Value) -> Result<current::Occupation> {
+        match self.as_str() {
+            Some(v) => match v {
+                "1" => Ok(current::Occupation::Medical),
+                "2" => Ok(current::Occupation::Nursing),
+                "3" => Ok(current::Occupation::AlliedHealth),
+                "4" => Ok(current::Occupation::Laboratory),
+                "5" => Ok(current::Occupation::Administrative),
+                "6" => Ok(current::Occupation::Ancillary),
+                "8" => Ok(current::Occupation::Research),
+                "7" => match other.as_str() {
+                    Some(v) if !v.is_empty() => Ok(current::Occupation::Other(v.to_string())),
+                    Some(_) => Ok(current::Occupation::Other("other".to_string())),
+                    None => Err(self.error(ExpectedJson::Occupation)),
+                },
+                _ => Err(self.error(ExpectedJson::Occupation)),
+            },
+            None => Err(self.error(ExpectedJson::Occupation)),
+        }
+    }
+    fn try_as_occupation_or_null(
+        &self,
+        other: &serde_json::Value,
+    ) -> Result<Option<current::Occupation>> {
+        match self.try_as_occupation(other) {
+            Ok(v) => Ok(Some(v)),
+            Err(_) => match self.as_null() {
+                Some(()) => Ok(None),
+                None => match self.as_str() {
+                    Some(v) if v.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::OccupationOrNull)),
+                },
+            },
+        }
+    }
     fn try_as_participant(&self) -> Result<current::Participant> {
         let v = self.try_as_object()?;
         let date_birth = v.try_get("a2_dob")?.try_as_date_or_null()?;
@@ -306,6 +348,9 @@ impl TryAs for serde_json::Value {
                 .map(|height| weight.map(|weight| weight / (height * height / 10000f64)))
                 .flatten(),
             gender: v.try_get("a1_gender")?.try_as_gender_or_null()?,
+            occupation: v
+                .try_get("c3_occupation")?
+                .try_as_occupation_or_null(v.try_get("c3_spec")?)?,
         };
         Ok(participant)
     }

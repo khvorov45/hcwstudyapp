@@ -92,7 +92,7 @@ impl ToCurrent<current::Occupation> for previous::Occupation {
             Laboratory => current::Occupation::Laboratory,
             Ancillary => current::Occupation::Ancillary,
             Research => current::Occupation::Research,
-            Other => current::Occupation::Other,
+            Other => current::Occupation::Other("other".to_string()),
         }
     }
 }
@@ -116,7 +116,8 @@ impl ToCurrent<current::Participant> for previous::Participant {
             height: self.height,
             weight: self.weight,
             bmi: self.bmi,
-            gender: None,
+            gender: self.gender.clone().map(|g| g.to_current()),
+            occupation: None,
         }
     }
 }
