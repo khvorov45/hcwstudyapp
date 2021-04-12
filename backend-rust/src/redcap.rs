@@ -54,6 +54,8 @@ pub enum ExpectedJson {
     Site,
     AccessGroup,
     Pid,
+    Gender,
+    GenderOrNull,
     User,
     Participant,
 }
@@ -87,6 +89,8 @@ trait TryAs {
     fn try_as_access_group(&self) -> Result<current::AccessGroup>;
     fn try_as_user(&self) -> Result<current::User>;
     fn try_as_pid(&self) -> Result<String>;
+    fn try_as_gender(&self) -> Result<current::Gender>;
+    fn try_as_gender_or_null(&self) -> Result<Option<current::Gender>>;
     fn try_as_participant(&self) -> Result<current::Participant>;
 }
 
@@ -247,6 +251,29 @@ impl TryAs for serde_json::Value {
         }
         Ok(pid.to_uppercase())
     }
+    fn try_as_gender(&self) -> Result<current::Gender> {
+        match self.as_str() {
+            Some(v) => match v {
+                "0" => Ok(current::Gender::Female),
+                "1" => Ok(current::Gender::Male),
+                "2" => Ok(current::Gender::Other),
+                _ => Err(self.error(ExpectedJson::Gender)),
+            },
+            None => Err(self.error(ExpectedJson::Gender)),
+        }
+    }
+    fn try_as_gender_or_null(&self) -> Result<Option<current::Gender>> {
+        match self.try_as_gender() {
+            Ok(v) => Ok(Some(v)),
+            Err(_) => match self.as_null() {
+                Some(()) => Ok(None),
+                None => match self.as_str() {
+                    Some(v) if v.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::GenderOrNull)),
+                },
+            },
+        }
+    }
     fn try_as_participant(&self) -> Result<current::Participant> {
         let v = self.try_as_object()?;
         let date_birth = v.try_get("a2_dob")?.try_as_date_or_null()?;
@@ -278,6 +305,7 @@ impl TryAs for serde_json::Value {
             bmi: height
                 .map(|height| weight.map(|weight| weight / (height * height / 10000f64)))
                 .flatten(),
+            gender: v.try_get("a1_gender")?.try_as_gender_or_null()?,
         };
         Ok(participant)
     }

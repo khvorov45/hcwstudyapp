@@ -77,6 +77,10 @@ pub struct Participant {
     pub mobile: Option<String>,
     pub date_screening: Option<DateTime<Utc>>,
     pub date_birth: Option<DateTime<Utc>>,
+    pub age_recruitment: Option<f64>,
+    pub height: Option<f64>,
+    pub weight: Option<f64>,
+    pub bmi: Option<f64>,
 }
 
 // ================================================================================================
