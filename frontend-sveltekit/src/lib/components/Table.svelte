@@ -64,74 +64,76 @@
 </script>
 
 <div class="table-container" style="--occupied-height: {occupiedHeight}">
-  <div
-    class="table"
-    style="width: {data.headers.reduce((s, x) => (s += x.width), 0) +
-      $scrollbarWidth}px"
-  >
-    <div class="thead">
-      <div class="header-row">
-        {#each data.headers as header, i}
-          <div
-            class="th {header.title}"
-            style="width: {headerWidth(header, i)}px"
-          >
-            <span class="cell-content header-content"
-              ><div
-                class="click-to-sort"
-                style="width: {headerWidth(header, i)}px"
-                on:click={() => {
-                  if (sortStatus.header === i) {
-                    sortStatus.status = nextSort(sortStatus.status)
-                  } else {
-                    sortStatus.header = i
-                    sortStatus.status = nextSort(Sort.No)
-                  }
-                }}
-              >
-                <span class="title">{header.title}</span>
-                <SortIcon
-                  sortOrder={sortStatus.header === i
-                    ? sortStatus.status
-                    : Sort.No}
-                />
-              </div>
-              <div class="filter">
-                {#if data.headers[i].filter.values === 1}
-                  <InputField
-                    bind:value={filterStatuses[i].value}
-                    width={`${headerWidth(header, i) - 40}px`}
-                    placeholder="search..."
+  <div class="vscroll">
+    <div
+      class="table"
+      style="width: {data.headers.reduce((s, x) => (s += x.width), 0) +
+        $scrollbarWidth}px"
+    >
+      <div class="thead">
+        <div class="header-row">
+          {#each data.headers as header, i}
+            <div
+              class="th {header.title}"
+              style="width: {headerWidth(header, i)}px"
+            >
+              <span class="cell-content header-content"
+                ><div
+                  class="click-to-sort"
+                  style="width: {headerWidth(header, i)}px"
+                  on:click={() => {
+                    if (sortStatus.header === i) {
+                      sortStatus.status = nextSort(sortStatus.status)
+                    } else {
+                      sortStatus.header = i
+                      sortStatus.status = nextSort(Sort.No)
+                    }
+                  }}
+                >
+                  <span class="title">{header.title}</span>
+                  <SortIcon
+                    sortOrder={sortStatus.header === i
+                      ? sortStatus.status
+                      : Sort.No}
                   />
-                {:else}
-                  <InputField
-                    bind:value={filterStatuses[i].value[0]}
-                    width={`${headerWidth(header, i) / 2 - 40}px`}
-                    placeholder="from"
-                  />
-                  <br />
-                  <InputField
-                    bind:value={filterStatuses[i].value[1]}
-                    width={`${headerWidth(header, i) / 2 - 40}px`}
-                    placeholder="to"
-                  />
-                {/if}
-              </div>
-            </span>
-          </div>
-        {/each}
-      </div>
-    </div>
-    <div class="tbody">
-      {#each displayData as row}
-        <div class="data-row">
-          {#each data.headers as header}
-            <div class="td {header.title}" style="width: {header.width}px">
-              <span class="cell-content">{header.accessor(row)}</span>
+                </div>
+                <div class="filter">
+                  {#if data.headers[i].filter.values === 1}
+                    <InputField
+                      bind:value={filterStatuses[i].value}
+                      width={`${headerWidth(header, i) - 40}px`}
+                      placeholder="search..."
+                    />
+                  {:else}
+                    <InputField
+                      bind:value={filterStatuses[i].value[0]}
+                      width={`${headerWidth(header, i) / 2 - 40}px`}
+                      placeholder="from"
+                    />
+                    <br />
+                    <InputField
+                      bind:value={filterStatuses[i].value[1]}
+                      width={`${headerWidth(header, i) / 2 - 40}px`}
+                      placeholder="to"
+                    />
+                  {/if}
+                </div>
+              </span>
             </div>
           {/each}
         </div>
-      {/each}
+      </div>
+      <div class="tbody">
+        {#each displayData as row}
+          <div class="data-row">
+            {#each data.headers as header}
+              <div class="td {header.title}" style="width: {header.width}px">
+                <span class="cell-content">{header.accessor(row)}</span>
+              </div>
+            {/each}
+          </div>
+        {/each}
+      </div>
     </div>
   </div>
 </div>
@@ -148,6 +150,11 @@
   .table-container,
   .table-container * {
     box-sizing: border-box;
+  }
+  .vscroll {
+    max-width: 100%;
+    overflow-x: scroll;
+    overflow-y: hidden;
   }
   .table {
     margin-left: auto;
