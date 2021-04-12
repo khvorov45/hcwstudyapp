@@ -1,6 +1,7 @@
 <script lang="ts">
   import Button from "./Button.svelte"
   import type { SubnavLink } from "$lib/util"
+  import { page } from "$app/stores"
 
   export let links: SubnavLink[] = []
 </script>
@@ -9,8 +10,10 @@
   {#each links as link}
     <div class="element">
       <a href={link.link}
-        ><Button width={link.width} active height="var(--size-nav)"
-          >{link.title}</Button
+        ><Button
+          width={link.width}
+          active={$page.path === link.link}
+          height="var(--size-nav)">{link.title}</Button
         ></a
       >
     </div>

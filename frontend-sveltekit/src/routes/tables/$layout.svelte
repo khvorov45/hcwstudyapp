@@ -9,6 +9,11 @@
       title: "Contact",
       width: "100px",
     },
+    {
+      link: "/tables/baseline",
+      title: "Baseline",
+      width: "100px",
+    },
   ]
 </script>
 
