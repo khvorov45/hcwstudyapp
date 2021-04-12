@@ -26,4 +26,5 @@ export type Participant = {
   mobile: string | null
   date_screening: string | null
   date_birth: string | null
+  age_recruitment: number | null
 }

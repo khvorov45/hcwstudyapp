@@ -55,6 +55,12 @@
       width: 270,
       filter: filt2,
     },
+    {
+      title: "Age at screening",
+      accessor: (u) => u.age_recruitment?.toFixed(1) ?? "",
+      width: 270,
+      filter: filt2,
+    },
   ]
 </script>
 
