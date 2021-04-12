@@ -1,6 +1,10 @@
 <script lang="ts">
   import { loginReq, token, participantsReq } from "$lib/state"
-  import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
+  import type {
+    AsyncStatus,
+    TableDisplayFilter,
+    TableDisplayHeader,
+  } from "$lib/util"
   import { fetchTable, justDateString } from "$lib/util"
   import type { Participant } from "$lib/data"
   import { onMount } from "svelte"
@@ -19,6 +23,16 @@
 
   $: fetchParticipants($token, $loginReq.status, mounted)
 
+  const filt2: TableDisplayFilter = {
+    values: 2,
+    fun: (v, c) =>
+      c[0] === ""
+        ? v <= c[1]
+        : c[1] === ""
+        ? v >= c[0]
+        : v <= c[1] && v >= c[0],
+  }
+
   const headers: TableDisplayHeader<Participant>[] = [
     {
       title: "PID",
@@ -31,17 +45,15 @@
     },
     {
       title: "Screened",
-      accessor: (u) => u.date_screening.slice(0, 10),
+      accessor: (u) => u.date_screening?.slice(0, 10) ?? "",
       width: 270,
-      filter: {
-        values: 2,
-        fun: (v, c) =>
-          c[0] === ""
-            ? v <= c[1]
-            : c[1] === ""
-            ? v >= c[0]
-            : v <= c[1] && v >= c[0],
-      },
+      filter: filt2,
+    },
+    {
+      title: "DoB",
+      accessor: (u) => u.date_birth?.slice(0, 10) ?? "",
+      width: 270,
+      filter: filt2,
     },
   ]
 </script>
