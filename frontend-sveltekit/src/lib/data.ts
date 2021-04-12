@@ -30,4 +30,5 @@ export type Participant = {
   height: number | null
   weight: number | null
   bmi: number | null
+  gender: "Male" | "Female" | "Other" | null
 }

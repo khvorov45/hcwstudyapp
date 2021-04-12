@@ -79,6 +79,15 @@
       width: 130,
       filter: filt2,
     },
+    {
+      title: "Gender",
+      accessor: (u) => u.gender ?? "",
+      width: 130,
+      filter: {
+        values: 1,
+        fun: (v, c) => v.startsWith(c),
+      },
+    },
   ]
 </script>
 
