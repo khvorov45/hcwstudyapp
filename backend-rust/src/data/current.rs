@@ -76,6 +76,7 @@ pub struct Participant {
     pub email: Option<String>,
     pub mobile: Option<String>,
     pub date_screening: Option<DateTime<Utc>>,
+    pub date_birth: Option<DateTime<Utc>>,
 }
 
 // ================================================================================================

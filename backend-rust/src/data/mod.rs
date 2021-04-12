@@ -105,6 +105,7 @@ impl ToCurrent<current::Participant> for previous::Participant {
             email: self.email.clone(),
             mobile: self.mobile.clone(),
             date_screening: self.date_screening,
+            date_birth: None,
         }
     }
 }

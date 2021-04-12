@@ -76,12 +76,6 @@ pub struct Participant {
     pub email: Option<String>,
     pub mobile: Option<String>,
     pub date_screening: Option<DateTime<Utc>>,
-    pub dob: Option<DateTime<Utc>>,
-    pub gender: Option<Gender>,
-    pub height_cm: Option<f32>,
-    pub weight_kg: Option<f32>,
-    pub atsi: Option<bool>,
-    pub occupation: Option<Occupation>,
 }
 
 // ================================================================================================

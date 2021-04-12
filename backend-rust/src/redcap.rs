@@ -111,7 +111,10 @@ impl TryAs for serde_json::Value {
             Some(v) => Ok(Some(v)),
             None => match self.as_null() {
                 Some(()) => Ok(None),
-                None => Err(self.error(ExpectedJson::StringOrNull)),
+                None => match self.as_str() {
+                    Some(s) if s.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::StringOrNull)),
+                },
             },
         }
     }
@@ -132,7 +135,10 @@ impl TryAs for serde_json::Value {
             Ok(d) => Ok(Some(d)),
             Err(_) => match self.as_null() {
                 Some(()) => Ok(None),
-                None => Err(self.error(ExpectedJson::DateOrNull)),
+                None => match self.as_str() {
+                    Some(s) if s.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::DateOrNull)),
+                },
             },
         }
     }
@@ -225,6 +231,7 @@ impl TryAs for serde_json::Value {
                 .try_as_str_or_null()?
                 .map(|s| s.to_string()),
             date_screening: v.try_get("date_screening")?.try_as_date_or_null()?,
+            date_birth: v.try_get("a2_dob")?.try_as_date_or_null()?,
         };
         Ok(participant)
     }
