@@ -5,7 +5,8 @@
     TableDisplayFilter,
     TableDisplayHeader,
   } from "$lib/util"
-  import { fetchTable, justDateString } from "$lib/util"
+  import { fetchTable } from "$lib/util"
+  import { occupationToString } from "$lib/data"
   import type { Participant } from "$lib/data"
   import { onMount } from "svelte"
   import Table from "$lib/components/Table.svelte"
@@ -82,6 +83,15 @@
     {
       title: "Gender",
       accessor: (u) => u.gender ?? "",
+      width: 130,
+      filter: {
+        values: 1,
+        fun: (v, c) => v.startsWith(c),
+      },
+    },
+    {
+      title: "Occupation",
+      accessor: (u) => (u.occupation ? occupationToString(u.occupation) : ""),
       width: 130,
       filter: {
         values: 1,

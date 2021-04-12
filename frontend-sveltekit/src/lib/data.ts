@@ -19,6 +19,28 @@ export type User = {
   deidentified_export: boolean
 }
 
+export type Occupation =
+  | "Nursing"
+  | "Medical"
+  | "Administrative"
+  | "AlliedHealth"
+  | "Laboratory"
+  | "Ancillary"
+  | "Research"
+  | { Other: string }
+
+export function occupationToString(a: Occupation): string {
+  return a === "Medical" ||
+    a === "Administrative" ||
+    a === "AlliedHealth" ||
+    a === "Laboratory" ||
+    a === "Ancillary" ||
+    a === "Nursing" ||
+    a === "Research"
+    ? a
+    : a.Other
+}
+
 export type Participant = {
   pid: string
   site: Site
@@ -31,4 +53,5 @@ export type Participant = {
   weight: number | null
   bmi: number | null
   gender: "Male" | "Female" | "Other" | null
+  occupation: Occupation | null
 }
