@@ -163,6 +163,7 @@
     height: var(--height-header);
     display: flex;
     align-items: center;
+    justify-content: center;
   }
   .header-content {
     flex-direction: column;
