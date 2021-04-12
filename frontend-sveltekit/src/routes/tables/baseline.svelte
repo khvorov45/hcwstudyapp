@@ -24,13 +24,24 @@
       title: "PID",
       accessor: (p) => p.pid,
       width: 100,
-      filterFun: (v, c) => v.startsWith(c),
+      filter: {
+        values: 1,
+        fun: (v, c) => v.startsWith(c),
+      },
     },
     {
       title: "Screened",
       accessor: (u) => u.date_screening.slice(0, 10),
       width: 270,
-      filterFun: (v, c) => v.startsWith(c),
+      filter: {
+        values: 2,
+        fun: (v, c) =>
+          c[0] === ""
+            ? v <= c[1]
+            : c[1] === ""
+            ? v >= c[0]
+            : v <= c[1] && v >= c[0],
+      },
     },
   ]
 </script>

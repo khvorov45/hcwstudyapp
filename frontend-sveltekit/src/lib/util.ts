@@ -146,11 +146,16 @@ export function detectScrollbarWidth(): number {
   return scrollbarWidth
 }
 
+export type TableDisplayFilter = {
+  values: 1 | 2
+  fun: (...args: any) => boolean
+}
+
 export type TableDisplayHeader<T> = {
   title: string
   accessor: (row: T) => string
   width: number
-  filterFun: (v: string, comp: string) => boolean
+  filter: TableDisplayFilter
 }
 
 export type TableDisplayData<T> = {

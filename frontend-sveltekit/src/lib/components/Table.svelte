@@ -21,12 +21,15 @@
 
   type FilterStatus = {
     header: number
-    value: string
+    value: any
   }
 
   const filterStatuses: FilterStatus[] = []
   for (let i = 0; i < data.headers.length; i++) {
-    filterStatuses.push({ header: i, value: "" })
+    filterStatuses.push({
+      header: i,
+      value: data.headers[i].filter.values === 1 ? "" : ["", ""],
+    })
   }
 
   function processTable<T>(
@@ -38,12 +41,15 @@
       return rows
     }
     for (let filterStatus of filterStatuses) {
-      if (filterStatus.value === "") {
+      if (
+        filterStatus.value === "" ||
+        (filterStatus.value[0] === "" && filterStatus.value[1] === "")
+      ) {
         continue
       }
       const thisHeader = data.headers[filterStatus.header]
       rows = rows.filter((r) =>
-        thisHeader.filterFun(thisHeader.accessor(r), filterStatus.value)
+        thisHeader.filter.fun(thisHeader.accessor(r), filterStatus.value)
       )
     }
     return rows.sort(
@@ -91,11 +97,25 @@
                 />
               </div>
               <div class="filter">
-                <InputField
-                  bind:value={filterStatuses[i].value}
-                  width={`${headerWidth(header, i) - 40}px`}
-                  placeholder="search..."
-                />
+                {#if data.headers[i].filter.values === 1}
+                  <InputField
+                    bind:value={filterStatuses[i].value}
+                    width={`${headerWidth(header, i) - 40}px`}
+                    placeholder="search..."
+                  />
+                {:else}
+                  <InputField
+                    bind:value={filterStatuses[i].value[0]}
+                    width={`${headerWidth(header, i) / 2 - 40}px`}
+                    placeholder="from"
+                  />
+                  <br />
+                  <InputField
+                    bind:value={filterStatuses[i].value[1]}
+                    width={`${headerWidth(header, i) / 2 - 40}px`}
+                    placeholder="to"
+                  />
+                {/if}
               </div>
             </span>
           </div>
@@ -180,5 +200,11 @@
   .td > .cell-content {
     height: var(--height-data-cell);
     padding-left: 10px;
+  }
+  .filter {
+    display: flex;
+  }
+  .filter br {
+    width: 10px;
   }
 </style>
