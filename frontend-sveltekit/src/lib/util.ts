@@ -200,3 +200,7 @@ export type SubnavLink = {
   title: string
   width: string
 }
+
+export function justDateString(d: Date) {
+  return d.toISOString().slice(10)
+}

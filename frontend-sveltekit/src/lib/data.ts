@@ -24,5 +24,5 @@ export type Participant = {
   site: Site
   email: string | null
   mobile: string | null
-  date_screening: Date | null
+  date_screening: string | null
 }
