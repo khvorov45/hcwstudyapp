@@ -105,7 +105,14 @@ impl ToCurrent<current::Participant> for previous::Participant {
             email: self.email.clone(),
             mobile: self.mobile.clone(),
             date_screening: self.date_screening,
-            date_birth: None,
+            date_birth: self.date_birth,
+            age_recruitment: self
+                .date_birth
+                .map(|dob| {
+                    self.date_screening
+                        .map(|date_screening| (date_screening - dob).num_days() as f64 / 365.25)
+                })
+                .flatten(),
         }
     }
 }

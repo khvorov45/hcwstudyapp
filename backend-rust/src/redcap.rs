@@ -222,6 +222,8 @@ impl TryAs for serde_json::Value {
     }
     fn try_as_participant(&self) -> Result<current::Participant> {
         let v = self.try_as_object()?;
+        let date_birth = v.try_get("a2_dob")?.try_as_date_or_null()?;
+        let date_screening = v.try_get("date_screening")?.try_as_date_or_null()?;
         let participant = current::Participant {
             pid: v.try_get("pid")?.try_as_pid()?,
             site: v.try_get("redcap_data_access_group")?.try_as_site()?,
@@ -233,8 +235,15 @@ impl TryAs for serde_json::Value {
                 .try_get("mobile_number")?
                 .try_as_str_or_null()?
                 .map(|s| s.to_string()),
-            date_screening: v.try_get("date_screening")?.try_as_date_or_null()?,
-            date_birth: v.try_get("a2_dob")?.try_as_date_or_null()?,
+            date_screening,
+            date_birth,
+            age_recruitment: date_birth
+                .map(|date_birth| {
+                    date_screening.map(|date_screening| {
+                        (date_screening - date_birth).num_days() as f64 / 365.25
+                    })
+                })
+                .flatten(),
         };
         Ok(participant)
     }
