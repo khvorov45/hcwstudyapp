@@ -47,6 +47,7 @@ pub enum ExpectedJson {
     StringOrNull,
     Integer,
     Real,
+    RealOrNull,
     Date,
     DateOrNull,
     Object,
@@ -78,6 +79,8 @@ trait TryAs {
     fn try_as_str(&self) -> Result<&str>;
     fn try_as_str_or_null(&self) -> Result<Option<&str>>;
     fn try_as_i64(&self) -> Result<i64>;
+    fn try_as_f64(&self) -> Result<f64>;
+    fn try_as_f64_or_null(&self) -> Result<Option<f64>>;
     fn try_as_date(&self) -> Result<chrono::DateTime<chrono::Utc>>;
     fn try_as_date_or_null(&self) -> Result<Option<chrono::DateTime<chrono::Utc>>>;
     fn try_as_site(&self) -> Result<current::Site>;
@@ -122,6 +125,30 @@ impl TryAs for serde_json::Value {
         match self.as_i64() {
             Some(v) => Ok(v),
             None => Err(self.error(ExpectedJson::Integer)),
+        }
+    }
+    fn try_as_f64(&self) -> Result<f64> {
+        match self.as_f64() {
+            Some(v) => Ok(v),
+            None => match self.as_str() {
+                Some(v) => match v.parse() {
+                    Ok(v) => Ok(v),
+                    Err(_) => Err(self.error(ExpectedJson::Real)),
+                },
+                None => Err(self.error(ExpectedJson::Real)),
+            },
+        }
+    }
+    fn try_as_f64_or_null(&self) -> Result<Option<f64>> {
+        match self.try_as_f64() {
+            Ok(v) => Ok(Some(v)),
+            Err(_) => match self.as_null() {
+                Some(()) => Ok(None),
+                None => match self.as_str() {
+                    Some(v) if v.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::RealOrNull)),
+                },
+            },
         }
     }
     fn try_as_date(&self) -> Result<chrono::DateTime<chrono::Utc>> {
@@ -224,6 +251,8 @@ impl TryAs for serde_json::Value {
         let v = self.try_as_object()?;
         let date_birth = v.try_get("a2_dob")?.try_as_date_or_null()?;
         let date_screening = v.try_get("date_screening")?.try_as_date_or_null()?;
+        let height = v.try_get("a5_height")?.try_as_f64_or_null()?;
+        let weight = v.try_get("a6_weight")?.try_as_f64_or_null()?;
         let participant = current::Participant {
             pid: v.try_get("pid")?.try_as_pid()?,
             site: v.try_get("redcap_data_access_group")?.try_as_site()?,
@@ -243,6 +272,11 @@ impl TryAs for serde_json::Value {
                         (date_screening - date_birth).num_days() as f64 / 365.25
                     })
                 })
+                .flatten(),
+            height,
+            weight,
+            bmi: height
+                .map(|height| weight.map(|weight| weight / (height * height / 10000f64)))
                 .flatten(),
         };
         Ok(participant)

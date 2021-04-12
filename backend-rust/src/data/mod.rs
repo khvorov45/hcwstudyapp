@@ -113,6 +113,9 @@ impl ToCurrent<current::Participant> for previous::Participant {
                         .map(|date_screening| (date_screening - dob).num_days() as f64 / 365.25)
                 })
                 .flatten(),
+            height: None,
+            weight: None,
+            bmi: None,
         }
     }
 }
