@@ -1,15 +1,29 @@
 <script lang="ts">
   import Button from "./Button.svelte"
+  import type { SubnavLink } from "$lib/util"
+
+  export let links: SubnavLink[] = []
 </script>
 
 <div class="subnav">
-  <div class="element">
-    <Button width="100px" active height="var(--size-nav)">Contact</Button>
-  </div>
+  {#each links as link}
+    <div class="element">
+      <a href={link.link}
+        ><Button width={link.width} active height="var(--size-nav)"
+          >{link.title}</Button
+        ></a
+      >
+    </div>
+  {/each}
 </div>
 
 <style>
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
   .subnav {
+    display: flex;
     height: var(--size-nav);
     border-bottom: 1px solid var(--color-bg-2);
   }

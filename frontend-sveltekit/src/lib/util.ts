@@ -194,3 +194,9 @@ export async function fetchTable(
     console.error(content.result.error)
   }
 }
+
+export type SubnavLink = {
+  link: string
+  title: string
+  width: string
+}
