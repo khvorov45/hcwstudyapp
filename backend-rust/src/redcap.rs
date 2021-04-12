@@ -192,6 +192,9 @@ impl TryAs for serde_json::Value {
                         pid.push(c);
                     } else {
                         pid.push('-');
+                        if c.is_digit(10) {
+                            pid.push(c);
+                        }
                         state = State::Transition;
                     }
                 }
