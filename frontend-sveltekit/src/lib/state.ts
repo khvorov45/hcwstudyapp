@@ -1,5 +1,5 @@
 import { writable } from "svelte/store"
-import type { User } from "$lib/data"
+import type { User, VaccinationHistory } from "$lib/data"
 import { apiReq } from "$lib/util"
 import type { ApiRequest, ApiResult } from "$lib/util"
 
@@ -86,3 +86,13 @@ export const participantsReq = createApiStore<{ token: string | null }, User[]>(
     expectContent: "json",
   })
 )
+
+export const vaccinationHistoryReq = createApiStore<
+  { token: string | null },
+  VaccinationHistory[]
+>(({ token }) => ({
+  method: "GET",
+  token,
+  url: "vaccination",
+  expectContent: "json",
+}))

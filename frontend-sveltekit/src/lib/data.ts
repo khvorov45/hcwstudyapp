@@ -55,3 +55,9 @@ export type Participant = {
   gender: "Male" | "Female" | "Other" | null
   occupation: Occupation | null
 }
+
+export type VaccinationHistory = {
+  pid: string
+  year: Site
+  status: "Australia" | "Overseas" | "No" | "Unknown" | null
+}

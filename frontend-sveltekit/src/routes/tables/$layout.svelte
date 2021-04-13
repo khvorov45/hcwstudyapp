@@ -16,6 +16,11 @@
       title: "Baseline",
       width: "100px",
     },
+    {
+      link: "/tables/vaccination",
+      title: "Vaccination",
+      width: "100px",
+    },
   ]
 </script>
 
