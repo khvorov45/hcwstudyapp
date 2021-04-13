@@ -1,4 +1,4 @@
-use crate::{data::current, error, Opt, Result};
+use crate::{data::current, db::PrimaryKey, error, Opt, Result};
 
 async fn redcap_api_request(
     opt: &Opt,
@@ -60,6 +60,9 @@ pub enum ExpectedJson {
     OccupationOrNull,
     User,
     Participant,
+    VaccinationStatus,
+    VaccinationStatusOrNull,
+    VaccinationHistory,
 }
 
 trait TryGet {
@@ -99,6 +102,13 @@ trait TryAs {
         other: &serde_json::Value,
     ) -> Result<Option<current::Occupation>>;
     fn try_as_participant(&self) -> Result<current::Participant>;
+    fn try_as_vaccination_status(&self) -> Result<current::VaccinationStatus>;
+    fn try_as_vaccination_status_or_null(&self) -> Result<Option<current::VaccinationStatus>>;
+    fn try_as_vaccination_history(
+        &self,
+        year: u32,
+        var_name: &str,
+    ) -> Result<current::VaccinationHistory>;
 }
 
 impl TryAs for serde_json::Value {
@@ -354,6 +364,42 @@ impl TryAs for serde_json::Value {
         };
         Ok(participant)
     }
+    fn try_as_vaccination_status(&self) -> Result<current::VaccinationStatus> {
+        use current::VaccinationStatus::*;
+        let v = match self.try_as_str()? {
+            "1" => Australia,
+            "2" => Overseas,
+            "3" => No,
+            "4" => Unknown,
+            _ => return Err(self.error(ExpectedJson::VaccinationStatus)),
+        };
+        Ok(v)
+    }
+    fn try_as_vaccination_status_or_null(&self) -> Result<Option<current::VaccinationStatus>> {
+        match self.try_as_vaccination_status() {
+            Ok(v) => Ok(Some(v)),
+            Err(_) => match self.as_null() {
+                Some(()) => Ok(None),
+                None => match self.as_str() {
+                    Some(v) if v.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::VaccinationStatusOrNull)),
+                },
+            },
+        }
+    }
+    fn try_as_vaccination_history(
+        &self,
+        year: u32,
+        var_name: &str,
+    ) -> Result<current::VaccinationHistory> {
+        let v = self.try_as_object()?;
+        let vac = current::VaccinationHistory {
+            pid: v.try_get("pid")?.try_as_pid()?,
+            year,
+            status: v.try_get(var_name)?.try_as_vaccination_status_or_null()?,
+        };
+        Ok(vac)
+    }
 }
 
 pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
@@ -371,6 +417,61 @@ pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
         }
     }
     Ok(users)
+}
+
+fn handle_extraction_error(e: anyhow::Error, value: &serde_json::Value) -> i32 {
+    fn log_full_error(e: String, value: &serde_json::Value) {
+        log::error!(
+            "Failed to parse: {}, at\n{}",
+            e,
+            serde_json::to_string_pretty(value)
+                .unwrap_or_else(|_| "could not print particpant".to_string())
+        )
+    }
+    fn log_pid_error(pid: &serde_json::Value) {
+        log::error!("Failed to parse pid: {}", pid);
+    }
+    let mut empty_pid_count = 0;
+    if let Some(e) = e.downcast_ref::<error::RedcapExtraction>() {
+        if let error::RedcapExtraction::UnexpectedJsonValue(expected, got) = e {
+            if expected == &ExpectedJson::Pid {
+                if let Some(pid) = got.as_str() {
+                    if pid.is_empty() {
+                        empty_pid_count += 1;
+                    } else {
+                        log_pid_error(got);
+                    }
+                } else {
+                    log_pid_error(got);
+                }
+            } else {
+                log_full_error(e.to_string(), &value);
+            }
+        } else {
+            log_full_error(e.to_string(), &value);
+        }
+    } else {
+        log_full_error(e.to_string(), &value);
+    }
+    empty_pid_count
+}
+
+#[derive(Default)]
+struct ExtractionCounts {
+    empty_pid: (i32, i32),
+    parsed: (i32, i32),
+    added: (i32, i32),
+}
+
+impl ExtractionCounts {
+    pub fn log(&self, title: &str) {
+        fn log_count(title: &str, msg: &str, c: (i32, i32)) {
+            log::info!("{} {}: {} (2020), {} (2021)", title, msg, c.0, c.1);
+        }
+        log_count(title, "with empty pid", self.empty_pid);
+        log_count(title, "parsed", self.parsed);
+        log_count(title, "added", self.added);
+    }
 }
 
 pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>> {
@@ -402,53 +503,10 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
         ],
     )
     .await?;
+
     let mut participants = Vec::new();
-    struct Counts {
-        empty_pid: (i32, i32),
-        parsed: (i32, i32),
-        added: (i32, i32),
-    }
-    let mut counts = Counts {
-        empty_pid: (0, 0),
-        parsed: (0, 0),
-        added: (0, 0),
-    };
-    fn handle_error(e: anyhow::Error, redcap_participant: &serde_json::Value) -> i32 {
-        fn log_full_error(e: String, redcap_participant: &serde_json::Value) {
-            log::error!(
-                "Failed to parse participant: {}, at\n{}",
-                e,
-                serde_json::to_string_pretty(redcap_participant)
-                    .unwrap_or_else(|_| "could not print particpant".to_string())
-            )
-        }
-        fn log_pid_error(pid: &serde_json::Value) {
-            log::error!("Failed to parse pid: {}", pid);
-        }
-        let mut empty_pid_count = 0;
-        if let Some(e) = e.downcast_ref::<error::RedcapExtraction>() {
-            if let error::RedcapExtraction::UnexpectedJsonValue(expected, got) = e {
-                if expected == &ExpectedJson::Pid {
-                    if let Some(pid) = got.as_str() {
-                        if pid.is_empty() {
-                            empty_pid_count += 1;
-                        } else {
-                            log_pid_error(got);
-                        }
-                    } else {
-                        log_pid_error(got);
-                    }
-                } else {
-                    log_full_error(e.to_string(), &redcap_participant);
-                }
-            } else {
-                log_full_error(e.to_string(), &redcap_participant);
-            }
-        } else {
-            log_full_error(e.to_string(), &redcap_participant);
-        }
-        empty_pid_count
-    }
+    let mut counts = ExtractionCounts::default();
+
     for redcap_participant in participants2020 {
         match redcap_participant.try_as_participant() {
             Ok(p) => {
@@ -456,9 +514,10 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
                 counts.added.0 += 1;
                 participants.push(p)
             }
-            Err(e) => counts.empty_pid.0 += handle_error(e, &redcap_participant),
+            Err(e) => counts.empty_pid.0 += handle_extraction_error(e, &redcap_participant),
         }
     }
+
     for redcap_participant in participants2021 {
         let participant = match redcap_participant.try_as_participant() {
             Ok(p) => {
@@ -466,7 +525,7 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
                 p
             }
             Err(e) => {
-                counts.empty_pid.1 += handle_error(e, &redcap_participant);
+                counts.empty_pid.1 += handle_extraction_error(e, &redcap_participant);
                 continue;
             }
         };
@@ -478,11 +537,86 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
         // Handle the case when a participant is present in the subsequent year
         // but their info is (potentially) different
     }
-    fn log_count(msg: &str, c: (i32, i32)) {
-        log::info!("Participants {}: {} (2020), {} (2021)", msg, c.0, c.1);
-    }
-    log_count("with empty pid", counts.empty_pid);
-    log_count("parsed", counts.parsed);
-    log_count("added", counts.added);
+    counts.log("Participants");
     Ok(participants)
+}
+
+pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::VaccinationHistory>> {
+    let years = (2015u32..=2020u32).into_iter().collect::<Vec<u32>>();
+    let years_var_names = years
+        .iter()
+        .map(|y| format!("vac_{}", y))
+        .collect::<Vec<String>>();
+    let (vaccination_history_screening_2020, vaccination_history_screening_2021) =
+        redcap_api_request(
+            opt,
+            &[
+                ("content", "record"),
+                (
+                    "fields",
+                    ["pid", years_var_names.join(",").as_str()]
+                        .join(",")
+                        .as_str(),
+                ),
+                ("events", "baseline_arm_1"),
+            ],
+        )
+        .await?;
+
+    let mut vaccination_history = Vec::new();
+    let mut counts = ExtractionCounts::default();
+
+    fn handle_error(e: anyhow::Error, val: &serde_json::Value, var_name: &str) -> i32 {
+        if let Some(error::RedcapExtraction::FieldNotFound(field_name)) =
+            e.downcast_ref::<error::RedcapExtraction>()
+        {
+            //* E.g. vac_2020 field in 2020 project screening form
+            if field_name == var_name {
+                0
+            } else {
+                handle_extraction_error(e, &val)
+            }
+        } else {
+            handle_extraction_error(e, &val)
+        }
+    }
+
+    for redcap_vaccination in vaccination_history_screening_2020 {
+        for (year, var_name) in years.iter().zip(years_var_names.iter()) {
+            match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
+                Ok(v) => {
+                    counts.parsed.0 += 1;
+                    counts.added.0 += 1;
+                    vaccination_history.push(v)
+                }
+                Err(e) => {
+                    counts.empty_pid.0 += handle_error(e, &redcap_vaccination, var_name);
+                }
+            }
+        }
+    }
+
+    for redcap_vaccination in vaccination_history_screening_2021 {
+        for (year, var_name) in years.iter().zip(years_var_names.iter()) {
+            let value = match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
+                Ok(v) => {
+                    counts.parsed.1 += 1;
+                    v
+                }
+                Err(e) => {
+                    counts.empty_pid.1 += handle_error(e, &redcap_vaccination, var_name);
+                    continue;
+                }
+            };
+            if !vaccination_history
+                .iter()
+                .any(|v| v.get_pk() == value.get_pk())
+            {
+                counts.added.1 += 1;
+                vaccination_history.push(value)
+            }
+        }
+    }
+    counts.log("Vaccination history");
+    Ok(vaccination_history)
 }

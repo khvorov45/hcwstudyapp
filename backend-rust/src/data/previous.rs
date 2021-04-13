@@ -85,6 +85,21 @@ pub struct Participant {
     pub occupation: Option<Occupation>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, Copy)]
+pub enum VaccinationStatus {
+    Australia,
+    Overseas,
+    Unknown,
+    No,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct VaccinationHistory {
+    pub pid: String,
+    pub year: u32,
+    pub status: Option<VaccinationStatus>,
+}
+
 // ================================================================================================
 
 impl PrimaryKey<String> for Participant {
@@ -108,6 +123,18 @@ impl PrimaryKey<String> for Token {
 impl ForeignKey<String> for Token {
     fn get_fk(&self) -> String {
         self.user.clone()
+    }
+}
+
+impl PrimaryKey<String> for VaccinationHistory {
+    fn get_pk(&self) -> String {
+        format!("{}{}", self.pid, self.year)
+    }
+}
+
+impl ForeignKey<String> for VaccinationHistory {
+    fn get_fk(&self) -> String {
+        self.pid.clone()
     }
 }
 

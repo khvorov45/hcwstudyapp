@@ -14,6 +14,7 @@ pub struct Db {
     pub users: Table<previous::User, current::User>,
     pub tokens: Table<previous::Token, current::Token>,
     pub participants: Table<previous::Participant, current::Participant>,
+    pub vaccination_history: Table<previous::VaccinationHistory, current::VaccinationHistory>,
 }
 
 pub struct DbDirs {
@@ -64,12 +65,14 @@ impl Db {
         let users = Table::new("User", &dirs)?;
         let tokens = Table::new("Token", &dirs)?;
         let participants = Table::new("Participant", &dirs)?;
+        let vaccination_history = Table::new("VaccinationHistory", &dirs)?;
 
         let mut db = Self {
             dirs,
             users,
             tokens,
             participants,
+            vaccination_history,
         };
 
         match db.dirs.init_state {
@@ -218,6 +221,15 @@ impl Db {
     ) -> Result<()> {
         self.participants.current.data = redcap_participants;
         self.participants.write()?;
+        Ok(())
+    }
+
+    pub fn sync_redcap_vaccination_history(
+        &mut self,
+        redcap_vaccination_history: Vec<current::VaccinationHistory>,
+    ) -> Result<()> {
+        self.vaccination_history.current.data = redcap_vaccination_history;
+        self.vaccination_history.write()?;
         Ok(())
     }
 }

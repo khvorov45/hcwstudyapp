@@ -121,3 +121,25 @@ impl ToCurrent<current::Participant> for previous::Participant {
         }
     }
 }
+
+impl ToCurrent<current::VaccinationStatus> for previous::VaccinationStatus {
+    fn to_current(&self) -> current::VaccinationStatus {
+        use previous::VaccinationStatus::*;
+        match self {
+            Australia => current::VaccinationStatus::Australia,
+            Overseas => current::VaccinationStatus::Overseas,
+            Unknown => current::VaccinationStatus::Unknown,
+            No => current::VaccinationStatus::No,
+        }
+    }
+}
+
+impl ToCurrent<current::VaccinationHistory> for previous::VaccinationHistory {
+    fn to_current(&self) -> current::VaccinationHistory {
+        current::VaccinationHistory {
+            pid: self.pid.clone(),
+            year: self.year,
+            status: self.status.map(|s| s.to_current()),
+        }
+    }
+}

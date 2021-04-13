@@ -31,6 +31,8 @@ pub fn routes(
     get_users(db.clone())
         .or(get_participants(db.clone()))
         .or(participants_redcap_sync(db.clone(), opt.clone()))
+        .or(get_vaccination_history(db.clone()))
+        .or(vaccination_history_redcap_sync(db.clone(), opt.clone()))
         .or(users_redcap_sync(db.clone(), opt.clone()))
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db.clone(), opt.clone(), mailer))
@@ -262,6 +264,45 @@ fn participants_redcap_sync(
                 .lock()
                 .await
                 .sync_redcap_participants(redcap_participants)
+            {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Vaccination history ============================================================================
+
+fn get_vaccination_history(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
+        Ok(warp::reply::json(
+            &db.lock().await.vaccination_history.current.data,
+        ))
+    }
+    warp::path!("vaccination-history")
+        .and(warp::get())
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn vaccination_history_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("vaccination-history" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_vaccination_history = match redcap::export_vaccination_history(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db
+                .lock()
+                .await
+                .sync_redcap_vaccination_history(redcap_vaccination_history)
             {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(reject(e)),
