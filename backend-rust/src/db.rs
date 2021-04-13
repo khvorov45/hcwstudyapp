@@ -239,11 +239,7 @@ impl Db {
     }
 }
 
-impl<
-        P: Serialize + DeserializeOwned + ToCurrent<C>,
-        C: Serialize + DeserializeOwned + PrimaryKey<String>,
-    > Table<P, C>
-{
+impl<P, C> Table<P, C> {
     /// Creates table with empty data
     pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
         log::debug!("creating table {}", name);
@@ -265,6 +261,9 @@ impl<
             current: TableData::new(current),
         })
     }
+}
+
+impl<P: DeserializeOwned, C: DeserializeOwned> Table<P, C> {
     pub fn read(&mut self, version: Version) -> Result<()> {
         match version {
             Version::Previous => {
@@ -276,6 +275,9 @@ impl<
         }
         Ok(())
     }
+}
+
+impl<P, C: Serialize> Table<P, C> {
     pub fn write(&self) -> Result<()> {
         fs::write(
             self.current.path.as_path(),
@@ -288,6 +290,9 @@ impl<
         ))?;
         Ok(())
     }
+}
+
+impl<P: ToCurrent<C>, C> Table<P, C> {
     pub fn convert(&mut self) {
         let mut converted = Vec::with_capacity(self.previous.data.len());
         for row in &self.previous.data {
@@ -295,6 +300,9 @@ impl<
         }
         self.current.data = converted;
     }
+}
+
+impl<P, C: PrimaryKey<String>> Table<P, C> {
     pub fn check_row_pk(&self, row: &C) -> Result<()> {
         self.check_row_pk_subset(row, &self.current.data)?;
         Ok(())
@@ -380,7 +388,7 @@ impl DbDirs {
     }
 }
 
-impl<T: Serialize + DeserializeOwned> TableData<T> {
+impl<T> TableData<T> {
     /// Empty data
     pub fn new(path: PathBuf) -> Self {
         Self {
@@ -388,6 +396,9 @@ impl<T: Serialize + DeserializeOwned> TableData<T> {
             data: Vec::new(),
         }
     }
+}
+
+impl<T: DeserializeOwned> TableData<T> {
     pub fn read(&mut self) -> Result<()> {
         let file = File::open(self.path.as_path())
             .context(format!("file {:?} failed to open", self.path,))?;
