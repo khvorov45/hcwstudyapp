@@ -50,7 +50,7 @@ pub struct Token {
     pub expires: Option<DateTime<Utc>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Copy)]
 pub enum Gender {
     Female,
     Male,
@@ -66,7 +66,7 @@ pub enum Occupation {
     Laboratory,
     Ancillary,
     Research,
-    Other,
+    Other(String),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -82,6 +82,7 @@ pub struct Participant {
     pub weight: Option<f64>,
     pub bmi: Option<f64>,
     pub gender: Option<Gender>,
+    pub occupation: Option<Occupation>,
 }
 
 // ================================================================================================
