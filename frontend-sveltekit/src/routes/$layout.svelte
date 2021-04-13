@@ -180,4 +180,28 @@
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     margin: 0;
   }
+
+  /* Scrollbars */
+  :global(::-webkit-scrollbar) {
+    width: 10px;
+  }
+
+  :global(::-webkit-scrollbar-track),
+  :global(::-webkit-scrollbar-corner) {
+    background: rgba(0, 0, 0, 0);
+  }
+
+  :global(::-webkit-scrollbar-thumb) {
+    background: var(--color-bg-2);
+  }
+
+  :global(::-webkit-scrollbar-thumb:hover) {
+    background: var(--color-bg-3);
+  }
+
+  :global(html),
+  :global(html *) {
+    scrollbar-color: var(--color-bg-2) rgba(0, 0, 0, 0);
+    scrollbar-width: auto;
+  }
 </style>
