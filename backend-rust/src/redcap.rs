@@ -22,6 +22,7 @@ async fn redcap_api_request(
     ]
     .concat();
 
+    let now = chrono::Utc::now();
     let (res2020, res2021) = tokio::join!(
         client
             .post(opt.redcap_api_url.as_str())
@@ -37,6 +38,8 @@ async fn redcap_api_request(
         res2020?.json::<Vec<serde_json::Value>>(),
         res2021?.json::<Vec<serde_json::Value>>(),
     );
+
+    log_time_elapsed("Redcap responded", now);
 
     Ok((res2020?, res2021?))
 }
@@ -474,6 +477,14 @@ impl ExtractionCounts {
     }
 }
 
+fn log_time_elapsed(title: &str, old: chrono::DateTime<chrono::Utc>) {
+    log::info!(
+        "{} parsed in {:.2}s",
+        title,
+        (chrono::Utc::now() - old).num_milliseconds() as f64 / 1000f64
+    );
+}
+
 pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>> {
     let (participants2020, participants2021) = redcap_api_request(
         opt,
@@ -563,6 +574,8 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         )
         .await?;
 
+    let now = chrono::Utc::now();
+
     let mut vaccination_history = Vec::new();
     let mut counts = ExtractionCounts::default();
 
@@ -618,5 +631,6 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         }
     }
     counts.log("Vaccination history");
+    log_time_elapsed("Vaccination history parsed", now);
     Ok(vaccination_history)
 }
