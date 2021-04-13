@@ -1,4 +1,4 @@
-use crate::{data::current, error, Opt, Result};
+use crate::{data::current, db::PrimaryKey, error, Opt, Result};
 
 async fn redcap_api_request(
     opt: &Opt,
@@ -609,7 +609,7 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         }
     }
 
-    vaccination_history.sort_by_key(|v| (v.pid.clone(), v.year));
+    vaccination_history.sort_by_key(|v| v.get_pk());
 
     for redcap_vaccination in vaccination_history_screening_2021 {
         for (year, var_name) in years.iter().zip(years_var_names.iter()) {
@@ -623,10 +623,8 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
                     continue;
                 }
             };
-            if let Err(i) = vaccination_history
-                .binary_search_by_key(&(value.pid.clone(), value.year), |v| {
-                    (v.pid.clone(), v.year)
-                })
+            if let Err(i) =
+                vaccination_history.binary_search_by_key(&value.get_pk(), |v| v.get_pk())
             {
                 counts.added.1 += 1;
                 vaccination_history.insert(i, value);

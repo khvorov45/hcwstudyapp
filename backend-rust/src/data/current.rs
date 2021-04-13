@@ -126,9 +126,9 @@ impl ForeignKey<String> for Token {
     }
 }
 
-impl PrimaryKey<String> for VaccinationHistory {
-    fn get_pk(&self) -> String {
-        format!("{}{}", self.pid, self.year)
+impl PrimaryKey<(String, u32)> for VaccinationHistory {
+    fn get_pk(&self) -> (String, u32) {
+        (self.pid.clone(), self.year)
     }
 }
 

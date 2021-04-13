@@ -7,14 +7,16 @@ use anyhow::Context;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs::{self, File};
 use std::io::BufReader;
+use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
 pub struct Db {
     pub dirs: DbDirs,
-    pub users: Table<previous::User, current::User>,
-    pub tokens: Table<previous::Token, current::Token>,
-    pub participants: Table<previous::Participant, current::Participant>,
-    pub vaccination_history: Table<previous::VaccinationHistory, current::VaccinationHistory>,
+    pub users: Table<previous::User, current::User, String, ()>,
+    pub tokens: Table<previous::Token, current::Token, String, String>,
+    pub participants: Table<previous::Participant, current::Participant, String, ()>,
+    pub vaccination_history:
+        Table<previous::VaccinationHistory, current::VaccinationHistory, (String, u32), String>,
 }
 
 pub struct DbDirs {
@@ -34,10 +36,12 @@ pub enum DbDirsInitState {
     Current,
 }
 
-pub struct Table<P, C> {
+pub struct Table<P, C, PK, FK> {
     pub name: String,
     pub previous: TableData<P>,
     pub current: TableData<C>,
+    pk: PhantomData<PK>,
+    fk: PhantomData<FK>,
 }
 
 pub struct TableData<T> {
@@ -157,7 +161,7 @@ impl Db {
     }
 
     pub fn token_verify(&self, token: &str) -> Result<current::User> {
-        let token_row = match self.tokens.lookup(auth::hash(token).as_str()) {
+        let token_row = match self.tokens.lookup(&auth::hash(token)) {
             Some(t) => t,
             None => {
                 return Err(anyhow::Error::new(error::Unauthorized::NoSuchToken(
@@ -170,7 +174,7 @@ impl Db {
                 token.to_string(),
             )));
         }
-        match self.users.lookup(token_row.user.as_str()) {
+        match self.users.lookup(&token_row.user) {
             Some(u) => Ok(u.clone()),
             None => Err(anyhow::Error::new(error::Unauthorized::NoUserWithToken(
                 token.to_string(),
@@ -179,7 +183,7 @@ impl Db {
     }
 
     pub fn token_refresh(&mut self, token: &str, len: usize, dtl: i64) -> Result<String> {
-        let token_row = match self.tokens.lookup_mut(auth::hash(token).as_str()) {
+        let token_row = match self.tokens.lookup_mut(&auth::hash(token)) {
             Some(t) => t,
             None => {
                 return Err(anyhow::Error::new(error::Unauthorized::NoSuchToken(
@@ -239,7 +243,7 @@ impl Db {
     }
 }
 
-impl<P, C> Table<P, C> {
+impl<P, C, PK, FK> Table<P, C, PK, FK> {
     /// Creates table with empty data
     pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
         log::debug!("creating table {}", name);
@@ -259,11 +263,13 @@ impl<P, C> Table<P, C> {
             name: name.to_string(),
             previous: TableData::new(previous),
             current: TableData::new(current),
+            pk: PhantomData,
+            fk: PhantomData,
         })
     }
 }
 
-impl<P: DeserializeOwned, C: DeserializeOwned> Table<P, C> {
+impl<P: DeserializeOwned, C: DeserializeOwned, PK, FK> Table<P, C, PK, FK> {
     pub fn read(&mut self, version: Version) -> Result<()> {
         match version {
             Version::Previous => {
@@ -277,7 +283,7 @@ impl<P: DeserializeOwned, C: DeserializeOwned> Table<P, C> {
     }
 }
 
-impl<P, C: Serialize> Table<P, C> {
+impl<P, C: Serialize, PK, FK> Table<P, C, PK, FK> {
     pub fn write(&self) -> Result<()> {
         fs::write(
             self.current.path.as_path(),
@@ -292,7 +298,7 @@ impl<P, C: Serialize> Table<P, C> {
     }
 }
 
-impl<P: ToCurrent<C>, C> Table<P, C> {
+impl<P: ToCurrent<C>, C, PK, FK> Table<P, C, PK, FK> {
     pub fn convert(&mut self) {
         let mut converted = Vec::with_capacity(self.previous.data.len());
         for row in &self.previous.data {
@@ -302,7 +308,7 @@ impl<P: ToCurrent<C>, C> Table<P, C> {
     }
 }
 
-impl<P, C: PrimaryKey<String>> Table<P, C> {
+impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug, FK> Table<P, C, PK, FK> {
     pub fn check_row_pk(&self, row: &C) -> Result<()> {
         self.check_row_pk_subset(row, &self.current.data)?;
         Ok(())
@@ -312,7 +318,7 @@ impl<P, C: PrimaryKey<String>> Table<P, C> {
         if data.iter().any(|r| row_pk == r.get_pk()) {
             Err(anyhow::Error::new(error::Conflict::PrimaryKey(
                 self.name.clone(),
-                row_pk,
+                format!("{:?}", row_pk),
             )))
         } else {
             Ok(())
@@ -325,32 +331,35 @@ impl<P, C: PrimaryKey<String>> Table<P, C> {
         }
         Ok(())
     }
-    pub fn lookup(&self, pk: &str) -> Option<&C> {
-        self.current.data.iter().find(|r| r.get_pk() == pk)
+    pub fn lookup(&self, pk: &PK) -> Option<&C> {
+        self.current.data.iter().find(|r| &r.get_pk() == pk)
     }
-    pub fn lookup_mut(&mut self, pk: &str) -> Option<&mut C> {
-        self.current.data.iter_mut().find(|r| r.get_pk() == pk)
+    pub fn lookup_mut(&mut self, pk: &PK) -> Option<&mut C> {
+        self.current.data.iter_mut().find(|r| &r.get_pk() == pk)
     }
 }
 
-impl<P, C: ForeignKey<String>> Table<P, C> {
-    pub fn check_row_fk<A, B: PrimaryKey<String>>(
+impl<P, C: ForeignKey<FK>, PK, FK: PartialEq + std::fmt::Debug> Table<P, C, PK, FK> {
+    pub fn check_row_fk<A, B: PrimaryKey<FK>, PFK>(
         &self,
         row: &C,
-        parent: &Table<A, B>,
+        parent: &Table<A, B, FK, PFK>,
     ) -> Result<()> {
         let row_fk = row.get_fk();
         if !parent.current.data.iter().any(|r| row_fk == r.get_pk()) {
             Err(anyhow::Error::new(error::Conflict::ForeignKey(
                 self.name.clone(),
                 parent.name.clone(),
-                row_fk,
+                format!("{:?}", row_fk),
             )))
         } else {
             Ok(())
         }
     }
-    pub fn verify_fk<A, B: PrimaryKey<String>>(&self, parent: &Table<A, B>) -> Result<()> {
+    pub fn verify_fk<A, B: PrimaryKey<FK>, PFK>(
+        &self,
+        parent: &Table<A, B, FK, PFK>,
+    ) -> Result<()> {
         for row in &self.current.data {
             self.check_row_fk(row, parent)?;
         }
