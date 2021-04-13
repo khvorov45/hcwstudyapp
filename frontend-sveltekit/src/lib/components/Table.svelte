@@ -163,6 +163,7 @@
   .tbody {
     height: calc(100vh - var(--height-header) - var(--occupied-height));
     overflow-y: scroll;
+    overflow-x: hidden;
   }
   .thead {
     height: var(--height-header);
