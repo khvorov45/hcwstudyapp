@@ -114,6 +114,7 @@ impl Db {
         self.users.read(version)?;
         self.tokens.read(version)?;
         self.participants.read(version)?;
+        self.vaccination_history.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -121,6 +122,7 @@ impl Db {
         self.users.write()?;
         self.tokens.write()?;
         self.participants.write()?;
+        self.vaccination_history.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -128,6 +130,7 @@ impl Db {
         self.users.convert();
         self.tokens.convert();
         self.participants.convert();
+        self.vaccination_history.convert();
     }
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
@@ -135,6 +138,8 @@ impl Db {
         self.tokens.verify_pk()?;
         self.tokens.verify_fk(&self.users)?;
         self.participants.verify_pk()?;
+        self.vaccination_history.verify_pk()?;
+        self.vaccination_history.verify_fk(&self.participants)?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
