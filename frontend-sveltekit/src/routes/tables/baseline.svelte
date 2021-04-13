@@ -98,6 +98,15 @@
         fun: (v, c) => v.startsWith(c),
       },
     },
+    {
+      title: "Site",
+      accessor: (u) => u.site,
+      width: 130,
+      filter: {
+        values: 1,
+        fun: (v, c) => v.startsWith(c),
+      },
+    },
   ]
 </script>
 
