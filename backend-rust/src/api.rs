@@ -235,13 +235,22 @@ fn users_redcap_sync(
 // Particiapants ==================================================================================
 
 fn get_participants(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
-        Ok(warp::reply::json(
-            &db.lock().await.participants.current.data,
-        ))
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let data = &db.lock().await.participants.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|p| p.site == site)
+                    .collect::<Vec<&current::Participant>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
     }
     warp::path!("participants")
         .and(warp::get())
+        .and(user_from_token(db.clone()))
         .and(with_db(db))
         .and_then(handler)
 }
