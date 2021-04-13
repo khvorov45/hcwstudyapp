@@ -283,13 +283,30 @@ fn participants_redcap_sync(
 // Vaccination history ============================================================================
 
 fn get_vaccination_history(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
-        Ok(warp::reply::json(
-            &db.lock().await.vaccination_history.current.data,
-        ))
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.vaccination_history.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db
+                .participants
+                .current
+                .data
+                .iter()
+                .filter(|p| p.site == site)
+                .collect::<Vec<&current::Participant>>();
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::VaccinationHistory>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
     }
     warp::path!("vaccination")
         .and(warp::get())
+        .and(user_from_token(db.clone()))
         .and(with_db(db))
         .and_then(handler)
 }
