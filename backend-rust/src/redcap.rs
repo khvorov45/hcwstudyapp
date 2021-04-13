@@ -1,4 +1,4 @@
-use crate::{data::current, db::PrimaryKey, error, Opt, Result};
+use crate::{data::current, error, Opt, Result};
 
 async fn redcap_api_request(
     opt: &Opt,
@@ -479,7 +479,7 @@ impl ExtractionCounts {
 
 fn log_time_elapsed(title: &str, old: chrono::DateTime<chrono::Utc>) {
     log::info!(
-        "{} parsed in {:.2}s",
+        "{} in {:.2}s",
         title,
         (chrono::Utc::now() - old).num_milliseconds() as f64 / 1000f64
     );
@@ -609,6 +609,8 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         }
     }
 
+    vaccination_history.sort_by_key(|v| (v.pid.clone(), v.year));
+
     for redcap_vaccination in vaccination_history_screening_2021 {
         for (year, var_name) in years.iter().zip(years_var_names.iter()) {
             let value = match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
@@ -621,12 +623,13 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
                     continue;
                 }
             };
-            if !vaccination_history
-                .iter()
-                .any(|v| v.get_pk() == value.get_pk())
+            if let Err(i) = vaccination_history
+                .binary_search_by_key(&(value.pid.clone(), value.year), |v| {
+                    (v.pid.clone(), v.year)
+                })
             {
                 counts.added.1 += 1;
-                vaccination_history.push(value)
+                vaccination_history.insert(i, value);
             }
         }
     }
