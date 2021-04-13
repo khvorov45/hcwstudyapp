@@ -63,7 +63,10 @@
   $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
 </script>
 
-<div class="table-container" style="--occupied-height: {occupiedHeight}">
+<div
+  class="table-container"
+  style="--occupied-height: {occupiedHeight}; --scrollbarWidth: {$scrollbarWidth}px"
+>
   <div class="vscroll">
     <div
       class="table"
@@ -161,7 +164,10 @@
     margin-right: auto;
   }
   .tbody {
-    height: calc(100vh - var(--height-header) - var(--occupied-height));
+    height: calc(
+      100vh - var(--height-header) - var(--occupied-height) -
+        var(--scrollbarWidth)
+    );
     overflow-y: scroll;
     overflow-x: hidden;
   }
