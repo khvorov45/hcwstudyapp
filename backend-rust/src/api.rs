@@ -279,7 +279,7 @@ fn get_vaccination_history(db: Db) -> impl Filter<Extract = impl Reply, Error = 
             &db.lock().await.vaccination_history.current.data,
         ))
     }
-    warp::path!("vaccination-history")
+    warp::path!("vaccination")
         .and(warp::get())
         .and(with_db(db))
         .and_then(handler)
@@ -289,7 +289,7 @@ fn vaccination_history_redcap_sync(
     db: Db,
     opt: Opt,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    warp::path!("vaccination-history" / "redcap" / "sync")
+    warp::path!("vaccination" / "redcap" / "sync")
         .and(warp::put())
         .and(user_from_token(db.clone()))
         .and(with_db(db))
