@@ -76,7 +76,7 @@
     },
     {
       title: "BMI",
-      accessor: (u) => u.weight?.toFixed(1) ?? "",
+      accessor: (u) => u.bmi?.toFixed(1) ?? "",
       width: 130,
       filter: filt2,
     },
