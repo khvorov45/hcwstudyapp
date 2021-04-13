@@ -515,6 +515,8 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
     )
     .await?;
 
+    let now = chrono::Utc::now();
+
     let mut participants = Vec::new();
     let mut counts = ExtractionCounts::default();
 
@@ -548,6 +550,7 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
         // Handle the case when a participant is present in the subsequent year
         // but their info is (potentially) different
     }
+    log_time_elapsed("Participants parsed", now);
     counts.log("Participants");
     Ok(participants)
 }
