@@ -95,3 +95,11 @@ pub struct VaccinationHistory {
     pub year: u32,
     pub status: Option<VaccinationStatus>,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Schedule {
+    pub pid: String,
+    pub year: u32,
+    pub day: u32,
+    pub date: Option<DateTime<Utc>>,
+}

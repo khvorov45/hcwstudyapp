@@ -42,6 +42,18 @@ impl ForeignKey<String> for current::VaccinationHistory {
     }
 }
 
+impl PrimaryKey<(String, u32, u32)> for current::Schedule {
+    fn get_pk(&self) -> (String, u32, u32) {
+        (self.pid.clone(), self.year, self.day)
+    }
+}
+
+impl ForeignKey<String> for current::Schedule {
+    fn get_fk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
 impl current::Token {
     pub fn new(
         email: &str,
@@ -211,6 +223,17 @@ impl ToCurrent<current::VaccinationHistory> for previous::VaccinationHistory {
             pid: self.pid.clone(),
             year: self.year,
             status: self.status.map(|s| s.to_current()),
+        }
+    }
+}
+
+impl ToCurrent<current::Schedule> for previous::Schedule {
+    fn to_current(&self) -> current::Schedule {
+        current::Schedule {
+            pid: self.pid.clone(),
+            year: self.year,
+            day: self.day,
+            date: self.date,
         }
     }
 }

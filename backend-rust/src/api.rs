@@ -33,6 +33,8 @@ pub fn routes(
         .or(participants_redcap_sync(db.clone(), opt.clone()))
         .or(get_vaccination_history(db.clone()))
         .or(vaccination_history_redcap_sync(db.clone(), opt.clone()))
+        .or(get_schedule(db.clone()))
+        .or(schedule_redcap_sync(db.clone(), opt.clone()))
         .or(users_redcap_sync(db.clone(), opt.clone()))
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db.clone(), opt.clone(), mailer))
@@ -330,6 +332,58 @@ fn vaccination_history_redcap_sync(
                 .await
                 .sync_redcap_vaccination_history(redcap_vaccination_history)
             {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Schedule =======================================================================================
+
+fn get_schedule(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.schedule.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db
+                .participants
+                .current
+                .data
+                .iter()
+                .filter(|p| p.site == site)
+                .collect::<Vec<&current::Participant>>();
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::Schedule>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("vaccination")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn schedule_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("schedule" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_schedule = match redcap::export_schedule(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db.lock().await.sync_redcap_schedule(redcap_schedule) {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(reject(e)),
             }

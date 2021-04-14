@@ -17,6 +17,7 @@ pub struct Db {
     pub participants: Table<previous::Participant, current::Participant, String, ()>,
     pub vaccination_history:
         Table<previous::VaccinationHistory, current::VaccinationHistory, (String, u32), String>,
+    pub schedule: Table<previous::Schedule, current::Schedule, (String, u32, u32), String>,
 }
 
 pub struct DbDirs {
@@ -66,17 +67,13 @@ impl Db {
 
         let dirs = DbDirs::new(dir)?;
 
-        let users = Table::new("User", &dirs)?;
-        let tokens = Table::new("Token", &dirs)?;
-        let participants = Table::new("Participant", &dirs)?;
-        let vaccination_history = Table::new("VaccinationHistory", &dirs)?;
-
         let mut db = Self {
+            users: Table::new("User", &dirs)?,
+            tokens: Table::new("Token", &dirs)?,
+            participants: Table::new("Participant", &dirs)?,
+            vaccination_history: Table::new("VaccinationHistory", &dirs)?,
+            schedule: Table::new("Schedule", &dirs)?,
             dirs,
-            users,
-            tokens,
-            participants,
-            vaccination_history,
         };
 
         match db.dirs.init_state {
@@ -119,6 +116,7 @@ impl Db {
         self.tokens.read(version)?;
         self.participants.read(version)?;
         self.vaccination_history.read(version)?;
+        self.schedule.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -127,6 +125,7 @@ impl Db {
         self.tokens.write()?;
         self.participants.write()?;
         self.vaccination_history.write()?;
+        self.schedule.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -135,6 +134,7 @@ impl Db {
         self.tokens.convert();
         self.participants.convert();
         self.vaccination_history.convert();
+        self.schedule.convert();
     }
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
@@ -144,6 +144,8 @@ impl Db {
         self.participants.verify_pk()?;
         self.vaccination_history.verify_pk()?;
         self.vaccination_history.verify_fk(&self.participants)?;
+        self.schedule.verify_pk()?;
+        self.schedule.verify_fk(&self.participants)?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
@@ -239,6 +241,12 @@ impl Db {
     ) -> Result<()> {
         self.vaccination_history.current.data = redcap_vaccination_history;
         self.vaccination_history.write()?;
+        Ok(())
+    }
+
+    pub fn sync_redcap_schedule(&mut self, redcap_schedule: Vec<current::Schedule>) -> Result<()> {
+        self.schedule.current.data = redcap_schedule;
+        self.schedule.write()?;
         Ok(())
     }
 }

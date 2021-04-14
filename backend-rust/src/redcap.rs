@@ -66,6 +66,7 @@ pub enum ExpectedJson {
     VaccinationStatus,
     VaccinationStatusOrNull,
     VaccinationHistory,
+    Schedule,
 }
 
 trait TryGet {
@@ -112,6 +113,7 @@ trait TryAs {
         year: u32,
         var_name: &str,
     ) -> Result<current::VaccinationHistory>;
+    fn try_as_schedule(&self, year: u32, day: u32, var_name: &str) -> Result<current::Schedule>;
 }
 
 impl TryAs for serde_json::Value {
@@ -402,6 +404,16 @@ impl TryAs for serde_json::Value {
             status: v.try_get(var_name)?.try_as_vaccination_status_or_null()?,
         };
         Ok(vac)
+    }
+    fn try_as_schedule(&self, year: u32, day: u32, var_name: &str) -> Result<current::Schedule> {
+        let v = self.try_as_object()?;
+        let schedule = current::Schedule {
+            pid: v.try_get("pid")?.try_as_pid()?,
+            year,
+            day,
+            date: v.try_get(var_name)?.try_as_date_or_null()?,
+        };
+        Ok(schedule)
     }
 }
 
@@ -752,4 +764,67 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
 
     log_time_elapsed("Vaccination history parsed", now);
     Ok(vaccination_history)
+}
+
+pub async fn export_schedule(opt: &Opt) -> Result<Vec<current::Schedule>> {
+    let days: [u32; 4] = [0, 7, 14, 280];
+    let var_names = days
+        .iter()
+        .map(|d| format!("scheduled_date_v{}", d))
+        .collect::<Vec<String>>();
+    let (schedule2020, schedule2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            (
+                "fields",
+                ["pid", var_names.join(",").as_str()].join(",").as_str(),
+            ),
+            ("events", "baseline_arm_1"),
+        ],
+    )
+    .await?;
+
+    let now = chrono::Utc::now();
+    let mut schedule = Vec::new();
+    let mut counts = ExtractionCounts::default();
+
+    for redcap_schedule in schedule2020 {
+        for (day, var_name) in days.iter().zip(var_names.iter()) {
+            match redcap_schedule.try_as_schedule(2020, *day, var_name) {
+                Ok(v) => {
+                    counts.parsed.0 += 1;
+                    counts.added.0 += 1;
+                    schedule.push(v)
+                }
+                Err(e) => counts.empty_pid.0 += handle_extraction_error(e, &redcap_schedule),
+            }
+        }
+    }
+
+    schedule.sort_by_key(|s| s.get_pk());
+
+    for redcap_schedule in schedule2021 {
+        for (day, var_name) in days.iter().zip(var_names.iter()) {
+            let v = match redcap_schedule.try_as_schedule(2021, *day, var_name) {
+                Ok(v) => {
+                    counts.parsed.1 += 1;
+                    v
+                }
+                Err(e) => {
+                    counts.empty_pid.1 += handle_extraction_error(e, &redcap_schedule);
+                    continue;
+                }
+            };
+            if let Err(i) = schedule.binary_search_by_key(&v.get_pk(), |s| s.get_pk()) {
+                counts.added.1 += 1;
+                schedule.insert(i, v);
+            }
+        }
+    }
+
+    counts.log("Schedule");
+    log_time_elapsed("Schedule parsed", now);
+
+    Ok(schedule)
 }
