@@ -58,6 +58,13 @@ export type Participant = {
 
 export type VaccinationHistory = {
   pid: string
-  year: Site
+  year: number
   status: "Australia" | "Overseas" | "No" | "Unknown" | null
+}
+
+export type Schedule = {
+  pid: string
+  year: number
+  day: number
+  date: string | null
 }

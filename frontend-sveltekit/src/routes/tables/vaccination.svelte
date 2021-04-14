@@ -31,7 +31,7 @@
     },
     {
       title: "Year",
-      accessor: (p) => p.year,
+      accessor: (p) => p.year.toString(),
       width: 100,
       filter: {
         values: 1,

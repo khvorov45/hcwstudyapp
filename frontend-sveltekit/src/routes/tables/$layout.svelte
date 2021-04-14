@@ -21,6 +21,11 @@
       title: "Vaccination",
       width: "100px",
     },
+    {
+      link: "/tables/schedule",
+      title: "Schedule",
+      width: "100px",
+    },
   ]
 </script>
 
