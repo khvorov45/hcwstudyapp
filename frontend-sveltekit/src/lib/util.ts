@@ -220,3 +220,11 @@ export const tableFilterStartsWith: TableDisplayFilter = {
   values: 1,
   fun: (v, c) => v.startsWith(c),
 }
+
+export function seq(from: number, to: number): number[] {
+  let arr: number[] = []
+  for (let i = from; i <= to; i++) {
+    arr.push(i)
+  }
+  return arr
+}

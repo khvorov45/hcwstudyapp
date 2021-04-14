@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Sort, nextSort, stringSort } from "$lib/util"
+  import { Sort, nextSort, stringSort, seq } from "$lib/util"
   import type { TableDisplayData, TableDisplayHeader } from "$lib/util"
   import SortIcon from "$lib/components/icons/Sort.svelte"
   import InputField from "$lib/components/InputField.svelte"
@@ -60,7 +60,17 @@
     )
   }
 
+  let verticalScrollProportion = 0
+  function scrollHandle(e: any) {
+    verticalScrollProportion = e.target.scrollTop / e.target.scrollTopMax
+  }
+
+  let halfRowsInWindow = 100
   $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
+  $: indexMid = Math.round(verticalScrollProportion * displayData.length)
+  $: indexTop = Math.max(0, indexMid - halfRowsInWindow)
+  $: indexBottom = Math.min(displayData.length, indexMid + halfRowsInWindow)
+  $: allIs = seq(indexTop, indexBottom - 1)
 </script>
 
 <div
@@ -126,16 +136,21 @@
           {/each}
         </div>
       </div>
-      <div class="tbody">
-        {#each displayData as row}
-          <div class="data-row">
-            {#each data.headers as header}
-              <div class="td {header.title}" style="width: {header.width}px">
-                <span class="cell-content">{header.accessor(row)}</span>
-              </div>
-            {/each}
-          </div>
-        {/each}
+      <div class="tbody" on:scroll={scrollHandle}>
+        <div class="window" style="--nrow: {displayData.length}">
+          <div class="window-padding-top" style="--itop: {indexTop}" />
+          {#each allIs as i}
+            <div class="data-row">
+              {#each data.headers as header}
+                <div class="td {header.title}" style="width: {header.width}px">
+                  <span class="cell-content"
+                    >{header.accessor(displayData[i])}</span
+                  >
+                </div>
+              {/each}
+            </div>
+          {/each}
+        </div>
       </div>
     </div>
   </div>
@@ -170,6 +185,12 @@
     );
     overflow-y: scroll;
     overflow-x: hidden;
+  }
+  .window {
+    height: calc(var(--nrow) * var(--height-data-cell));
+  }
+  .window-padding-top {
+    height: calc(var(--itop) * var(--height-data-cell));
   }
   .thead {
     height: var(--height-header);
