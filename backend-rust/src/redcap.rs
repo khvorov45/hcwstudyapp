@@ -561,25 +561,30 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         .iter()
         .map(|y| format!("vac_{}", y))
         .collect::<Vec<String>>();
-    let (vaccination_history_screening_2020, vaccination_history_screening_2021) =
-        redcap_api_request(
-            opt,
-            &[
-                ("content", "record"),
-                (
-                    "fields",
-                    ["pid", years_var_names.join(",").as_str()]
-                        .join(",")
-                        .as_str(),
-                ),
-                ("events", "baseline_arm_1"),
-            ],
-        )
-        .await?;
+    let screening_fields = ["pid", "record_id", years_var_names.join(",").as_str()].join(",");
+    let screening_params = [
+        ("content", "record"),
+        ("fields", screening_fields.as_str()),
+        ("events", "baseline_arm_1"),
+    ];
+    let vaccination_fields = ["record_id", "vaccinated"].join(",");
+    let vaccination_params = [
+        ("content", "record"),
+        ("fields", vaccination_fields.as_str()),
+        ("events", "vaccination_arm_1"),
+    ];
+    let (redcap_screening, redcap_vaccination) = tokio::join!(
+        redcap_api_request(opt, &screening_params),
+        redcap_api_request(opt, &vaccination_params),
+    );
 
     let now = chrono::Utc::now();
 
+    let (redcap_screening_2020, redcap_screening_2021) = redcap_screening?;
+    let (redcap_vaccination_2020, redcap_vaccination_2021) = redcap_vaccination?;
+
     let mut vaccination_history = Vec::new();
+    let mut pid_map = std::collections::HashMap::<String, String>::new();
     let mut counts = ExtractionCounts::default();
 
     fn handle_error(e: anyhow::Error, val: &serde_json::Value, var_name: &str) -> i32 {
@@ -597,7 +602,32 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         }
     }
 
-    for redcap_vaccination in vaccination_history_screening_2020 {
+    fn add_to_pid_map(
+        pid_map: &mut std::collections::HashMap<String, String>,
+        v: &serde_json::Value,
+    ) -> Result<()> {
+        let v = v.try_as_object()?;
+        let pid = v.try_get("pid")?.try_as_str()?;
+        let record_id = v.try_get("record_id")?.try_as_str()?;
+        if !pid.is_empty() {
+            pid_map.insert(record_id.to_string(), pid.to_string());
+        }
+        Ok(())
+    }
+
+    fn handle_pid_map_error(e: anyhow::Error, v: &serde_json::Value) {
+        log::error!(
+            "failed to add to pid map: {} at\n{}",
+            e,
+            serde_json::to_string_pretty(&v)
+                .unwrap_or_else(|_| "failed to print screening vaccination".to_string())
+        )
+    }
+
+    for redcap_vaccination in redcap_screening_2020 {
+        if let Err(e) = add_to_pid_map(&mut pid_map, &redcap_vaccination) {
+            handle_pid_map_error(e, &redcap_vaccination)
+        }
         for (year, var_name) in years.iter().zip(years_var_names.iter()) {
             match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
                 Ok(v) => {
@@ -614,7 +644,10 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
 
     vaccination_history.sort_by_key(|v| v.get_pk());
 
-    for redcap_vaccination in vaccination_history_screening_2021 {
+    for redcap_vaccination in redcap_screening_2021 {
+        if let Err(e) = add_to_pid_map(&mut pid_map, &redcap_vaccination) {
+            handle_pid_map_error(e, &redcap_vaccination)
+        }
         for (year, var_name) in years.iter().zip(years_var_names.iter()) {
             let value = match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
                 Ok(v) => {
@@ -634,7 +667,89 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
             }
         }
     }
+
     counts.log("Vaccination history");
+
+    fn parse_redcap_vaccination(
+        v: &serde_json::Value,
+    ) -> Result<(String, Option<current::VaccinationStatus>)> {
+        let v = v.try_as_object()?;
+        let record_id = v.try_get("record_id")?.try_as_str()?.to_string();
+        let status = match v.try_get("vaccinated")?.try_as_str()? {
+            "1" => Some(current::VaccinationStatus::Australia),
+            "0" => Some(current::VaccinationStatus::No),
+            _ => None,
+        };
+        Ok((record_id, status))
+    }
+
+    fn handle_error_vaccination(e: anyhow::Error, v: &serde_json::Value) {
+        log::error!(
+            "failed to parse vaccination: {} at\n{}",
+            e,
+            serde_json::to_string_pretty(v)
+                .unwrap_or_else(|_| "failed to print vaccination".to_string())
+        );
+    }
+
+    fn add_to_vaccinations(
+        vaccination_history: &mut Vec<current::VaccinationHistory>,
+        redcap_vaccination_year: &[serde_json::Value],
+        year: u32,
+        pid_map: &std::collections::HashMap<String, String>,
+    ) {
+        let mut added = 0;
+        let mut no_matching_pid = 0;
+        let mut parsed = 0;
+        for redcap_vaccination in redcap_vaccination_year {
+            let (record_id, status) = match parse_redcap_vaccination(&redcap_vaccination) {
+                Ok((r, s)) => {
+                    parsed += 1;
+                    (r, s)
+                }
+                Err(e) => {
+                    handle_error_vaccination(e, &redcap_vaccination);
+                    continue;
+                }
+            };
+            let pid = match pid_map.get(&record_id) {
+                Some(pid) => pid.clone(),
+                None => {
+                    no_matching_pid += 1;
+                    continue;
+                }
+            };
+            if let Err(i) =
+                vaccination_history.binary_search_by_key(&(pid.clone(), year), |v| v.get_pk())
+            {
+                added += 1;
+                let value = current::VaccinationHistory { pid, status, year };
+                vaccination_history.insert(i, value);
+            }
+        }
+        log::info!(
+            "Vaccinations in {}: {} parsed, {} no matching pid, {} added",
+            year,
+            parsed,
+            no_matching_pid,
+            added
+        );
+    }
+
+    add_to_vaccinations(
+        &mut vaccination_history,
+        &redcap_vaccination_2020,
+        2020,
+        &pid_map,
+    );
+
+    add_to_vaccinations(
+        &mut vaccination_history,
+        &redcap_vaccination_2021,
+        2021,
+        &pid_map,
+    );
+
     log_time_elapsed("Vaccination history parsed", now);
     Ok(vaccination_history)
 }
