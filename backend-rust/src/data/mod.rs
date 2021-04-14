@@ -1,7 +1,78 @@
-use crate::db::ToCurrent;
+use crate::{
+    auth,
+    db::{ForeignKey, PrimaryKey, ToCurrent},
+};
 
 pub mod current;
 pub mod previous;
+
+impl PrimaryKey<String> for current::Participant {
+    fn get_pk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
+impl PrimaryKey<String> for current::User {
+    fn get_pk(&self) -> String {
+        self.email.clone()
+    }
+}
+
+impl PrimaryKey<String> for current::Token {
+    fn get_pk(&self) -> String {
+        self.hash.clone()
+    }
+}
+
+impl ForeignKey<String> for current::Token {
+    fn get_fk(&self) -> String {
+        self.user.clone()
+    }
+}
+
+impl PrimaryKey<(String, u32)> for current::VaccinationHistory {
+    fn get_pk(&self) -> (String, u32) {
+        (self.pid.clone(), self.year)
+    }
+}
+
+impl ForeignKey<String> for current::VaccinationHistory {
+    fn get_fk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
+impl current::Token {
+    pub fn new(
+        email: &str,
+        kind: current::TokenKind,
+        len: usize,
+        days_to_live: i64,
+    ) -> (String, Self) {
+        let before_hash = auth::random_string(len);
+        let expires = match kind {
+            current::TokenKind::Session => {
+                Some(chrono::Utc::now() + chrono::Duration::days(days_to_live))
+            }
+            current::TokenKind::Api => None,
+        };
+        let token = Self {
+            user: email.to_string(),
+            hash: auth::hash(before_hash.as_str()),
+            kind,
+            expires,
+        };
+        (before_hash, token)
+    }
+    pub fn is_expired(&self) -> bool {
+        if self.expires.is_none() {
+            return false;
+        }
+        self.expires.unwrap() < chrono::Utc::now()
+    }
+}
+
+// ================================================================================================
 
 impl ToCurrent<current::UserKind> for previous::UserKind {
     fn to_current(&self) -> current::UserKind {
