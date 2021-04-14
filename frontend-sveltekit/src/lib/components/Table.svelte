@@ -65,12 +65,29 @@
     verticalScrollProportion = e.target.scrollTop / e.target.scrollTopMax
   }
 
-  let halfRowsInWindow = 100
+  let rowsInWindow = 100
+  let indexBuffer = seq(0, rowsInWindow - 1)
+  function findFirstRow(midRow: number, rowsInWindow: number, nRows: number) {
+    let firstRow = midRow - rowsInWindow / 2
+    let minFirstRow = 0
+    if (firstRow < minFirstRow) {
+      firstRow = minFirstRow
+    }
+    let maxFirstRow = nRows - rowsInWindow
+    if (firstRow > maxFirstRow) {
+      firstRow = maxFirstRow
+    }
+    return firstRow
+  }
+  function recalculateIndices(start: number) {
+    for (let i = 0; i < indexBuffer.length; i++) {
+      indexBuffer[i] = start + i
+    }
+  }
   $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
   $: indexMid = Math.round(verticalScrollProportion * displayData.length)
-  $: indexTop = Math.max(0, indexMid - halfRowsInWindow)
-  $: indexBottom = Math.min(displayData.length, indexMid + halfRowsInWindow)
-  $: allIs = seq(indexTop, indexBottom - 1)
+  $: indexTop = findFirstRow(indexMid, rowsInWindow, displayData.length)
+  $: recalculateIndices(indexTop)
 </script>
 
 <div
@@ -139,7 +156,7 @@
       <div class="tbody" on:scroll={scrollHandle}>
         <div class="window" style="--nrow: {displayData.length}">
           <div class="window-padding-top" style="--itop: {indexTop}" />
-          {#each allIs as i}
+          {#each indexBuffer as i}
             <div class="data-row">
               {#each data.headers as header}
                 <div class="td {header.title}" style="width: {header.width}px">
