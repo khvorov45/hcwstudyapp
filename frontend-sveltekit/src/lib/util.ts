@@ -209,3 +209,14 @@ export type SubnavLink = {
 export function justDateString(d: Date) {
   return d.toISOString().slice(10)
 }
+
+export const tableFilterBetween: TableDisplayFilter = {
+  values: 2,
+  fun: (v, c) =>
+    c[0] === "" ? v <= c[1] : c[1] === "" ? v >= c[0] : v <= c[1] && v >= c[0],
+}
+
+export const tableFilterStartsWith: TableDisplayFilter = {
+  values: 1,
+  fun: (v, c) => v.startsWith(c),
+}

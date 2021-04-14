@@ -1,11 +1,7 @@
 <script lang="ts">
   import { loginReq, token, participantsReq } from "$lib/state"
-  import type {
-    AsyncStatus,
-    TableDisplayFilter,
-    TableDisplayHeader,
-  } from "$lib/util"
-  import { fetchTable } from "$lib/util"
+  import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
+  import { fetchTable, tableFilterStartsWith } from "$lib/util"
   import type { Participant } from "$lib/data"
   import { onMount } from "svelte"
   import Table from "$lib/components/Table.svelte"
@@ -23,34 +19,30 @@
 
   $: fetchParticipants($token, $loginReq.status, mounted)
 
-  const filt: TableDisplayFilter = {
-    values: 1,
-    fun: (v, c) => v.startsWith(c),
-  }
   const headers: TableDisplayHeader<Participant>[] = [
     {
       title: "PID",
       accessor: (p) => p.pid,
       width: 100,
-      filter: filt,
+      filter: tableFilterStartsWith,
     },
     {
       title: "Email",
       accessor: (u) => u.email,
       width: 270,
-      filter: filt,
+      filter: tableFilterStartsWith,
     },
     {
       title: "Mobile",
       accessor: (u) => u.mobile,
       width: 130,
-      filter: filt,
+      filter: tableFilterStartsWith,
     },
     {
       title: "Site",
       accessor: (u) => u.site,
       width: 150,
-      filter: filt,
+      filter: tableFilterStartsWith,
     },
   ]
 </script>

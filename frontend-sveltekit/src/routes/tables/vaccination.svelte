@@ -1,7 +1,7 @@
 <script lang="ts">
   import { loginReq, token, vaccinationHistoryReq } from "$lib/state"
   import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
-  import { fetchTable } from "$lib/util"
+  import { fetchTable, tableFilterStartsWith } from "$lib/util"
   import type { VaccinationHistory } from "$lib/data"
   import { onMount } from "svelte"
   import Table from "$lib/components/Table.svelte"
@@ -24,28 +24,19 @@
       title: "PID",
       accessor: (p) => p.pid,
       width: 100,
-      filter: {
-        values: 1,
-        fun: (v, c) => v.startsWith(c),
-      },
+      filter: tableFilterStartsWith,
     },
     {
       title: "Year",
       accessor: (p) => p.year.toString(),
       width: 100,
-      filter: {
-        values: 1,
-        fun: (v, c) => v.startsWith(c),
-      },
+      filter: tableFilterStartsWith,
     },
     {
       title: "Status",
       accessor: (p) => p.status ?? "",
       width: 100,
-      filter: {
-        values: 1,
-        fun: (v, c) => v.startsWith(c),
-      },
+      filter: tableFilterStartsWith,
     },
   ]
 </script>
