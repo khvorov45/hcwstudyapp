@@ -1,7 +1,7 @@
 <script lang="ts">
   import { loginReq, token, usersReq } from "$lib/state"
   import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
-  import { fetchTable } from "$lib/util"
+  import { fetchTable, tableFilterStartsWith } from "$lib/util"
   import { accessGroupToString } from "$lib/data"
   import type { User } from "$lib/data"
   import { onMount } from "svelte"
@@ -25,13 +25,13 @@
       title: "Email",
       accessor: (u) => u.email,
       width: 270,
-      filterFun: (v, c) => v.startsWith(c),
+      filter: tableFilterStartsWith,
     },
     {
       title: "Access",
       accessor: (u) => accessGroupToString(u.access_group),
       width: 110,
-      filterFun: (v, c) => v.startsWith(c),
+      filter: tableFilterStartsWith,
     },
   ]
 </script>
