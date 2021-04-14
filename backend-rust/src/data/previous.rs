@@ -103,3 +103,33 @@ pub struct Schedule {
     pub day: u32,
     pub date: Option<DateTime<Utc>>,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum SwabResult {
+    InfluenzaAUnsubtyped,
+    InfluenzaAh3,
+    InfluenzaAh1,
+    InfluenzaBNoLineage,
+    InfluenzaBVic,
+    InfluenzaBYam,
+    InfluenzaC,
+    Parainfluenza,
+    HumanMetapneumovirus,
+    Picornavirus,
+    Adenovirus,
+    CoronavirusSars,
+    CoronavirusSarsCoV2,
+    Other(String),
+    Negative,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct WeeklySurvey {
+    pub pid: String,
+    pub year: u32,
+    pub index: u32,
+    pub date: Option<DateTime<Utc>>,
+    pub ari: bool,
+    pub swab_collection: Option<bool>,
+    pub swab_result: Option<Vec<SwabResult>>,
+}

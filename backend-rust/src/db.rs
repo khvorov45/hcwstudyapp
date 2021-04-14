@@ -18,6 +18,8 @@ pub struct Db {
     pub vaccination_history:
         Table<previous::VaccinationHistory, current::VaccinationHistory, (String, u32), String>,
     pub schedule: Table<previous::Schedule, current::Schedule, (String, u32, u32), String>,
+    pub weekly_survey:
+        Table<previous::WeeklySurvey, current::WeeklySurvey, (String, u32, u32), String>,
 }
 
 pub struct DbDirs {
@@ -73,6 +75,7 @@ impl Db {
             participants: Table::new("Participant", &dirs)?,
             vaccination_history: Table::new("VaccinationHistory", &dirs)?,
             schedule: Table::new("Schedule", &dirs)?,
+            weekly_survey: Table::new("WeeklySurvey", &dirs)?,
             dirs,
         };
 

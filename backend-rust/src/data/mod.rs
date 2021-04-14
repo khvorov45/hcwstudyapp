@@ -54,6 +54,18 @@ impl ForeignKey<String> for current::Schedule {
     }
 }
 
+impl PrimaryKey<(String, u32, u32)> for current::WeeklySurvey {
+    fn get_pk(&self) -> (String, u32, u32) {
+        (self.pid.clone(), self.year, self.index)
+    }
+}
+
+impl ForeignKey<String> for current::WeeklySurvey {
+    fn get_fk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
 impl current::Token {
     pub fn new(
         email: &str,
@@ -234,6 +246,46 @@ impl ToCurrent<current::Schedule> for previous::Schedule {
             year: self.year,
             day: self.day,
             date: self.date,
+        }
+    }
+}
+
+impl ToCurrent<current::SwabResult> for previous::SwabResult {
+    fn to_current(&self) -> current::SwabResult {
+        use previous::SwabResult::*;
+        match self {
+            InfluenzaAUnsubtyped => current::SwabResult::InfluenzaAUnsubtyped,
+            InfluenzaAh3 => current::SwabResult::InfluenzaAh3,
+            InfluenzaAh1 => current::SwabResult::InfluenzaAh1,
+            InfluenzaBNoLineage => current::SwabResult::InfluenzaBNoLineage,
+            InfluenzaBVic => current::SwabResult::InfluenzaBVic,
+            InfluenzaBYam => current::SwabResult::InfluenzaBYam,
+            InfluenzaC => current::SwabResult::InfluenzaC,
+            Parainfluenza => current::SwabResult::Parainfluenza,
+            HumanMetapneumovirus => current::SwabResult::HumanMetapneumovirus,
+            Picornavirus => current::SwabResult::Picornavirus,
+            Adenovirus => current::SwabResult::Adenovirus,
+            CoronavirusSars => current::SwabResult::CoronavirusSars,
+            CoronavirusSarsCoV2 => current::SwabResult::CoronavirusSarsCoV2,
+            Other(s) => current::SwabResult::Other(s.clone()),
+            Negative => current::SwabResult::Negative,
+        }
+    }
+}
+
+impl ToCurrent<current::WeeklySurvey> for previous::WeeklySurvey {
+    fn to_current(&self) -> current::WeeklySurvey {
+        current::WeeklySurvey {
+            pid: self.pid.clone(),
+            year: self.year,
+            index: self.index,
+            date: self.date,
+            ari: self.ari,
+            swab_collection: self.swab_collection,
+            swab_result: self
+                .swab_result
+                .clone()
+                .map(|v| v.iter().map(|r| r.to_current()).collect()),
         }
     }
 }
