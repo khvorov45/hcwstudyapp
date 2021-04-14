@@ -223,7 +223,7 @@ export const tableFilterStartsWith: TableDisplayFilter = {
 
 export function seq(from: number, to: number): number[] {
   let arr: number[] = []
-  for (let i = from; i <= to; i++) {
+  for (let i = from; i < to; i++) {
     arr.push(i)
   }
   return arr

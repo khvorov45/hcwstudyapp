@@ -65,8 +65,6 @@
     verticalScrollProportion = e.target.scrollTop / e.target.scrollTopMax
   }
 
-  let rowsInWindow = 100
-  let indexBuffer = seq(0, rowsInWindow - 1)
   function findFirstRow(midRow: number, rowsInWindow: number, nRows: number) {
     let firstRow = midRow - rowsInWindow / 2
     let minFirstRow = 0
@@ -85,6 +83,8 @@
     }
   }
   $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
+  $: rowsInWindow = Math.min(100, displayData.length)
+  $: indexBuffer = seq(0, rowsInWindow) //! $: here defeats the purpose entirely
   $: indexMid = Math.round(verticalScrollProportion * displayData.length)
   $: indexTop = findFirstRow(indexMid, rowsInWindow, displayData.length)
   $: recalculateIndices(indexTop)

@@ -19,6 +19,8 @@
 
   $: fetchParticipants($token, $loginReq.status, mounted)
 
+  //$: console.log($participantsReq.result)
+
   const headers: TableDisplayHeader<Participant>[] = [
     {
       title: "PID",
