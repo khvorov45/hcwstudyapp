@@ -1,4 +1,5 @@
 use crate::{data::current, db::PrimaryKey, error, Opt, Result};
+use std::collections::HashMap;
 
 async fn redcap_api_request(
     opt: &Opt,
@@ -567,13 +568,74 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
     Ok(participants)
 }
 
-pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::VaccinationHistory>> {
+pub async fn export_record_id_pid_map(opt: &Opt) -> Result<HashMap<String, String>> {
+    let (map2020, map2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            ("fields", ["pid", "record_id"].join(",").as_str()),
+            ("events", "baseline_arm_1"),
+        ],
+    )
+    .await?;
+
+    let mut pid_map = std::collections::HashMap::<String, String>::new();
+
+    fn add_to_pid_map(
+        pid_map: &mut std::collections::HashMap<String, String>,
+        v: &serde_json::Value,
+    ) -> Result<u32> {
+        let v = v.try_as_object()?;
+        let pid = v.try_get("pid")?.try_as_str()?;
+        let record_id = v.try_get("record_id")?.try_as_str()?;
+        if !pid.is_empty() {
+            pid_map.insert(record_id.to_string(), pid.to_string());
+            Ok(1)
+        } else {
+            Ok(0)
+        }
+    }
+
+    fn handle_pid_map_error(e: anyhow::Error, v: &serde_json::Value) {
+        log::error!(
+            "failed to add to pid map: {} at\n{}",
+            e,
+            serde_json::to_string_pretty(&v)
+                .unwrap_or_else(|_| "failed to print screening vaccination".to_string())
+        )
+    }
+
+    let mut parsed = 0;
+    let mut added = 0;
+    for redcap_vaccination in map2020.iter().chain(map2021.iter()) {
+        match add_to_pid_map(&mut pid_map, &redcap_vaccination) {
+            Ok(i) => {
+                added += i;
+                parsed += 1;
+            }
+            Err(e) => handle_pid_map_error(e, &redcap_vaccination),
+        }
+    }
+
+    log::info!(
+        "Record ID - PID map extraction: {} parsed; {} added",
+        parsed,
+        added,
+    );
+
+    Ok(pid_map)
+}
+
+pub async fn export_vaccination_history(
+    opt: &Opt,
+    pid_map: &HashMap<String, String>,
+) -> Result<Vec<current::VaccinationHistory>> {
     let years = (2015u32..=2020u32).into_iter().collect::<Vec<u32>>();
     let years_var_names = years
         .iter()
         .map(|y| format!("vac_{}", y))
         .collect::<Vec<String>>();
-    let screening_fields = ["pid", "record_id", years_var_names.join(",").as_str()].join(",");
+    let screening_fields = ["pid", years_var_names.join(",").as_str()].join(",");
     let screening_params = [
         ("content", "record"),
         ("fields", screening_fields.as_str()),
@@ -596,7 +658,6 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
     let (redcap_vaccination_2020, redcap_vaccination_2021) = redcap_vaccination?;
 
     let mut vaccination_history = Vec::new();
-    let mut pid_map = std::collections::HashMap::<String, String>::new();
     let mut counts = ExtractionCounts::default();
 
     fn handle_error(e: anyhow::Error, val: &serde_json::Value, var_name: &str) -> i32 {
@@ -614,32 +675,7 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
         }
     }
 
-    fn add_to_pid_map(
-        pid_map: &mut std::collections::HashMap<String, String>,
-        v: &serde_json::Value,
-    ) -> Result<()> {
-        let v = v.try_as_object()?;
-        let pid = v.try_get("pid")?.try_as_str()?;
-        let record_id = v.try_get("record_id")?.try_as_str()?;
-        if !pid.is_empty() {
-            pid_map.insert(record_id.to_string(), pid.to_string());
-        }
-        Ok(())
-    }
-
-    fn handle_pid_map_error(e: anyhow::Error, v: &serde_json::Value) {
-        log::error!(
-            "failed to add to pid map: {} at\n{}",
-            e,
-            serde_json::to_string_pretty(&v)
-                .unwrap_or_else(|_| "failed to print screening vaccination".to_string())
-        )
-    }
-
     for redcap_vaccination in redcap_screening_2020 {
-        if let Err(e) = add_to_pid_map(&mut pid_map, &redcap_vaccination) {
-            handle_pid_map_error(e, &redcap_vaccination)
-        }
         for (year, var_name) in years.iter().zip(years_var_names.iter()) {
             match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
                 Ok(v) => {
@@ -657,9 +693,6 @@ pub async fn export_vaccination_history(opt: &Opt) -> Result<Vec<current::Vaccin
     vaccination_history.sort_by_key(|v| v.get_pk());
 
     for redcap_vaccination in redcap_screening_2021 {
-        if let Err(e) = add_to_pid_map(&mut pid_map, &redcap_vaccination) {
-            handle_pid_map_error(e, &redcap_vaccination)
-        }
         for (year, var_name) in years.iter().zip(years_var_names.iter()) {
             let value = match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
                 Ok(v) => {

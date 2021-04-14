@@ -323,10 +323,15 @@ fn vaccination_history_redcap_sync(
         .and(with_db(db))
         .and(with_opt(opt))
         .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
-            let redcap_vaccination_history = match redcap::export_vaccination_history(&opt).await {
-                Ok(u) => u,
+            let pid_map = match redcap::export_record_id_pid_map(&opt).await {
+                Ok(map) => map,
                 Err(e) => return Err(reject(e)),
             };
+            let redcap_vaccination_history =
+                match redcap::export_vaccination_history(&opt, &pid_map).await {
+                    Ok(u) => u,
+                    Err(e) => return Err(reject(e)),
+                };
             match db
                 .lock()
                 .await
