@@ -362,7 +362,7 @@ fn get_schedule(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> 
             Ok(warp::reply::json(data))
         }
     }
-    warp::path!("vaccination")
+    warp::path!("schedule")
         .and(warp::get())
         .and(user_from_token(db.clone()))
         .and(with_db(db))
