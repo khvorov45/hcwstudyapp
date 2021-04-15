@@ -1052,7 +1052,7 @@ pub async fn export_weekly_survey(
         weekly_survey.push(value);
     }
 
-    for redcap_survey in survey2021 {
+    for redcap_survey in &survey2021 {
         let record_id = match pull_record_id(&redcap_survey) {
             Ok(s) => s,
             Err(e) => {
@@ -1091,5 +1091,108 @@ pub async fn export_weekly_survey(
 
     counts.log("Weekly survey");
     log_time_elapsed("Weekly survey parsed", now);
+
+    if let Err(e) = send_covid_vaccination(opt, &survey2021).await {
+        log::error!("Error sending covid vaccinations: {}", e);
+    }
+
     Ok(weekly_survey)
+}
+
+#[derive(serde_derive::Serialize)]
+struct RedcapVaccinationCovid {
+    record_id: String,
+    redcap_event_name: String,
+    covid_vac_brand: String,
+    other_covax_brand: String,
+    covid_vac_dose1_rec: String,
+    covid_vac_dose2_rec: String,
+    covid_vacc_date1: String,
+    covid_vacc_date2: String,
+    covid_vac_batch1: String,
+    covid_vac_batch2: String,
+    covid_vac_survey_index: String,
+}
+
+async fn send_covid_vaccination(opt: &Opt, data_raw: &[serde_json::Value]) -> Result<()> {
+    let mut data_to_send: Vec<RedcapVaccinationCovid> = Vec::new();
+
+    for value in data_raw {
+        let v = value.try_as_object()?;
+        let received = v.try_get("recent_covax")?.try_as_str()?;
+        let dose = v.try_get("covax_dose")?.try_as_str()?.to_string();
+        if received != "1" || (dose != "1" && dose != "2") {
+            continue;
+        }
+        let date = v.try_get("covax_date")?.try_as_str()?.to_string();
+        let batch = v.try_get("covax_batch")?.try_as_str()?.to_string();
+        let v = RedcapVaccinationCovid {
+            record_id: v.try_get("record_id")?.try_as_str()?.to_string(),
+            redcap_event_name: "vaccination_arm_1".to_string(),
+            covid_vac_brand: v.try_get("covax_rec")?.try_as_str()?.to_string(),
+            other_covax_brand: v.try_get("covax_rec_other")?.try_as_str()?.to_string(),
+            covid_vac_dose1_rec: if dose == "1" {
+                "1".to_string()
+            } else {
+                "".to_string()
+            },
+            covid_vac_dose2_rec: if dose == "2" {
+                "1".to_string()
+            } else {
+                "".to_string()
+            },
+            covid_vacc_date1: if dose == "1" {
+                date.clone()
+            } else {
+                "".to_string()
+            },
+            covid_vacc_date2: if dose == "2" { date } else { "".to_string() },
+            covid_vac_batch1: if dose == "1" {
+                batch.clone()
+            } else {
+                "".to_string()
+            },
+            covid_vac_batch2: if dose == "2" { batch } else { "".to_string() },
+            covid_vac_survey_index: v
+                .try_get("redcap_event_name")?
+                .try_as_str()?
+                .replace("weekly_survey_", "")
+                .replace("_arm_1", "")
+                .to_string(),
+        };
+        data_to_send.push(v);
+    }
+
+    if data_to_send.is_empty() {
+        log::info!("no covid vaccination information to send");
+        return Ok(());
+    }
+
+    let client = reqwest::Client::new();
+    let data_string = serde_json::to_string(&data_to_send)?;
+    let params = &[
+        ("token", opt.redcap_token_2021.as_str()),
+        ("format", "json"),
+        ("content", "record"),
+        ("data", data_string.as_str()),
+    ];
+    let res = client
+        .post(opt.redcap_api_url.as_str())
+        .form(params)
+        .send()
+        .await?;
+    if !res.status().is_success() {
+        log::error!(
+            "Error sending results, status: {}, body: {}",
+            res.status(),
+            res.text()
+                .await
+                .unwrap_or_else(|_| "failed to text body".to_string())
+        );
+    }
+    log::info!(
+        "sent {} covid vaccination info to redcap",
+        data_to_send.len()
+    );
+    Ok(())
 }
