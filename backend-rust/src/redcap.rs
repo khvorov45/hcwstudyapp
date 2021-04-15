@@ -938,24 +938,16 @@ pub async fn export_schedule(opt: &Opt) -> Result<Vec<current::Schedule>> {
         }
     }
 
-    schedule.sort_by_key(|s| s.get_pk());
-
     for redcap_schedule in schedule2021 {
         for (day, var_name) in days.iter().zip(var_names.iter()) {
-            let v = match redcap_schedule.try_as_schedule(2021, *day, var_name) {
+            match redcap_schedule.try_as_schedule(2021, *day, var_name) {
                 Ok(v) => {
                     counts.parsed.1 += 1;
-                    v
+                    counts.added.1 += 1;
+                    schedule.push(v);
                 }
-                Err(e) => {
-                    counts.empty_pid.1 += handle_extraction_error(e, &redcap_schedule);
-                    continue;
-                }
+                Err(e) => counts.empty_pid.1 += handle_extraction_error(e, &redcap_schedule),
             };
-            if let Err(i) = schedule.binary_search_by_key(&v.get_pk(), |s| s.get_pk()) {
-                counts.added.1 += 1;
-                schedule.insert(i, v);
-            }
         }
     }
 
