@@ -120,6 +120,7 @@ impl Db {
         self.participants.read(version)?;
         self.vaccination_history.read(version)?;
         self.schedule.read(version)?;
+        self.weekly_survey.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -129,6 +130,7 @@ impl Db {
         self.participants.write()?;
         self.vaccination_history.write()?;
         self.schedule.write()?;
+        self.weekly_survey.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -138,6 +140,7 @@ impl Db {
         self.participants.convert();
         self.vaccination_history.convert();
         self.schedule.convert();
+        self.weekly_survey.convert();
     }
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
@@ -149,6 +152,8 @@ impl Db {
         self.vaccination_history.verify_fk(&self.participants)?;
         self.schedule.verify_pk()?;
         self.schedule.verify_fk(&self.participants)?;
+        self.weekly_survey.verify_pk()?;
+        self.weekly_survey.verify_fk(&self.participants)?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
