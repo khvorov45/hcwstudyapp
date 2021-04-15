@@ -9,27 +9,27 @@
     {
       link: "/tables/contact",
       title: "Contact",
-      width: "100px",
+      width: 100,
     },
     {
       link: "/tables/baseline",
       title: "Baseline",
-      width: "100px",
+      width: 100,
     },
     {
       link: "/tables/vaccination",
       title: "Vaccination",
-      width: "100px",
+      width: 100,
     },
     {
       link: "/tables/schedule",
       title: "Schedule",
-      width: "100px",
+      width: 100,
     },
     {
       link: "/tables/weekly-survey",
       title: "Weekly survey",
-      width: "150px",
+      width: 150,
     },
   ]
 </script>

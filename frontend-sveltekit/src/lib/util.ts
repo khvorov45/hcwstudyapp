@@ -203,7 +203,7 @@ export async function fetchTable(
 export type SubnavLink = {
   link: string
   title: string
-  width: string
+  width: number
 }
 
 export function justDateString(d: Date) {
