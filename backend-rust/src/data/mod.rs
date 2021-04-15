@@ -285,7 +285,9 @@ impl ToCurrent<current::WeeklySurvey> for previous::WeeklySurvey {
             swab_result: self
                 .swab_result
                 .clone()
-                .map(|v| v.iter().map(|r| r.to_current()).collect()),
+                .iter()
+                .map(|r| r.to_current())
+                .collect(),
         }
     }
 }

@@ -129,7 +129,7 @@ pub struct WeeklySurvey {
     pub index: u32,
     pub year: u32,
     pub date: Option<DateTime<Utc>>,
-    pub ari: bool,
+    pub ari: Option<bool>,
     pub swab_collection: Option<bool>,
-    pub swab_result: Option<Vec<SwabResult>>,
+    pub swab_result: Vec<SwabResult>,
 }

@@ -52,9 +52,12 @@ pub enum ExpectedJson {
     Integer,
     Real,
     RealOrNull,
+    Boolean,
+    BooleanOrNull,
     Date,
     DateOrNull,
     Object,
+    Array,
     Site,
     AccessGroup,
     Pid,
@@ -68,10 +71,13 @@ pub enum ExpectedJson {
     VaccinationStatusOrNull,
     VaccinationHistory,
     Schedule,
+    SwabResult,
+    WeeklySurvey,
 }
 
 trait TryGet {
     fn try_get(&self, name: &str) -> Result<&serde_json::Value>;
+    fn try_as_swab_results(&self) -> Result<Vec<current::SwabResult>>;
 }
 
 impl TryGet for serde_json::Map<String, serde_json::Value> {
@@ -83,16 +89,50 @@ impl TryGet for serde_json::Map<String, serde_json::Value> {
             ))),
         }
     }
+    fn try_as_swab_results(&self) -> Result<Vec<current::SwabResult>> {
+        use current::SwabResult::*;
+        let map = vec![
+            (1, InfluenzaAh1),
+            (2, InfluenzaAh3),
+            (3, InfluenzaAh1),
+            (4, InfluenzaBNoLineage),
+            (5, InfluenzaBVic),
+            (6, InfluenzaBYam),
+            (7, InfluenzaC),
+            (8, Parainfluenza),
+            (9, HumanMetapneumovirus),
+            (10, Picornavirus),
+            (11, Adenovirus),
+            (12, CoronavirusSars),
+            (13, CoronavirusSarsCoV2),
+            (
+                14,
+                Other(self.try_get("swab_other")?.try_as_str()?.to_string()),
+            ),
+            (15, Negative),
+        ];
+        let mut res = Vec::with_capacity(map.len());
+        for (i, swab_result) in map {
+            let var_name = format!("swab_result___{}", i);
+            if self.try_get(var_name.as_str())?.try_as_str()? == "1" {
+                res.push(swab_result)
+            }
+        }
+        Ok(res)
+    }
 }
 
 trait TryAs {
     fn error(&self, expected: ExpectedJson) -> anyhow::Error;
     fn try_as_object(&self) -> Result<&serde_json::Map<String, serde_json::Value>>;
+    fn try_as_array(&self) -> Result<Vec<serde_json::Value>>;
     fn try_as_str(&self) -> Result<&str>;
     fn try_as_str_or_null(&self) -> Result<Option<&str>>;
     fn try_as_i64(&self) -> Result<i64>;
     fn try_as_f64(&self) -> Result<f64>;
     fn try_as_f64_or_null(&self) -> Result<Option<f64>>;
+    fn try_as_bool(&self) -> Result<bool>;
+    fn try_as_bool_or_null(&self) -> Result<Option<bool>>;
     fn try_as_date(&self) -> Result<chrono::DateTime<chrono::Utc>>;
     fn try_as_date_or_null(&self) -> Result<Option<chrono::DateTime<chrono::Utc>>>;
     fn try_as_site(&self) -> Result<current::Site>;
@@ -115,6 +155,8 @@ trait TryAs {
         var_name: &str,
     ) -> Result<current::VaccinationHistory>;
     fn try_as_schedule(&self, year: u32, day: u32, var_name: &str) -> Result<current::Schedule>;
+    fn try_as_swab_result(&self) -> Result<current::SwabResult>;
+    fn try_as_weekly_survey(&self, pid_map: &str, year: u32) -> Result<current::WeeklySurvey>;
 }
 
 impl TryAs for serde_json::Value {
@@ -128,6 +170,12 @@ impl TryAs for serde_json::Value {
         match self.as_object() {
             Some(v) => Ok(v),
             None => Err(self.error(ExpectedJson::Object)),
+        }
+    }
+    fn try_as_array(&self) -> Result<Vec<serde_json::Value>> {
+        match self.as_array() {
+            Some(v) => Ok(v.to_vec()),
+            None => Err(self.error(ExpectedJson::Array)),
         }
     }
     fn try_as_str(&self) -> Result<&str> {
@@ -174,6 +222,34 @@ impl TryAs for serde_json::Value {
                 None => match self.as_str() {
                     Some(v) if v.is_empty() => Ok(None),
                     _ => Err(self.error(ExpectedJson::RealOrNull)),
+                },
+            },
+        }
+    }
+    fn try_as_bool(&self) -> Result<bool> {
+        match self.as_bool() {
+            Some(v) => Ok(v),
+            None => match self.as_str() {
+                Some(v) => match v.parse() {
+                    Ok(v) => Ok(v),
+                    Err(_) => match v {
+                        "1" => Ok(true),
+                        "0" => Ok(false),
+                        _ => Err(self.error(ExpectedJson::Boolean)),
+                    },
+                },
+                None => Err(self.error(ExpectedJson::Boolean)),
+            },
+        }
+    }
+    fn try_as_bool_or_null(&self) -> Result<Option<bool>> {
+        match self.try_as_bool() {
+            Ok(v) => Ok(Some(v)),
+            Err(_) => match self.as_null() {
+                Some(()) => Ok(None),
+                None => match self.as_str() {
+                    Some(v) if v.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::BooleanOrNull)),
                 },
             },
         }
@@ -416,6 +492,31 @@ impl TryAs for serde_json::Value {
         };
         Ok(schedule)
     }
+    fn try_as_swab_result(&self) -> Result<current::SwabResult> {
+        let res = match self.try_as_str()? {
+            "a" => current::SwabResult::Adenovirus,
+            _ => return Err(self.error(ExpectedJson::SwabResult)),
+        };
+        Ok(res)
+    }
+    fn try_as_weekly_survey(&self, pid: &str, year: u32) -> Result<current::WeeklySurvey> {
+        let v = self.try_as_object()?;
+        let weekly_survey = current::WeeklySurvey {
+            pid: pid.to_string(),
+            year,
+            index: v
+                .try_get("redcap_event_name")?
+                .try_as_str()?
+                .replace("weekly_survey_", "")
+                .replace("_arm_1", "")
+                .parse()?,
+            ari: v.try_get("ari_definition")?.try_as_bool_or_null()?,
+            date: v.try_get("date_symptom_survey")?.try_as_date_or_null()?,
+            swab_collection: v.try_get("swab_collection")?.try_as_bool_or_null()?,
+            swab_result: v.try_as_swab_results()?,
+        };
+        Ok(weekly_survey)
+    }
 }
 
 pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
@@ -435,19 +536,21 @@ pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
     Ok(users)
 }
 
+fn log_full_error(msg: &str, e: String, value: &serde_json::Value) {
+    log::error!(
+        "{}: {}, at\n{}",
+        msg,
+        e,
+        serde_json::to_string_pretty(value).unwrap_or_else(|_| format!("{:?}", value))
+    )
+}
+
 fn handle_extraction_error(e: anyhow::Error, value: &serde_json::Value) -> i32 {
-    fn log_full_error(e: String, value: &serde_json::Value) {
-        log::error!(
-            "Failed to parse: {}, at\n{}",
-            e,
-            serde_json::to_string_pretty(value)
-                .unwrap_or_else(|_| "could not print particpant".to_string())
-        )
-    }
     fn log_pid_error(pid: &serde_json::Value) {
         log::error!("Failed to parse pid: {}", pid);
     }
     let mut empty_pid_count = 0;
+    let msg = "failed to parse";
     if let Some(e) = e.downcast_ref::<error::RedcapExtraction>() {
         if let error::RedcapExtraction::UnexpectedJsonValue(expected, got) = e {
             if expected == &ExpectedJson::Pid {
@@ -461,13 +564,13 @@ fn handle_extraction_error(e: anyhow::Error, value: &serde_json::Value) -> i32 {
                     log_pid_error(got);
                 }
             } else {
-                log_full_error(e.to_string(), &value);
+                log_full_error(msg, e.to_string(), &value);
             }
         } else {
-            log_full_error(e.to_string(), &value);
+            log_full_error(msg, e.to_string(), &value);
         }
     } else {
-        log_full_error(e.to_string(), &value);
+        log_full_error(msg, e.to_string(), &value);
     }
     empty_pid_count
 }
@@ -860,4 +963,133 @@ pub async fn export_schedule(opt: &Opt) -> Result<Vec<current::Schedule>> {
     log_time_elapsed("Schedule parsed", now);
 
     Ok(schedule)
+}
+
+pub async fn export_weekly_survey(
+    opt: &Opt,
+    pid_map: &HashMap<String, String>,
+) -> Result<Vec<current::WeeklySurvey>> {
+    let survey_indices = (1u32..=52u32).collect::<Vec<u32>>();
+    let survey_event_names = survey_indices
+        .iter()
+        .map(|i| format!("weekly_survey_{}_arm_1", i))
+        .collect::<Vec<String>>();
+    let (survey2020, survey2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            (
+                "fields",
+                [
+                    "record_id",
+                    "ari_definition",
+                    "date_symptom_survey",
+                    "swab_collection",
+                    "swab_result",
+                    "swab_other",
+                    "recent_covax",
+                    "covax_rec",
+                    "covax_rec_other",
+                    "covax_dose",
+                    "covax_date",
+                    "covax_batch",
+                ]
+                .join(",")
+                .as_str(),
+            ),
+            ("events", survey_event_names.join(",").as_str()),
+        ],
+    )
+    .await?;
+
+    let now = chrono::Utc::now();
+    let mut weekly_survey: Vec<current::WeeklySurvey> = Vec::new();
+    let mut counts = ExtractionCounts::default();
+
+    fn pull_record_id(v: &serde_json::Value) -> Result<String> {
+        let record_id = v
+            .try_as_object()?
+            .try_get("record_id")?
+            .try_as_str()?
+            .to_string();
+        Ok(record_id)
+    }
+
+    for redcap_survey in survey2020 {
+        let record_id = match pull_record_id(&redcap_survey) {
+            Ok(s) => s,
+            Err(e) => {
+                log_full_error(
+                    "Failed to extract record_id from weekly survey",
+                    e.to_string(),
+                    &redcap_survey,
+                );
+                continue;
+            }
+        };
+        let pid = match pid_map.get(&record_id) {
+            Some(pid) => pid,
+            None => {
+                counts.empty_pid.0 += 1;
+                continue;
+            }
+        };
+        let value = match redcap_survey.try_as_weekly_survey(pid.as_str(), 2020) {
+            Ok(v) => {
+                counts.parsed.0 += 1;
+                v
+            }
+            Err(e) => {
+                log_full_error(
+                    "Failed to parse weekly survey",
+                    e.to_string(),
+                    &redcap_survey,
+                );
+                continue;
+            }
+        };
+        counts.added.0 += 1;
+        weekly_survey.push(value);
+    }
+
+    for redcap_survey in survey2021 {
+        let record_id = match pull_record_id(&redcap_survey) {
+            Ok(s) => s,
+            Err(e) => {
+                log_full_error(
+                    "Failed to extract record_id from weekly survey",
+                    e.to_string(),
+                    &redcap_survey,
+                );
+                continue;
+            }
+        };
+        let pid = match pid_map.get(&record_id) {
+            Some(pid) => pid,
+            None => {
+                counts.empty_pid.1 += 1;
+                continue;
+            }
+        };
+        let value = match redcap_survey.try_as_weekly_survey(pid.as_str(), 2021) {
+            Ok(v) => {
+                counts.parsed.1 += 1;
+                v
+            }
+            Err(e) => {
+                log_full_error(
+                    "Failed to parse weekly survey",
+                    e.to_string(),
+                    &redcap_survey,
+                );
+                continue;
+            }
+        };
+        counts.added.1 += 1;
+        weekly_survey.push(value);
+    }
+
+    counts.log("Weekly survey");
+    log_time_elapsed("Weekly survey parsed", now);
+    Ok(weekly_survey)
 }

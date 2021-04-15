@@ -252,6 +252,15 @@ impl Db {
         self.schedule.write()?;
         Ok(())
     }
+
+    pub fn sync_redcap_weekly_survey(
+        &mut self,
+        redcap_weekly_survey: Vec<current::WeeklySurvey>,
+    ) -> Result<()> {
+        self.weekly_survey.current.data = redcap_weekly_survey;
+        self.weekly_survey.write()?;
+        Ok(())
+    }
 }
 
 impl<P, C, PK, FK> Table<P, C, PK, FK> {

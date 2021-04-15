@@ -29,6 +29,8 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     let log = warp::log("api");
     get_users(db.clone())
+        .or(get_weekly_survey(db.clone()))
+        .or(weekly_survey_redcap_sync(db.clone(), opt.clone()))
         .or(get_participants(db.clone()))
         .or(participants_redcap_sync(db.clone(), opt.clone()))
         .or(get_vaccination_history(db.clone()))
@@ -389,6 +391,66 @@ fn schedule_redcap_sync(
                 Err(e) => return Err(reject(e)),
             };
             match db.lock().await.sync_redcap_schedule(redcap_schedule) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Weekly survey ==================================================================================
+
+fn get_weekly_survey(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.weekly_survey.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db
+                .participants
+                .current
+                .data
+                .iter()
+                .filter(|p| p.site == site)
+                .collect::<Vec<&current::Participant>>();
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::WeeklySurvey>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("weekly-survey")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn weekly_survey_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("weekly-survey" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let pid_map = match redcap::export_record_id_pid_map(&opt).await {
+                Ok(map) => map,
+                Err(e) => return Err(reject(e)),
+            };
+            let redcap_weekly_survey = match redcap::export_weekly_survey(&opt, &pid_map).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db
+                .lock()
+                .await
+                .sync_redcap_weekly_survey(redcap_weekly_survey)
+            {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(reject(e)),
             }
