@@ -68,3 +68,53 @@ export type Schedule = {
   day: number
   date: string | null
 }
+
+export type SwabResult =
+  | "InfluenzaAUnsubtyped"
+  | "InfluenzaAh3"
+  | "InfluenzaAh1"
+  | "InfluenzaBNoLineage"
+  | "InfluenzaBVic"
+  | "InfluenzaBYam"
+  | "InfluenzaC"
+  | "Parainfluenza"
+  | "HumanMetapneumovirus"
+  | "Picornavirus"
+  | "Adenovirus"
+  | "CoronavirusSars"
+  | "CoronavirusSarsCoV2"
+  | "Negative"
+  | { Other: string }
+
+export function swabResultToString(s: SwabResult) {
+  if (
+    s === "InfluenzaAUnsubtyped" ||
+    s === "InfluenzaAh3" ||
+    s === "InfluenzaAh1" ||
+    s === "InfluenzaBNoLineage" ||
+    s === "InfluenzaBVic" ||
+    s === "InfluenzaBYam" ||
+    s === "InfluenzaC" ||
+    s === "Parainfluenza" ||
+    s === "HumanMetapneumovirus" ||
+    s === "Picornavirus" ||
+    s === "Adenovirus" ||
+    s === "CoronavirusSars" ||
+    s === "CoronavirusSarsCoV2" ||
+    s === "Negative"
+  ) {
+    return s
+  } else {
+    return s.Other
+  }
+}
+
+export type WeeklySurvey = {
+  pid: string
+  year: number
+  index: number
+  date: string | null
+  ari: boolean | null
+  swab_collection: boolean | null
+  swab_result: SwabResult[]
+}

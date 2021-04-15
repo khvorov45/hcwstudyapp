@@ -26,6 +26,11 @@
       title: "Schedule",
       width: "100px",
     },
+    {
+      link: "/tables/weekly-survey",
+      title: "Weekly survey",
+      width: "150px",
+    },
   ]
 </script>
 
