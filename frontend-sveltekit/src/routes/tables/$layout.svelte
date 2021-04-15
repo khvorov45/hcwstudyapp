@@ -31,6 +31,11 @@
       title: "Weekly survey",
       width: 150,
     },
+    {
+      link: "/tables/weekly-completion",
+      title: "Weekly completion",
+      width: 150,
+    },
   ]
 </script>
 
