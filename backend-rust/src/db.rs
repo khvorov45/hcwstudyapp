@@ -241,6 +241,15 @@ impl Db {
         Ok(())
     }
 
+    pub fn get_participants_subset(&self, site: current::Site) -> Vec<&current::Participant> {
+        self.participants
+            .current
+            .data
+            .iter()
+            .filter(|p| p.site == site)
+            .collect()
+    }
+
     pub fn sync_redcap_participants(
         &mut self,
         redcap_participants: Vec<current::Participant>,

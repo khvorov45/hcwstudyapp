@@ -293,13 +293,7 @@ fn get_vaccination_history(db: Db) -> impl Filter<Extract = impl Reply, Error = 
         let db = db.lock().await;
         let data = &db.vaccination_history.current.data;
         if let current::AccessGroup::Site(site) = u.access_group {
-            let participants = db
-                .participants
-                .current
-                .data
-                .iter()
-                .filter(|p| p.site == site)
-                .collect::<Vec<&current::Participant>>();
+            let participants = db.get_participants_subset(site);
             Ok(warp::reply::json(
                 &data
                     .iter()
@@ -354,13 +348,7 @@ fn get_schedule(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> 
         let db = db.lock().await;
         let data = &db.schedule.current.data;
         if let current::AccessGroup::Site(site) = u.access_group {
-            let participants = db
-                .participants
-                .current
-                .data
-                .iter()
-                .filter(|p| p.site == site)
-                .collect::<Vec<&current::Participant>>();
+            let participants = db.get_participants_subset(site);
             Ok(warp::reply::json(
                 &data
                     .iter()
@@ -406,13 +394,7 @@ fn get_weekly_survey(db: Db) -> impl Filter<Extract = impl Reply, Error = Reject
         let db = db.lock().await;
         let data = &db.weekly_survey.current.data;
         if let current::AccessGroup::Site(site) = u.access_group {
-            let participants = db
-                .participants
-                .current
-                .data
-                .iter()
-                .filter(|p| p.site == site)
-                .collect::<Vec<&current::Participant>>();
+            let participants = db.get_participants_subset(site);
             Ok(warp::reply::json(
                 &data
                     .iter()
@@ -459,20 +441,14 @@ fn weekly_survey_redcap_sync(
         })
 }
 
-// Weekly survey ==================================================================================
+// Withdrawn ======================================================================================
 
 fn get_withdrawn(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
         let db = db.lock().await;
         let data = &db.withdrawn.current.data;
         if let current::AccessGroup::Site(site) = u.access_group {
-            let participants = db
-                .participants
-                .current
-                .data
-                .iter()
-                .filter(|p| p.site == site)
-                .collect::<Vec<&current::Participant>>();
+            let participants = db.get_participants_subset(site);
             Ok(warp::reply::json(
                 &data
                     .iter()
