@@ -29,6 +29,8 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     let log = warp::log("api");
     get_users(db.clone())
+        .or(get_withdrawn(db.clone()))
+        .or(withdrawn_redcap_sync(db.clone(), opt.clone()))
         .or(get_weekly_survey(db.clone()))
         .or(weekly_survey_redcap_sync(db.clone(), opt.clone()))
         .or(get_participants(db.clone()))
@@ -451,6 +453,62 @@ fn weekly_survey_redcap_sync(
                 .await
                 .sync_redcap_weekly_survey(redcap_weekly_survey)
             {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Weekly survey ==================================================================================
+
+fn get_withdrawn(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.withdrawn.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db
+                .participants
+                .current
+                .data
+                .iter()
+                .filter(|p| p.site == site)
+                .collect::<Vec<&current::Participant>>();
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::Withdrawn>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("withdrawn")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn withdrawn_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("withdrawn" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let pid_map = match redcap::export_record_id_pid_map(&opt).await {
+                Ok(map) => map,
+                Err(e) => return Err(reject(e)),
+            };
+            let redcap_withdrawn = match redcap::export_withdrawn(&opt, &pid_map).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db.lock().await.sync_redcap_withdrawn(redcap_withdrawn) {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(reject(e)),
             }

@@ -66,6 +66,18 @@ impl ForeignKey<String> for current::WeeklySurvey {
     }
 }
 
+impl PrimaryKey<String> for current::Withdrawn {
+    fn get_pk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
+impl ForeignKey<String> for current::Withdrawn {
+    fn get_fk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
 impl current::Token {
     pub fn new(
         email: &str,
@@ -288,6 +300,16 @@ impl ToCurrent<current::WeeklySurvey> for previous::WeeklySurvey {
                 .iter()
                 .map(|r| r.to_current())
                 .collect(),
+        }
+    }
+}
+
+impl ToCurrent<current::Withdrawn> for previous::Withdrawn {
+    fn to_current(&self) -> current::Withdrawn {
+        current::Withdrawn {
+            pid: self.pid.clone(),
+            date: self.date,
+            reason: self.reason.clone(),
         }
     }
 }

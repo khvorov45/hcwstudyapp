@@ -73,6 +73,7 @@ pub enum ExpectedJson {
     Schedule,
     SwabResult,
     WeeklySurvey,
+    Withdrawn,
 }
 
 trait TryGet {
@@ -156,7 +157,8 @@ trait TryAs {
     ) -> Result<current::VaccinationHistory>;
     fn try_as_schedule(&self, year: u32, day: u32, var_name: &str) -> Result<current::Schedule>;
     fn try_as_swab_result(&self) -> Result<current::SwabResult>;
-    fn try_as_weekly_survey(&self, pid_map: &str, year: u32) -> Result<current::WeeklySurvey>;
+    fn try_as_weekly_survey(&self, pid: &str, year: u32) -> Result<current::WeeklySurvey>;
+    fn try_as_withdrawn(&self, pid: &str) -> Result<current::Withdrawn>;
 }
 
 impl TryAs for serde_json::Value {
@@ -516,6 +518,18 @@ impl TryAs for serde_json::Value {
             swab_result: v.try_as_swab_results()?,
         };
         Ok(weekly_survey)
+    }
+    fn try_as_withdrawn(&self, pid: &str) -> Result<current::Withdrawn> {
+        let v = self.try_as_object()?;
+        let withdrawn = current::Withdrawn {
+            pid: pid.to_string(),
+            date: v.try_get("withdrawal_date")?.try_as_date_or_null()?,
+            reason: v
+                .try_get("withdrawal_reason")?
+                .try_as_str_or_null()?
+                .map(|s| s.to_string()),
+        };
+        Ok(withdrawn)
     }
 }
 
@@ -957,6 +971,15 @@ pub async fn export_schedule(opt: &Opt) -> Result<Vec<current::Schedule>> {
     Ok(schedule)
 }
 
+fn pull_record_id(v: &serde_json::Value) -> Result<String> {
+    let record_id = v
+        .try_as_object()?
+        .try_get("record_id")?
+        .try_as_str()?
+        .to_string();
+    Ok(record_id)
+}
+
 pub async fn export_weekly_survey(
     opt: &Opt,
     pid_map: &HashMap<String, String>,
@@ -997,15 +1020,6 @@ pub async fn export_weekly_survey(
     let now = chrono::Utc::now();
     let mut weekly_survey: Vec<current::WeeklySurvey> = Vec::new();
     let mut counts = ExtractionCounts::default();
-
-    fn pull_record_id(v: &serde_json::Value) -> Result<String> {
-        let record_id = v
-            .try_as_object()?
-            .try_get("record_id")?
-            .try_as_str()?
-            .to_string();
-        Ok(record_id)
-    }
 
     for redcap_survey in survey2020 {
         let record_id = match pull_record_id(&redcap_survey) {
@@ -1187,4 +1201,111 @@ async fn send_covid_vaccination(opt: &Opt, data_raw: &[serde_json::Value]) -> Re
         data_to_send.len()
     );
     Ok(())
+}
+
+pub async fn export_withdrawn(
+    opt: &Opt,
+    pid_map: &HashMap<String, String>,
+) -> Result<Vec<current::Withdrawn>> {
+    let (withdrawn2020, withdrawn2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            (
+                "fields",
+                [
+                    "record_id",
+                    "withdrawn",
+                    "withdrawal_date",
+                    "withdrawal_reason",
+                ]
+                .join(",")
+                .as_str(),
+            ),
+            ("events", "withdrawal_arm_1"),
+        ],
+    )
+    .await?;
+
+    let now = chrono::Utc::now();
+    let mut withdrawn: Vec<current::Withdrawn> = Vec::new();
+    let mut counts = ExtractionCounts::default();
+
+    for redcap_withdrawn in withdrawn2020 {
+        let record_id = match pull_record_id(&redcap_withdrawn) {
+            Ok(s) => s,
+            Err(e) => {
+                log_full_error(
+                    "Failed to extract record_id from withdrawn",
+                    e.to_string(),
+                    &redcap_withdrawn,
+                );
+                continue;
+            }
+        };
+        let pid = match pid_map.get(&record_id) {
+            Some(pid) => pid,
+            None => {
+                counts.empty_pid.0 += 1;
+                continue;
+            }
+        };
+        match redcap_withdrawn.try_as_withdrawn(pid.as_str()) {
+            Ok(v) => {
+                counts.parsed.0 += 1;
+                counts.added.0 += 1;
+                withdrawn.push(v)
+            }
+            Err(e) => log_full_error(
+                "failed to parse withdrawn",
+                e.to_string(),
+                &redcap_withdrawn,
+            ),
+        }
+    }
+
+    withdrawn.sort_by_key(|w| w.get_pk());
+
+    for redcap_withdrawn in withdrawn2021 {
+        let record_id = match pull_record_id(&redcap_withdrawn) {
+            Ok(s) => s,
+            Err(e) => {
+                log_full_error(
+                    "Failed to extract record_id from withdrawn",
+                    e.to_string(),
+                    &redcap_withdrawn,
+                );
+                continue;
+            }
+        };
+        let pid = match pid_map.get(&record_id) {
+            Some(pid) => pid,
+            None => {
+                counts.empty_pid.1 += 1;
+                continue;
+            }
+        };
+        let value = match redcap_withdrawn.try_as_withdrawn(pid.as_str()) {
+            Ok(v) => {
+                counts.parsed.1 += 1;
+                v
+            }
+            Err(e) => {
+                log_full_error(
+                    "failed to parse withdrawn",
+                    e.to_string(),
+                    &redcap_withdrawn,
+                );
+                continue;
+            }
+        };
+        if let Err(i) = withdrawn.binary_search_by_key(&value.get_pk(), |w| w.get_pk()) {
+            counts.added.1 += 1;
+            withdrawn.insert(i, value);
+        }
+    }
+
+    counts.log("Withdrawal");
+    log_time_elapsed("Withdrawal parsed", now);
+    Ok(withdrawn)
 }

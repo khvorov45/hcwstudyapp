@@ -20,6 +20,7 @@ pub struct Db {
     pub schedule: Table<previous::Schedule, current::Schedule, (String, u32, u32), String>,
     pub weekly_survey:
         Table<previous::WeeklySurvey, current::WeeklySurvey, (String, u32, u32), String>,
+    pub withdrawn: Table<previous::Withdrawn, current::Withdrawn, String, String>,
 }
 
 pub struct DbDirs {
@@ -76,6 +77,7 @@ impl Db {
             vaccination_history: Table::new("VaccinationHistory", &dirs)?,
             schedule: Table::new("Schedule", &dirs)?,
             weekly_survey: Table::new("WeeklySurvey", &dirs)?,
+            withdrawn: Table::new("Withdrawn", &dirs)?,
             dirs,
         };
 
@@ -121,6 +123,7 @@ impl Db {
         self.vaccination_history.read(version)?;
         self.schedule.read(version)?;
         self.weekly_survey.read(version)?;
+        self.withdrawn.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -131,6 +134,7 @@ impl Db {
         self.vaccination_history.write()?;
         self.schedule.write()?;
         self.weekly_survey.write()?;
+        self.withdrawn.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -141,6 +145,7 @@ impl Db {
         self.vaccination_history.convert();
         self.schedule.convert();
         self.weekly_survey.convert();
+        self.withdrawn.convert();
     }
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
@@ -154,6 +159,8 @@ impl Db {
         self.schedule.verify_fk(&self.participants)?;
         self.weekly_survey.verify_pk()?;
         self.weekly_survey.verify_fk(&self.participants)?;
+        self.withdrawn.verify_pk()?;
+        self.withdrawn.verify_fk(&self.participants)?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
@@ -264,6 +271,15 @@ impl Db {
     ) -> Result<()> {
         self.weekly_survey.current.data = redcap_weekly_survey;
         self.weekly_survey.write()?;
+        Ok(())
+    }
+
+    pub fn sync_redcap_withdrawn(
+        &mut self,
+        redcap_withdrawn: Vec<current::Withdrawn>,
+    ) -> Result<()> {
+        self.withdrawn.current.data = redcap_withdrawn;
+        self.withdrawn.write()?;
         Ok(())
     }
 }

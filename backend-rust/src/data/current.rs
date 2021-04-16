@@ -133,3 +133,10 @@ pub struct WeeklySurvey {
     pub swab_collection: Option<bool>,
     pub swab_result: Vec<SwabResult>,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Withdrawn {
+    pub pid: String,
+    pub date: Option<DateTime<Utc>>,
+    pub reason: Option<String>,
+}
