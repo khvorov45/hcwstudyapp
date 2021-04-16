@@ -533,23 +533,6 @@ impl TryAs for serde_json::Value {
     }
 }
 
-pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
-    let (users2020, users2021) = redcap_api_request(opt, &[("content", "user")]).await?;
-    let mut users = Vec::new();
-    //* Emails won't repeat in first year
-    for redcap_user in users2020 {
-        users.push(redcap_user.try_as_user()?);
-    }
-    //* Need to check that user isn't already in for subsequent years
-    for redcap_user in users2021 {
-        let user = redcap_user.try_as_user()?;
-        if !users.iter().any(|u| u.email == user.email) {
-            users.push(user);
-        }
-    }
-    Ok(users)
-}
-
 fn log_full_error(msg: &str, e: String, value: &serde_json::Value) {
     log::error!(
         "{}: {}, at\n{}",
@@ -559,60 +542,109 @@ fn log_full_error(msg: &str, e: String, value: &serde_json::Value) {
     )
 }
 
-fn handle_extraction_error(e: anyhow::Error, value: &serde_json::Value) -> i32 {
-    fn log_pid_error(pid: &serde_json::Value) {
-        log::error!("Failed to parse pid: {}", pid);
-    }
-    let mut empty_pid_count = 0;
-    let msg = "failed to parse";
-    if let Some(e) = e.downcast_ref::<error::RedcapExtraction>() {
-        if let error::RedcapExtraction::UnexpectedJsonValue(expected, got) = e {
-            if expected == &ExpectedJson::Pid {
-                if let Some(pid) = got.as_str() {
-                    if pid.is_empty() {
-                        empty_pid_count += 1;
-                    } else {
-                        log_pid_error(got);
-                    }
-                } else {
-                    log_pid_error(got);
-                }
-            } else {
-                log_full_error(msg, e.to_string(), &value);
-            }
-        } else {
-            log_full_error(msg, e.to_string(), &value);
-        }
-    } else {
-        log_full_error(msg, e.to_string(), &value);
-    }
-    empty_pid_count
-}
-
-#[derive(Default)]
-struct ExtractionCounts {
-    empty_pid: (i32, i32),
-    parsed: (i32, i32),
-    added: (i32, i32),
-}
-
-impl ExtractionCounts {
-    pub fn log(&self, title: &str) {
-        fn log_count(title: &str, msg: &str, c: (i32, i32)) {
-            log::info!("{} {}: {} (2020), {} (2021)", title, msg, c.0, c.1);
-        }
-        log_count(title, "with empty pid", self.empty_pid);
-        log_count(title, "parsed", self.parsed);
-        log_count(title, "added", self.added);
-    }
-}
-
 fn log_time_elapsed(title: &str, old: chrono::DateTime<chrono::Utc>) {
     log::info!(
         "{} in {:.2}s",
         title,
         (chrono::Utc::now() - old).num_milliseconds() as f64 / 1000f64
     );
+}
+
+struct ExtractionCount {
+    name: String,
+    count: (i32, i32),
+}
+
+impl ExtractionCount {
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            count: (0, 0),
+        }
+    }
+}
+
+struct ExtractionCounts {
+    counts: Vec<ExtractionCount>,
+}
+
+impl ExtractionCounts {
+    pub fn new(names: &[&str]) -> Self {
+        Self {
+            counts: names
+                .iter()
+                .map(|name| ExtractionCount::new(name))
+                .collect(),
+        }
+    }
+    pub fn add(&mut self, i: usize, year: u32) {
+        match year {
+            2020 => self.counts[i].count.0 += 1,
+            2021 => self.counts[i].count.1 += 1,
+            _ => {}
+        }
+    }
+    pub fn log(&self, title: &str) {
+        self.counts.iter().for_each(|c| {
+            log::info!(
+                "{} {}: {} (2020), {} (2021)",
+                title,
+                c.name,
+                c.count.0,
+                c.count.1
+            )
+        });
+    }
+}
+
+pub async fn export_users(opt: &Opt) -> Result<Vec<current::User>> {
+    let (users2020, users2021) = redcap_api_request(opt, &[("content", "user")]).await?;
+
+    let mut users: Vec<current::User> = Vec::new();
+    let mut counts = ExtractionCounts::new(&["parsed", "added"]);
+
+    let mut add = |u: &serde_json::Value, year: u32| {
+        let value = match u.try_as_user() {
+            Ok(v) => {
+                counts.add(0, year);
+                v
+            }
+            Err(e) => {
+                log_full_error("Failed to parse user", e.to_string(), u);
+                return;
+            }
+        };
+        if let Err(i) = users.binary_search_by_key(&value.get_pk(), |v| v.get_pk()) {
+            counts.add(1, year);
+            users.insert(i, value);
+        }
+    };
+
+    users2020.iter().for_each(|u| add(u, 2020));
+    users2021.iter().for_each(|u| add(u, 2021));
+
+    counts.log("Users");
+
+    Ok(users)
+}
+
+fn pull_pid(v: &serde_json::Value) -> Result<String> {
+    let pid = v.try_as_object()?.try_get("pid")?.try_as_str()?.to_string();
+    Ok(pid)
+}
+
+fn pid_is_empty(v: &serde_json::Value) -> Result<bool> {
+    let s = pull_pid(v)?.is_empty();
+    Ok(s)
+}
+
+fn pull_record_id(v: &serde_json::Value) -> Result<String> {
+    let record_id = v
+        .try_as_object()?
+        .try_get("record_id")?
+        .try_as_str()?
+        .to_string();
+    Ok(record_id)
 }
 
 pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>> {
@@ -647,39 +679,48 @@ pub async fn export_participants(opt: &Opt) -> Result<Vec<current::Participant>>
 
     let now = chrono::Utc::now();
 
-    let mut participants = Vec::new();
-    let mut counts = ExtractionCounts::default();
+    let mut participants: Vec<current::Participant> = Vec::new();
+    let mut counts = ExtractionCounts::new(&["parsed", "added", "empty_pid"]);
 
-    for redcap_participant in participants2020 {
-        match redcap_participant.try_as_participant() {
-            Ok(p) => {
-                counts.parsed.0 += 1;
-                counts.added.0 += 1;
-                participants.push(p)
+    let mut add = |redcap_participant: &serde_json::Value, year: u32| {
+        match pid_is_empty(redcap_participant) {
+            Ok(s) => {
+                if s {
+                    counts.add(2, year);
+                    return;
+                }
             }
-            Err(e) => counts.empty_pid.0 += handle_extraction_error(e, &redcap_participant),
-        }
-    }
-
-    for redcap_participant in participants2021 {
-        let participant = match redcap_participant.try_as_participant() {
+            Err(e) => {
+                log_full_error("Failed to pull pid", e.to_string(), redcap_participant);
+                return;
+            }
+        };
+        let value = match redcap_participant.try_as_participant() {
             Ok(p) => {
-                counts.parsed.1 += 1;
+                counts.add(0, year);
                 p
             }
             Err(e) => {
-                counts.empty_pid.1 += handle_extraction_error(e, &redcap_participant);
-                continue;
+                log_full_error(
+                    "Failed parse participant",
+                    e.to_string(),
+                    &redcap_participant,
+                );
+                return;
             }
         };
-        if !participants.iter().any(|p| p.pid == participant.pid) {
-            counts.added.1 += 1;
-            participants.push(participant);
+        if let Err(i) = participants.binary_search_by_key(&value.get_pk(), |v| v.get_pk()) {
+            counts.add(1, year);
+            participants.insert(i, value);
         }
         // TODO
         // Handle the case when a participant is present in the subsequent year
         // but their info is (potentially) different
-    }
+    };
+
+    participants2020.iter().for_each(|p| add(p, 2020));
+    participants2021.iter().for_each(|p| add(p, 2021));
+
     log_time_elapsed("Participants parsed", now);
     counts.log("Participants");
     Ok(participants)
@@ -764,6 +805,7 @@ pub async fn export_vaccination_history(
         ("fields", vaccination_fields.as_str()),
         ("events", "vaccination_arm_1"),
     ];
+
     let (redcap_screening, redcap_vaccination) = tokio::join!(
         redcap_api_request(opt, &screening_params),
         redcap_api_request(opt, &vaccination_params),
@@ -774,144 +816,111 @@ pub async fn export_vaccination_history(
     let (redcap_screening_2020, redcap_screening_2021) = redcap_screening?;
     let (redcap_vaccination_2020, redcap_vaccination_2021) = redcap_vaccination?;
 
-    let mut vaccination_history = Vec::new();
-    let mut counts = ExtractionCounts::default();
+    let mut vaccination_history: Vec<current::VaccinationHistory> = Vec::new();
+    let mut counts = ExtractionCounts::new(&["parsed", "added", "empty pid"]);
 
-    fn handle_error(e: anyhow::Error, val: &serde_json::Value, var_name: &str) -> i32 {
-        if let Some(error::RedcapExtraction::FieldNotFound(field_name)) =
-            e.downcast_ref::<error::RedcapExtraction>()
-        {
-            //* E.g. vac_2020 field in 2020 project screening form
-            if field_name == var_name {
-                0
-            } else {
-                handle_extraction_error(e, &val)
-            }
-        } else {
-            handle_extraction_error(e, &val)
-        }
-    }
-
-    for redcap_vaccination in redcap_screening_2020 {
-        for (year, var_name) in years.iter().zip(years_var_names.iter()) {
-            match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
-                Ok(v) => {
-                    counts.parsed.0 += 1;
-                    counts.added.0 += 1;
-                    vaccination_history.push(v)
-                }
-                Err(e) => {
-                    counts.empty_pid.0 += handle_error(e, &redcap_vaccination, var_name);
+    let mut add = |redcap_vaccination: &serde_json::Value, year: u32| {
+        match pid_is_empty(redcap_vaccination) {
+            Ok(s) => {
+                if s {
+                    counts.add(2, year);
+                    return;
                 }
             }
+            Err(e) => {
+                log_full_error("Failed to pull pid", e.to_string(), redcap_vaccination);
+                return;
+            }
         }
-    }
 
-    vaccination_history.sort_by_key(|v| v.get_pk());
+        fn pull_var_name(v: &serde_json::Value, var_name: &str) -> Result<()> {
+            v.try_as_object()?.try_get(var_name)?;
+            Ok(())
+        }
 
-    for redcap_vaccination in redcap_screening_2021 {
-        for (year, var_name) in years.iter().zip(years_var_names.iter()) {
-            let value = match redcap_vaccination.try_as_vaccination_history(*year, var_name) {
+        for (vac_year, var_name) in years.iter().zip(years_var_names.iter()) {
+            if pull_var_name(redcap_vaccination, var_name).is_err() {
+                //* E.g. vac_2020 field in 2020 project screening form
+                continue;
+            }
+
+            let value = match redcap_vaccination.try_as_vaccination_history(*vac_year, var_name) {
                 Ok(v) => {
-                    counts.parsed.1 += 1;
+                    counts.add(0, year);
                     v
                 }
                 Err(e) => {
-                    counts.empty_pid.1 += handle_error(e, &redcap_vaccination, var_name);
+                    log_full_error(
+                        "Failed to parse redcap vaccination from screening",
+                        e.to_string(),
+                        redcap_vaccination,
+                    );
                     continue;
                 }
             };
             if let Err(i) =
                 vaccination_history.binary_search_by_key(&value.get_pk(), |v| v.get_pk())
             {
-                counts.added.1 += 1;
+                counts.add(1, year);
                 vaccination_history.insert(i, value);
             }
         }
-    }
+    };
 
-    counts.log("Vaccination history");
+    redcap_screening_2020.iter().for_each(|s| add(s, 2020));
+    redcap_screening_2021.iter().for_each(|s| add(s, 2021));
 
-    fn parse_redcap_vaccination(
-        v: &serde_json::Value,
-    ) -> Result<(String, Option<current::VaccinationStatus>)> {
-        let v = v.try_as_object()?;
-        let record_id = v.try_get("record_id")?.try_as_str()?.to_string();
-        let status = match v.try_get("vaccinated")?.try_as_str()? {
-            "1" => Some(current::VaccinationStatus::Australia),
-            "0" => Some(current::VaccinationStatus::No),
-            _ => None,
+    counts.log("Vaccination history (screening)");
+    let mut counts = ExtractionCounts::new(&["parsed", "added", "no matching pid"]);
+
+    let mut add = |redcap_vaccination_form: &serde_json::Value, year: u32| {
+        fn parse_redcap_vaccination(
+            v: &serde_json::Value,
+        ) -> Result<(String, Option<current::VaccinationStatus>)> {
+            let v = v.try_as_object()?;
+            let record_id = v.try_get("record_id")?.try_as_str()?.to_string();
+            let status = match v.try_get("vaccinated")?.try_as_str()? {
+                "1" => Some(current::VaccinationStatus::Australia),
+                "0" => Some(current::VaccinationStatus::No),
+                _ => None,
+            };
+            Ok((record_id, status))
+        }
+
+        let (record_id, status) = match parse_redcap_vaccination(redcap_vaccination_form) {
+            Ok((r, s)) => {
+                counts.add(0, year);
+                (r, s)
+            }
+            Err(e) => {
+                log_full_error(
+                    "Failed to parse vaccination form",
+                    e.to_string(),
+                    redcap_vaccination_form,
+                );
+                return;
+            }
         };
-        Ok((record_id, status))
-    }
-
-    fn handle_error_vaccination(e: anyhow::Error, v: &serde_json::Value) {
-        log::error!(
-            "failed to parse vaccination: {} at\n{}",
-            e,
-            serde_json::to_string_pretty(v)
-                .unwrap_or_else(|_| "failed to print vaccination".to_string())
-        );
-    }
-
-    fn add_to_vaccinations(
-        vaccination_history: &mut Vec<current::VaccinationHistory>,
-        redcap_vaccination_year: &[serde_json::Value],
-        year: u32,
-        pid_map: &std::collections::HashMap<String, String>,
-    ) {
-        let mut added = 0;
-        let mut no_matching_pid = 0;
-        let mut parsed = 0;
-        for redcap_vaccination in redcap_vaccination_year {
-            let (record_id, status) = match parse_redcap_vaccination(&redcap_vaccination) {
-                Ok((r, s)) => {
-                    parsed += 1;
-                    (r, s)
-                }
-                Err(e) => {
-                    handle_error_vaccination(e, &redcap_vaccination);
-                    continue;
-                }
-            };
-            let pid = match pid_map.get(&record_id) {
-                Some(pid) => pid.clone(),
-                None => {
-                    no_matching_pid += 1;
-                    continue;
-                }
-            };
-            if let Err(i) =
-                vaccination_history.binary_search_by_key(&(pid.clone(), year), |v| v.get_pk())
-            {
-                added += 1;
-                let value = current::VaccinationHistory { pid, status, year };
-                vaccination_history.insert(i, value);
+        let pid = match pid_map.get(&record_id) {
+            Some(pid) => pid.clone(),
+            None => {
+                counts.add(2, year);
+                return;
             }
+        };
+        if let Err(i) =
+            vaccination_history.binary_search_by_key(&(pid.clone(), year), |v| v.get_pk())
+        {
+            counts.add(1, year);
+            let value = current::VaccinationHistory { pid, status, year };
+            vaccination_history.insert(i, value);
         }
-        log::info!(
-            "Vaccinations in {}: {} parsed, {} no matching pid, {} added",
-            year,
-            parsed,
-            no_matching_pid,
-            added
-        );
-    }
+    };
 
-    add_to_vaccinations(
-        &mut vaccination_history,
-        &redcap_vaccination_2020,
-        2020,
-        &pid_map,
-    );
+    redcap_vaccination_2020.iter().for_each(|v| add(v, 2020));
+    redcap_vaccination_2021.iter().for_each(|v| add(v, 2021));
 
-    add_to_vaccinations(
-        &mut vaccination_history,
-        &redcap_vaccination_2021,
-        2021,
-        &pid_map,
-    );
-
+    counts.log("Vaccination history (yearly form)");
     log_time_elapsed("Vaccination history parsed", now);
     Ok(vaccination_history)
 }
@@ -937,47 +946,39 @@ pub async fn export_schedule(opt: &Opt) -> Result<Vec<current::Schedule>> {
 
     let now = chrono::Utc::now();
     let mut schedule = Vec::new();
-    let mut counts = ExtractionCounts::default();
+    let mut counts = ExtractionCounts::new(&["parsed (and added)", "empty pid"]);
 
-    for redcap_schedule in schedule2020 {
-        for (day, var_name) in days.iter().zip(var_names.iter()) {
-            match redcap_schedule.try_as_schedule(2020, *day, var_name) {
-                Ok(v) => {
-                    counts.parsed.0 += 1;
-                    counts.added.0 += 1;
-                    schedule.push(v)
+    let mut add = |v: &serde_json::Value, year: u32| {
+        match pid_is_empty(v) {
+            Ok(s) => {
+                if s {
+                    counts.add(1, year);
+                    return;
                 }
-                Err(e) => counts.empty_pid.0 += handle_extraction_error(e, &redcap_schedule),
+            }
+            Err(e) => {
+                log_full_error("Failed to pull pid from schedule", e.to_string(), v);
+                return;
             }
         }
-    }
-
-    for redcap_schedule in schedule2021 {
         for (day, var_name) in days.iter().zip(var_names.iter()) {
-            match redcap_schedule.try_as_schedule(2021, *day, var_name) {
+            match v.try_as_schedule(2020, *day, var_name) {
                 Ok(v) => {
-                    counts.parsed.1 += 1;
-                    counts.added.1 += 1;
-                    schedule.push(v);
+                    counts.add(0, year);
+                    schedule.push(v)
                 }
-                Err(e) => counts.empty_pid.1 += handle_extraction_error(e, &redcap_schedule),
-            };
+                Err(e) => log_full_error("Failed to parse schedule", e.to_string(), v),
+            }
         }
-    }
+    };
+
+    schedule2020.iter().for_each(|s| add(s, 2020));
+    schedule2021.iter().for_each(|s| add(s, 2021));
 
     counts.log("Schedule");
     log_time_elapsed("Schedule parsed", now);
 
     Ok(schedule)
-}
-
-fn pull_record_id(v: &serde_json::Value) -> Result<String> {
-    let record_id = v
-        .try_as_object()?
-        .try_get("record_id")?
-        .try_as_str()?
-        .to_string();
-    Ok(record_id)
 }
 
 pub async fn export_weekly_survey(
@@ -1019,81 +1020,40 @@ pub async fn export_weekly_survey(
 
     let now = chrono::Utc::now();
     let mut weekly_survey: Vec<current::WeeklySurvey> = Vec::new();
-    let mut counts = ExtractionCounts::default();
+    let mut counts = ExtractionCounts::new(&["parsed (and added)", "no matching pid"]);
 
-    for redcap_survey in survey2020 {
-        let record_id = match pull_record_id(&redcap_survey) {
+    let mut add = |v: &serde_json::Value, year: u32| {
+        let record_id = match pull_record_id(v) {
             Ok(s) => s,
             Err(e) => {
                 log_full_error(
                     "Failed to extract record_id from weekly survey",
                     e.to_string(),
-                    &redcap_survey,
+                    v,
                 );
-                continue;
+                return;
             }
         };
         let pid = match pid_map.get(&record_id) {
             Some(pid) => pid,
             None => {
-                counts.empty_pid.0 += 1;
-                continue;
+                counts.add(1, year);
+                return;
             }
         };
-        let value = match redcap_survey.try_as_weekly_survey(pid.as_str(), 2020) {
+        match v.try_as_weekly_survey(pid.as_str(), 2020) {
             Ok(v) => {
-                counts.parsed.0 += 1;
-                v
+                counts.add(0, year);
+                weekly_survey.push(v);
             }
             Err(e) => {
-                log_full_error(
-                    "Failed to parse weekly survey",
-                    e.to_string(),
-                    &redcap_survey,
-                );
-                continue;
+                log_full_error("Failed to parse weekly survey", e.to_string(), v);
             }
         };
-        counts.added.0 += 1;
-        weekly_survey.push(value);
-    }
+    };
 
-    for redcap_survey in &survey2021 {
-        let record_id = match pull_record_id(&redcap_survey) {
-            Ok(s) => s,
-            Err(e) => {
-                log_full_error(
-                    "Failed to extract record_id from weekly survey",
-                    e.to_string(),
-                    &redcap_survey,
-                );
-                continue;
-            }
-        };
-        let pid = match pid_map.get(&record_id) {
-            Some(pid) => pid,
-            None => {
-                counts.empty_pid.1 += 1;
-                continue;
-            }
-        };
-        let value = match redcap_survey.try_as_weekly_survey(pid.as_str(), 2021) {
-            Ok(v) => {
-                counts.parsed.1 += 1;
-                v
-            }
-            Err(e) => {
-                log_full_error(
-                    "Failed to parse weekly survey",
-                    e.to_string(),
-                    &redcap_survey,
-                );
-                continue;
-            }
-        };
-        counts.added.1 += 1;
-        weekly_survey.push(value);
-    }
+    survey2020.iter().for_each(|s| add(s, 2020));
+    survey2021.iter().for_each(|s| add(s, 2021));
 
     counts.log("Weekly survey");
     log_time_elapsed("Weekly survey parsed", now);
@@ -1229,81 +1189,47 @@ pub async fn export_withdrawn(
 
     let now = chrono::Utc::now();
     let mut withdrawn: Vec<current::Withdrawn> = Vec::new();
-    let mut counts = ExtractionCounts::default();
+    let mut counts = ExtractionCounts::new(&["parsed", "added", "no matching pid"]);
 
-    for redcap_withdrawn in withdrawn2020 {
-        let record_id = match pull_record_id(&redcap_withdrawn) {
+    let mut add = |v: &serde_json::Value, year: u32| {
+        let record_id = match pull_record_id(&v) {
             Ok(s) => s,
             Err(e) => {
                 log_full_error(
                     "Failed to extract record_id from withdrawn",
                     e.to_string(),
-                    &redcap_withdrawn,
+                    v,
                 );
-                continue;
+                return;
             }
         };
         let pid = match pid_map.get(&record_id) {
             Some(pid) => pid,
             None => {
-                counts.empty_pid.0 += 1;
-                continue;
+                counts.add(2, year);
+                return;
             }
         };
-        match redcap_withdrawn.try_as_withdrawn(pid.as_str()) {
+        let value = match v.try_as_withdrawn(pid.as_str()) {
             Ok(v) => {
-                counts.parsed.0 += 1;
-                counts.added.0 += 1;
-                withdrawn.push(v)
-            }
-            Err(e) => log_full_error(
-                "failed to parse withdrawn",
-                e.to_string(),
-                &redcap_withdrawn,
-            ),
-        }
-    }
-
-    withdrawn.sort_by_key(|w| w.get_pk());
-
-    for redcap_withdrawn in withdrawn2021 {
-        let record_id = match pull_record_id(&redcap_withdrawn) {
-            Ok(s) => s,
-            Err(e) => {
-                log_full_error(
-                    "Failed to extract record_id from withdrawn",
-                    e.to_string(),
-                    &redcap_withdrawn,
-                );
-                continue;
-            }
-        };
-        let pid = match pid_map.get(&record_id) {
-            Some(pid) => pid,
-            None => {
-                counts.empty_pid.1 += 1;
-                continue;
-            }
-        };
-        let value = match redcap_withdrawn.try_as_withdrawn(pid.as_str()) {
-            Ok(v) => {
-                counts.parsed.1 += 1;
+                counts.add(0, year);
                 v
             }
             Err(e) => {
-                log_full_error(
-                    "failed to parse withdrawn",
-                    e.to_string(),
-                    &redcap_withdrawn,
-                );
-                continue;
+                log_full_error("failed to parse withdrawn", e.to_string(), v);
+                return;
             }
         };
         if let Err(i) = withdrawn.binary_search_by_key(&value.get_pk(), |w| w.get_pk()) {
-            counts.added.1 += 1;
+            counts.add(1, year);
             withdrawn.insert(i, value);
         }
-    }
+        // TODO
+        // Should probably merge these like participants
+    };
+
+    withdrawn2020.iter().for_each(|w| add(w, 2020));
+    withdrawn2021.iter().for_each(|w| add(w, 2021));
 
     counts.log("Withdrawal");
     log_time_elapsed("Withdrawal parsed", now);
