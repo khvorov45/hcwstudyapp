@@ -126,8 +126,8 @@ pub enum SwabResult {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WeeklySurvey {
     pub pid: String,
-    pub index: u32,
     pub year: u32,
+    pub index: u32,
     pub date: Option<DateTime<Utc>>,
     pub ari: Option<bool>,
     pub swab_collection: Option<bool>,
