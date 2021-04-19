@@ -118,3 +118,9 @@ export type WeeklySurvey = {
   swab_collection: boolean | null
   swab_result: SwabResult[]
 }
+
+export type Withdrawn = {
+  pid: string
+  date: string | null
+  reason: string | null
+}

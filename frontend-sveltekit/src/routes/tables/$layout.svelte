@@ -36,6 +36,11 @@
       title: "Weekly completion",
       width: 150,
     },
+    {
+      link: "/tables/withdrawn",
+      title: "Withdrawn",
+      width: 100,
+    },
   ]
 </script>
 

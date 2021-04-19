@@ -4,6 +4,7 @@ import type {
   User,
   VaccinationHistory,
   WeeklySurvey,
+  Withdrawn,
 } from "$lib/data"
 import { apiReq } from "$lib/util"
 import type { ApiRequest, ApiResult } from "$lib/util"
@@ -118,5 +119,15 @@ export const weeklySurveyReq = createApiStore<
   method: "GET",
   token,
   url: "weekly-survey",
+  expectContent: "json",
+}))
+
+export const withdrawnReq = createApiStore<
+  { token: string | null },
+  Withdrawn[]
+>(({ token }) => ({
+  method: "GET",
+  token,
+  url: "withdrawn",
   expectContent: "json",
 }))
