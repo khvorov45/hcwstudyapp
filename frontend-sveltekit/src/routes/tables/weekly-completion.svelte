@@ -8,6 +8,7 @@
   } from "$lib/util"
   import { onMount } from "svelte"
   import Table from "$lib/components/Table.svelte"
+  import type { WeeklySurvey } from "$lib/data"
 
   let mounted = false
   onMount(() => (mounted = true))
@@ -28,17 +29,24 @@
     weeks: number[]
   }
 
-  const weeklyCompletion: WeeklyCompletion[] = []
-  $: ($weeklySurveyReq.result?.data ?? [])
-    .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
-    .reduce((a, s) => {
-      if (a[a.length - 1]?.pid === s.pid) {
-        a[a.length - 1].weeks.push(s.index)
-      } else {
-        a.push({ pid: s.pid, year: s.year, weeks: [s.index] })
-      }
-      return a
-    }, weeklyCompletion)
+  function createWeeklyCompletion(data: WeeklySurvey[]) {
+    const result: WeeklyCompletion[] = []
+    data
+      .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
+      .reduce((a, s) => {
+        if (a[a.length - 1]?.pid === s.pid) {
+          a[a.length - 1].weeks.push(s.index)
+        } else {
+          a.push({ pid: s.pid, year: s.year, weeks: [s.index] })
+        }
+        return a
+      }, result)
+    return result
+  }
+
+  $: weeklyCompletion = createWeeklyCompletion(
+    $weeklySurveyReq.result?.data ?? []
+  )
 
   function abbreviateSequence(s: number[]): string {
     const startEnds: string = ""
