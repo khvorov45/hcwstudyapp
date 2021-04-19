@@ -308,7 +308,8 @@ impl TryAs for serde_json::Value {
     /// The expected format is XXX-DDD-XXX-DDD where X is a letter and D is a digit.
     /// The dash is optional, the letters and numbers after the first pair are also optional.
     fn try_as_pid(&self) -> Result<String> {
-        let mut pid = String::new();
+        let mut site_part = String::new();
+        let mut number_part = String::new();
         let itr = self.try_as_str()?.chars();
         #[derive(PartialEq)]
         enum State {
@@ -321,18 +322,17 @@ impl TryAs for serde_json::Value {
             match &state {
                 State::First => {
                     if c.is_alphabetic() {
-                        pid.push(c);
+                        site_part.push(c);
                     } else {
-                        pid.push('-');
                         if c.is_digit(10) {
-                            pid.push(c);
+                            number_part.push(c);
                         }
                         state = State::Transition;
                     }
                 }
                 State::Transition => {
                     if c.is_digit(10) {
-                        pid.push(c);
+                        number_part.push(c);
                         state = State::Second
                     } else {
                         continue;
@@ -340,7 +340,7 @@ impl TryAs for serde_json::Value {
                 }
                 State::Second => {
                     if c.is_digit(10) {
-                        pid.push(c);
+                        number_part.push(c);
                     } else {
                         break;
                     }
@@ -350,7 +350,8 @@ impl TryAs for serde_json::Value {
         if state != State::Second {
             return Err(self.error(ExpectedJson::Pid));
         }
-        Ok(pid.to_uppercase())
+        //* Number format: right-align and pad to 3 with 0's
+        Ok(format!("{}-{:0>3}", site_part.to_uppercase(), number_part))
     }
     fn try_as_gender(&self) -> Result<current::Gender> {
         match self.as_str() {
