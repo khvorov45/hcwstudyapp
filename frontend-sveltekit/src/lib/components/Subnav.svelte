@@ -66,7 +66,7 @@
     left="-{maxDropdownLinkWidth}px"
   >
     {#each linksInDropdown as link}
-      <div class="element">
+      <div class="element dropdown">
         <a href={link.link}
           ><Button
             width={link.width + "px"}
@@ -90,6 +90,12 @@
     border-bottom: 1px solid var(--color-bg-2);
   }
   .drop-down-button {
+    margin-left: auto;
+  }
+  .element.dropdown {
+    display: flex;
+  }
+  .element.dropdown a {
     margin-left: auto;
   }
 </style>
