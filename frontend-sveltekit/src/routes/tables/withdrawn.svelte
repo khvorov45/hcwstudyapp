@@ -49,4 +49,5 @@
 <Table
   data={{ rows: $withdrawnReq.result?.data ?? [], headers }}
   occupiedHeight={"calc(var(--size-nav) * 2)"}
+  heightDataCell="90px"
 />

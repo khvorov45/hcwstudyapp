@@ -7,6 +7,7 @@
 
   export let data: TableDisplayData<any> = { rows: [], headers: [] }
   export let occupiedHeight = "var(--size-nav)"
+  export let heightDataCell = "30px"
 
   function headerWidth(header: TableDisplayHeader<any>, i: number) {
     return header.width + (i + 1 === data.headers.length ? $scrollbarWidth : 0)
@@ -92,7 +93,9 @@
 
 <div
   class="table-container"
-  style="--occupied-height: {occupiedHeight}; --scrollbarWidth: {$scrollbarWidth}px"
+  style="--occupied-height: {occupiedHeight};
+  --scrollbarWidth: {$scrollbarWidth}px;
+  --height-data-cell: {heightDataCell};"
 >
   <div class="vscroll">
     <div
@@ -160,7 +163,7 @@
             <div class="data-row">
               {#each data.headers as header}
                 <div class="td {header.title}" style="width: {header.width}px">
-                  <span class="cell-content"
+                  <span class="cell-content data-content"
                     >{header.accessor(displayData[i])}</span
                   >
                 </div>
@@ -176,7 +179,6 @@
 <style>
   :root {
     --height-header: 70px;
-    --height-data-cell: 30px;
   }
   .table-container {
     width: 100%;
@@ -239,6 +241,9 @@
   }
   .header-content {
     flex-direction: column;
+  }
+  .data-content {
+    white-space: break-spaces;
   }
   .click-to-sort {
     display: flex;
