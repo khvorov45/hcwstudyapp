@@ -19,10 +19,6 @@
 
   let windowWidth = 150
   let dropDownButtonWidth = 30
-  let maxLinkWidth = links.reduce(
-    (max, link) => (link.width > max ? link.width : max),
-    0
-  )
 
   let dropDownVisible = false
 
@@ -36,6 +32,10 @@
   )
   $: linksInDropdown =
     lastLinkIndex === -1 ? [] : links.slice(lastLinkIndex, links.length)
+  $: maxDropdownLinkWidth = linksInDropdown.reduce(
+    (max, link) => (link.width > max ? link.width : max),
+    0
+  )
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -63,7 +63,7 @@
   <Popover
     visible={dropDownVisible}
     top="var(--size-nav)"
-    left="-{maxLinkWidth}px"
+    left="-{maxDropdownLinkWidth}px"
   >
     {#each linksInDropdown as link}
       <div class="element">
