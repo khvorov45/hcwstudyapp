@@ -57,6 +57,7 @@
       width={dropDownButtonWidth + "px"}
       height="var(--size-nav)"
       disabled={lastLinkIndex === -1}
+      active={linksInDropdown.map((l) => l.link).includes($page.path)}
       action={() => (dropDownVisible = !dropDownVisible)}><DoubleDown /></Button
     >
   </div>
