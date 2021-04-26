@@ -1,5 +1,6 @@
 import { writable } from "svelte/store"
 import type {
+  Participant,
   Schedule,
   Serology,
   User,
@@ -8,7 +9,7 @@ import type {
   WeeklySurvey,
   Withdrawn,
 } from "$lib/data"
-import { apiReq } from "$lib/util"
+import { apiReq, rollup, summariseLogmean } from "$lib/util"
 import type { ApiRequest, ApiResult } from "$lib/util"
 
 export const scrollbarWidth = writable(0)
@@ -87,14 +88,15 @@ export const usersReq = createApiStore<{ token: string | null }, User[]>(
   })
 )
 
-export const participantsReq = createApiStore<{ token: string | null }, User[]>(
-  ({ token }) => ({
-    method: "GET",
-    token,
-    url: "participants",
-    expectContent: "json",
-  })
-)
+export const participantsReq = createApiStore<
+  { token: string | null },
+  Participant[]
+>(({ token }) => ({
+  method: "GET",
+  token,
+  url: "participants",
+  expectContent: "json",
+}))
 
 export const vaccinationHistoryReq = createApiStore<
   { token: string | null },
@@ -151,4 +153,98 @@ export const serologyReq = createApiStore<{ token: string | null }, Serology[]>(
     url: "serology",
     expectContent: "json",
   })
+)
+
+function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
+  const { subscribe, set, update } = writable<{
+    init: boolean
+    result: T[]
+  }>({
+    init: false,
+    result: [],
+  })
+  return {
+    subscribe,
+    set,
+    update,
+    gen: (args: A) => {
+      let res = gen(args)
+      update((current) => {
+        current.init = true
+        current.result = res
+        return current
+      })
+    },
+  }
+}
+
+export type SerologyExtra = Serology & {
+  site: string
+}
+
+export const serologyExtra = createTableExtraStore(
+  ({
+    serology,
+    particpants,
+  }: {
+    serology: Serology[]
+    particpants: Participant[]
+  }) =>
+    serology.map((s) => ({
+      site: particpants.find((p) => p.pid === s.pid)?.site ?? "(missing)",
+      ...s,
+    }))
+)
+
+function createSummaryStore<
+  T extends { site: string },
+  K extends { [k: string]: T[keyof T] },
+  S extends Object
+>(initKeyGetter: (x: T) => K, summarise: (arr: T[], k: K) => S) {
+  const { subscribe, set, update } = writable<{
+    init: boolean
+    overall: (S & K)[]
+    site: (S & K)[]
+    priorVacs: (S & K)[]
+  }>({
+    init: false,
+    overall: [],
+    site: [],
+    priorVacs: [],
+  })
+  return {
+    subscribe,
+    set,
+    update,
+    gen: (table: T[]) => {
+      update((current) => {
+        current.init = true
+        current.overall = rollup(
+          table,
+          (d) => ({ ...initKeyGetter(d) }),
+          summarise
+        )
+        current.site = rollup(
+          table,
+          (d) => ({ ...initKeyGetter(d), site: d.site }),
+          summarise
+        )
+        current.priorVacs = rollup(
+          table,
+          (d) => ({ ...initKeyGetter(d) }),
+          summarise
+        )
+        return current
+      })
+    },
+  }
+}
+
+export const serologySummary = createSummaryStore(
+  (s: SerologyExtra) => ({ year: s.year, day: s.day, virus: s.virus }),
+  (v: SerologyExtra[]) =>
+    summariseLogmean(
+      v.map((s) => s.titre),
+      0
+    )
 )

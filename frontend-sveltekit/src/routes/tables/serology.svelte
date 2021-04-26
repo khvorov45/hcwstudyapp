@@ -3,7 +3,6 @@
   import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
   import {
     fetchTable,
-    tableFilterBetween,
     tableFilterStartsWith,
     tableFilterIncludes,
   } from "$lib/util"

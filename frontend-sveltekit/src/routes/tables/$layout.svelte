@@ -51,6 +51,11 @@
       title: "Serology",
       width: 100,
     },
+    {
+      link: "/tables/summary",
+      title: "Summary",
+      width: 100,
+    },
   ]
 </script>
 

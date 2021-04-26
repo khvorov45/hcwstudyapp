@@ -163,13 +163,19 @@ export type TableDisplayData<T> = {
   rows: T[]
 }
 
+export enum FetchTableStatus {
+  AlreadyFetched,
+  Reset,
+  Fetched,
+}
+
 export async function fetchTable(
   // TODO: Better type for store
   store: any,
   token: string | null,
   loginStatus: AsyncStatus,
   mounted: boolean
-) {
+): Promise<FetchTableStatus> {
   let content: any
   let unsubscribe = store.subscribe((c: any) => (content = c))
   unsubscribe()
@@ -179,7 +185,7 @@ export async function fetchTable(
     content.status === "loading" ||
     !mounted
   ) {
-    return
+    return FetchTableStatus.AlreadyFetched
   }
   if (token === null || loginStatus !== "success") {
     store.update((c) => {
@@ -187,7 +193,7 @@ export async function fetchTable(
       c.result = null
       return c
     })
-    return
+    return FetchTableStatus.Reset
   }
 
   await store.execute({ token })
@@ -198,6 +204,8 @@ export async function fetchTable(
   if (content.result?.error !== null) {
     console.error(content.result.error)
   }
+
+  return FetchTableStatus.Fetched
 }
 
 export type SubnavLink = {
@@ -232,4 +240,209 @@ export function seq(from: number, to: number): number[] {
     arr.push(i)
   }
   return arr
+}
+
+function selectAsString<
+  T extends Object,
+  K extends { [k: string]: T[keyof T] }
+>(a: T, keyGetter: (x: T) => K) {
+  const keys = keyGetter(a)
+  return Object.entries(keys)
+    .map(([name, value]) => value)
+    .join("-")
+}
+
+export function selectUnique<
+  T extends Object,
+  K extends { [k: string]: T[keyof T] }
+>(arr: T[], keyGetter: (x: T) => K) {
+  let selectedUnique: {
+    object: K
+    string: string
+  }[] = []
+  return arr.reduce((prev, cur) => {
+    const curString = selectAsString(cur, keyGetter)
+    if (!prev.map((p) => p.string).includes(curString)) {
+      prev.push({ object: keyGetter(cur), string: curString })
+    }
+    return prev
+  }, selectedUnique)
+}
+
+export function rollup<
+  T extends Object,
+  K extends { [k: string]: T[keyof T] },
+  S extends Object
+>(arr: T[], keyGetter: (x: T) => K, summarise: (arr: T[], k: K) => S) {
+  const uniqueValues = selectUnique(arr, keyGetter)
+  return uniqueValues.map((uniqueValue) => {
+    const subset = arr.filter(
+      (a) => selectAsString(a, keyGetter) === uniqueValue.string
+    )
+    const summary = summarise(subset, uniqueValue.object)
+    Object.assign(summary, uniqueValue.object)
+    return summary as S & K
+  })
+}
+
+export function cut(
+  x: number | null,
+  {
+    thresholds = [],
+    mode = "left",
+    formatLow = (x) => `<${mode === "left" ? "" : "="}${x}`,
+    formatHigh = (x) => `>${mode === "left" ? "=" : ""}${x}`,
+    formatBetween = (x1, x2) => `${x1}-${x2}`,
+    missing = "(missing)",
+  }: {
+    thresholds?: number[]
+    mode?: "left" | "right"
+    formatLow?: (x: number) => string
+    formatHigh?: (x: number) => string
+    formatBetween?: (x1: number, x2: number) => string
+    missing?: string
+  }
+): { string: string; low: number; high: number } {
+  if (x === undefined || x === null || isNaN(x)) {
+    return { string: missing, low: Infinity, high: Infinity }
+  }
+  const compareLeft =
+    mode === "left"
+      ? (x: number, left: number) => x >= left
+      : (x: number, left: number) => x > left
+  const compareRight =
+    mode === "left"
+      ? (x: number, right: number) => x < right
+      : (x: number, right: number) => x <= right
+  const thresholdsSorted =
+    thresholds.length === 0 ? [0] : thresholds.sort((a, b) => a - b)
+  if (compareRight(x, thresholdsSorted[0])) {
+    return {
+      string: formatLow(thresholdsSorted[0]),
+      low: -Infinity,
+      high: thresholdsSorted[0],
+    }
+  }
+  if (compareLeft(x, thresholdsSorted[thresholdsSorted.length - 1])) {
+    return {
+      string: formatHigh(thresholdsSorted[thresholdsSorted.length - 1]),
+      low: thresholdsSorted[thresholdsSorted.length - 1],
+      high: Infinity,
+    }
+  }
+  const closestHighIndex = thresholdsSorted.findIndex(
+    (t, i) => compareLeft(x, thresholdsSorted[i - 1]) && compareRight(x, t)
+  )
+  return {
+    string: formatBetween(
+      thresholdsSorted[closestHighIndex - 1],
+      thresholdsSorted[closestHighIndex]
+    ),
+    low: thresholdsSorted[closestHighIndex - 1],
+    high: thresholdsSorted[closestHighIndex],
+  }
+}
+
+export function getSum(arr: number[]): number {
+  return arr.reduce((sum, x) => sum + x, 0)
+}
+
+export function getCumsum(arr: number[]): number[] {
+  return arr.reduce((acc, x) => {
+    const last = acc[acc.length - 1] ?? 0
+    acc.push(last + x)
+    return acc
+  }, [] as number[])
+}
+
+export function getMean(arr: number[]): number {
+  return getSum(arr) / arr.length
+}
+
+export function getVariance(arr: number[]): number {
+  const mean = getMean(arr)
+  return getSum(arr.map((x) => x - mean).map((x) => x * x)) / (arr.length - 1)
+}
+
+export function getStandardDeviation(arr: number[]): number {
+  return Math.sqrt(getVariance(arr))
+}
+
+export function getMeanVariance(arr: number[]) {
+  return getVariance(arr) / arr.length
+}
+
+export function getMeanStandardError(arr: number[]) {
+  return Math.sqrt(getMeanVariance(arr))
+}
+
+export function getQuantile(arr: (number | null)[], q: number) {
+  const arrSorted = arr.sort((a, b) => a - b)
+  // Just round to the nearest integer
+  return arrSorted[Math.round(q * (arr.length - 1))]
+}
+
+export function getMin(arr: (number | null)[]): number {
+  // TS can't tell I'm removing all nulls from the array
+  // @ts-ignore
+  return (
+    arr
+      .filter((x) => x !== null)
+      // @ts-ignore
+      .reduce((acc, x) => (x < acc ? x : acc), Infinity)
+  )
+}
+
+export function getMax(arr: (number | null)[]): number {
+  // TS can't tell I'm removing all nulls from the array
+  // @ts-ignore
+  return (
+    arr
+      .filter((x) => x !== null)
+      // @ts-ignore
+      .reduce((acc, x) => (x > acc ? x : acc), -Infinity)
+  )
+}
+
+/** Array passed is not `log`ed */
+export function summariseLogmean(arr: number[], precision: number = 3) {
+  const logs = arr.map(Math.log)
+  const logmean = getMean(logs)
+  const se = getMeanStandardError(logs)
+  const mean = Math.exp(logmean)
+  const logerr = 1.96 * se
+  const loglow = logmean - logerr
+  const loghigh = logmean + logerr
+  const low = Math.exp(loglow)
+  const high = Math.exp(loghigh)
+  return { kind: "logmean", mean, low, high, precision }
+}
+
+export function summariseProportion(v: boolean[]) {
+  const prop = v.filter((x) => x).length / v.length
+  // Normal approximation
+  const se = Math.sqrt((prop * (1 - prop)) / v.length)
+  const err = 1.96 * se
+  return {
+    kind: "proportion",
+    prop,
+    low: Math.max(prop - err, 0),
+    high: Math.min(prop + err, 1),
+  }
+}
+
+export function summariseCount<T>(ns: T[]) {
+  return {
+    kind: "count",
+    n: ns.length,
+  }
+}
+
+export function summariseNumeric(ns: (number | null)[]) {
+  return {
+    kind: "numeric",
+    mean: getQuantile(ns, 0.5),
+    min: getMin(ns),
+    max: getMax(ns),
+  }
 }
