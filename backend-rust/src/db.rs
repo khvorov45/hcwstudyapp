@@ -3,7 +3,7 @@ use crate::{
     data::{current, previous},
     error, Result,
 };
-use anyhow::Context;
+use anyhow::{bail, Context};
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs::{self, File};
 use std::io::BufReader;
@@ -12,17 +12,16 @@ use std::path::{Path, PathBuf};
 
 pub struct Db {
     pub dirs: DbDirs,
-    pub users: Table<previous::User, current::User, String, ()>,
-    pub tokens: Table<previous::Token, current::Token, String, String>,
-    pub participants: Table<previous::Participant, current::Participant, String, ()>,
+    pub users: Table<previous::User, current::User, String>,
+    pub tokens: Table<previous::Token, current::Token, String>,
+    pub participants: Table<previous::Participant, current::Participant, String>,
     pub vaccination_history:
-        Table<previous::VaccinationHistory, current::VaccinationHistory, (String, u32), String>,
-    pub schedule: Table<previous::Schedule, current::Schedule, (String, u32, u32), String>,
-    pub weekly_survey:
-        Table<previous::WeeklySurvey, current::WeeklySurvey, (String, u32, u32), String>,
-    pub withdrawn: Table<previous::Withdrawn, current::Withdrawn, String, String>,
-    pub virus: Table<previous::Virus, current::Virus, String, ()>,
-    pub serology: Table<previous::Serology, current::Serology, (String, u32, u32, String), String>,
+        Table<previous::VaccinationHistory, current::VaccinationHistory, (String, u32)>,
+    pub schedule: Table<previous::Schedule, current::Schedule, (String, u32, u32)>,
+    pub weekly_survey: Table<previous::WeeklySurvey, current::WeeklySurvey, (String, u32, u32)>,
+    pub withdrawn: Table<previous::Withdrawn, current::Withdrawn, String>,
+    pub virus: Table<previous::Virus, current::Virus, String>,
+    pub serology: Table<previous::Serology, current::Serology, (String, u32, u32, String)>,
 }
 
 pub struct DbDirs {
@@ -42,12 +41,11 @@ pub enum DbDirsInitState {
     Current,
 }
 
-pub struct Table<P, C, PK, FK> {
+pub struct Table<P, C, PK> {
     pub name: String,
     pub previous: TableData<P>,
     pub current: TableData<C>,
     pk: PhantomData<PK>,
-    fk: PhantomData<FK>,
 }
 
 pub struct TableData<T> {
@@ -160,31 +158,47 @@ impl Db {
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
         self.users.verify_pk()?;
+
         self.tokens.verify_pk()?;
-        self.tokens.verify_fk(&self.users)?;
+        self.users
+            .check_pks_present(&self.tokens.map_and_collect(|t| &t.user))?;
+
         self.participants.verify_pk()?;
+
         self.vaccination_history.verify_pk()?;
-        self.vaccination_history.verify_fk(&self.participants)?;
+        self.participants
+            .check_pks_present(&self.vaccination_history.map_and_collect(|v| &v.pid))?;
+
         self.schedule.verify_pk()?;
-        self.schedule.verify_fk(&self.participants)?;
+        self.participants
+            .check_pks_present(&self.schedule.map_and_collect(|v| &v.pid))?;
+
         self.weekly_survey.verify_pk()?;
-        self.weekly_survey.verify_fk(&self.participants)?;
+        self.participants
+            .check_pks_present(&self.weekly_survey.map_and_collect(|v| &v.pid))?;
+
         self.withdrawn.verify_pk()?;
-        self.withdrawn.verify_fk(&self.participants)?;
+        self.participants
+            .check_pks_present(&self.withdrawn.map_and_collect(|v| &v.pid))?;
+
         self.virus.verify_pk()?;
+
         self.serology.verify_pk()?;
-        self.serology.verify_fk(&self.participants)?;
+        self.participants
+            .check_pks_present(&self.serology.map_and_collect(|v| &v.pid))?;
+        self.virus
+            .check_pks_present(&self.serology.map_and_collect(|v| &v.virus))?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
-        self.users.check_row_pk(&user)?;
+        self.users.check_row_pk_absent(&user)?;
         self.users.current.data.push(user);
         self.users.write()?;
         Ok(())
     }
     pub fn insert_token(&mut self, token: current::Token) -> Result<()> {
-        self.tokens.check_row_pk(&token)?;
-        self.tokens.check_row_fk(&token, &self.users)?;
+        self.tokens.check_row_pk_absent(&token)?;
+        self.users.try_lookup(&token.user)?;
         self.tokens.current.data.push(token);
         self.tokens.write()?;
         Ok(())
@@ -306,7 +320,7 @@ impl Db {
     }
 }
 
-impl<P, C, PK, FK> Table<P, C, PK, FK> {
+impl<P, C, PK> Table<P, C, PK> {
     /// Creates table with empty data
     pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
         log::debug!("creating table {}", name);
@@ -327,12 +341,17 @@ impl<P, C, PK, FK> Table<P, C, PK, FK> {
             previous: TableData::new(previous),
             current: TableData::new(current),
             pk: PhantomData,
-            fk: PhantomData,
         })
+    }
+    pub fn map_and_collect<T, F>(&self, f: F) -> Vec<&T>
+    where
+        F: FnMut(&C) -> &T,
+    {
+        self.current.data.iter().map(f).collect::<Vec<&T>>()
     }
 }
 
-impl<P: DeserializeOwned, C: DeserializeOwned, PK, FK> Table<P, C, PK, FK> {
+impl<P: DeserializeOwned, C: DeserializeOwned, PK> Table<P, C, PK> {
     pub fn read(&mut self, version: Version) -> Result<()> {
         match version {
             Version::Previous => {
@@ -346,7 +365,7 @@ impl<P: DeserializeOwned, C: DeserializeOwned, PK, FK> Table<P, C, PK, FK> {
     }
 }
 
-impl<P, C: Serialize, PK, FK> Table<P, C, PK, FK> {
+impl<P, C: Serialize, PK> Table<P, C, PK> {
     pub fn write(&self) -> Result<()> {
         fs::write(
             self.current.path.as_path(),
@@ -361,7 +380,7 @@ impl<P, C: Serialize, PK, FK> Table<P, C, PK, FK> {
     }
 }
 
-impl<P: ToCurrent<C>, C, PK, FK> Table<P, C, PK, FK> {
+impl<P: ToCurrent<C>, C, PK> Table<P, C, PK> {
     pub fn convert(&mut self) {
         let mut converted = Vec::with_capacity(self.previous.data.len());
         for row in &self.previous.data {
@@ -371,12 +390,18 @@ impl<P: ToCurrent<C>, C, PK, FK> Table<P, C, PK, FK> {
     }
 }
 
-impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug, FK> Table<P, C, PK, FK> {
-    pub fn check_row_pk(&self, row: &C) -> Result<()> {
-        self.check_row_pk_subset(row, &self.current.data)?;
+impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug> Table<P, C, PK> {
+    pub fn check_pks_present(&self, pks: &[&PK]) -> Result<()> {
+        for pk in pks {
+            self.try_lookup(pk)?;
+        }
         Ok(())
     }
-    fn check_row_pk_subset(&self, row: &C, data: &[C]) -> Result<()> {
+    pub fn check_row_pk_absent(&self, row: &C) -> Result<()> {
+        self.check_row_pk_absent_subset(row, &self.current.data)?;
+        Ok(())
+    }
+    fn check_row_pk_absent_subset(&self, row: &C, data: &[C]) -> Result<()> {
         let row_pk = row.get_pk();
         if data.iter().any(|r| row_pk == r.get_pk()) {
             Err(anyhow::Error::new(error::Conflict::PrimaryKey(
@@ -389,8 +414,8 @@ impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug, FK> Table<P, C, PK, 
     }
     pub fn verify_pk(&self) -> Result<()> {
         for (i, row) in self.current.data.iter().enumerate() {
-            self.check_row_pk_subset(row, &self.current.data[..i])?;
-            self.check_row_pk_subset(row, &self.current.data[(i + 1)..])?;
+            self.check_row_pk_absent_subset(row, &self.current.data[..i])?;
+            self.check_row_pk_absent_subset(row, &self.current.data[(i + 1)..])?;
         }
         Ok(())
     }
@@ -400,33 +425,21 @@ impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug, FK> Table<P, C, PK, 
     pub fn lookup_mut(&mut self, pk: &PK) -> Option<&mut C> {
         self.current.data.iter_mut().find(|r| &r.get_pk() == pk)
     }
-}
-
-impl<P, C: ForeignKey<FK>, PK, FK: PartialEq + std::fmt::Debug> Table<P, C, PK, FK> {
-    pub fn check_row_fk<A, B: PrimaryKey<FK>, PFK>(
-        &self,
-        row: &C,
-        parent: &Table<A, B, FK, PFK>,
-    ) -> Result<()> {
-        let row_fk = row.get_fk();
-        if !parent.current.data.iter().any(|r| row_fk == r.get_pk()) {
-            Err(anyhow::Error::new(error::Conflict::ForeignKey(
+    pub fn try_lookup(&self, pk: &PK) -> Result<&C> {
+        match self.lookup(pk) {
+            Some(k) => Ok(k),
+            None => bail!(error::Conflict::PrimaryKey(
                 self.name.clone(),
-                parent.name.clone(),
-                format!("{:?}", row_fk),
-            )))
-        } else {
-            Ok(())
+                format!("{:?}", pk)
+            )),
         }
     }
-    pub fn verify_fk<A, B: PrimaryKey<FK>, PFK>(
-        &self,
-        parent: &Table<A, B, FK, PFK>,
-    ) -> Result<()> {
-        for row in &self.current.data {
-            self.check_row_fk(row, parent)?;
+    pub fn try_lookup_mut(&mut self, pk: &PK) -> Result<&mut C> {
+        let own_name = self.name.clone();
+        match self.lookup_mut(pk) {
+            Some(k) => Ok(k),
+            None => bail!(error::Conflict::PrimaryKey(own_name, format!("{:?}", pk))),
         }
-        Ok(())
     }
 }
 
@@ -491,8 +504,4 @@ pub trait ToCurrent<C> {
 
 pub trait PrimaryKey<K> {
     fn get_pk(&self) -> K;
-}
-
-pub trait ForeignKey<K> {
-    fn get_fk(&self) -> K;
 }

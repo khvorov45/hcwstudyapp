@@ -1,6 +1,6 @@
 use crate::{
     auth,
-    db::{ForeignKey, PrimaryKey, ToCurrent},
+    db::{PrimaryKey, ToCurrent},
 };
 
 pub mod current;
@@ -24,21 +24,9 @@ impl PrimaryKey<String> for current::Token {
     }
 }
 
-impl ForeignKey<String> for current::Token {
-    fn get_fk(&self) -> String {
-        self.user.clone()
-    }
-}
-
 impl PrimaryKey<(String, u32)> for current::VaccinationHistory {
     fn get_pk(&self) -> (String, u32) {
         (self.pid.clone(), self.year)
-    }
-}
-
-impl ForeignKey<String> for current::VaccinationHistory {
-    fn get_fk(&self) -> String {
-        self.pid.clone()
     }
 }
 
@@ -48,32 +36,14 @@ impl PrimaryKey<(String, u32, u32)> for current::Schedule {
     }
 }
 
-impl ForeignKey<String> for current::Schedule {
-    fn get_fk(&self) -> String {
-        self.pid.clone()
-    }
-}
-
 impl PrimaryKey<(String, u32, u32)> for current::WeeklySurvey {
     fn get_pk(&self) -> (String, u32, u32) {
         (self.pid.clone(), self.year, self.index)
     }
 }
 
-impl ForeignKey<String> for current::WeeklySurvey {
-    fn get_fk(&self) -> String {
-        self.pid.clone()
-    }
-}
-
 impl PrimaryKey<String> for current::Withdrawn {
     fn get_pk(&self) -> String {
-        self.pid.clone()
-    }
-}
-
-impl ForeignKey<String> for current::Withdrawn {
-    fn get_fk(&self) -> String {
         self.pid.clone()
     }
 }
@@ -87,12 +57,6 @@ impl PrimaryKey<String> for current::Virus {
 impl PrimaryKey<(String, u32, u32, String)> for current::Serology {
     fn get_pk(&self) -> (String, u32, u32, String) {
         (self.pid.clone(), self.year, self.day, self.virus.clone())
-    }
-}
-
-impl ForeignKey<String> for current::Serology {
-    fn get_fk(&self) -> String {
-        self.pid.clone()
     }
 }
 
