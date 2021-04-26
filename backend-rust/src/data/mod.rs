@@ -78,6 +78,24 @@ impl ForeignKey<String> for current::Withdrawn {
     }
 }
 
+impl PrimaryKey<String> for current::Virus {
+    fn get_pk(&self) -> String {
+        self.name.clone()
+    }
+}
+
+impl PrimaryKey<(String, u32, u32, String)> for current::Serology {
+    fn get_pk(&self) -> (String, u32, u32, String) {
+        (self.pid.clone(), self.year, self.day, self.virus.clone())
+    }
+}
+
+impl ForeignKey<String> for current::Serology {
+    fn get_fk(&self) -> String {
+        self.pid.clone()
+    }
+}
+
 impl current::Token {
     pub fn new(
         email: &str,
@@ -310,6 +328,28 @@ impl ToCurrent<current::Withdrawn> for previous::Withdrawn {
             pid: self.pid.clone(),
             date: self.date,
             reason: self.reason.clone(),
+        }
+    }
+}
+
+impl ToCurrent<current::Virus> for previous::Virus {
+    fn to_current(&self) -> current::Virus {
+        current::Virus {
+            name: self.name.clone(),
+            short_name: self.short_name.clone(),
+            clade: self.clade.clone(),
+        }
+    }
+}
+
+impl ToCurrent<current::Serology> for previous::Serology {
+    fn to_current(&self) -> current::Serology {
+        current::Serology {
+            pid: self.pid.clone(),
+            year: self.year,
+            day: self.day,
+            virus: self.virus.clone(),
+            titre: self.titre,
         }
     }
 }

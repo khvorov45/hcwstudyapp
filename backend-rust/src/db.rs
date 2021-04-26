@@ -21,6 +21,8 @@ pub struct Db {
     pub weekly_survey:
         Table<previous::WeeklySurvey, current::WeeklySurvey, (String, u32, u32), String>,
     pub withdrawn: Table<previous::Withdrawn, current::Withdrawn, String, String>,
+    pub virus: Table<previous::Virus, current::Virus, String, ()>,
+    pub serology: Table<previous::Serology, current::Serology, (String, u32, u32, String), String>,
 }
 
 pub struct DbDirs {
@@ -78,6 +80,8 @@ impl Db {
             schedule: Table::new("Schedule", &dirs)?,
             weekly_survey: Table::new("WeeklySurvey", &dirs)?,
             withdrawn: Table::new("Withdrawn", &dirs)?,
+            virus: Table::new("Virus", &dirs)?,
+            serology: Table::new("Serology", &dirs)?,
             dirs,
         };
 
@@ -124,6 +128,8 @@ impl Db {
         self.schedule.read(version)?;
         self.weekly_survey.read(version)?;
         self.withdrawn.read(version)?;
+        self.virus.read(version)?;
+        self.serology.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -135,6 +141,8 @@ impl Db {
         self.schedule.write()?;
         self.weekly_survey.write()?;
         self.withdrawn.write()?;
+        self.virus.write()?;
+        self.serology.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -146,6 +154,8 @@ impl Db {
         self.schedule.convert();
         self.weekly_survey.convert();
         self.withdrawn.convert();
+        self.virus.convert();
+        self.serology.convert();
     }
     pub fn verify(&mut self) -> Result<()> {
         log::debug!("verifying db");
@@ -161,6 +171,9 @@ impl Db {
         self.weekly_survey.verify_fk(&self.participants)?;
         self.withdrawn.verify_pk()?;
         self.withdrawn.verify_fk(&self.participants)?;
+        self.virus.verify_pk()?;
+        self.serology.verify_pk()?;
+        self.serology.verify_fk(&self.participants)?;
         Ok(())
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {

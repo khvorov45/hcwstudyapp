@@ -41,6 +41,16 @@
       title: "Withdrawn",
       width: 100,
     },
+    {
+      link: "/tables/virus",
+      title: "Virus",
+      width: 100,
+    },
+    {
+      link: "/tables/serology",
+      title: "Serology",
+      width: 100,
+    },
   ]
 </script>
 

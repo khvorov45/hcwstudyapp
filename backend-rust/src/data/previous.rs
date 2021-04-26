@@ -140,3 +140,19 @@ pub struct Withdrawn {
     pub date: Option<DateTime<Utc>>,
     pub reason: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Virus {
+    pub name: String,
+    pub short_name: String,
+    pub clade: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Serology {
+    pub pid: String,
+    pub year: u32,
+    pub day: u32,
+    pub virus: String,
+    pub titre: u32,
+}

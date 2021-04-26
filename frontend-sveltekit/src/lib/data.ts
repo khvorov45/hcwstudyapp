@@ -124,3 +124,17 @@ export type Withdrawn = {
   date: string | null
   reason: string | null
 }
+
+export type Virus = {
+  name: string
+  short_name: string
+  clade: string
+}
+
+export type Serology = {
+  pid: string
+  year: number
+  day: number
+  virus: string
+  titre: number
+}

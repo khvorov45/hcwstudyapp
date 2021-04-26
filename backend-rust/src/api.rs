@@ -29,6 +29,8 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     let log = warp::log("api");
     get_users(db.clone())
+        .or(get_virus(db.clone()))
+        .or(get_serology(db.clone()))
         .or(get_withdrawn(db.clone()))
         .or(withdrawn_redcap_sync(db.clone(), opt.clone()))
         .or(get_weekly_survey(db.clone()))
@@ -489,4 +491,44 @@ fn withdrawn_redcap_sync(
                 Err(e) => Err(reject(e)),
             }
         })
+}
+
+// Virus ==========================================================================================
+
+fn get_virus(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(_u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.virus.current.data;
+        Ok(warp::reply::json(data))
+    }
+    warp::path!("virus")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+// Serology =======================================================================================
+
+fn get_serology(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.serology.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db.get_participants_subset(site);
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::Serology>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("serology")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
 }
