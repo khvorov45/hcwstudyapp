@@ -39,6 +39,7 @@ function createLocalStore<T>(
 }
 
 export const token = createLocalStore("token", null)
+export const lastRefresh = createLocalStore("last-refresh", null)
 
 export const theme = createLocalStore("theme", "dark", (theme) =>
   document.documentElement.setAttribute("theme", theme)

@@ -1,7 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import Nav from "$lib/components/Nav.svelte"
-  import { token, theme, loginReq, scrollbarWidth } from "../lib/state"
+  import {
+    token,
+    theme,
+    loginReq,
+    scrollbarWidth,
+    lastRefresh,
+  } from "../lib/state"
   import { page } from "$app/stores"
   import Link from "$lib/components/Link.svelte"
   import { apiErrorToString, apiReq, detectScrollbarWidth } from "$lib/util"
@@ -10,6 +16,7 @@
     $scrollbarWidth = detectScrollbarWidth()
     token.useLocalStorage()
     theme.useLocalStorage()
+    lastRefresh.useLocalStorage()
     await login()
     // Attempt to pull token from url
     if ($loginReq.status === "error") {
@@ -17,6 +24,15 @@
       if (newToken !== null && newToken !== $token) {
         token.set(newToken)
         await login()
+        await refreshToken()
+      }
+      // See if the token needs to be refreshed
+    } else {
+      if (
+        $lastRefresh === null ||
+        new Date().getTime() - new Date($lastRefresh).getTime() >
+          24 * 60 * 60 * 1000
+      ) {
         await refreshToken()
       }
     }
@@ -59,6 +75,7 @@
       console.error("refresh error: " + apiErrorToString(res.error))
     } else {
       $token = res.data
+      $lastRefresh = new Date().toISOString()
     }
   }
 
