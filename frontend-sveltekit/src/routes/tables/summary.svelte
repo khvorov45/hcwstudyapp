@@ -8,18 +8,15 @@
     serologySummary,
     virusReq,
     scrollbarWidth,
+    vaccinationHistoryReq,
+    participantsExtra,
   } from "$lib/state"
-  import type { AsyncStatus, TableDisplayHeader } from "$lib/util"
-  import {
-    fetchTable,
-    tableFilterStartsWith,
-    tableFilterIncludes,
-    FetchTableStatus,
-  } from "$lib/util"
-  import type { Serology, Site } from "$lib/data"
+  import type { AsyncStatus } from "$lib/util"
+  import { fetchTable, FetchTableStatus } from "$lib/util"
+  import type { Site } from "$lib/data"
   import { onMount } from "svelte"
-  import Table from "$lib/components/Table.svelte"
   import Summary from "$lib/components/Summary.svelte"
+  import Button from "$lib/components/Button.svelte"
 
   let mounted = false
   onMount(() => (mounted = true))
@@ -34,6 +31,7 @@
       fetchTable(participantsReq, token, loginStatus, mounted),
       fetchTable(serologyReq, token, loginStatus, mounted),
       fetchTable(virusReq, token, loginStatus, mounted),
+      fetchTable(vaccinationHistoryReq, token, loginStatus, mounted),
     ])
     if (statuses.find((s) => s === FetchTableStatus.Fetched) !== undefined) {
       needToRegenExtra = true
@@ -42,14 +40,16 @@
 
   let needToRegenSummary = false
   function regenExtra(need: boolean) {
-    if (!need && $serologyExtra.init) {
+    if (!need && $serologyExtra.init && $participantsExtra.init) {
       return
     }
     needToRegenExtra = false
     needToRegenSummary = true
     const serology = $serologyReq.result?.data ?? []
-    const particpants = $participantsReq.result?.data ?? []
-    serologyExtra.gen({ serology, particpants })
+    const participants = $participantsReq.result?.data ?? []
+    const vaccinations = $vaccinationHistoryReq.result?.data ?? []
+    participantsExtra.gen({ participants, vaccinations })
+    serologyExtra.gen({ serology, participants: $participantsExtra.result })
   }
 
   function regenSummary(need: boolean) {
@@ -61,6 +61,7 @@
   }
 
   let days = [0, 7, 14, 220]
+  let priorVacs = [0, 1, 2, 3, 4, 5]
   let sites: Site[] = [
     "Adelaide",
     "Brisbane",
@@ -70,6 +71,8 @@
     "Sydney",
   ]
 
+  let split: "Site" | "PriorVacs" = "PriorVacs"
+
   $: fetchTables($token, $loginReq.status, mounted)
   $: regenExtra(needToRegenExtra)
   $: regenSummary(needToRegenSummary)
@@ -77,14 +80,29 @@
   $: viruses = $virusReq.result?.data?.map((v) => v.name) ?? []
 </script>
 
+<div class="control">
+  <Button
+    action={() => (split === "Site" ? (split = "PriorVacs") : (split = "Site"))}
+    height="calc(var(--size-nav) - 1px)"
+    width="150px"
+    >Split: {split === "PriorVacs" ? "Vaccinations" : "Site"}</Button
+  >
+</div>
+
 <div class="table-container" style="--scrollbar-width: {$scrollbarWidth}px;">
   <div class="table">
     <div class="thead">
       <div class="tr header-row">
         <div class="th" />
-        {#each sites as site}
-          <div class="th">{site}</div>
-        {/each}
+        {#if split === "Site"}
+          {#each sites as site}
+            <div class="th">{site}</div>
+          {/each}
+        {:else}
+          {#each priorVacs as priorVac}
+            <div class="th">{priorVac}</div>
+          {/each}
+        {/if}
         <div class="th">Overall</div>
       </div>
     </div>
@@ -95,22 +113,38 @@
         {#each days as day}
           <div class="tr data-row">
             <div class="td">{day}</div>
-            {#each sites as site}
-              <div class="td">
-                <Summary
-                  summary={$serologySummary.site.find(
-                    (s) =>
-                      s.day === day &&
-                      s.virus === virus &&
-                      s.year === 2020 &&
-                      s.site == site
-                  ) ?? null}
-                />
-              </div>
-            {/each}
+            {#if split === "Site"}
+              {#each sites as site}
+                <div class="td">
+                  <Summary
+                    summary={$serologySummary.result?.site.find(
+                      (s) =>
+                        s.day === day &&
+                        s.virus === virus &&
+                        s.year === 2020 &&
+                        s.site == site
+                    ) ?? null}
+                  />
+                </div>
+              {/each}
+            {:else}
+              {#each priorVacs as priorVac}
+                <div class="td">
+                  <Summary
+                    summary={$serologySummary.result?.priorVacs5YearBeforeBleed.find(
+                      (s) =>
+                        s.day === day &&
+                        s.virus === virus &&
+                        s.year === 2020 &&
+                        s.priorVacs5YearBeforeBleed == priorVac
+                    ) ?? null}
+                  />
+                </div>
+              {/each}
+            {/if}
             <div class="td">
               <Summary
-                summary={$serologySummary.overall.find(
+                summary={$serologySummary.result?.overall.find(
                   (s) => s.day === day && s.virus === virus && s.year === 2020
                 ) ?? null}
               />
@@ -126,6 +160,12 @@
   :root {
     --height-row: 45px;
   }
+  .control {
+    display: flex;
+    height: var(--size-nav);
+    border-bottom: 1px solid var(--color-bg-2);
+    box-sizing: border-box;
+  }
   .table-container {
     width: 100%;
     overflow-x: scroll;
@@ -138,7 +178,7 @@
   }
   .tbody {
     height: calc(
-      100vh - var(--size-nav) * 2 - var(--height-row) - var(--scrollbar-width)
+      100vh - var(--size-nav) * 3 - var(--height-row) - var(--scrollbar-width)
     );
     overflow-y: scroll;
     overflow-x: hidden;

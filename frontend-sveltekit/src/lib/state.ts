@@ -178,39 +178,67 @@ function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
   }
 }
 
+export type ParticipantExtra = Participant & {
+  priorVacs: number[]
+}
+
+export const participantsExtra = createTableExtraStore(
+  ({
+    participants,
+    vaccinations,
+  }: {
+    participants: Participant[]
+    vaccinations: VaccinationHistory[]
+  }) =>
+    participants.map((p) => ({
+      priorVacs: vaccinations
+        .filter(
+          (v) =>
+            v.pid === p.pid &&
+            (v.status === "Australia" || v.status === "Overseas")
+        )
+        .map((v) => v.year),
+      ...p,
+    }))
+)
+
 export type SerologyExtra = Serology & {
   site: string
+  priorVacs: number[]
+  priorVacs5YearBeforeBleed: number
 }
 
 export const serologyExtra = createTableExtraStore(
   ({
     serology,
-    particpants,
+    participants,
   }: {
     serology: Serology[]
-    particpants: Participant[]
+    participants: ParticipantExtra[]
   }) =>
-    serology.map((s) => ({
-      site: particpants.find((p) => p.pid === s.pid)?.site ?? "(missing)",
-      ...s,
-    }))
+    serology.map((s) => {
+      const p = participants.find((p) => p.pid === s.pid)
+      const priorVacs = p?.priorVacs ?? []
+      return {
+        site: p?.site ?? "(missing)",
+        priorVacs: p?.priorVacs ?? [],
+        priorVacs5YearBeforeBleed: priorVacs.filter(
+          (x) => x < s.year && x >= s.year - 5
+        ).length,
+        ...s,
+      }
+    })
 )
 
-function createSummaryStore<
-  T extends { site: string },
-  K extends { [k: string]: T[keyof T] },
-  S extends Object
->(initKeyGetter: (x: T) => K, summarise: (arr: T[], k: K) => S) {
+function createSummaryStore<T extends Object, S extends Object>(
+  summarise: (arr: T[]) => S
+) {
   const { subscribe, set, update } = writable<{
     init: boolean
-    overall: (S & K)[]
-    site: (S & K & { site: string })[]
-    priorVacs: (S & K)[]
+    result: S
   }>({
     init: false,
-    overall: [],
-    site: [],
-    priorVacs: [],
+    result: null,
   })
   return {
     subscribe,
@@ -219,33 +247,39 @@ function createSummaryStore<
     gen: (table: T[]) => {
       update((current) => {
         current.init = true
-        current.overall = rollup(
-          table,
-          (d) => ({ ...initKeyGetter(d) }),
-          summarise
-        )
-        //@ts-ignore
-        current.site = rollup(
-          table,
-          (d) => ({ ...initKeyGetter(d), site: d.site }),
-          summarise
-        )
-        current.priorVacs = rollup(
-          table,
-          (d) => ({ ...initKeyGetter(d) }),
-          summarise
-        )
+        current.result = summarise(table)
         return current
       })
     },
   }
 }
 
-export const serologySummary = createSummaryStore(
-  (s: SerologyExtra) => ({ year: s.year, day: s.day, virus: s.virus }),
-  (v: SerologyExtra[]) =>
+export const serologySummary = createSummaryStore((v: SerologyExtra[]) => {
+  const summarise = (data) =>
     summariseLogmean(
-      v.map((s) => s.titre),
+      data.map((row) => row.titre),
       0
     )
-)
+  return {
+    overall: rollup(
+      v,
+      (d) => ({ year: d.year, day: d.day, virus: d.virus }),
+      summarise
+    ),
+    site: rollup(
+      v,
+      (d) => ({ year: d.year, day: d.day, virus: d.virus, site: d.site }),
+      summarise
+    ),
+    priorVacs5YearBeforeBleed: rollup(
+      v,
+      (d) => ({
+        year: d.year,
+        day: d.day,
+        virus: d.virus,
+        priorVacs5YearBeforeBleed: d.priorVacs5YearBeforeBleed,
+      }),
+      summarise
+    ),
+  }
+})
