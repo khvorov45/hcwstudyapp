@@ -6,56 +6,65 @@ use crate::{
 pub mod current;
 pub mod previous;
 
-impl PrimaryKey<String> for current::Participant {
-    fn get_pk(&self) -> String {
+impl PrimaryKey for current::Participant {
+    type K = String;
+    fn get_pk(&self) -> Self::K {
         self.pid.clone()
     }
 }
 
-impl PrimaryKey<String> for current::User {
-    fn get_pk(&self) -> String {
+impl PrimaryKey for current::User {
+    type K = String;
+    fn get_pk(&self) -> Self::K {
         self.email.clone()
     }
 }
 
-impl PrimaryKey<String> for current::Token {
-    fn get_pk(&self) -> String {
+impl PrimaryKey for current::Token {
+    type K = String;
+    fn get_pk(&self) -> Self::K {
         self.hash.clone()
     }
 }
 
-impl PrimaryKey<(String, u32)> for current::VaccinationHistory {
-    fn get_pk(&self) -> (String, u32) {
+impl PrimaryKey for current::VaccinationHistory {
+    type K = (String, u32);
+    fn get_pk(&self) -> Self::K {
         (self.pid.clone(), self.year)
     }
 }
 
-impl PrimaryKey<(String, u32, u32)> for current::Schedule {
-    fn get_pk(&self) -> (String, u32, u32) {
+impl PrimaryKey for current::Schedule {
+    type K = (String, u32, u32);
+    fn get_pk(&self) -> Self::K {
         (self.pid.clone(), self.year, self.day)
     }
 }
 
-impl PrimaryKey<(String, u32, u32)> for current::WeeklySurvey {
-    fn get_pk(&self) -> (String, u32, u32) {
+impl PrimaryKey for current::WeeklySurvey {
+    type K = (String, u32, u32);
+    fn get_pk(&self) -> Self::K {
         (self.pid.clone(), self.year, self.index)
     }
 }
 
-impl PrimaryKey<String> for current::Withdrawn {
-    fn get_pk(&self) -> String {
+impl PrimaryKey for current::Withdrawn {
+    type K = String;
+    fn get_pk(&self) -> Self::K {
         self.pid.clone()
     }
 }
 
-impl PrimaryKey<String> for current::Virus {
-    fn get_pk(&self) -> String {
+impl PrimaryKey for current::Virus {
+    type K = String;
+    fn get_pk(&self) -> Self::K {
         self.name.clone()
     }
 }
 
-impl PrimaryKey<(String, u32, u32, String)> for current::Serology {
-    fn get_pk(&self) -> (String, u32, u32, String) {
+impl PrimaryKey for current::Serology {
+    type K = (String, u32, u32, String);
+    fn get_pk(&self) -> Self::K {
         (self.pid.clone(), self.year, self.day, self.virus.clone())
     }
 }

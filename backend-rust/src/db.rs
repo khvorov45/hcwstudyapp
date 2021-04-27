@@ -7,21 +7,19 @@ use anyhow::{bail, Context};
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs::{self, File};
 use std::io::BufReader;
-use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
 pub struct Db {
     pub dirs: DbDirs,
-    pub users: Table<previous::User, current::User, String>,
-    pub tokens: Table<previous::Token, current::Token, String>,
-    pub participants: Table<previous::Participant, current::Participant, String>,
-    pub vaccination_history:
-        Table<previous::VaccinationHistory, current::VaccinationHistory, (String, u32)>,
-    pub schedule: Table<previous::Schedule, current::Schedule, (String, u32, u32)>,
-    pub weekly_survey: Table<previous::WeeklySurvey, current::WeeklySurvey, (String, u32, u32)>,
-    pub withdrawn: Table<previous::Withdrawn, current::Withdrawn, String>,
-    pub virus: Table<previous::Virus, current::Virus, String>,
-    pub serology: Table<previous::Serology, current::Serology, (String, u32, u32, String)>,
+    pub users: Table<previous::User, current::User>,
+    pub tokens: Table<previous::Token, current::Token>,
+    pub participants: Table<previous::Participant, current::Participant>,
+    pub vaccination_history: Table<previous::VaccinationHistory, current::VaccinationHistory>,
+    pub schedule: Table<previous::Schedule, current::Schedule>,
+    pub weekly_survey: Table<previous::WeeklySurvey, current::WeeklySurvey>,
+    pub withdrawn: Table<previous::Withdrawn, current::Withdrawn>,
+    pub virus: Table<previous::Virus, current::Virus>,
+    pub serology: Table<previous::Serology, current::Serology>,
 }
 
 pub struct DbDirs {
@@ -41,11 +39,10 @@ pub enum DbDirsInitState {
     Current,
 }
 
-pub struct Table<P, C, PK> {
+pub struct Table<P, C> {
     pub name: String,
     pub previous: TableData<P>,
     pub current: TableData<C>,
-    pk: PhantomData<PK>,
 }
 
 pub struct TableData<T> {
@@ -320,7 +317,7 @@ impl Db {
     }
 }
 
-impl<P, C, PK> Table<P, C, PK> {
+impl<P, C> Table<P, C> {
     /// Creates table with empty data
     pub fn new(name: &str, dirs: &DbDirs) -> Result<Self> {
         log::debug!("creating table {}", name);
@@ -340,7 +337,6 @@ impl<P, C, PK> Table<P, C, PK> {
             name: name.to_string(),
             previous: TableData::new(previous),
             current: TableData::new(current),
-            pk: PhantomData,
         })
     }
     pub fn map_and_collect<T, F>(&self, f: F) -> Vec<&T>
@@ -351,7 +347,7 @@ impl<P, C, PK> Table<P, C, PK> {
     }
 }
 
-impl<P: DeserializeOwned, C: DeserializeOwned, PK> Table<P, C, PK> {
+impl<P: DeserializeOwned, C: DeserializeOwned> Table<P, C> {
     pub fn read(&mut self, version: Version) -> Result<()> {
         match version {
             Version::Previous => {
@@ -365,7 +361,7 @@ impl<P: DeserializeOwned, C: DeserializeOwned, PK> Table<P, C, PK> {
     }
 }
 
-impl<P, C: Serialize, PK> Table<P, C, PK> {
+impl<P, C: Serialize> Table<P, C> {
     pub fn write(&self) -> Result<()> {
         fs::write(
             self.current.path.as_path(),
@@ -380,7 +376,7 @@ impl<P, C: Serialize, PK> Table<P, C, PK> {
     }
 }
 
-impl<P: ToCurrent<C>, C, PK> Table<P, C, PK> {
+impl<P: ToCurrent<C>, C> Table<P, C> {
     pub fn convert(&mut self) {
         let mut converted = Vec::with_capacity(self.previous.data.len());
         for row in &self.previous.data {
@@ -390,8 +386,8 @@ impl<P: ToCurrent<C>, C, PK> Table<P, C, PK> {
     }
 }
 
-impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug> Table<P, C, PK> {
-    pub fn check_pks_present(&self, pks: &[&PK]) -> Result<()> {
+impl<P, C: PrimaryKey> Table<P, C> {
+    pub fn check_pks_present(&self, pks: &[&<C as PrimaryKey>::K]) -> Result<()> {
         for pk in pks {
             self.try_lookup(pk)?;
         }
@@ -419,13 +415,13 @@ impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug> Table<P, C, PK> {
         }
         Ok(())
     }
-    pub fn lookup(&self, pk: &PK) -> Option<&C> {
+    pub fn lookup(&self, pk: &<C as PrimaryKey>::K) -> Option<&C> {
         self.current.data.iter().find(|r| &r.get_pk() == pk)
     }
-    pub fn lookup_mut(&mut self, pk: &PK) -> Option<&mut C> {
+    pub fn lookup_mut(&mut self, pk: &<C as PrimaryKey>::K) -> Option<&mut C> {
         self.current.data.iter_mut().find(|r| &r.get_pk() == pk)
     }
-    pub fn try_lookup(&self, pk: &PK) -> Result<&C> {
+    pub fn try_lookup(&self, pk: &<C as PrimaryKey>::K) -> Result<&C> {
         match self.lookup(pk) {
             Some(k) => Ok(k),
             None => bail!(error::Conflict::PrimaryKey(
@@ -434,7 +430,7 @@ impl<P, C: PrimaryKey<PK>, PK: PartialEq + std::fmt::Debug> Table<P, C, PK> {
             )),
         }
     }
-    pub fn try_lookup_mut(&mut self, pk: &PK) -> Result<&mut C> {
+    pub fn try_lookup_mut(&mut self, pk: &<C as PrimaryKey>::K) -> Result<&mut C> {
         let own_name = self.name.clone();
         match self.lookup_mut(pk) {
             Some(k) => Ok(k),
@@ -502,6 +498,7 @@ pub trait ToCurrent<C> {
     fn to_current(&self) -> C;
 }
 
-pub trait PrimaryKey<K> {
-    fn get_pk(&self) -> K;
+pub trait PrimaryKey {
+    type K: std::fmt::Debug + PartialEq;
+    fn get_pk(&self) -> Self::K;
 }
