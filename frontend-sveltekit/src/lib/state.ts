@@ -204,7 +204,7 @@ function createSummaryStore<
   const { subscribe, set, update } = writable<{
     init: boolean
     overall: (S & K)[]
-    site: (S & K)[]
+    site: (S & K & { site: string })[]
     priorVacs: (S & K)[]
   }>({
     init: false,
@@ -224,6 +224,7 @@ function createSummaryStore<
           (d) => ({ ...initKeyGetter(d) }),
           summarise
         )
+        //@ts-ignore
         current.site = rollup(
           table,
           (d) => ({ ...initKeyGetter(d), site: d.site }),
