@@ -19,6 +19,7 @@
   import type { Serology, Site } from "$lib/data"
   import { onMount } from "svelte"
   import Table from "$lib/components/Table.svelte"
+  import Summary from "$lib/components/Summary.svelte"
 
   let mounted = false
   onMount(() => (mounted = true))
@@ -99,23 +100,23 @@
             <div class="td">{day}</div>
             {#each sites as site}
               <div class="td">
-                {$serologySummary.site
-                  .find(
+                <Summary
+                  summary={$serologySummary.site.find(
                     (s) =>
                       s.day === day &&
                       s.virus === virus &&
                       s.year === 2020 &&
                       s.site == site
-                  )
-                  ?.mean.toFixed(0) ?? ""}
+                  ) ?? null}
+                />
               </div>
             {/each}
             <div class="td">
-              {$serologySummary.overall
-                .find(
+              <Summary
+                summary={$serologySummary.overall.find(
                   (s) => s.day === day && s.virus === virus && s.year === 2020
-                )
-                ?.mean.toFixed(0) ?? ""}
+                ) ?? null}
+              />
             </div>
           </div>
         {/each}
@@ -126,7 +127,7 @@
 
 <style>
   :root {
-    --height-row: 30px;
+    --height-row: 45px;
   }
   .table-container {
     width: 100%;
@@ -147,7 +148,7 @@
   }
   .tr {
     display: flex;
-    height: 30px;
+    height: var(--height-row);
   }
   .tr * {
     width: 300px;
@@ -160,6 +161,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .th {
+    font-weight: bold;
   }
   .label-row .td {
     justify-content: flex-start;
