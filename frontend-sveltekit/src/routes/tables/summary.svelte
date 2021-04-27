@@ -75,9 +75,6 @@
   $: regenSummary(needToRegenSummary)
 
   $: viruses = $virusReq.result?.data?.map((v) => v.name) ?? []
-
-  $: console.log($serologyExtra)
-  $: console.log($serologySummary)
 </script>
 
 <div class="table-container" style="--scrollbar-width: {$scrollbarWidth}px;">
