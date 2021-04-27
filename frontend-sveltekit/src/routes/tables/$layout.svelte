@@ -52,8 +52,8 @@
       width: 100,
     },
     {
-      link: "/tables/summary",
-      title: "Summary",
+      link: "/tables/gmts",
+      title: "GMTs",
       width: 100,
     },
   ]
