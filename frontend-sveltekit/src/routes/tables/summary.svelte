@@ -94,6 +94,17 @@
     <div class="thead">
       <div class="tr header-row">
         <div class="th" />
+        <div class="th">
+          {#if split === "Site"}
+            Site
+          {:else}
+            Vaccinations (5 years before bleed)
+          {/if}
+        </div>
+        <div class="th" />
+      </div>
+      <div class="tr header-row">
+        <div class="th" />
         {#if split === "Site"}
           {#each sites as site}
             <div class="th">{site}</div>
@@ -158,6 +169,7 @@
 
 <style>
   :root {
+    --height-header: 30px;
     --height-row: 45px;
   }
   .control {
@@ -178,7 +190,8 @@
   }
   .tbody {
     height: calc(
-      100vh - var(--size-nav) * 3 - var(--height-row) - var(--scrollbar-width)
+      100vh - var(--size-nav) * 3 - var(--height-header) * 2 -
+        var(--scrollbar-width)
     );
     overflow-y: scroll;
     overflow-x: hidden;
@@ -192,6 +205,9 @@
   }
   .label-row {
     background-color: var(--color-bg-2);
+  }
+  .header-row {
+    height: var(--height-header);
   }
   .td,
   .th {
