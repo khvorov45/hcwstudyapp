@@ -169,7 +169,7 @@
 
 <style>
   :root {
-    --height-header: 30px;
+    --height-header-summary: 30px;
     --height-row: 45px;
   }
   .control {
@@ -190,7 +190,7 @@
   }
   .tbody {
     height: calc(
-      100vh - var(--size-nav) * 3 - var(--height-header) * 2 -
+      100vh - var(--size-nav) * 3 - var(--height-header-summary) * 2 -
         var(--scrollbar-width)
     );
     overflow-y: scroll;
@@ -207,7 +207,7 @@
     background-color: var(--color-bg-2);
   }
   .header-row {
-    height: var(--height-header);
+    height: var(--height-header-summary);
   }
   .td,
   .th {

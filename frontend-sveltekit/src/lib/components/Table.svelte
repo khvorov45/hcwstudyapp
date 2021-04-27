@@ -178,7 +178,7 @@
 
 <style>
   :root {
-    --height-header: 70px;
+    --height-header-Table: 70px;
   }
   .table-container {
     width: 100%;
@@ -199,7 +199,7 @@
   }
   .tbody {
     height: calc(
-      100vh - var(--height-header) - var(--occupied-height) -
+      100vh - var(--height-header-Table) - var(--occupied-height) -
         var(--scrollbarWidth)
     );
     overflow-y: scroll;
@@ -212,7 +212,7 @@
     height: calc(var(--itop) * var(--height-data-cell));
   }
   .thead {
-    height: var(--height-header);
+    height: var(--height-header-Table);
   }
   .header-row,
   .data-row {
@@ -227,14 +227,14 @@
   .th {
     border-right: 1px solid var(--color-bg-2);
     border-bottom: 1px solid var(--color-bg-2);
-    height: var(--height-header);
+    height: var(--height-header-Table);
     font-weight: bold;
   }
   .th:first-child {
     border-left: 1px solid var(--color-bg-2);
   }
   .cell-content {
-    height: var(--height-header);
+    height: var(--height-header-Table);
     display: flex;
     align-items: center;
     justify-content: center;
