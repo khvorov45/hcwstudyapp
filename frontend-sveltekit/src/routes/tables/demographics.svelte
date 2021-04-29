@@ -108,7 +108,7 @@
     </div>
     <div class="tbody">
       <!--Overall counts-->
-      <div class="tr data-row">
+      <div class="tr data-row start-row">
         <div class="td">Count</div>
         {#if split === "Site"}
           {#each sites as site}
@@ -131,7 +131,7 @@
         </div>
       </div>
       <!--Gender counts-->
-      <div class="tr label-row">
+      <div class="tr label-row start-row">
         <div class="td">Gender</div>
       </div>
       {#each genders as gender}
@@ -162,7 +162,7 @@
         </div>
       {/each}
       <!--Age summaries-->
-      <div class="tr">
+      <div class="tr start-row">
         <div class="td">Age</div>
         {#if split === "Site"}
           {#each sites as site}
@@ -242,6 +242,9 @@
   }
   .header-row {
     height: var(--height-header-summary);
+  }
+  .start-row {
+    border-top: 1px solid var(--color-bg-3);
   }
   .td,
   .th {
