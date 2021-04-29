@@ -163,7 +163,11 @@
       {/each}
       <!--Age summaries-->
       <div class="tr start-row">
-        <div class="td">Age</div>
+        <div class="td">
+          <span>Age</span><Summary
+            summary={{ mean: "median", low: "min", high: "max" }}
+          />
+        </div>
         {#if split === "Site"}
           {#each sites as site}
             <div class="td">
@@ -171,6 +175,7 @@
                 summary={$participantsSummary.result?.site.find(
                   (r) => r.site == site
                 )?.age ?? null}
+                format={(s) => s.toFixed(0)}
               />
             </div>
           {/each}
@@ -181,6 +186,7 @@
                 summary={$participantsSummary.result?.priorVacs5YearBeforeScreening.find(
                   (r) => r.priorVacs5YearBeforeScreening == priorVac
                 )?.age ?? null}
+                format={(s) => s.toFixed(0)}
               />
             </div>
           {/each}
@@ -188,6 +194,7 @@
         <div class="td">
           <Summary
             summary={$participantsSummary.result?.overall[0]?.age ?? null}
+            format={(s) => s.toFixed(0)}
           />
         </div>
       </div>

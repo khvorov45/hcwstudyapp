@@ -15,8 +15,5 @@
     {
       "path": "frontend-sveltekit"
     }
-  ],
-  "settings": {
-    "cSpell.words": ["Withdrawns"]
-  }
+  ]
 }

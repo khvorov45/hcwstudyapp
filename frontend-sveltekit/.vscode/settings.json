@@ -4,6 +4,8 @@
         "Picornavirus",
         "Unsubtyped",
         "Withdrawns",
-        "deidentified"
+        "deidentified",
+        "sveltejs",
+        "vite"
     ]
 }

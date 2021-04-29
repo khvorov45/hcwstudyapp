@@ -53,8 +53,8 @@
     },
     {
       link: "/tables/gmts",
-      title: "GMTs",
-      width: 100,
+      title: "GMTs (95% CI)",
+      width: 120,
     },
     {
       link: "/tables/demographics",

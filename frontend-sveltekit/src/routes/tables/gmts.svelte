@@ -118,7 +118,6 @@
       </div>
     </div>
     <div class="tbody">
-      <div class="tr label-row"><div class="td label-data">GMT</div></div>
       {#each viruses as virus}
         <div class="tr label-row"><div class="td">{virus}</div></div>
         {#each days as day}
@@ -135,6 +134,7 @@
                         s.year === 2020 &&
                         s.site == site
                     ) ?? null}
+                    format={(s) => s.toFixed(0)}
                   />
                 </div>
               {/each}
@@ -149,6 +149,7 @@
                         s.year === 2020 &&
                         s.priorVacs5YearBeforeBleed == priorVac
                     ) ?? null}
+                    format={(s) => s.toFixed(0)}
                   />
                 </div>
               {/each}
@@ -158,6 +159,7 @@
                 summary={$serologySummary.result?.overall.find(
                   (s) => s.day === day && s.virus === virus && s.year === 2020
                 ) ?? null}
+                format={(s) => s.toFixed(0)}
               />
             </div>
           </div>
