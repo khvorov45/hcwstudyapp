@@ -41,6 +41,8 @@ export function occupationToString(a: Occupation): string {
     : a.Other
 }
 
+export type Gender = "Male" | "Female" | "Other"
+
 export type Participant = {
   pid: string
   site: Site
@@ -52,7 +54,7 @@ export type Participant = {
   height: number | null
   weight: number | null
   bmi: number | null
-  gender: "Male" | "Female" | "Other" | null
+  gender: Gender | null
   occupation: Occupation | null
 }
 

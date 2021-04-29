@@ -9,7 +9,13 @@ import type {
   WeeklySurvey,
   Withdrawn,
 } from "$lib/data"
-import { apiReq, rollup, summariseLogmean } from "$lib/util"
+import {
+  apiReq,
+  rollup,
+  summariseCount,
+  summariseLogmean,
+  summariseNumeric,
+} from "$lib/util"
 import type { ApiRequest, ApiResult } from "$lib/util"
 
 export const scrollbarWidth = writable(0)
@@ -180,6 +186,7 @@ function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
 
 export type ParticipantExtra = Participant & {
   priorVacs: number[]
+  priorVacs5YearBeforeScreening: number
 }
 
 export const participantsExtra = createTableExtraStore(
@@ -189,17 +196,25 @@ export const participantsExtra = createTableExtraStore(
   }: {
     participants: Participant[]
     vaccinations: VaccinationHistory[]
-  }) =>
-    participants.map((p) => ({
-      priorVacs: vaccinations
+  }) => {
+    return participants.map((p) => {
+      const vaccinatedYears = vaccinations
         .filter(
           (v) =>
             v.pid === p.pid &&
             (v.status === "Australia" || v.status === "Overseas")
         )
-        .map((v) => v.year),
-      ...p,
-    }))
+        .map((v) => v.year)
+      const screeningYear = new Date(p.date_screening).getFullYear()
+      return {
+        priorVacs: vaccinatedYears,
+        priorVacs5YearBeforeScreening: vaccinatedYears.filter(
+          (vYear) => vYear < screeningYear && vYear >= screeningYear - 5
+        ).length,
+        ...p,
+      }
+    })
+  }
 )
 
 export type SerologyExtra = Serology & {
@@ -283,3 +298,26 @@ export const serologySummary = createSummaryStore((v: SerologyExtra[]) => {
     ),
   }
 })
+
+export const participantsSummary = createSummaryStore(
+  (v: ParticipantExtra[]) => {
+    function summary(v: ParticipantExtra[]) {
+      return {
+        count: summariseCount(v),
+        age: summariseNumeric(v.map((d) => d.age_recruitment)),
+        gender: rollup(v, (d) => ({ gender: d.gender }), summariseCount),
+      }
+    }
+    return {
+      overall: rollup(v, (d) => ({}), summary),
+      site: rollup(v, (d) => ({ site: d.site }), summary),
+      priorVacs5YearBeforeScreening: rollup(
+        v,
+        (d) => ({
+          priorVacs5YearBeforeScreening: d.priorVacs5YearBeforeScreening,
+        }),
+        summary
+      ),
+    }
+  }
+)

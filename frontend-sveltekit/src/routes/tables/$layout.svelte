@@ -56,6 +56,11 @@
       title: "GMTs",
       width: 100,
     },
+    {
+      link: "/tables/demographics",
+      title: "Demographics",
+      width: 100,
+    },
   ]
 </script>
 

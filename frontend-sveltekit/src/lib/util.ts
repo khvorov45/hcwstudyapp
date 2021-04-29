@@ -442,7 +442,7 @@ export function summariseNumeric(ns: (number | null)[]) {
   return {
     kind: "numeric",
     mean: getQuantile(ns, 0.5),
-    min: getMin(ns),
-    max: getMax(ns),
+    low: getMin(ns),
+    high: getMax(ns),
   }
 }
