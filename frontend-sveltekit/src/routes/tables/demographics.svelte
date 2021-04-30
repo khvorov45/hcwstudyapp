@@ -114,7 +114,7 @@
           {#each sites as site}
             <div class="td">
               {$participantsSummary.result?.site.find((r) => r.site == site)
-                ?.count.n ?? ""}
+                ?.count.n ?? 0}
             </div>
           {/each}
         {:else}
@@ -122,7 +122,7 @@
             <div class="td">
               {$participantsSummary.result?.priorVacs5YearBeforeScreening.find(
                 (r) => r.priorVacs5YearBeforeScreening == priorVac
-              )?.count.n ?? ""}
+              )?.count.n ?? 0}
             </div>
           {/each}
         {/if}
@@ -130,6 +130,47 @@
           {$participantsSummary.result?.overall[0]?.count.n ?? ""}
         </div>
       </div>
+      <!--Site-prior vac counts-->
+      {#if split === "Site"}
+        {#each priorVacs as priorVac}
+          <div class="tr">
+            <div class="td">{priorVac + " prior"}</div>
+            {#each sites as site}
+              <div class="td">
+                {$participantsSummary.result?.sitePriorVacCounts.find(
+                  (x) =>
+                    x.site === site &&
+                    x.priorVacs5YearBeforeScreening == priorVac
+                )?.n ?? 0}
+              </div>
+            {/each}
+            <div class="td">
+              {$participantsSummary.result?.priorVacs5YearBeforeScreening.find(
+                (r) => r.priorVacs5YearBeforeScreening == priorVac
+              )?.count.n ?? 0}
+            </div>
+          </div>
+        {/each}
+      {:else}
+        {#each sites as site}
+          <div class="tr">
+            <div class="td">{site}</div>
+            {#each priorVacs as priorVac}
+              <div class="td">
+                {$participantsSummary.result?.sitePriorVacCounts.find(
+                  (x) =>
+                    x.site === site &&
+                    x.priorVacs5YearBeforeScreening == priorVac
+                )?.n ?? 0}
+              </div>
+            {/each}
+            <div class="td">
+              {$participantsSummary.result?.site.find((r) => r.site == site)
+                ?.count.n ?? 0}
+            </div>
+          </div>
+        {/each}
+      {/if}
       <!--Gender counts-->
       <div class="tr label-row start-row">
         <div class="td">Gender</div>

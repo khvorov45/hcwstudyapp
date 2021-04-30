@@ -318,6 +318,14 @@ export const participantsSummary = createSummaryStore(
         }),
         summary
       ),
+      sitePriorVacCounts: rollup(
+        v,
+        (d) => ({
+          site: d.site,
+          priorVacs5YearBeforeScreening: d.priorVacs5YearBeforeScreening,
+        }),
+        summariseCount
+      ),
     }
   }
 )
