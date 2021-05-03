@@ -189,7 +189,7 @@
                   summary={$titreChangesSummary.result?.site.find(
                     (s) =>
                       s.virus === virus && s.year === 2020 && s.site === site
-                  ) ?? null}
+                  )?.gmr ?? null}
                   format={(s) => s.toFixed(1)}
                 />
               </div>
@@ -203,7 +203,7 @@
                       s.virus === virus &&
                       s.year === 2020 &&
                       s.priorVacs5YearsBeforeBleed === priorVac
-                  ) ?? null}
+                  )?.gmr ?? null}
                   format={(s) => s.toFixed(1)}
                 />
               </div>
@@ -213,8 +213,46 @@
             <Summary
               summary={$titreChangesSummary.result?.overall.find(
                 (s) => s.virus === virus && s.year === 2020
-              ) ?? null}
+              )?.gmr ?? null}
               format={(s) => s.toFixed(1)}
+            />
+          </div>
+        </div>
+        <div class="tr">
+          <div class="td">4-fold change (14 vs 0)</div>
+          {#if split === "Site"}
+            {#each sites as site}
+              <div class="td">
+                <Summary
+                  summary={$titreChangesSummary.result?.site.find(
+                    (s) =>
+                      s.virus === virus && s.year === 2020 && s.site === site
+                  )?.seroconversion ?? null}
+                  format={(s) => `${Math.round(s * 100)}%`}
+                />
+              </div>
+            {/each}
+          {:else}
+            {#each priorVacs as priorVac}
+              <div class="td">
+                <Summary
+                  summary={$titreChangesSummary.result?.priorVacs5YearBeforeBleed.find(
+                    (s) =>
+                      s.virus === virus &&
+                      s.year === 2020 &&
+                      s.priorVacs5YearsBeforeBleed === priorVac
+                  )?.seroconversion ?? null}
+                  format={(s) => `${Math.round(s * 100)}%`}
+                />
+              </div>
+            {/each}
+          {/if}
+          <div class="td">
+            <Summary
+              summary={$titreChangesSummary.result?.overall.find(
+                (s) => s.virus === virus && s.year === 2020
+              )?.seroconversion ?? null}
+              format={(s) => `${Math.round(s * 100)}%`}
             />
           </div>
         </div>

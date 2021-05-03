@@ -16,6 +16,7 @@ import {
   summariseCount,
   summariseLogmean,
   summariseNumeric,
+  summariseProportion,
 } from "$lib/util"
 import type { ApiRequest, ApiResult } from "$lib/util"
 
@@ -253,6 +254,7 @@ export type TitreChanges = {
   year: number
   virus: string
   titreChangeD0D14: number
+  seroconversionD0D14: boolean
 }
 
 export const titreChanges = createTableExtraStore(
@@ -298,6 +300,7 @@ export const titreChanges = createTableExtraStore(
               year: studyYear,
               priorVacs5YearsBeforeBleed,
               titreChangeD0D14,
+              seroconversionD0D14: titreChangeD0D14 >= 4,
             })
           }
         }
@@ -362,11 +365,15 @@ export const serologySummary = createSummaryStore((v: SerologyExtra[]) => {
 })
 
 export const titreChangesSummary = createSummaryStore((v: TitreChanges[]) => {
-  const summarise = (data: TitreChanges[]) =>
-    summariseLogmean(
+  const summarise = (data: TitreChanges[]) => ({
+    gmr: summariseLogmean(
       data.map((row) => row.titreChangeD0D14),
       0
-    )
+    ),
+    seroconversion: summariseProportion(
+      data.map((row) => row.seroconversionD0D14)
+    ),
+  })
   return {
     overall: rollup(v, (d) => ({ year: d.year, virus: d.virus }), summarise),
     site: rollup(

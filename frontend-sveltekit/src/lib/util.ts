@@ -421,7 +421,7 @@ export function summariseProportion(v: boolean[]) {
   const err = 1.96 * se
   return {
     kind: "proportion",
-    prop,
+    mean: prop,
     low: Math.max(prop - err, 0),
     high: Math.min(prop + err, 1),
   }
