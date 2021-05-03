@@ -242,28 +242,26 @@ export function seq(from: number, to: number): number[] {
   return arr
 }
 
-function selectAsString<
-  T extends Object,
-  K extends { [k: string]: T[keyof T] }
->(a: T, keyGetter: (x: T) => K) {
-  const keys = keyGetter(a)
-  return Object.entries(keys)
-    .map(([name, value]) => value)
-    .join("-")
+function compareObjects<T extends Object>(o1: T, o2: T) {
+  let equal = true
+  for (let key of Object.keys(o2)) {
+    if (o1[key] !== o2[key]) {
+      equal = false
+      break
+    }
+  }
+  return equal
 }
 
 export function selectUnique<
   T extends Object,
   K extends { [k: string]: T[keyof T] }
 >(arr: T[], keyGetter: (x: T) => K) {
-  let selectedUnique: {
-    object: K
-    string: string
-  }[] = []
+  let selectedUnique: K[] = []
   return arr.reduce((prev, cur) => {
-    const curString = selectAsString(cur, keyGetter)
-    if (!prev.map((p) => p.string).includes(curString)) {
-      prev.push({ object: keyGetter(cur), string: curString })
+    const curObject = keyGetter(cur)
+    if (prev.findIndex((p) => compareObjects(p, curObject)) === -1) {
+      prev.push(curObject)
     }
     return prev
   }, selectedUnique)
@@ -276,11 +274,9 @@ export function rollup<
 >(arr: T[], keyGetter: (x: T) => K, summarise: (arr: T[], k: K) => S) {
   const uniqueValues = selectUnique(arr, keyGetter)
   return uniqueValues.map((uniqueValue) => {
-    const subset = arr.filter(
-      (a) => selectAsString(a, keyGetter) === uniqueValue.string
-    )
-    const summary = summarise(subset, uniqueValue.object)
-    Object.assign(summary, uniqueValue.object)
+    const subset = arr.filter((a) => compareObjects(uniqueValue, keyGetter(a)))
+    const summary = summarise(subset, uniqueValue)
+    Object.assign(summary, uniqueValue)
     return summary as S & K
   })
 }
