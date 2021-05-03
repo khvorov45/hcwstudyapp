@@ -10,6 +10,8 @@
     scrollbarWidth,
     vaccinationHistoryReq,
     participantsExtra,
+    titreChanges,
+    titreChangesSummary,
   } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
   import { fetchTable, FetchTableStatus } from "$lib/util"
@@ -40,7 +42,12 @@
 
   let needToRegenSummary = false
   function regenExtra(need: boolean) {
-    if (!need && $serologyExtra.init && $participantsExtra.init) {
+    if (
+      !need &&
+      $serologyExtra.init &&
+      $participantsExtra.init &&
+      $titreChanges.init
+    ) {
       return
     }
     needToRegenExtra = false
@@ -48,16 +55,25 @@
     const serology = $serologyReq.result?.data ?? []
     const participants = $participantsReq.result?.data ?? []
     const vaccinations = $vaccinationHistoryReq.result?.data ?? []
+    const viruses = $virusReq.result?.data ?? []
+
     participantsExtra.gen({ participants, vaccinations })
     serologyExtra.gen({ serology, participants: $participantsExtra.result })
+    titreChanges.gen({
+      serology: $serologyExtra.result,
+      studyYears: [2020],
+      viruses,
+      participants,
+    })
   }
 
   function regenSummary(need: boolean) {
-    if (!need && $serologySummary.init) {
+    if (!need && $serologySummary.init && $titreChangesSummary.init) {
       return
     }
     needToRegenSummary = false
     serologySummary.gen($serologyExtra.result)
+    titreChangesSummary.gen($titreChanges.result)
   }
 
   let days = [0, 7, 14, 220]
@@ -164,6 +180,44 @@
             </div>
           </div>
         {/each}
+        <div class="tr">
+          <div class="td">GMR (14 vs 0)</div>
+          {#if split === "Site"}
+            {#each sites as site}
+              <div class="td">
+                <Summary
+                  summary={$titreChangesSummary.result?.site.find(
+                    (s) =>
+                      s.virus === virus && s.year === 2020 && s.site === site
+                  ) ?? null}
+                  format={(s) => s.toFixed(1)}
+                />
+              </div>
+            {/each}
+          {:else}
+            {#each priorVacs as priorVac}
+              <div class="td">
+                <Summary
+                  summary={$titreChangesSummary.result?.priorVacs5YearBeforeBleed.find(
+                    (s) =>
+                      s.virus === virus &&
+                      s.year === 2020 &&
+                      s.priorVacs5YearsBeforeBleed === priorVac
+                  ) ?? null}
+                  format={(s) => s.toFixed(1)}
+                />
+              </div>
+            {/each}
+          {/if}
+          <div class="td">
+            <Summary
+              summary={$titreChangesSummary.result?.overall.find(
+                (s) => s.virus === virus && s.year === 2020
+              ) ?? null}
+              format={(s) => s.toFixed(1)}
+            />
+          </div>
+        </div>
       {/each}
     </div>
   </div>

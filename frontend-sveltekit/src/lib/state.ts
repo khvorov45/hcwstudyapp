@@ -3,6 +3,7 @@ import type {
   Participant,
   Schedule,
   Serology,
+  Site,
   User,
   VaccinationHistory,
   Virus,
@@ -245,6 +246,67 @@ export const serologyExtra = createTableExtraStore(
     })
 )
 
+export type TitreChanges = {
+  pid: string
+  site: Site
+  priorVacs5YearsBeforeBleed: number
+  year: number
+  virus: string
+  titreChangeD0D14: number
+}
+
+export const titreChanges = createTableExtraStore(
+  ({
+    serology,
+    studyYears,
+    viruses,
+    participants,
+  }: {
+    serology: SerologyExtra[]
+    studyYears: number[]
+    viruses: Virus[]
+    participants: Participant[]
+  }) => {
+    const titreChanges: any[] = []
+    for (let studyYear of studyYears) {
+      const serologyYear = serology.filter((x) => x.year === studyYear)
+      for (let virus of viruses) {
+        const serologyVirusYear = serologyYear.filter(
+          (x) => x.virus === virus.name
+        )
+        for (let participant of participants) {
+          const serologyVirusYearPid = serologyVirusYear.filter(
+            (x) => x.pid === participant.pid
+          )
+          const d14 =
+            serologyVirusYearPid.find((x) => x.day === 14)?.titre ?? null
+          const d0 =
+            serologyVirusYearPid.find((x) => x.day === 0)?.titre ?? null
+          let titreChangeD0D14 = null
+          if (d14 !== null && d0 !== null) {
+            titreChangeD0D14 = d14 / d0
+          }
+
+          const priorVacs5YearsBeforeBleed =
+            serologyVirusYearPid[0]?.priorVacs5YearBeforeBleed ?? null
+
+          if (titreChangeD0D14 !== null) {
+            titreChanges.push({
+              pid: participant.pid,
+              site: participant.site,
+              virus: virus.name,
+              year: studyYear,
+              priorVacs5YearsBeforeBleed,
+              titreChangeD0D14,
+            })
+          }
+        }
+      }
+    }
+    return titreChanges
+  }
+)
+
 function createSummaryStore<T extends Object, S extends Object>(
   summarise: (arr: T[]) => S
 ) {
@@ -293,6 +355,31 @@ export const serologySummary = createSummaryStore((v: SerologyExtra[]) => {
         day: d.day,
         virus: d.virus,
         priorVacs5YearBeforeBleed: d.priorVacs5YearBeforeBleed,
+      }),
+      summarise
+    ),
+  }
+})
+
+export const titreChangesSummary = createSummaryStore((v: TitreChanges[]) => {
+  const summarise = (data: TitreChanges[]) =>
+    summariseLogmean(
+      data.map((row) => row.titreChangeD0D14),
+      0
+    )
+  return {
+    overall: rollup(v, (d) => ({ year: d.year, virus: d.virus }), summarise),
+    site: rollup(
+      v,
+      (d) => ({ year: d.year, virus: d.virus, site: d.site }),
+      summarise
+    ),
+    priorVacs5YearBeforeBleed: rollup(
+      v,
+      (d) => ({
+        year: d.year,
+        virus: d.virus,
+        priorVacs5YearsBeforeBleed: d.priorVacs5YearsBeforeBleed,
       }),
       summarise
     ),
