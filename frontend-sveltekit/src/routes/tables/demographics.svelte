@@ -10,7 +10,7 @@
   } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
   import { fetchTable, FetchTableStatus } from "$lib/util"
-  import type { Site, Gender } from "$lib/data"
+  import type { Site, Gender, Occupation } from "$lib/data"
   import { onMount } from "svelte"
   import Summary from "$lib/components/Summary.svelte"
   import Button from "$lib/components/Button.svelte"
@@ -63,6 +63,16 @@
     "Sydney",
   ]
   let genders: Gender[] = ["Female", "Male", "Other"]
+  let occupations = [
+    "Administrative",
+    "AlliedHealth",
+    "Ancillary",
+    "Laboratory",
+    "Medical",
+    "Nursing",
+    "Research",
+    "Other",
+  ]
 
   let split: "Site" | "PriorVacs" = "PriorVacs"
 
@@ -198,6 +208,37 @@
           <div class="td">
             {$participantsSummary.result?.overall[0]?.gender.find(
               (x) => x.gender === gender
+            )?.n ?? 0}
+          </div>
+        </div>
+      {/each}
+      <!--Occupation counts-->
+      <div class="tr label-row start-row">
+        <div class="td">Occupation</div>
+      </div>
+      {#each occupations as occupation}
+        <div class="tr data-row">
+          <div class="td">{occupation}</div>
+          {#if split === "Site"}
+            {#each sites as site}
+              <div class="td">
+                {$participantsSummary.result?.site
+                  .find((r) => r.site == site)
+                  ?.occupation.find((x) => x.occupation === occupation)?.n ?? 0}
+              </div>
+            {/each}
+          {:else}
+            {#each priorVacs as priorVac}
+              <div class="td">
+                {$participantsSummary.result?.priorVacs5YearBeforeScreening
+                  .find((r) => r.priorVacs5YearBeforeScreening == priorVac)
+                  ?.occupation.find((x) => x.occupation === occupation)?.n ?? 0}
+              </div>
+            {/each}
+          {/if}
+          <div class="td">
+            {$participantsSummary.result?.overall[0]?.occupation.find(
+              (x) => x.occupation === occupation
             )?.n ?? 0}
           </div>
         </div>

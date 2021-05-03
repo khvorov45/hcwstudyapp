@@ -29,16 +29,21 @@ export type Occupation =
   | "Research"
   | { Other: string }
 
-export function occupationToString(a: Occupation): string {
-  return a === "Medical" ||
+export function isOccupationNotOther(a: Occupation): boolean {
+  return (
+    a === "Medical" ||
     a === "Administrative" ||
     a === "AlliedHealth" ||
     a === "Laboratory" ||
     a === "Ancillary" ||
     a === "Nursing" ||
     a === "Research"
-    ? a
-    : a.Other
+  )
+}
+
+export function occupationToString(a: Occupation): string {
+  // @ts-ignore
+  return isOccupationNotOther(a) ? a : a.Other
 }
 
 export type Gender = "Male" | "Female" | "Other"

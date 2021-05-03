@@ -10,6 +10,7 @@ import type {
   WeeklySurvey,
   Withdrawn,
 } from "$lib/data"
+import { isOccupationNotOther } from "$lib/data"
 import {
   apiReq,
   rollup,
@@ -403,6 +404,15 @@ export const participantsSummary = createSummaryStore(
         height: summariseNumeric(v.map((d) => d.height)),
         weight: summariseNumeric(v.map((d) => d.weight)),
         bmi: summariseNumeric(v.map((d) => d.bmi)),
+        occupation: rollup(
+          v,
+          (d) => ({
+            occupation: isOccupationNotOther(d.occupation)
+              ? d.occupation
+              : "Other",
+          }),
+          summariseCount
+        ),
       }
     }
     return {
