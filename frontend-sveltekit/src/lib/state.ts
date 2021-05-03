@@ -400,6 +400,9 @@ export const participantsSummary = createSummaryStore(
         count: summariseCount(v),
         age: summariseNumeric(v.map((d) => d.age_recruitment)),
         gender: rollup(v, (d) => ({ gender: d.gender }), summariseCount),
+        height: summariseNumeric(v.map((d) => d.height)),
+        weight: summariseNumeric(v.map((d) => d.weight)),
+        bmi: summariseNumeric(v.map((d) => d.bmi)),
       }
     }
     return {

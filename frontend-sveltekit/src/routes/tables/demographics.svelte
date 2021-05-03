@@ -239,6 +239,117 @@
           />
         </div>
       </div>
+      <!--Height summaries-->
+      <div class="tr start-row">
+        <div class="td">
+          <span>Height</span><Summary
+            summary={{ mean: "median", low: "min", high: "max" }}
+          />
+        </div>
+        {#if split === "Site"}
+          {#each sites as site}
+            <div class="td">
+              <Summary
+                summary={$participantsSummary.result?.site.find(
+                  (r) => r.site == site
+                )?.height ?? null}
+                format={(s) => s.toFixed(0)}
+              />
+            </div>
+          {/each}
+        {:else}
+          {#each priorVacs as priorVac}
+            <div class="td">
+              <Summary
+                summary={$participantsSummary.result?.priorVacs5YearBeforeScreening.find(
+                  (r) => r.priorVacs5YearBeforeScreening == priorVac
+                )?.height ?? null}
+                format={(s) => s.toFixed(0)}
+              />
+            </div>
+          {/each}
+        {/if}
+        <div class="td">
+          <Summary
+            summary={$participantsSummary.result?.overall[0]?.height ?? null}
+            format={(s) => s.toFixed(0)}
+          />
+        </div>
+      </div>
+      <!--Weight summaries-->
+      <div class="tr start-row">
+        <div class="td">
+          <span>Weight</span><Summary
+            summary={{ mean: "median", low: "min", high: "max" }}
+          />
+        </div>
+        {#if split === "Site"}
+          {#each sites as site}
+            <div class="td">
+              <Summary
+                summary={$participantsSummary.result?.site.find(
+                  (r) => r.site == site
+                )?.weight ?? null}
+                format={(s) => s.toFixed(0)}
+              />
+            </div>
+          {/each}
+        {:else}
+          {#each priorVacs as priorVac}
+            <div class="td">
+              <Summary
+                summary={$participantsSummary.result?.priorVacs5YearBeforeScreening.find(
+                  (r) => r.priorVacs5YearBeforeScreening == priorVac
+                )?.weight ?? null}
+                format={(s) => s.toFixed(0)}
+              />
+            </div>
+          {/each}
+        {/if}
+        <div class="td">
+          <Summary
+            summary={$participantsSummary.result?.overall[0]?.weight ?? null}
+            format={(s) => s.toFixed(0)}
+          />
+        </div>
+      </div>
+      <!--BMI summaries-->
+      <div class="tr start-row">
+        <div class="td">
+          <span>BMI</span><Summary
+            summary={{ mean: "median", low: "min", high: "max" }}
+          />
+        </div>
+        {#if split === "Site"}
+          {#each sites as site}
+            <div class="td">
+              <Summary
+                summary={$participantsSummary.result?.site.find(
+                  (r) => r.site == site
+                )?.bmi ?? null}
+                format={(s) => s.toFixed(1)}
+              />
+            </div>
+          {/each}
+        {:else}
+          {#each priorVacs as priorVac}
+            <div class="td">
+              <Summary
+                summary={$participantsSummary.result?.priorVacs5YearBeforeScreening.find(
+                  (r) => r.priorVacs5YearBeforeScreening == priorVac
+                )?.bmi ?? null}
+                format={(s) => s.toFixed(1)}
+              />
+            </div>
+          {/each}
+        {/if}
+        <div class="td">
+          <Summary
+            summary={$participantsSummary.result?.overall[0]?.bmi ?? null}
+            format={(s) => s.toFixed(1)}
+          />
+        </div>
+      </div>
     </div>
   </div>
 </div>
