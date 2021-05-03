@@ -52,8 +52,8 @@
       width: 100,
     },
     {
-      link: "/tables/gmts",
-      title: "GMTs (95% CI)",
+      link: "/tables/summary-titre",
+      title: "Titre summary",
       width: 120,
     },
     {
