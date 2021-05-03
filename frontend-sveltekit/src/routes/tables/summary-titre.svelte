@@ -108,8 +108,7 @@
 <div class="table-container" style="--scrollbar-width: {$scrollbarWidth}px;">
   <div class="table">
     <div class="thead">
-      <div class="tr header-row">
-        <div class="th" />
+      <div class="tr header-row overhead">
         <div class="th">
           {#if split === "Site"}
             Site
@@ -117,7 +116,6 @@
             Vaccinations (5 years before bleed)
           {/if}
         </div>
-        <div class="th" />
       </div>
       <div class="tr header-row">
         <div class="th" />
@@ -265,6 +263,7 @@
   :root {
     --height-header-summary: 30px;
     --height-row: 45px;
+    --width-column-summary-titre: 100px;
   }
   .control {
     display: flex;
@@ -278,7 +277,7 @@
     overflow-y: hidden;
   }
   .table {
-    width: calc(8 * 100px);
+    width: calc(8 * var(--width-column-summary-titre) + var(--scrollbar-width));
     margin-left: auto;
     margin-right: auto;
   }
@@ -295,13 +294,17 @@
     height: var(--height-row);
   }
   .tr * {
-    width: 300px;
+    width: var(--width-column-summary-titre);
   }
   .label-row {
     background-color: var(--color-bg-2);
+    white-space: nowrap;
   }
   .header-row {
     height: var(--height-header-summary);
+  }
+  .overhead .th {
+    width: calc(8 * 100px + var(--scrollbar-width));
   }
   .td,
   .th {
