@@ -70,7 +70,7 @@
       <div class="element dropdown">
         <a href={link.link}
           ><Button
-            width={link.width + "px"}
+            width={maxDropdownLinkWidth + "px"}
             active={$page.path === link.link}
             height="var(--size-nav)">{link.title}</Button
           ></a
