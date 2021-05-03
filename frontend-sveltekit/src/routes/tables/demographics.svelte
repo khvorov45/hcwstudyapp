@@ -279,9 +279,6 @@
   .tr * {
     width: 100px;
   }
-  .header-row *:last-child {
-    width: calc(100px + var(--scrollbar-width));
-  }
   .overhead .th {
     width: calc(8 * 100px + var(--scrollbar-width));
   }
