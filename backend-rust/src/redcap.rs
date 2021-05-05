@@ -744,15 +744,14 @@ pub async fn export_record_id_pid_map(opt: &Opt) -> Result<HashMap<String, Strin
         pid_map: &mut std::collections::HashMap<String, String>,
         v: &serde_json::Value,
     ) -> Result<u32> {
-        let v = v.try_as_object()?;
-        let pid = v.try_get("pid")?.try_as_str()?;
-        let record_id = v.try_get("record_id")?.try_as_str()?;
-        if !pid.is_empty() {
-            pid_map.insert(record_id.to_string(), pid.to_string());
-            Ok(1)
-        } else {
-            Ok(0)
+        if pid_is_empty(v)? {
+            return Ok(0);
         }
+        let v = v.try_as_object()?;
+        let pid = v.try_get("pid")?.try_as_pid()?;
+        let record_id = v.try_get("record_id")?.try_as_str()?;
+        pid_map.insert(record_id.to_string(), pid.to_string());
+        Ok(1)
     }
 
     fn handle_pid_map_error(e: anyhow::Error, v: &serde_json::Value) {
