@@ -1041,7 +1041,7 @@ pub async fn export_weekly_survey(
                 return;
             }
         };
-        match v.try_as_weekly_survey(pid.as_str(), 2020) {
+        match v.try_as_weekly_survey(pid.as_str(), year) {
             Ok(v) => {
                 counts.add(0, year);
                 weekly_survey.push(v);
