@@ -46,7 +46,7 @@
     },
     {
       title: "Date",
-      accessor: (p) => p.date.slice(0, 10) ?? "",
+      accessor: (p) => p.date?.slice(0, 10) ?? "",
       width: 200,
       filter: tableFilterBetween,
     },
