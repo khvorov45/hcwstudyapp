@@ -242,6 +242,14 @@ export function seq(from: number, to: number): number[] {
   return arr
 }
 
+export function rep(what: number, times: number): number[] {
+  let arr: number[] = []
+  for (let i = 0; i < times; i++) {
+    arr.push(what)
+  }
+  return arr
+}
+
 function compareObjects<T extends Object>(o1: T, o2: T) {
   let equal = true
   for (let key of Object.keys(o2)) {
