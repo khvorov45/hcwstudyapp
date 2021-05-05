@@ -547,9 +547,13 @@ function WeeklyCompletion({
 
   const weeklyCompletion: WeeklyCompletion[] = []
   ;(weeklySurvey ?? [])
+    .sort((a, b) => a.redcapProjectYear - b.redcapProjectYear)
     .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
     .reduce((a, s) => {
-      if (a[a.length - 1]?.pid === s.pid) {
+      if (
+        a[a.length - 1]?.pid === s.pid &&
+        a[a.length - 1]?.year === s.redcapProjectYear
+      ) {
         a[a.length - 1].weeks.push(s.index)
       } else {
         a.push({ pid: s.pid, year: s.redcapProjectYear, weeks: [s.index] })
