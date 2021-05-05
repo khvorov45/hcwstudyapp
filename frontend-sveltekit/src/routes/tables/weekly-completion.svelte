@@ -32,9 +32,13 @@
   function createWeeklyCompletion(data: WeeklySurvey[]) {
     const result: WeeklyCompletion[] = []
     data
+      .sort((a, b) => a.year - b.year)
       .sort((a, b) => (a.pid < b.pid ? 1 : a.pid > b.pid ? -1 : 0))
       .reduce((a, s) => {
-        if (a[a.length - 1]?.pid === s.pid) {
+        if (
+          a[a.length - 1]?.pid === s.pid &&
+          a[a.length - 1]?.year === s.year
+        ) {
           a[a.length - 1].weeks.push(s.index)
         } else {
           a.push({ pid: s.pid, year: s.year, weeks: [s.index] })
