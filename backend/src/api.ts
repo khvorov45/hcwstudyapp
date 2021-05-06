@@ -486,13 +486,15 @@ Incomplete weeks:\n\n${links
           .map(createEmail)
       )
       if (emails.length > 0) {
-        if (emails.length <= 30) {
+        const emailSendLimit = 20
+        if (emails.length <= emailSendLimit) {
           await Promise.all(emails.map(sendEmail))
         } else {
-          // The limit should be 30 emails per minute
-          for (let i = 0; i <= emails.length; i += 30) {
-            await Promise.all(emails.slice(i, i + 30).map(sendEmail))
-            await sleep(1100)
+          for (let i = 0; i <= emails.length; i += emailSendLimit) {
+            await Promise.all(
+              emails.slice(i, i + emailSendLimit).map(sendEmail)
+            )
+            await sleep(11000)
           }
         }
       }
