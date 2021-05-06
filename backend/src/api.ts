@@ -58,7 +58,14 @@ import { exportWeeklySurveyLink, RedcapConfig, sendRoi } from "./redcap"
 import { emailApiToken, Emailer, emailLoginLink } from "./email"
 import { BooleanFromString } from "io-ts-types"
 import { pipe } from "fp-ts/lib/function"
-import { getWeek, getWeekBounds, justDateString, seq, unique } from "./util"
+import {
+  getWeek,
+  getWeekBounds,
+  justDateString,
+  seq,
+  sleep,
+  unique,
+} from "./util"
 import { map } from "fp-ts/lib/ReadonlyRecord"
 
 export function getRoutes(
@@ -417,7 +424,15 @@ export function getRoutes(
         }
       }
 
-      async function sendEmail(s: Summary) {
+      type Email = {
+        from: string
+        to: string
+        subject: string
+        text: string
+        html: string
+      }
+
+      async function createEmail(s: Summary): Promise<Email> {
         const links = await Promise.all(
           s.gaps.map((i) => getLink(s.redcapRecordId, i))
         )
@@ -435,13 +450,22 @@ Incomplete weeks:\n\n${links
           )
           .join("\n\n")}`
 
-        await emailConfig.emailer.transporter.sendMail({
+        return {
           from: emailConfig.emailer.from,
           to: s.email,
           subject: "NIH HCW Study Summary of Weekly Surveys",
           text: content,
           html: content.replace(/\n/g, "<br/>"),
-        })
+        }
+      }
+
+      let errors = ""
+      async function sendEmail(email: Email) {
+        try {
+          await emailConfig.emailer.transporter.sendMail(email)
+        } catch (e) {
+          errors += e.message + "\n"
+        }
       }
 
       const withdrawnPid = withdrawn.map((w) => w.pid)
@@ -456,16 +480,28 @@ Incomplete weeks:\n\n${links
         .map(summariseOneParticipantYear)
         .filter((s) => s !== null && s.gaps.length > 0)
 
-      const emails = summariesToSend
-        // @ts-ignore
-        .map(sendEmail)
-
-      await Promise.all(emails)
+      const emails = await Promise.all(
+        summariesToSend
+          // @ts-ignore
+          .map(createEmail)
+      )
+      console.log(emails)
+      if (emails.length > 0) {
+        if (emails.length <= 30) {
+          await Promise.all(emails.map(sendEmail))
+        } else {
+          // The limit should be 30 emails per minute
+          for (let i = 0; i <= emails.length; i += 30) {
+            await Promise.all(emails.slice(i, i + 30).map(sendEmail))
+            await sleep(1100)
+          }
+        }
+      }
 
       res.send(
         `Sent ${summariesToSend.length} summar${
           summariesToSend.length === 1 ? "y" : "ies"
-        }`
+        }${errors === "" ? "" : "\nerrors:\n" + errors}`
       )
     }
   )

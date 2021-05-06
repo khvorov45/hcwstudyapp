@@ -73,3 +73,7 @@ export function seq(min: number, max: number): number[] {
 export function unique<T>(arr: T[]): T[] {
   return Array.from(new Set(arr))
 }
+
+export async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
