@@ -485,7 +485,6 @@ Incomplete weeks:\n\n${links
           // @ts-ignore
           .map(createEmail)
       )
-      console.log(emails)
       if (emails.length > 0) {
         if (emails.length <= 30) {
           await Promise.all(emails.map(sendEmail))
