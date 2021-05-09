@@ -704,6 +704,9 @@ export async function exportBloodSamples(
   const bloodSamples: any[] = []
   for (let bloodSampleWide of bloodSamplesWide) {
     const pid = processPid(bloodSampleWide.pid)
+    if (pid === null) {
+      continue
+    }
     const year = bloodSampleWide.redcapProjectYear
     const baselineDate = processRedcapString(
       bloodSampleWide.date_baseline_blood
