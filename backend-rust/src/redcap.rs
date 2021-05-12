@@ -750,7 +750,7 @@ pub async fn export_record_id_pid_map(opt: &Opt) -> Result<HashMap<String, Strin
         let v = v.try_as_object()?;
         let pid = v.try_get("pid")?.try_as_pid()?;
         let record_id = v.try_get("record_id")?.try_as_str()?;
-        pid_map.insert(record_id.to_string(), pid.to_string());
+        pid_map.insert(record_id.to_string(), pid);
         Ok(1)
     }
 
@@ -912,7 +912,7 @@ pub async fn export_vaccination_history(
             vaccination_history.binary_search_by_key(&(pid.clone(), year), |v| v.get_pk())
         {
             counts.add(1, year);
-            let value = current::VaccinationHistory { pid, status, year };
+            let value = current::VaccinationHistory { pid, year, status };
             vaccination_history.insert(i, value);
         }
     };

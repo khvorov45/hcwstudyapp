@@ -461,10 +461,10 @@ impl DbDirs {
         }
 
         Ok(Self {
+            init_state,
             root,
             previous,
             current,
-            init_state,
         })
     }
 }
