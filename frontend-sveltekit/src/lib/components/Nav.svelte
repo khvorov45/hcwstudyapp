@@ -12,6 +12,7 @@
   import Popover from "./Popover.svelte"
   import Switch from "./Switch.svelte"
   import Users from "./icons/Users.svelte"
+  import Attention from "./icons/Attention.svelte"
 
   let settingsVisible = false
 
@@ -61,6 +62,12 @@
       <div class="element">
         <a class:active={$page.path.startsWith("/tables")} href="/tables"
           ><Table /></a
+        >
+      </div>
+      <div class="element">
+        <a
+          class:active={$page.path.startsWith("/data-quality")}
+          href="/data-quality"><Attention /></a
         >
       </div>
     {/if}
