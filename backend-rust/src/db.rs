@@ -71,53 +71,53 @@ pub struct TableIssues {
 
 #[derive(serde_derive::Serialize)]
 pub struct TokenTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::Token>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct UserTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::User>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct ParticipantTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::Participant>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct VaccinationTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::VaccinationHistory>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct ScheduleTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::Schedule>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct WeeklySurveyTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::WeeklySurvey>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct WithdrawnTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::Withdrawn>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct VirusTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::Virus>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct SerologyTableIssues {
-    pk: Vec<KeyIssue>,
+    pk: Vec<KeyIssue<current::Serology>>,
 }
 
 #[derive(serde_derive::Serialize)]
-pub struct KeyIssue {
+pub struct KeyIssue<T> {
     value: serde_json::Value,
-    rows: Vec<serde_json::Value>,
+    rows: Vec<T>,
 }
 
 // ================================================================================================
@@ -477,7 +477,7 @@ impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
         }
         Ok(())
     }
-    pub fn find_pk_issues(&mut self) -> Vec<KeyIssue> {
+    pub fn find_pk_issues(&mut self) -> Vec<KeyIssue<C>> {
         log::debug!("Finding PK issues for table {}", self.name);
         let mut issues = Vec::new();
 
@@ -495,10 +495,7 @@ impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
                 if this_index - previous_index > 1 {
                     let issue = KeyIssue {
                         value: serde_json::to_value(previous_pk).unwrap(),
-                        rows: self.current.data[previous_index..this_index]
-                            .iter()
-                            .map(|v| serde_json::to_value(v).unwrap())
-                            .collect(),
+                        rows: self.current.data[previous_index..this_index].to_vec(),
                     };
                     issues.push(issue);
                 }
