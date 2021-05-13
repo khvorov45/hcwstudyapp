@@ -962,7 +962,7 @@ pub async fn export_schedule(opt: &Opt) -> Result<Vec<current::Schedule>> {
             }
         }
         for (day, var_name) in days.iter().zip(var_names.iter()) {
-            match v.try_as_schedule(2020, *day, var_name) {
+            match v.try_as_schedule(year, *day, var_name) {
                 Ok(v) => {
                     counts.add(0, year);
                     schedule.push(v)
