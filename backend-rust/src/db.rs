@@ -56,6 +56,70 @@ pub enum Version {
     Current,
 }
 
+#[derive(serde_derive::Serialize)]
+pub struct TableIssues {
+    user: UserTableIssues,
+    tokens: TokenTableIssues,
+    participants: ParticipantTableIssues,
+    vaccination: VaccinationTableIssues,
+    schedule: ScheduleTableIssues,
+    weekly_survey: WeeklySurveyTableIssues,
+    withdrawn: WithdrawnTableIssues,
+    virus: VirusTableIssues,
+    serology: SerologyTableIssues,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct TokenTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct UserTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct ParticipantTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct VaccinationTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct ScheduleTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct WeeklySurveyTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct WithdrawnTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct VirusTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct SerologyTableIssues {
+    pk: Vec<KeyIssue>,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct KeyIssue {
+    value: serde_json::Value,
+    rows: Vec<serde_json::Value>,
+}
+
 // ================================================================================================
 
 impl Db {
@@ -152,40 +216,38 @@ impl Db {
         self.virus.convert();
         self.serology.convert();
     }
-    pub fn verify(&mut self) -> Result<()> {
+    pub fn find_table_issues(&mut self) -> TableIssues {
         log::debug!("verifying db");
-        self.users.verify_pk()?;
 
-        self.tokens.verify_pk()?;
-        self.users
-            .check_pks_present(&self.tokens.map_and_collect(|t| &t.user))?;
-
-        self.participants.verify_pk()?;
-
-        self.vaccination_history.verify_pk()?;
-        self.participants
-            .check_pks_present(&self.vaccination_history.map_and_collect(|v| &v.pid))?;
-
-        self.schedule.verify_pk()?;
-        self.participants
-            .check_pks_present(&self.schedule.map_and_collect(|v| &v.pid))?;
-
-        self.weekly_survey.verify_pk()?;
-        self.participants
-            .check_pks_present(&self.weekly_survey.map_and_collect(|v| &v.pid))?;
-
-        self.withdrawn.verify_pk()?;
-        self.participants
-            .check_pks_present(&self.withdrawn.map_and_collect(|v| &v.pid))?;
-
-        self.virus.verify_pk()?;
-
-        self.serology.verify_pk()?;
-        self.participants
-            .check_pks_present(&self.serology.map_and_collect(|v| &v.pid))?;
-        self.virus
-            .check_pks_present(&self.serology.map_and_collect(|v| &v.virus))?;
-        Ok(())
+        TableIssues {
+            user: UserTableIssues {
+                pk: self.users.find_pk_issues(),
+            },
+            tokens: TokenTableIssues {
+                pk: self.tokens.find_pk_issues(),
+            },
+            participants: ParticipantTableIssues {
+                pk: self.participants.find_pk_issues(),
+            },
+            vaccination: VaccinationTableIssues {
+                pk: self.vaccination_history.find_pk_issues(),
+            },
+            schedule: ScheduleTableIssues {
+                pk: self.schedule.find_pk_issues(),
+            },
+            weekly_survey: WeeklySurveyTableIssues {
+                pk: self.weekly_survey.find_pk_issues(),
+            },
+            withdrawn: WithdrawnTableIssues {
+                pk: self.withdrawn.find_pk_issues(),
+            },
+            virus: VirusTableIssues {
+                pk: self.virus.find_pk_issues(),
+            },
+            serology: SerologyTableIssues {
+                pk: self.serology.find_pk_issues(),
+            },
+        }
     }
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
         self.users.check_row_pk_absent(&user)?;
@@ -386,7 +448,7 @@ impl<P: ToCurrent<C>, C> Table<P, C> {
     }
 }
 
-impl<P, C: PrimaryKey> Table<P, C> {
+impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
     pub fn check_pks_present(&self, pks: &[&<C as PrimaryKey>::K]) -> Result<()> {
         for pk in pks {
             self.try_lookup(pk)?;
@@ -414,6 +476,38 @@ impl<P, C: PrimaryKey> Table<P, C> {
             self.check_row_pk_absent_subset(row, &self.current.data[(i + 1)..])?;
         }
         Ok(())
+    }
+    pub fn find_pk_issues(&mut self) -> Vec<KeyIssue> {
+        log::debug!("Finding PK issues for table {}", self.name);
+        let mut issues = Vec::new();
+
+        if self.current.data.len() <= 1 {
+            return issues;
+        }
+
+        self.current.data.sort_by_key(|r| r.get_pk());
+
+        let mut previous_index = 0;
+        let mut previous_pk = self.current.data[previous_index].get_pk();
+        for this_index in 1..self.current.data.len() {
+            let this_pk = self.current.data[this_index].get_pk();
+            if this_pk != previous_pk {
+                if this_index - previous_index > 1 {
+                    let issue = KeyIssue {
+                        value: serde_json::to_value(previous_pk).unwrap(),
+                        rows: self.current.data[previous_index..this_index]
+                            .iter()
+                            .map(|v| serde_json::to_value(v).unwrap())
+                            .collect(),
+                    };
+                    issues.push(issue);
+                }
+                previous_index = this_index;
+                previous_pk = this_pk;
+            }
+        }
+
+        issues
     }
     pub fn lookup(&self, pk: &<C as PrimaryKey>::K) -> Option<&C> {
         self.current.data.iter().find(|r| &r.get_pk() == pk)
@@ -499,6 +593,6 @@ pub trait ToCurrent<C> {
 }
 
 pub trait PrimaryKey {
-    type K: std::fmt::Debug + PartialEq;
+    type K: std::fmt::Debug + PartialEq + PartialOrd + Ord + serde::Serialize;
     fn get_pk(&self) -> Self::K;
 }

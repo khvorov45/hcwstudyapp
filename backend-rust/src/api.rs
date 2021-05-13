@@ -29,6 +29,7 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     let log = warp::log("api");
     get_users(db.clone())
+        .or(check_quality(db.clone()))
         .or(get_virus(db.clone()))
         .or(get_serology(db.clone()))
         .or(get_withdrawn(db.clone()))
@@ -527,6 +528,21 @@ fn get_serology(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> 
         }
     }
     warp::path!("serology")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+// Data quality ====================================================================================
+
+fn check_quality(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(_u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let mut db = db.lock().await;
+        let issues = db.find_table_issues();
+        Ok(warp::reply::json(&issues))
+    }
+    warp::path!("check-quality")
         .and(warp::get())
         .and(user_from_token(db.clone()))
         .and(with_db(db))
