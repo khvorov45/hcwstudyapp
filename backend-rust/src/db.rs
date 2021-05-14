@@ -58,55 +58,20 @@ pub enum Version {
 
 #[derive(serde_derive::Serialize)]
 pub struct TableIssues {
-    user: UserTableIssues,
-    tokens: TokenTableIssues,
-    participants: ParticipantTableIssues,
-    vaccination: VaccinationTableIssues,
     schedule: ScheduleTableIssues,
     weekly_survey: WeeklySurveyTableIssues,
-    withdrawn: WithdrawnTableIssues,
     virus: VirusTableIssues,
     serology: SerologyTableIssues,
 }
 
 #[derive(serde_derive::Serialize)]
-pub struct TokenTableIssues {
-    pk: Vec<KeyIssue<<current::Token as PrimaryKey>::K, current::Token>>,
-    fk: Vec<KeyIssue<<current::User as PrimaryKey>::K, current::Token>>,
-}
-
-#[derive(serde_derive::Serialize)]
-pub struct UserTableIssues {
-    pk: Vec<KeyIssue<<current::User as PrimaryKey>::K, current::User>>,
-}
-
-#[derive(serde_derive::Serialize)]
-pub struct ParticipantTableIssues {
-    pk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::Participant>>,
-}
-
-#[derive(serde_derive::Serialize)]
-pub struct VaccinationTableIssues {
-    pk: Vec<KeyIssue<<current::VaccinationHistory as PrimaryKey>::K, current::VaccinationHistory>>,
-    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::VaccinationHistory>>,
-}
-
-#[derive(serde_derive::Serialize)]
 pub struct ScheduleTableIssues {
     pk: Vec<KeyIssue<<current::Schedule as PrimaryKey>::K, current::Schedule>>,
-    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::Schedule>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct WeeklySurveyTableIssues {
     pk: Vec<KeyIssue<<current::WeeklySurvey as PrimaryKey>::K, current::WeeklySurvey>>,
-    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::WeeklySurvey>>,
-}
-
-#[derive(serde_derive::Serialize)]
-pub struct WithdrawnTableIssues {
-    pk: Vec<KeyIssue<<current::Withdrawn as PrimaryKey>::K, current::Withdrawn>>,
-    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::Withdrawn>>,
 }
 
 #[derive(serde_derive::Serialize)]
@@ -226,44 +191,12 @@ impl Db {
     pub fn find_table_issues(&mut self) -> TableIssues {
         log::debug!("verifying db");
 
-        let participant_pks = self.participants.get_pks();
-
         TableIssues {
-            user: UserTableIssues {
-                pk: self.users.find_pk_issues(),
-            },
-            tokens: TokenTableIssues {
-                pk: self.tokens.find_pk_issues(),
-                fk: self
-                    .tokens
-                    .find_fk_issues(&self.users.get_pks(), |t| t.user.clone()),
-            },
-            participants: ParticipantTableIssues {
-                pk: self.participants.find_pk_issues(),
-            },
-            vaccination: VaccinationTableIssues {
-                pk: self.vaccination_history.find_pk_issues(),
-                fk: self
-                    .vaccination_history
-                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
-            },
             schedule: ScheduleTableIssues {
                 pk: self.schedule.find_pk_issues(),
-                fk: self
-                    .schedule
-                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
             },
             weekly_survey: WeeklySurveyTableIssues {
                 pk: self.weekly_survey.find_pk_issues(),
-                fk: self
-                    .weekly_survey
-                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
-            },
-            withdrawn: WithdrawnTableIssues {
-                pk: self.withdrawn.find_pk_issues(),
-                fk: self
-                    .withdrawn
-                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
             },
             virus: VirusTableIssues {
                 pk: self.virus.find_pk_issues(),
@@ -272,7 +205,7 @@ impl Db {
                 pk: self.serology.find_pk_issues(),
                 fk_participant: self
                     .serology
-                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
+                    .find_fk_issues(&self.participants.get_pks(), |v| v.pid.clone()),
                 fk_virus: self
                     .serology
                     .find_fk_issues(&self.virus.get_pks(), |v| v.virus.clone()),
