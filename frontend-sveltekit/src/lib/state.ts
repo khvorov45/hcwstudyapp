@@ -9,6 +9,7 @@ import type {
   Virus,
   WeeklySurvey,
   Withdrawn,
+  DataQuality,
 } from "$lib/data"
 import { isOccupationNotOther } from "$lib/data"
 import {
@@ -163,6 +164,16 @@ export const serologyReq = createApiStore<{ token: string | null }, Serology[]>(
     expectContent: "json",
   })
 )
+
+export const checkQualityReq = createApiStore<
+  { token: string | null },
+  DataQuality[]
+>(({ token }) => ({
+  method: "GET",
+  token,
+  url: "check-quality",
+  expectContent: "json",
+}))
 
 function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
   const { subscribe, set, update } = writable<{

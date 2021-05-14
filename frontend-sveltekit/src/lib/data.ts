@@ -145,3 +145,38 @@ export type Serology = {
   virus: string
   titre: number
 }
+
+export type KeyIssue<K, T> = {
+  value: K
+  rows: T[]
+}
+
+export type DataQuality = {
+  participants: {
+    pk: KeyIssue<string, Participant>
+  }
+  vaccination: {
+    pk: KeyIssue<[string, number], VaccinationHistory>
+    fk: KeyIssue<string, VaccinationHistory>
+  }
+  schedule: {
+    pk: KeyIssue<[string, number, number], Schedule>
+    fk: KeyIssue<string, Schedule>
+  }
+  weekly_survey: {
+    pk: KeyIssue<[string, number, number], WeeklySurvey>
+    fk: KeyIssue<string, WeeklySurvey>
+  }
+  withdrawn: {
+    pk: KeyIssue<string, Withdrawn>
+    fk: KeyIssue<string, Withdrawn>
+  }
+  virus: {
+    pk: KeyIssue<string, Virus>
+  }
+  serology: {
+    pk: KeyIssue<string, Serology>
+    fk_participant: KeyIssue<string, Serology>
+    fk_virus: KeyIssue<string, Serology>
+  }
+}
