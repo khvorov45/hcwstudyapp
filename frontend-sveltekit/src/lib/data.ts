@@ -152,13 +152,6 @@ export type KeyIssue<K, T> = {
 }
 
 export type DataQuality = {
-  participants: {
-    pk: KeyIssue<string, Participant>
-  }
-  vaccination: {
-    pk: KeyIssue<[string, number], VaccinationHistory>
-    fk: KeyIssue<string, VaccinationHistory>
-  }
   schedule: {
     pk: KeyIssue<[string, number, number], Schedule>
     fk: KeyIssue<string, Schedule>
@@ -166,10 +159,6 @@ export type DataQuality = {
   weekly_survey: {
     pk: KeyIssue<[string, number, number], WeeklySurvey>
     fk: KeyIssue<string, WeeklySurvey>
-  }
-  withdrawn: {
-    pk: KeyIssue<string, Withdrawn>
-    fk: KeyIssue<string, Withdrawn>
   }
   virus: {
     pk: KeyIssue<string, Virus>
