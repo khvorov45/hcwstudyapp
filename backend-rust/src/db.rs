@@ -72,6 +72,7 @@ pub struct TableIssues {
 #[derive(serde_derive::Serialize)]
 pub struct TokenTableIssues {
     pk: Vec<KeyIssue<<current::Token as PrimaryKey>::K, current::Token>>,
+    fk: Vec<KeyIssue<<current::User as PrimaryKey>::K, current::Token>>,
 }
 
 #[derive(serde_derive::Serialize)]
@@ -87,21 +88,25 @@ pub struct ParticipantTableIssues {
 #[derive(serde_derive::Serialize)]
 pub struct VaccinationTableIssues {
     pk: Vec<KeyIssue<<current::VaccinationHistory as PrimaryKey>::K, current::VaccinationHistory>>,
+    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::VaccinationHistory>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct ScheduleTableIssues {
     pk: Vec<KeyIssue<<current::Schedule as PrimaryKey>::K, current::Schedule>>,
+    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::Schedule>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct WeeklySurveyTableIssues {
     pk: Vec<KeyIssue<<current::WeeklySurvey as PrimaryKey>::K, current::WeeklySurvey>>,
+    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::WeeklySurvey>>,
 }
 
 #[derive(serde_derive::Serialize)]
 pub struct WithdrawnTableIssues {
     pk: Vec<KeyIssue<<current::Withdrawn as PrimaryKey>::K, current::Withdrawn>>,
+    fk: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::Withdrawn>>,
 }
 
 #[derive(serde_derive::Serialize)]
@@ -112,6 +117,8 @@ pub struct VirusTableIssues {
 #[derive(serde_derive::Serialize)]
 pub struct SerologyTableIssues {
     pk: Vec<KeyIssue<<current::Serology as PrimaryKey>::K, current::Serology>>,
+    fk_participant: Vec<KeyIssue<<current::Participant as PrimaryKey>::K, current::Serology>>,
+    fk_virus: Vec<KeyIssue<<current::Virus as PrimaryKey>::K, current::Serology>>,
 }
 
 #[derive(serde_derive::Serialize)]
@@ -219,33 +226,56 @@ impl Db {
     pub fn find_table_issues(&mut self) -> TableIssues {
         log::debug!("verifying db");
 
+        let participant_pks = self.participants.get_pks();
+
         TableIssues {
             user: UserTableIssues {
                 pk: self.users.find_pk_issues(),
             },
             tokens: TokenTableIssues {
                 pk: self.tokens.find_pk_issues(),
+                fk: self
+                    .tokens
+                    .find_fk_issues(&self.users.get_pks(), |t| t.user.clone()),
             },
             participants: ParticipantTableIssues {
                 pk: self.participants.find_pk_issues(),
             },
             vaccination: VaccinationTableIssues {
                 pk: self.vaccination_history.find_pk_issues(),
+                fk: self
+                    .vaccination_history
+                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
             },
             schedule: ScheduleTableIssues {
                 pk: self.schedule.find_pk_issues(),
+                fk: self
+                    .schedule
+                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
             },
             weekly_survey: WeeklySurveyTableIssues {
                 pk: self.weekly_survey.find_pk_issues(),
+                fk: self
+                    .weekly_survey
+                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
             },
             withdrawn: WithdrawnTableIssues {
                 pk: self.withdrawn.find_pk_issues(),
+                fk: self
+                    .withdrawn
+                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
             },
             virus: VirusTableIssues {
                 pk: self.virus.find_pk_issues(),
             },
             serology: SerologyTableIssues {
                 pk: self.serology.find_pk_issues(),
+                fk_participant: self
+                    .serology
+                    .find_fk_issues(&participant_pks, |v| v.pid.clone()),
+                fk_virus: self
+                    .serology
+                    .find_fk_issues(&self.virus.get_pks(), |v| v.pid.clone()),
             },
         }
     }
@@ -449,6 +479,9 @@ impl<P: ToCurrent<C>, C> Table<P, C> {
 }
 
 impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
+    pub fn get_pks(&self) -> Vec<<C as PrimaryKey>::K> {
+        self.current.data.iter().map(|r| r.get_pk()).collect()
+    }
     pub fn check_pks_present(&self, pks: &[&<C as PrimaryKey>::K]) -> Result<()> {
         for pk in pks {
             self.try_lookup(pk)?;
@@ -501,6 +534,39 @@ impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
                 }
                 previous_index = this_index;
                 previous_pk = this_pk;
+            }
+        }
+
+        issues
+    }
+    pub fn find_fk_issues<F: PartialEq + Ord, G: Fn(&C) -> F>(
+        &mut self,
+        fks: &[F],
+        get_fk: G,
+    ) -> Vec<KeyIssue<F, C>> {
+        log::debug!("Finding FK issues for table {}", self.name);
+        let mut issues = Vec::new();
+
+        if self.current.data.is_empty() {
+            return issues;
+        }
+
+        self.current.data.sort_by_key(|r| get_fk(r));
+
+        let mut previous_index = 0;
+        let mut previous_fk = get_fk(&self.current.data[previous_index]);
+        for this_index in 0..self.current.data.len() {
+            let this_fk = get_fk(&self.current.data[this_index]);
+            if this_fk != previous_fk {
+                if !fks.contains(&previous_fk) {
+                    let issue = KeyIssue {
+                        value: previous_fk,
+                        rows: self.current.data[previous_index..this_index].to_vec(),
+                    };
+                    issues.push(issue);
+                }
+                previous_index = this_index;
+                previous_fk = this_fk;
             }
         }
 
