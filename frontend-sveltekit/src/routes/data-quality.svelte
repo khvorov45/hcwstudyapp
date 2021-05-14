@@ -17,7 +17,81 @@
 
   $: fetchDataQuality($token, $loginReq.status, mounted)
 
-  $: console.log($checkQualityReq)
+  $: problems = $checkQualityReq.result?.data
+
+  $: serologyProblems = problems?.serology
+  $: serologyOk =
+    serologyProblems?.pk.length === 0 &&
+    serologyProblems?.fk_participant.length === 0 &&
+    serologyProblems?.fk_virus.length == 0
+
+  $: virusProblems = problems?.virus
+  $: virusOk = virusProblems?.pk.length === 0
+
+  $: scheduleProblems = problems?.schedule
+  $: scheduleOk = scheduleProblems?.pk.length === 0
+
+  $: weeklySurveyProblems = problems?.weekly_survey
+  $: weeklySurveyOk = weeklySurveyProblems?.pk.length === 0
+
+  $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk
 </script>
 
-Data quality
+{#if allOk}
+  <div class="no-problems">No problems found</div>
+{:else}
+  {#if !weeklySurveyOk}
+    <div class="card">
+      <div class="table-name">Weekly Survey</div>
+      NOT OK
+    </div>
+  {/if}
+
+  {#if !scheduleOk}
+    <div class="card-container">
+      <div class="card">
+        <div class="table-name">Schedule</div>
+        <div class="subtitle">Duplicate entries</div>
+        {#each scheduleProblems?.pk as pkProblem}
+          <div class="pk-problem">
+            {pkProblem.value.join(" - ")}
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
+  {#if !virusOk}
+    <div class="card">
+      <div class="table-name">Virus</div>
+      NOT OK
+    </div>
+  {/if}
+
+  {#if !serologyOk}
+    <div class="card">
+      <div class="table-name">Serology</div>
+      NOT OK
+    </div>
+  {/if}
+{/if}
+
+<style>
+  .card-container {
+    display: flex;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+  .table-name {
+    font-size: large;
+    text-align: center;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--color-font-2);
+  }
+</style>

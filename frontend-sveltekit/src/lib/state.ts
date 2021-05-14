@@ -167,7 +167,7 @@ export const serologyReq = createApiStore<{ token: string | null }, Serology[]>(
 
 export const checkQualityReq = createApiStore<
   { token: string | null },
-  DataQuality[]
+  DataQuality
 >(({ token }) => ({
   method: "GET",
   token,

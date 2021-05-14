@@ -153,19 +153,17 @@ export type KeyIssue<K, T> = {
 
 export type DataQuality = {
   schedule: {
-    pk: KeyIssue<[string, number, number], Schedule>
-    fk: KeyIssue<string, Schedule>
+    pk: KeyIssue<[string, number, number], Schedule>[]
   }
   weekly_survey: {
-    pk: KeyIssue<[string, number, number], WeeklySurvey>
-    fk: KeyIssue<string, WeeklySurvey>
+    pk: KeyIssue<[string, number, number], WeeklySurvey>[]
   }
   virus: {
-    pk: KeyIssue<string, Virus>
+    pk: KeyIssue<string, Virus>[]
   }
   serology: {
-    pk: KeyIssue<string, Serology>
-    fk_participant: KeyIssue<string, Serology>
-    fk_virus: KeyIssue<string, Serology>
+    pk: KeyIssue<string, Serology>[]
+    fk_participant: KeyIssue<string, Serology>[]
+    fk_virus: KeyIssue<string, Serology>[]
   }
 }
