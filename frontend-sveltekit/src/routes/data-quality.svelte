@@ -19,25 +19,32 @@
 
   $: problems = $checkQualityReq.result?.data
 
-  $: serologyProblems = problems?.serology
+  $: serologyProblems = problems?.serology ?? null
   $: serologyOk =
     serologyProblems?.pk.length === 0 &&
     serologyProblems?.fk_participant.length === 0 &&
     serologyProblems?.fk_virus.length == 0
 
-  $: virusProblems = problems?.virus
+  $: virusProblems = problems?.virus ?? null
   $: virusOk = virusProblems?.pk.length === 0
 
-  $: scheduleProblems = problems?.schedule
+  $: scheduleProblems = problems?.schedule ?? null
   $: scheduleOk = scheduleProblems?.pk.length === 0
 
-  $: weeklySurveyProblems = problems?.weekly_survey
+  $: weeklySurveyProblems = problems?.weekly_survey ?? null
   $: weeklySurveyOk = weeklySurveyProblems?.pk.length === 0
 
+  $: anyNull =
+    serologyProblems === null ||
+    virusProblems === null ||
+    scheduleProblems === null ||
+    weeklySurveyProblems === null
   $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk
 </script>
 
-{#if allOk}
+{#if anyNull}
+  ...
+{:else if allOk}
   <div class="no-problems">No problems found</div>
 {:else}
   {#if !weeklySurveyOk}
