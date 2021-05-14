@@ -223,12 +223,16 @@ impl Db {
                 pk: self
                     .serology
                     .find_pk_issues(|s| allowed_pid.binary_search(&s.pid).is_ok()),
-                fk_participant: self
-                    .serology
-                    .find_fk_issues(&self.participants.get_pks(), |v| v.pid.clone()),
-                fk_virus: self
-                    .serology
-                    .find_fk_issues(&self.virus.get_pks(), |v| v.virus.clone()),
+                fk_participant: self.serology.find_fk_issues(
+                    |s| allowed_pid.binary_search(&s.pid).is_ok(),
+                    &self.participants.get_pks(),
+                    |v| v.pid.clone(),
+                ),
+                fk_virus: self.serology.find_fk_issues(
+                    |s| allowed_pid.binary_search(&s.pid).is_ok(),
+                    &self.virus.get_pks(),
+                    |v| v.virus.clone(),
+                ),
             },
         }
     }
@@ -472,11 +476,11 @@ impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
 
         let mut data: Vec<&C> = self.current.data.iter().filter(subset).collect();
 
-        data.sort_by_key(|r| r.get_pk());
-
         if data.len() <= 1 {
             return issues;
         }
+
+        data.sort_by_key(|r| r.get_pk());
 
         let mut previous_index = 0;
         let mut previous_pk = data[previous_index].get_pk();
@@ -501,29 +505,36 @@ impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
 
         issues
     }
-    pub fn find_fk_issues<F: PartialEq + Ord, G: Fn(&C) -> F>(
+    pub fn find_fk_issues<F: PartialEq + Ord, G: Fn(&C) -> F, S: FnMut(&&C) -> bool>(
         &mut self,
+        subset: S,
         fks: &[F],
         get_fk: G,
     ) -> Vec<KeyIssue<F, C>> {
         log::debug!("Finding FK issues for table {}", self.name);
         let mut issues = Vec::new();
 
-        if self.current.data.is_empty() {
+        let mut data: Vec<&C> = self.current.data.iter().filter(subset).collect();
+
+        if data.is_empty() {
             return issues;
         }
 
-        self.current.data.sort_by_key(|r| get_fk(r));
+        data.sort_by_key(|r| get_fk(r));
 
         let mut previous_index = 0;
-        let mut previous_fk = get_fk(&self.current.data[previous_index]);
-        for this_index in 0..self.current.data.len() {
-            let this_fk = get_fk(&self.current.data[this_index]);
+        let mut previous_fk = get_fk(&data[previous_index]);
+        for this_index in 0..data.len() {
+            let this_fk = get_fk(&data[this_index]);
             if this_fk != previous_fk {
                 if !fks.contains(&previous_fk) {
                     let issue = KeyIssue {
                         value: previous_fk,
-                        rows: self.current.data[previous_index..this_index].to_vec(),
+                        rows: data[previous_index..this_index]
+                            .iter()
+                            .cloned()
+                            .cloned()
+                            .collect(),
                     };
                     issues.push(issue);
                 }
