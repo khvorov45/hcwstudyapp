@@ -79,7 +79,7 @@
     }
   }
 
-  const protectedRoutes = ["/tables", "/users"]
+  const protectedRoutes = ["/tables", "/users", "/data-quality"]
   const adminRoutes = ["/users"]
   $: segmentIsProtected = protectedRoutes.some((r) => $page.path === r)
   $: segmentIsAdmin = adminRoutes.some((r) => $page.path === r)
