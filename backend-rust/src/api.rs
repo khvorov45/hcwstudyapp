@@ -537,9 +537,9 @@ fn get_serology(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> 
 // Data quality ====================================================================================
 
 fn check_quality(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    async fn handler(_u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+    async fn handler(user: current::User, db: Db) -> Result<impl Reply, Infallible> {
         let mut db = db.lock().await;
-        let issues = db.find_table_issues();
+        let issues = db.find_table_issues(user.access_group);
         Ok(warp::reply::json(&issues))
     }
     warp::path!("check-quality")

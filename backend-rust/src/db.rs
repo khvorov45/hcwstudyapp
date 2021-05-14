@@ -188,21 +188,41 @@ impl Db {
         self.virus.convert();
         self.serology.convert();
     }
-    pub fn find_table_issues(&mut self) -> TableIssues {
+    pub fn find_table_issues(&mut self, access_group: current::AccessGroup) -> TableIssues {
         log::debug!("verifying db");
+
+        let mut allowed_pid: Vec<String> = self
+            .participants
+            .current
+            .data
+            .iter()
+            .filter(|p| match access_group {
+                current::AccessGroup::Unrestricted | current::AccessGroup::Admin => true,
+                current::AccessGroup::Site(site) => p.site == site,
+            })
+            .map(|p| p.pid.clone())
+            .collect();
+
+        allowed_pid.sort();
 
         TableIssues {
             schedule: ScheduleTableIssues {
-                pk: self.schedule.find_pk_issues(),
+                pk: self
+                    .schedule
+                    .find_pk_issues(|s| allowed_pid.binary_search(&s.pid).is_ok()),
             },
             weekly_survey: WeeklySurveyTableIssues {
-                pk: self.weekly_survey.find_pk_issues(),
+                pk: self
+                    .weekly_survey
+                    .find_pk_issues(|s| allowed_pid.binary_search(&s.pid).is_ok()),
             },
             virus: VirusTableIssues {
-                pk: self.virus.find_pk_issues(),
+                pk: self.virus.find_pk_issues(|_| true),
             },
             serology: SerologyTableIssues {
-                pk: self.serology.find_pk_issues(),
+                pk: self
+                    .serology
+                    .find_pk_issues(|s| allowed_pid.binary_search(&s.pid).is_ok()),
                 fk_participant: self
                     .serology
                     .find_fk_issues(&self.participants.get_pks(), |v| v.pid.clone()),
@@ -443,25 +463,34 @@ impl<P, C: PrimaryKey + Clone + serde::Serialize> Table<P, C> {
         }
         Ok(())
     }
-    pub fn find_pk_issues(&mut self) -> Vec<KeyIssue<<C as PrimaryKey>::K, C>> {
+    pub fn find_pk_issues<S: FnMut(&&C) -> bool>(
+        &mut self,
+        subset: S,
+    ) -> Vec<KeyIssue<<C as PrimaryKey>::K, C>> {
         log::debug!("Finding PK issues for table {}", self.name);
         let mut issues = Vec::new();
 
-        if self.current.data.len() <= 1 {
+        let mut data: Vec<&C> = self.current.data.iter().filter(subset).collect();
+
+        data.sort_by_key(|r| r.get_pk());
+
+        if data.len() <= 1 {
             return issues;
         }
 
-        self.current.data.sort_by_key(|r| r.get_pk());
-
         let mut previous_index = 0;
-        let mut previous_pk = self.current.data[previous_index].get_pk();
-        for this_index in 1..self.current.data.len() {
-            let this_pk = self.current.data[this_index].get_pk();
+        let mut previous_pk = data[previous_index].get_pk();
+        for this_index in 1..data.len() {
+            let this_pk = data[this_index].get_pk();
             if this_pk != previous_pk {
                 if this_index - previous_index > 1 {
                     let issue = KeyIssue {
                         value: previous_pk,
-                        rows: self.current.data[previous_index..this_index].to_vec(),
+                        rows: data[previous_index..this_index]
+                            .iter()
+                            .cloned()
+                            .cloned()
+                            .collect(),
                     };
                     issues.push(issue);
                 }
