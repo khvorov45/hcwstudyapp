@@ -275,7 +275,7 @@ impl Db {
                     .find_fk_issues(&participant_pks, |v| v.pid.clone()),
                 fk_virus: self
                     .serology
-                    .find_fk_issues(&self.virus.get_pks(), |v| v.pid.clone()),
+                    .find_fk_issues(&self.virus.get_pks(), |v| v.virus.clone()),
             },
         }
     }
