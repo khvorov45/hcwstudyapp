@@ -13,6 +13,7 @@
     "lettre",
     "splitn",
     "structopt",
+    "unvacc",
     "vacc"
   ]
 }

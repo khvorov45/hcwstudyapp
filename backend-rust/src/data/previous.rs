@@ -156,3 +156,38 @@ pub struct Serology {
     pub virus: String,
     pub titre: u32,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq)]
+pub enum StudyGroup {
+    MainOnly,
+    MainAndNested,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq)]
+pub enum ConsentDisease {
+    Flu,
+    Covid,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq)]
+pub enum ConsentForm {
+    Paper,
+    Electronic,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Consent {
+    pub pid: String,
+    pub year: u32,
+    pub disease: ConsentDisease,
+    pub form: ConsentForm,
+    pub group: Option<StudyGroup>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct YearChange {
+    pub record_id: String,
+    pub year: u32,
+    pub pid: Option<String>,
+    pub pid_preformat: Option<String>,
+}

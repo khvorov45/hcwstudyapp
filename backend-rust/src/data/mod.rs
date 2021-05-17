@@ -326,3 +326,53 @@ impl ToCurrent<current::Serology> for previous::Serology {
         }
     }
 }
+
+impl ToCurrent<current::StudyGroup> for previous::StudyGroup {
+    fn to_current(&self) -> current::StudyGroup {
+        match self {
+            previous::StudyGroup::MainOnly => current::StudyGroup::MainOnly,
+            previous::StudyGroup::MainAndNested => current::StudyGroup::MainAndNested,
+        }
+    }
+}
+
+impl ToCurrent<current::ConsentDisease> for previous::ConsentDisease {
+    fn to_current(&self) -> current::ConsentDisease {
+        match self {
+            previous::ConsentDisease::Flu => current::ConsentDisease::Flu,
+            previous::ConsentDisease::Covid => current::ConsentDisease::Covid,
+        }
+    }
+}
+
+impl ToCurrent<current::ConsentForm> for previous::ConsentForm {
+    fn to_current(&self) -> current::ConsentForm {
+        match self {
+            previous::ConsentForm::Paper => current::ConsentForm::Paper,
+            previous::ConsentForm::Electronic => current::ConsentForm::Electronic,
+        }
+    }
+}
+
+impl ToCurrent<current::Consent> for previous::Consent {
+    fn to_current(&self) -> current::Consent {
+        current::Consent {
+            pid: self.pid.clone(),
+            year: self.year,
+            disease: self.disease.to_current(),
+            form: self.form.to_current(),
+            group: self.group.map(|d| d.to_current()),
+        }
+    }
+}
+
+impl ToCurrent<current::YearChange> for previous::YearChange {
+    fn to_current(&self) -> current::YearChange {
+        current::YearChange {
+            record_id: self.record_id.clone(),
+            year: self.year,
+            pid: self.pid.clone(),
+            pid_preformat: self.pid_preformat.clone(),
+        }
+    }
+}

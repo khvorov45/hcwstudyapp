@@ -20,6 +20,8 @@ pub struct Db {
     pub withdrawn: Table<previous::Withdrawn, current::Withdrawn>,
     pub virus: Table<previous::Virus, current::Virus>,
     pub serology: Table<previous::Serology, current::Serology>,
+    pub consent: Table<previous::Consent, current::Consent>,
+    pub year_change: Table<previous::YearChange, current::YearChange>,
 }
 
 pub struct DbDirs {
@@ -113,6 +115,8 @@ impl Db {
             withdrawn: Table::new("Withdrawn", &dirs)?,
             virus: Table::new("Virus", &dirs)?,
             serology: Table::new("Serology", &dirs)?,
+            consent: Table::new("Consent", &dirs)?,
+            year_change: Table::new("YearChange", &dirs)?,
             dirs,
         };
 
@@ -161,6 +165,8 @@ impl Db {
         self.withdrawn.read(version)?;
         self.virus.read(version)?;
         self.serology.read(version)?;
+        self.consent.read(version)?;
+        self.year_change.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -174,6 +180,8 @@ impl Db {
         self.withdrawn.write()?;
         self.virus.write()?;
         self.serology.write()?;
+        self.consent.write()?;
+        self.year_change.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -187,6 +195,8 @@ impl Db {
         self.withdrawn.convert();
         self.virus.convert();
         self.serology.convert();
+        self.consent.convert();
+        self.year_change.convert();
     }
     pub fn find_table_issues(&mut self, access_group: current::AccessGroup) -> TableIssues {
         log::debug!("verifying db");
@@ -362,6 +372,21 @@ impl Db {
     ) -> Result<()> {
         self.withdrawn.current.data = redcap_withdrawn;
         self.withdrawn.write()?;
+        Ok(())
+    }
+
+    pub fn sync_redcap_consent(&mut self, redcap_consent: Vec<current::Consent>) -> Result<()> {
+        self.consent.current.data = redcap_consent;
+        self.consent.write()?;
+        Ok(())
+    }
+
+    pub fn sync_redcap_year_change(
+        &mut self,
+        redcap_year_change: Vec<current::YearChange>,
+    ) -> Result<()> {
+        self.year_change.current.data = redcap_year_change;
+        self.year_change.write()?;
         Ok(())
     }
 }

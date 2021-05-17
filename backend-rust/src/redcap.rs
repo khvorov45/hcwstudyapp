@@ -61,6 +61,7 @@ pub enum ExpectedJson {
     Site,
     AccessGroup,
     Pid,
+    PidOrNull,
     Gender,
     GenderOrNull,
     Occupation,
@@ -74,6 +75,7 @@ pub enum ExpectedJson {
     SwabResult,
     WeeklySurvey,
     Withdrawn,
+    YearChange,
 }
 
 trait TryGet {
@@ -140,6 +142,7 @@ trait TryAs {
     fn try_as_access_group(&self) -> Result<current::AccessGroup>;
     fn try_as_user(&self) -> Result<current::User>;
     fn try_as_pid(&self) -> Result<String>;
+    fn try_as_pid_or_null(&self) -> Result<Option<String>>;
     fn try_as_gender(&self) -> Result<current::Gender>;
     fn try_as_gender_or_null(&self) -> Result<Option<current::Gender>>;
     fn try_as_occupation(&self, other: &serde_json::Value) -> Result<current::Occupation>;
@@ -159,6 +162,17 @@ trait TryAs {
     fn try_as_swab_result(&self) -> Result<current::SwabResult>;
     fn try_as_weekly_survey(&self, pid: &str, year: u32) -> Result<current::WeeklySurvey>;
     fn try_as_withdrawn(&self, pid: &str) -> Result<current::Withdrawn>;
+    fn try_as_study_group_or_null_flu_paper(&self) -> Result<Option<current::StudyGroup>>;
+    fn try_as_study_group_or_null_flu_electronic(&self) -> Result<Option<current::StudyGroup>>;
+    fn try_as_study_group_or_null_covid_paper(&self) -> Result<Option<current::StudyGroup>>;
+    fn try_as_study_group_or_null_covid_electronic(&self) -> Result<Option<current::StudyGroup>>;
+    fn try_as_consent(
+        &self,
+        year: u32,
+        disease: current::ConsentDisease,
+        form: current::ConsentForm,
+    ) -> Result<current::Consent>;
+    fn try_as_year_change(&self, year: u32) -> Result<current::YearChange>;
 }
 
 impl TryAs for serde_json::Value {
@@ -188,13 +202,11 @@ impl TryAs for serde_json::Value {
     }
     fn try_as_str_or_null(&self) -> Result<Option<&str>> {
         match self.as_str() {
+            Some(s) if s.is_empty() => Ok(None),
             Some(v) => Ok(Some(v)),
             None => match self.as_null() {
                 Some(()) => Ok(None),
-                None => match self.as_str() {
-                    Some(s) if s.is_empty() => Ok(None),
-                    _ => Err(self.error(ExpectedJson::StringOrNull)),
-                },
+                None => Err(self.error(ExpectedJson::StringOrNull)),
             },
         }
     }
@@ -352,6 +364,18 @@ impl TryAs for serde_json::Value {
         }
         //* Number format: right-align and pad to 3 with 0's
         Ok(format!("{}-{:0>3}", site_part.to_uppercase(), number_part))
+    }
+    fn try_as_pid_or_null(&self) -> Result<Option<String>> {
+        match self.try_as_pid() {
+            Ok(v) => Ok(Some(v)),
+            Err(_) => match self.as_null() {
+                Some(()) => Ok(None),
+                None => match self.as_str() {
+                    Some(v) if v.is_empty() => Ok(None),
+                    _ => Err(self.error(ExpectedJson::PidOrNull)),
+                },
+            },
+        }
     }
     fn try_as_gender(&self) -> Result<current::Gender> {
         match self.as_str() {
@@ -531,6 +555,132 @@ impl TryAs for serde_json::Value {
                 .map(|s| s.to_string()),
         };
         Ok(withdrawn)
+    }
+    fn try_as_study_group_or_null_flu_paper(&self) -> Result<Option<current::StudyGroup>> {
+        let v = self.try_as_object()?;
+        let consent = v.try_get("consent")?.try_as_bool_or_null()?;
+        let group = match consent {
+            Some(consent) => {
+                if consent {
+                    let add_bleed = v.try_get("add_bleed")?.try_as_bool_or_null()?;
+                    match add_bleed {
+                        Some(add_bleed) => {
+                            if add_bleed {
+                                Some(current::StudyGroup::MainAndNested)
+                            } else {
+                                Some(current::StudyGroup::MainOnly)
+                            }
+                        }
+                        None => Some(current::StudyGroup::MainOnly),
+                    }
+                } else {
+                    None
+                }
+            }
+            None => None,
+        };
+        Ok(group)
+    }
+    fn try_as_study_group_or_null_flu_electronic(&self) -> Result<Option<current::StudyGroup>> {
+        let v = self.try_as_object()?;
+        let mut study_group = None;
+        let study_group_vacc = v.try_get("study_group_vacc")?.try_as_str_or_null()?;
+        if let Some(study_group_vacc) = study_group_vacc {
+            study_group = match study_group_vacc {
+                "1" => Some(current::StudyGroup::MainOnly),
+                "2" => Some(current::StudyGroup::MainAndNested),
+                _ => anyhow::bail!("expected '1' or '2' for study_group_vacc"),
+            };
+        }
+        let consent_unvacc = v.try_get("consent_unvacc")?.try_as_bool_or_null()?;
+        if let Some(consent_unvacc) = consent_unvacc {
+            if consent_unvacc {
+                let study_group_2 = current::StudyGroup::MainOnly;
+                match study_group {
+                    Some(study_group) => {
+                        if study_group != study_group_2 {
+                            anyhow::bail!("conflicting flu consent")
+                        }
+                    }
+                    None => study_group = Some(study_group_2),
+                }
+            }
+        }
+        Ok(study_group)
+    }
+    fn try_as_study_group_or_null_covid_paper(&self) -> Result<Option<current::StudyGroup>> {
+        let v = self.try_as_object()?;
+        let mut study_group = None;
+        let consent_covid = v.try_get("consent_covid")?.try_as_str_or_null()?;
+        if let Some(consent_covid) = consent_covid {
+            study_group = match consent_covid {
+                "1" => Some(current::StudyGroup::MainOnly),
+                "2" => Some(current::StudyGroup::MainAndNested),
+                "3" => None,
+                _ => anyhow::bail!("expected '1', '2' or '3' for consent_covid"),
+            };
+        }
+        Ok(study_group)
+    }
+    fn try_as_study_group_or_null_covid_electronic(&self) -> Result<Option<current::StudyGroup>> {
+        let v = self.try_as_object()?;
+        let mut study_group = None;
+        let study_group_vacc_covax = v.try_get("study_group_vacc_covax")?.try_as_str_or_null()?;
+        if let Some(study_group_vacc_covax) = study_group_vacc_covax {
+            study_group = match study_group_vacc_covax {
+                "1" => Some(current::StudyGroup::MainOnly),
+                "2" => Some(current::StudyGroup::MainAndNested),
+                _ => anyhow::bail!("expected '1' or '2' for study_group_vacc_covax"),
+            };
+        }
+        Ok(study_group)
+    }
+    fn try_as_consent(
+        &self,
+        year: u32,
+        disease: current::ConsentDisease,
+        form: current::ConsentForm,
+    ) -> Result<current::Consent> {
+        let v = self.try_as_object()?;
+
+        let group = match disease {
+            current::ConsentDisease::Flu => match form {
+                current::ConsentForm::Paper => self.try_as_study_group_or_null_flu_paper()?,
+                current::ConsentForm::Electronic => {
+                    self.try_as_study_group_or_null_flu_electronic()?
+                }
+            },
+            current::ConsentDisease::Covid => match form {
+                current::ConsentForm::Paper => self.try_as_study_group_or_null_covid_paper()?,
+                current::ConsentForm::Electronic => {
+                    self.try_as_study_group_or_null_covid_electronic()?
+                }
+            },
+        };
+
+        let consent = current::Consent {
+            pid: v.try_get("pid")?.try_as_pid()?,
+            year,
+            disease,
+            form,
+            group,
+        };
+
+        Ok(consent)
+    }
+    fn try_as_year_change(&self, year: u32) -> Result<current::YearChange> {
+        let v = self.try_as_object()?;
+        let year_change = current::YearChange {
+            record_id: v.try_get("record_id")?.try_as_str()?.to_string(),
+            year,
+            pid: v.try_get("pid")?.try_as_pid_or_null()?,
+            pid_preformat: v
+                .try_get("pid")?
+                .try_as_str_or_null()?
+                .map(|s| s.to_string()),
+        };
+
+        Ok(year_change)
     }
 }
 
@@ -1234,4 +1384,128 @@ pub async fn export_withdrawn(
     counts.log("Withdrawal");
     log_time_elapsed("Withdrawal parsed", now);
     Ok(withdrawn)
+}
+
+pub async fn export_consent(opt: &Opt) -> Result<Vec<current::Consent>> {
+    let (consent2020, consent2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            (
+                "fields",
+                [
+                    "record_id",
+                    "pid",
+                    "consent",
+                    "add_bleed",
+                    "study_group_vacc",
+                    "consent_unvacc",
+                    "consent_covid",
+                    "study_group_vacc_covax",
+                ]
+                .join(",")
+                .as_str(),
+            ),
+            ("events", "baseline_arm_1"),
+        ],
+    )
+    .await?;
+
+    let now = chrono::Utc::now();
+    let mut consent: Vec<current::Consent> = Vec::new();
+    let mut counts = ExtractionCounts::new(&["parsed and added", "empty pid"]);
+
+    let mut add = |v: &serde_json::Value, year: u32| {
+        match pid_is_empty(v) {
+            Ok(empty) => {
+                if empty {
+                    counts.add(1, year);
+                    return;
+                }
+            }
+            Err(e) => {
+                log::error!("failed to pull pid: {}, {:?}", e, v);
+                return;
+            }
+        }
+        for disease in &[current::ConsentDisease::Flu, current::ConsentDisease::Covid] {
+            for form in &[
+                current::ConsentForm::Electronic,
+                current::ConsentForm::Paper,
+            ] {
+                if *disease == current::ConsentDisease::Covid && year == 2020 {
+                    continue;
+                }
+                let value = match v.try_as_consent(year, *disease, *form) {
+                    Ok(v) => {
+                        counts.add(0, year);
+                        v
+                    }
+                    Err(e) => {
+                        log_full_error(
+                            format!(
+                                "Failed to parse year-change for year {}, disease {:?}, form {:?}",
+                                year, disease, form
+                            )
+                            .as_str(),
+                            e.to_string(),
+                            v,
+                        );
+                        return;
+                    }
+                };
+                consent.push(value);
+            }
+        }
+    };
+
+    consent2020.iter().for_each(|y| add(y, 2020));
+    consent2021.iter().for_each(|y| add(y, 2021));
+
+    counts.log("Consent");
+    log_time_elapsed("Consent parsed", now);
+
+    Ok(consent)
+}
+
+pub async fn export_year_change(opt: &Opt) -> Result<Vec<current::YearChange>> {
+    let (year_change2020, year_change2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            ("fields", ["record_id", "pid"].join(",").as_str()),
+            ("events", "baseline_arm_1"),
+        ],
+    )
+    .await?;
+
+    let now = chrono::Utc::now();
+    let mut year_change: Vec<current::YearChange> = Vec::new();
+    let mut counts = ExtractionCounts::new(&["parsed and added"]);
+
+    let mut add = |v: &serde_json::Value, year: u32| {
+        let value = match v.try_as_year_change(year) {
+            Ok(v) => {
+                counts.add(0, year);
+                v
+            }
+            Err(e) => {
+                log_full_error(
+                    format!("Failed to parse year-change for year {}", year).as_str(),
+                    e.to_string(),
+                    v,
+                );
+                return;
+            }
+        };
+        year_change.push(value);
+    };
+
+    year_change2020.iter().for_each(|y| add(y, 2020));
+    year_change2021.iter().for_each(|y| add(y, 2021));
+
+    counts.log("Year change");
+    log_time_elapsed("Year change parsed", now);
+
+    Ok(year_change)
 }

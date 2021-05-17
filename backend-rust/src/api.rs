@@ -29,6 +29,10 @@ pub fn routes(
         .allow_headers(vec!["Authorization", "Content-Type"]);
     let log = warp::log("api");
     get_users(db.clone())
+        .or(get_year_change(db.clone()))
+        .or(year_change_redcap_sync(db.clone(), opt.clone()))
+        .or(get_consent(db.clone()))
+        .or(consent_redcap_sync(db.clone(), opt.clone()))
         .or(check_quality(db.clone()))
         .or(get_virus(db.clone()))
         .or(get_serology(db.clone()))
@@ -547,4 +551,100 @@ fn check_quality(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection>
         .and(user_from_token(db.clone()))
         .and(with_db(db))
         .and_then(handler)
+}
+
+// Year change ======================================================================================
+
+fn get_consent(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.consent.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db.get_participants_subset(site);
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::Consent>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("consent")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn consent_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("consent" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_consent = match redcap::export_consent(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db.lock().await.sync_redcap_consent(redcap_consent) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Year change ======================================================================================
+
+fn get_year_change(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.year_change.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db.get_participants_subset(site);
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| {
+                        participants
+                            .iter()
+                            .any(|p| p.pid == v.pid.as_ref().map(|s| s.as_ref()).unwrap_or(""))
+                    })
+                    .collect::<Vec<&current::YearChange>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("year-change")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn year_change_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("year-change" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_year_change = match redcap::export_year_change(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db.lock().await.sync_redcap_year_change(redcap_year_change) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
 }
