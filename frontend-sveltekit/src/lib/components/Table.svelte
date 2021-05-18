@@ -63,7 +63,8 @@
 
   let verticalScrollProportion = 0
   function scrollHandle(e: any) {
-    verticalScrollProportion = e.target.scrollTop / e.target.scrollTopMax
+    const scrollTopMax = e.target.scrollTopMax ?? e.target.scrollHeight
+    verticalScrollProportion = e.target.scrollTop / scrollTopMax
   }
 
   function findFirstRow(midRow: number, rowsInWindow: number, nRows: number) {
