@@ -10,6 +10,7 @@ import type {
   WeeklySurvey,
   Withdrawn,
   DataQuality,
+  Consent,
 } from "$lib/data"
 import { isOccupationNotOther } from "$lib/data"
 import {
@@ -174,6 +175,15 @@ export const checkQualityReq = createApiStore<
   url: "check-quality",
   expectContent: "json",
 }))
+
+export const consentReq = createApiStore<{ token: string | null }, Consent[]>(
+  ({ token }) => ({
+    method: "GET",
+    token,
+    url: "consent",
+    expectContent: "json",
+  })
+)
 
 function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
   const { subscribe, set, update } = writable<{

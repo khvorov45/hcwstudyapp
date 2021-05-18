@@ -12,6 +12,11 @@
       width: 100,
     },
     {
+      link: "/tables/consent",
+      title: "Consent",
+      width: 100,
+    },
+    {
       link: "/tables/baseline",
       title: "Baseline",
       width: 100,

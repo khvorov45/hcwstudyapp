@@ -146,6 +146,20 @@ export type Serology = {
   titre: number
 }
 
+export type ConsentDisease = "Flu" | "Covid"
+
+export type ConsentForm = "Paper" | "Electronic"
+
+export type StudyGroup = "MainOnly" | "MainAndNested"
+
+export type Consent = {
+  pid: string
+  year: number
+  disease: ConsentDisease
+  form: ConsentForm
+  group: StudyGroup | null
+}
+
 export type KeyIssue<K, T> = {
   value: K
   rows: T[]
