@@ -160,13 +160,11 @@
         <div class="window" style="--nrow: {displayData.length}">
           <div class="window-padding-top" style="--itop: {indexTop}" />
           {#each indexBuffer as i}
-            <div class="data-row">
+            <div class="data-row {i % 2 == 0 ? 'even' : 'odd'}">
               {#each data.headers as header}
                 <div class="td {header.title}" style="width: {header.width}px">
-                  <span
-                    class="cell-content data-content {i % 2 == 0
-                      ? 'even'
-                      : 'odd'}">{header.accessor(displayData[i])}</span
+                  <span class="cell-content data-content"
+                    >{header.accessor(displayData[i])}</span
                   >
                 </div>
               {/each}
