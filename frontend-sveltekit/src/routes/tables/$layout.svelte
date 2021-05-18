@@ -47,6 +47,11 @@
       width: 100,
     },
     {
+      link: "/tables/year-change",
+      title: "Yearly changes",
+      width: 100,
+    },
+    {
       link: "/tables/virus",
       title: "Virus",
       width: 100,

@@ -11,6 +11,7 @@ import type {
   Withdrawn,
   DataQuality,
   Consent,
+  YearChange,
 } from "$lib/data"
 import { isOccupationNotOther } from "$lib/data"
 import {
@@ -184,6 +185,16 @@ export const consentReq = createApiStore<{ token: string | null }, Consent[]>(
     expectContent: "json",
   })
 )
+
+export const yearChangeReq = createApiStore<
+  { token: string | null },
+  YearChange[]
+>(({ token }) => ({
+  method: "GET",
+  token,
+  url: "year-change",
+  expectContent: "json",
+}))
 
 function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
   const { subscribe, set, update } = writable<{

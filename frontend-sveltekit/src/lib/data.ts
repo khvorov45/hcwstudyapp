@@ -160,6 +160,13 @@ export type Consent = {
   group: StudyGroup | null
 }
 
+export type YearChange = {
+  record_id: string
+  year: number
+  pid: string | null
+  pid_preformat: string | null
+}
+
 export type KeyIssue<K, T> = {
   value: K
   rows: T[]
