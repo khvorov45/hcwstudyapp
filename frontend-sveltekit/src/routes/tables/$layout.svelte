@@ -49,7 +49,7 @@
     {
       link: "/tables/year-change",
       title: "Yearly changes",
-      width: 100,
+      width: 120,
     },
     {
       link: "/tables/virus",
