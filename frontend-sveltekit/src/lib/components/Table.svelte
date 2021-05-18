@@ -1,4 +1,6 @@
 <script lang="ts">
+  import VirtualList from "@sveltejs/svelte-virtual-list"
+
   import { Sort, nextSort, stringSort, seq } from "$lib/util"
   import type { TableDisplayData, TableDisplayHeader } from "$lib/util"
   import SortIcon from "$lib/components/icons/Sort.svelte"
@@ -8,10 +10,6 @@
   export let data: TableDisplayData<any> = { rows: [], headers: [] }
   export let occupiedHeight = "var(--size-nav)"
   export let heightDataCell = "30px"
-
-  function headerWidth(header: TableDisplayHeader<any>, i: number) {
-    return header.width + (i + 1 === data.headers.length ? $scrollbarWidth : 0)
-  }
 
   type SortStatus = {
     header: number
@@ -61,35 +59,8 @@
     )
   }
 
-  let verticalScrollProportion = 0
-  function scrollHandle(e: any) {
-    const scrollTopMax = e.target.scrollTopMax ?? e.target.scrollHeight
-    verticalScrollProportion = e.target.scrollTop / scrollTopMax
-  }
-
-  function findFirstRow(midRow: number, rowsInWindow: number, nRows: number) {
-    let firstRow = midRow - rowsInWindow / 2
-    let minFirstRow = 0
-    if (firstRow < minFirstRow) {
-      firstRow = minFirstRow
-    }
-    let maxFirstRow = nRows - rowsInWindow
-    if (firstRow > maxFirstRow) {
-      firstRow = maxFirstRow
-    }
-    return firstRow
-  }
-  function recalculateIndices(start: number) {
-    for (let i = 0; i < indexBuffer.length; i++) {
-      indexBuffer[i] = start + i
-    }
-  }
   $: displayData = processTable(data.rows.slice(0), sortStatus, filterStatuses)
-  $: rowsInWindow = Math.min(100, displayData.length)
-  $: indexBuffer = seq(0, rowsInWindow) //! $: here defeats the purpose entirely
-  $: indexMid = Math.round(verticalScrollProportion * displayData.length)
-  $: indexTop = findFirstRow(indexMid, rowsInWindow, displayData.length)
-  $: recalculateIndices(indexTop)
+  $: displayDataIndices = seq(0, displayData.length)
 </script>
 
 <div
@@ -107,14 +78,11 @@
       <div class="thead">
         <div class="header-row">
           {#each data.headers as header, i}
-            <div
-              class="th {header.title}"
-              style="width: {headerWidth(header, i)}px"
-            >
+            <div class="th {header.title}" style="width: {header.width}px">
               <span class="cell-content header-content"
                 ><div
                   class="click-to-sort"
-                  style="width: {headerWidth(header, i)}px"
+                  style="width: {header.width}px"
                   on:click={() => {
                     if (sortStatus.header === i) {
                       sortStatus.status = nextSort(sortStatus.status)
@@ -135,19 +103,19 @@
                   {#if data.headers[i].filter.values === 1}
                     <InputField
                       bind:value={filterStatuses[i].value}
-                      width={`${headerWidth(header, i) - 40}px`}
+                      width={`${header.width - 40}px`}
                       placeholder="search..."
                     />
                   {:else}
                     <InputField
                       bind:value={filterStatuses[i].value[0]}
-                      width={`${headerWidth(header, i) / 2 - 20}px`}
+                      width={`${header.width / 2 - 20}px`}
                       placeholder="from"
                     />
                     <br />
                     <InputField
                       bind:value={filterStatuses[i].value[1]}
-                      width={`${headerWidth(header, i) / 2 - 20}px`}
+                      width={`${header.width / 2 - 20}px`}
                       placeholder="to"
                     />
                   {/if}
@@ -157,21 +125,18 @@
           {/each}
         </div>
       </div>
-      <div class="tbody" on:scroll={scrollHandle}>
-        <div class="window" style="--nrow: {displayData.length}">
-          <div class="window-padding-top" style="--itop: {indexTop}" />
-          {#each indexBuffer as i}
-            <div class="data-row {i % 2 == 0 ? 'even' : 'odd'}">
-              {#each data.headers as header}
-                <div class="td {header.title}" style="width: {header.width}px">
-                  <span class="cell-content data-content"
-                    >{header.accessor(displayData[i])}</span
-                  >
-                </div>
-              {/each}
-            </div>
-          {/each}
-        </div>
+      <div class="tbody">
+        <VirtualList items={displayDataIndices} let:item>
+          <div class="data-row {item % 2 == 0 ? 'even' : 'odd'}">
+            {#each data.headers as header}
+              <div class="td {header.title}" style="width: {header.width}px">
+                <span class="cell-content data-content"
+                  >{header.accessor(displayData[item])}</span
+                >
+              </div>
+            {/each}
+          </div>
+        </VirtualList>
       </div>
     </div>
   </div>
