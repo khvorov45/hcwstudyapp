@@ -163,8 +163,10 @@
             <div class="data-row">
               {#each data.headers as header}
                 <div class="td {header.title}" style="width: {header.width}px">
-                  <span class="cell-content data-content"
-                    >{header.accessor(displayData[i])}</span
+                  <span
+                    class="cell-content data-content {i % 2 == 0
+                      ? 'even'
+                      : 'odd'}">{header.accessor(displayData[i])}</span
                   >
                 </div>
               {/each}
@@ -218,7 +220,7 @@
   .data-row {
     display: flex;
   }
-  .data-row:nth-child(even) {
+  .data-row.even {
     background-color: var(--color-bg-2);
   }
   .td {
