@@ -359,7 +359,7 @@ impl TryAs for serde_json::Value {
                 }
             }
         }
-        if state != State::Second {
+        if state != State::Second || site_part.is_empty() {
             return Err(self.error(ExpectedJson::Pid));
         }
         //* Number format: right-align and pad to 3 with 0's
