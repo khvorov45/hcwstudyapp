@@ -46,60 +46,67 @@
   $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk && consentOk
 </script>
 
-{#if anyNull}
-  ...
-{:else if allOk}
-  <div class="no-problems">No problems found</div>
-{:else}
-  {#if !weeklySurveyOk}
-    <div class="card">
-      <div class="table-name">Weekly Survey</div>
-      NOT OK
-    </div>
-  {/if}
-
-  {#if !scheduleOk}
-    <div class="card-container">
+<div class="vscroll">
+  {#if anyNull}
+    ...
+  {:else if allOk}
+    <div class="no-problems">No problems found</div>
+  {:else}
+    {#if !weeklySurveyOk}
       <div class="card">
-        <div class="table-name">Schedule</div>
-        <div class="subtitle">Duplicate entries</div>
-        {#each scheduleProblems?.pk as pkProblem}
-          <div class="pk-problem">
-            {pkProblem.value.join(" - ")}
-          </div>
-        {/each}
+        <div class="table-name">Weekly Survey</div>
+        NOT OK
       </div>
-    </div>
-  {/if}
+    {/if}
 
-  {#if !virusOk}
-    <div class="card">
-      <div class="table-name">Virus</div>
-      NOT OK
-    </div>
-  {/if}
+    {#if !scheduleOk}
+      <div class="card-container">
+        <div class="card">
+          <div class="table-name">Schedule</div>
+          <div class="subtitle">Duplicate entries</div>
+          {#each scheduleProblems?.pk as pkProblem}
+            <div class="pk-problem">
+              {pkProblem.value.join(" - ")}
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
 
-  {#if !serologyOk}
-    <div class="card">
-      <div class="table-name">Serology</div>
-      NOT OK
-    </div>
-  {/if}
-
-  {#if !consentOk}
-    <div class="card-container">
+    {#if !virusOk}
       <div class="card">
-        <div class="table-name">Consent</div>
-        <div class="subtitle">Conflicting forms</div>
-        {#each consentProblems?.conflicting_groups as conflict}
-          <div>{conflict.join(" ")}</div>
-        {/each}
+        <div class="table-name">Virus</div>
+        NOT OK
       </div>
-    </div>
+    {/if}
+
+    {#if !serologyOk}
+      <div class="card">
+        <div class="table-name">Serology</div>
+        NOT OK
+      </div>
+    {/if}
+
+    {#if !consentOk}
+      <div class="card-container">
+        <div class="card">
+          <div class="table-name">Consent</div>
+          <div class="subtitle">Conflicting forms</div>
+          {#each consentProblems?.conflicting_groups as conflict}
+            <div>{conflict.join(" ")}</div>
+          {/each}
+        </div>
+      </div>
+    {/if}
   {/if}
-{/if}
+</div>
 
 <style>
+  .vscroll {
+    height: calc(100vh - var(--size-nav));
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
   .card-container {
     display: flex;
     margin-top: 10px;
