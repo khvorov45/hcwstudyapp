@@ -202,7 +202,7 @@ export async function fetchTable(
   unsubscribe()
 
   if (content.result?.error !== null) {
-    console.error(content.result.error)
+    console.error(apiErrorToString(content.result.error))
   }
 
   return FetchTableStatus.Fetched
