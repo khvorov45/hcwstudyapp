@@ -44,8 +44,6 @@
     weeklySurveyProblems === null ||
     consentProblems === null
   $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk && consentOk
-
-  $: console.log($checkQualityReq)
 </script>
 
 {#if anyNull}
