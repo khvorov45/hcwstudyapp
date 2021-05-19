@@ -72,8 +72,7 @@
   <div class="vscroll">
     <div
       class="table"
-      style="width: {data.headers.reduce((s, x) => (s += x.width), 0) +
-        $scrollbarWidth}px"
+      style="width: {data.headers.reduce((s, x) => (s += x.width), 0)}px"
     >
       <div class="thead">
         <div class="header-row">
@@ -168,7 +167,7 @@
       100vh - var(--height-header-Table) - var(--occupied-height) -
         var(--scrollbarWidth)
     );
-    overflow-y: scroll;
+    overflow-y: hidden;
     overflow-x: hidden;
   }
   .window {
