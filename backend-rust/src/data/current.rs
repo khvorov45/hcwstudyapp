@@ -163,7 +163,7 @@ pub enum StudyGroup {
     MainAndNested,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ConsentDisease {
     Flu,
     Covid,

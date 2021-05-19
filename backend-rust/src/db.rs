@@ -64,6 +64,11 @@ pub struct TableIssues {
     weekly_survey: WeeklySurveyTableIssues,
     virus: VirusTableIssues,
     serology: SerologyTableIssues,
+    consent: ConsentTableIssues,
+}
+#[derive(serde_derive::Serialize)]
+pub struct ConsentTableIssues {
+    conflicting_groups: Vec<(String, u32, current::ConsentDisease)>,
 }
 
 #[derive(serde_derive::Serialize)]
@@ -244,8 +249,61 @@ impl Db {
                     |v| v.virus.clone(),
                 ),
             },
+            consent: self.find_consent_issues(&allowed_pid),
         }
     }
+
+    fn find_consent_issues(&mut self, sorted_allowed_pid: &[String]) -> ConsentTableIssues {
+        let mut conflicting_groups = Vec::new();
+
+        if self.consent.current.data.is_empty() {
+            return ConsentTableIssues { conflicting_groups };
+        }
+
+        fn key(x: &current::Consent) -> (&String, u32, current::ConsentDisease) {
+            (&x.pid, x.year, x.disease)
+        }
+
+        self.consent
+            .current
+            .data
+            .sort_by(|a, b| key(a).cmp(&key(b)));
+
+        let consent: Vec<&current::Consent> = self
+            .consent
+            .current
+            .data
+            .iter()
+            .filter(|x| sorted_allowed_pid.binary_search(&x.pid).is_ok())
+            .collect();
+
+        let mut last_key = key(&consent[0]);
+        let mut last_group = consent[0].group;
+        let mut conflict_found = false;
+        for consent_row in consent {
+            let this_key = key(consent_row);
+            if this_key == last_key {
+                if conflict_found {
+                    continue;
+                }
+                if last_group.is_none() {
+                    last_group = consent_row.group;
+                } else if consent_row.group.is_some() && last_group != consent_row.group {
+                    conflict_found = true;
+                }
+            } else {
+                if conflict_found {
+                    conflicting_groups.push((last_key.0.clone(), last_key.1, last_key.2));
+                    conflict_found = false;
+                }
+                last_key = this_key;
+                last_group = consent_row.group;
+            }
+        }
+
+        ConsentTableIssues { conflicting_groups }
+    }
+
     pub fn insert_user(&mut self, user: current::User) -> Result<()> {
         self.users.check_row_pk_absent(&user)?;
         self.users.current.data.push(user);
