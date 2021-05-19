@@ -187,4 +187,7 @@ export type DataQuality = {
     fk_participant: KeyIssue<string, Serology>[]
     fk_virus: KeyIssue<string, Serology>[]
   }
+  consent: {
+    conflicting_groups: [String, number, ConsentDisease][]
+  }
 }

@@ -34,12 +34,18 @@
   $: weeklySurveyProblems = problems?.weekly_survey ?? null
   $: weeklySurveyOk = weeklySurveyProblems?.pk.length === 0
 
+  $: consentProblems = problems?.consent ?? null
+  $: consentOk = consentProblems?.conflicting_groups.length === 0
+
   $: anyNull =
     serologyProblems === null ||
     virusProblems === null ||
     scheduleProblems === null ||
-    weeklySurveyProblems === null
-  $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk
+    weeklySurveyProblems === null ||
+    consentProblems === null
+  $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk && consentOk
+
+  $: console.log($checkQualityReq)
 </script>
 
 {#if anyNull}
@@ -79,6 +85,18 @@
     <div class="card">
       <div class="table-name">Serology</div>
       NOT OK
+    </div>
+  {/if}
+
+  {#if !consentOk}
+    <div class="card-container">
+      <div class="card">
+        <div class="table-name">Consent</div>
+        <div class="subtitle">Conflicting forms</div>
+        {#each consentProblems?.conflicting_groups as conflict}
+          <div>{conflict.join(" ")}</div>
+        {/each}
+      </div>
     </div>
   {/if}
 {/if}
