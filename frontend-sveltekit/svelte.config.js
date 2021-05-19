@@ -1,6 +1,5 @@
-const sveltePreprocess = require("svelte-preprocess")
-const static = require("@sveltejs/adapter-static")
-const pkg = require("./package.json")
+import sveltePreprocess from "svelte-preprocess"
+import staticAdapter from "@sveltejs/adapter-static"
 
 const apiRoot =
   process.env.NODE_ENV === "development"
@@ -8,7 +7,7 @@ const apiRoot =
     : JSON.stringify("https://reports.hcwflustudy.com/api")
 
 /** @type {import('@sveltejs/kit').Config} */
-module.exports = {
+const config = {
   // Consult https://github.com/sveltejs/svelte-preprocess
   // for more information about preprocessors
   preprocess: sveltePreprocess({
@@ -21,7 +20,7 @@ module.exports = {
     // By default, `npm run build` will create a standard Node app.
     // You can create optimized builds for different platforms by
     // specifying a different adapter
-    adapter: static(),
+    adapter: staticAdapter(),
 
     // hydrate the <div id="svelte"> element in src/app.html
     target: "#svelte",
@@ -30,9 +29,9 @@ module.exports = {
       define: {
         "process.env.API_ROOT": apiRoot,
       },
-      ssr: {
-        noExternal: Object.keys(pkg.dependencies || {}),
-      },
+      ssr: true,
     },
   },
 }
+
+export default config
