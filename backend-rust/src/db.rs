@@ -65,7 +65,14 @@ pub struct TableIssues {
     virus: VirusTableIssues,
     serology: SerologyTableIssues,
     consent: ConsentTableIssues,
+    year_changes: YearChangeTableIssues,
 }
+
+#[derive(serde_derive::Serialize)]
+pub struct YearChangeTableIssues {
+    duplicate_pid: Vec<KeyIssue<(String, u32), String>>,
+}
+
 #[derive(serde_derive::Serialize)]
 pub struct ConsentTableIssues {
     conflicting_groups: Vec<(String, u32, current::ConsentDisease)>,
@@ -250,7 +257,57 @@ impl Db {
                 ),
             },
             consent: self.find_consent_issues(&allowed_pid),
+            year_changes: self.find_year_change_issues(&allowed_pid),
         }
+    }
+
+    fn find_year_change_issues(&mut self, sorted_allowed_pid: &[String]) -> YearChangeTableIssues {
+        let mut duplicate_pid = Vec::new();
+
+        if self.year_change.current.data.len() <= 1 {
+            return YearChangeTableIssues { duplicate_pid };
+        }
+
+        fn key(x: &current::YearChange) -> (Option<&String>, u32) {
+            (x.pid.as_ref(), x.year)
+        }
+
+        self.year_change
+            .current
+            .data
+            .sort_by(|a, b| key(a).cmp(&key(b)));
+
+        let year_change: Vec<&current::YearChange> =
+            self.year_change.filter_and_collect(|x| match &x.pid {
+                Some(pid) => sorted_allowed_pid.binary_search(pid).is_ok(),
+                None => false,
+            });
+
+        let mut last_key = key(&year_change[0]);
+        let mut last_record_id = &year_change[0].record_id;
+        let mut issue_rows = Vec::new();
+        for year_change_row in &year_change[1..] {
+            let this_key = key(year_change_row);
+            if this_key == last_key {
+                if issue_rows.is_empty() {
+                    issue_rows.push(last_record_id.clone());
+                }
+                issue_rows.push(year_change_row.record_id.clone());
+            } else {
+                if !issue_rows.is_empty() {
+                    let issue = KeyIssue {
+                        value: (last_key.0.unwrap().clone(), last_key.1),
+                        rows: issue_rows.clone(),
+                    };
+                    duplicate_pid.push(issue);
+                    issue_rows.clear();
+                }
+                last_key = this_key;
+                last_record_id = &year_change_row.record_id;
+            }
+        }
+
+        YearChangeTableIssues { duplicate_pid }
     }
 
     fn find_consent_issues(&mut self, sorted_allowed_pid: &[String]) -> ConsentTableIssues {

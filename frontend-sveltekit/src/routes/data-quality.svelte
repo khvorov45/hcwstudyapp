@@ -37,13 +37,23 @@
   $: consentProblems = problems?.consent ?? null
   $: consentOk = consentProblems?.conflicting_groups.length === 0
 
+  $: yearChangeProblems = problems?.year_changes ?? null
+  $: yearChangeOk = yearChangeProblems?.duplicate_pid.length === 0
+
   $: anyNull =
     serologyProblems === null ||
     virusProblems === null ||
     scheduleProblems === null ||
     weeklySurveyProblems === null ||
-    consentProblems === null
-  $: allOk = serologyOk && virusOk && scheduleOk && weeklySurveyOk && consentOk
+    consentProblems === null ||
+    yearChangeProblems === null
+  $: allOk =
+    serologyOk &&
+    virusOk &&
+    scheduleOk &&
+    weeklySurveyOk &&
+    consentOk &&
+    yearChangeOk
 </script>
 
 <div class="vscroll">
@@ -98,6 +108,20 @@
         </div>
       </div>
     {/if}
+
+    {#if !yearChangeOk}
+      <div class="card-container">
+        <div class="card">
+          <div class="table-name">Year changes</div>
+          <div class="subtitle">Duplicate pids</div>
+          {#each yearChangeProblems?.duplicate_pid as duplicatePid}
+            <div>
+              {duplicatePid.value.join(" ")}: {duplicatePid.rows.join(" ")}
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -106,6 +130,7 @@
     height: calc(100vh - var(--size-nav));
     overflow-y: scroll;
     overflow-x: hidden;
+    display: flex;
   }
   .card-container {
     display: flex;

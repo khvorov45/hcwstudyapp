@@ -190,4 +190,7 @@ export type DataQuality = {
   consent: {
     conflicting_groups: [String, number, ConsentDisease][]
   }
+  year_changes: {
+    duplicate_pid: KeyIssue<[String, number], String>[]
+  }
 }
