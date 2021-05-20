@@ -271,11 +271,7 @@ impl Db {
 
         let consent: Vec<&current::Consent> = self
             .consent
-            .current
-            .data
-            .iter()
-            .filter(|x| sorted_allowed_pid.binary_search(&x.pid).is_ok())
-            .collect();
+            .filter_and_collect(|x| sorted_allowed_pid.binary_search(&x.pid).is_ok());
 
         let mut last_key = key(&consent[0]);
         let mut last_group = consent[0].group;
@@ -383,12 +379,7 @@ impl Db {
     }
 
     pub fn get_participants_subset(&self, site: current::Site) -> Vec<&current::Participant> {
-        self.participants
-            .current
-            .data
-            .iter()
-            .filter(|p| p.site == site)
-            .collect()
+        self.participants.filter_and_collect(|p| p.site == site)
     }
 
     pub fn sync_redcap_participants(
@@ -476,6 +467,12 @@ impl<P, C> Table<P, C> {
         F: FnMut(&C) -> &T,
     {
         self.current.data.iter().map(f).collect::<Vec<&T>>()
+    }
+    pub fn filter_and_collect<F>(&self, f: F) -> Vec<&C>
+    where
+        F: FnMut(&&C) -> bool,
+    {
+        self.current.data.iter().filter(f).collect::<Vec<&C>>()
     }
 }
 
