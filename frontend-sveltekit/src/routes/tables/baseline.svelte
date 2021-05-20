@@ -24,7 +24,7 @@
 
   $: fetchParticipants($token, $loginReq.status, mounted)
 
-  const headers: TableDisplayHeader<Participant>[] = [
+  const headers: TableDisplayHeader<Participant, any>[] = [
     {
       title: "PID",
       accessor: (p) => p.pid,
@@ -45,25 +45,29 @@
     },
     {
       title: "Age at screening",
-      accessor: (u) => u.age_recruitment?.toFixed(1) ?? "",
+      accessor: (u) => u.age_recruitment,
+      formatter: (x) => x?.toFixed(1) ?? "",
       width: 170,
       filter: tableFilterBetween,
     },
     {
       title: "Height",
-      accessor: (u) => u.height?.toFixed(1) ?? "",
+      accessor: (u) => u.height,
+      formatter: (x) => x?.toFixed(1) ?? "",
       width: 130,
       filter: tableFilterBetween,
     },
     {
       title: "Weight",
-      accessor: (u) => u.weight?.toFixed(1) ?? "",
+      accessor: (u) => u.weight,
+      formatter: (x) => x?.toFixed(1) ?? "",
       width: 130,
       filter: tableFilterBetween,
     },
     {
       title: "BMI",
-      accessor: (u) => u.bmi?.toFixed(1) ?? "",
+      accessor: (u) => u.bmi,
+      formatter: (x) => x?.toFixed(1) ?? "",
       width: 130,
       filter: tableFilterBetween,
     },

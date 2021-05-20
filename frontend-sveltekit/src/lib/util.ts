@@ -14,15 +14,21 @@ export function sortToString(s: Sort): string {
   return s === Sort.Up ? "up" : s === Sort.Down ? "down" : "no"
 }
 
-export function stringSort<T>(
-  accessor: (x: T) => string,
+export function genericSort<T, V>(
+  accessor: (x: T) => V,
   rev: boolean = false
 ): (a: T, b: T) => number {
   return (x: T, y: T) => {
     let a = accessor(x)
     let b = accessor(y)
     let i = 0
-    if (a > b) {
+    if (a === b) {
+      i = 0
+    } else if (a === null) {
+      i = 1
+    } else if (b === null) {
+      i = -1
+    } else if (a > b) {
       i = 1
     } else if (a < b) {
       i = -1
@@ -151,15 +157,16 @@ export type TableDisplayFilter = {
   fun: (...args: any) => boolean
 }
 
-export type TableDisplayHeader<T> = {
+export type TableDisplayHeader<T, V> = {
   title: string
-  accessor: (row: T) => string
+  accessor: (row: T) => V
+  formatter?: (v: V) => string
   width: number
   filter: TableDisplayFilter
 }
 
 export type TableDisplayData<T> = {
-  headers: TableDisplayHeader<T>[]
+  headers: TableDisplayHeader<T, any>[]
   rows: T[]
 }
 

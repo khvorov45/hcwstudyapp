@@ -1,7 +1,7 @@
 <script lang="ts">
   import VirtualList from "@sveltejs/svelte-virtual-list"
 
-  import { Sort, nextSort, stringSort, seq } from "$lib/util"
+  import { Sort, nextSort, genericSort, seq } from "$lib/util"
   import type { TableDisplayData, TableDisplayHeader } from "$lib/util"
   import SortIcon from "$lib/components/icons/Sort.svelte"
   import InputField from "$lib/components/InputField.svelte"
@@ -52,7 +52,7 @@
       )
     }
     return rows.sort(
-      stringSort(
+      genericSort(
         data.headers[sortStatus.header].accessor,
         sortStatus.status === Sort.Down
       )
@@ -130,7 +130,9 @@
             {#each data.headers as header}
               <div class="td {header.title}" style="width: {header.width}px">
                 <span class="cell-content data-content"
-                  >{header.accessor(displayData[item])}</span
+                  >{header.formatter
+                    ? header.formatter(header.accessor(displayData[item]))
+                    : header.accessor(displayData[item])}</span
                 >
               </div>
             {/each}
