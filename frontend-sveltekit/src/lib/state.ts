@@ -101,6 +101,62 @@ export const syncParticipantsReq = createApiStore<
   expectContent: "none",
 }))
 
+export const syncVaccinationReq = createApiStore<
+  { token: string | null },
+  User
+>(({ token }) => ({
+  method: "PUT",
+  token: token,
+  url: "vaccination/redcap/sync",
+  expectContent: "none",
+}))
+
+export const syncScheduleReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
+    method: "PUT",
+    token: token,
+    url: "schedule/redcap/sync",
+    expectContent: "none",
+  })
+)
+
+export const syncWeeklySurveyReq = createApiStore<
+  { token: string | null },
+  User
+>(({ token }) => ({
+  method: "PUT",
+  token: token,
+  url: "weekly-survey/redcap/sync",
+  expectContent: "none",
+}))
+
+export const syncWithdrawnReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
+    method: "PUT",
+    token: token,
+    url: "withdrawn/redcap/sync",
+    expectContent: "none",
+  })
+)
+
+export const syncConsentReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
+    method: "PUT",
+    token: token,
+    url: "consent/redcap/sync",
+    expectContent: "none",
+  })
+)
+
+export const syncYearChangeReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
+    method: "PUT",
+    token: token,
+    url: "year-change/redcap/sync",
+    expectContent: "none",
+  })
+)
+
 export const loginReq = createApiStore<{ token: string | null }, User>(
   ({ token }) => ({
     method: "GET",

@@ -8,9 +8,19 @@
     usersReq,
     participantsReq,
     syncParticipantsReq,
+    syncVaccinationReq,
+    vaccinationHistoryReq,
+    syncScheduleReq,
+    scheduleReq,
+    syncWeeklySurveyReq,
+    weeklySurveyReq,
+    syncWithdrawnReq,
+    withdrawnReq,
+    syncConsentReq,
+    consentReq,
+    syncYearChangeReq,
+    yearChangeReq,
   } from "$lib/state"
-  import { apiReq } from "$lib/util"
-  import type { ApiResponseError, AsyncStatus } from "$lib/util"
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
   import Search from "./icons/Search.svelte"
@@ -44,6 +54,50 @@
     }
     await syncParticipantsReq.execute({ token: $token })
     await participantsReq.execute({ token: $token })
+  }
+
+  async function syncVaccination() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncVaccinationReq.execute({ token: $token })
+    await vaccinationHistoryReq.execute({ token: $token })
+  }
+  async function syncSchedule() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncScheduleReq.execute({ token: $token })
+    await scheduleReq.execute({ token: $token })
+  }
+  async function syncWeeklySurvey() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncWeeklySurveyReq.execute({ token: $token })
+    await weeklySurveyReq.execute({ token: $token })
+  }
+  async function syncWithdrawn() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncWithdrawnReq.execute({ token: $token })
+    await withdrawnReq.execute({ token: $token })
+  }
+  async function syncConsent() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncConsentReq.execute({ token: $token })
+    await consentReq.execute({ token: $token })
+  }
+
+  async function syncYearChange() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncYearChangeReq.execute({ token: $token })
+    await yearChangeReq.execute({ token: $token })
   }
 </script>
 
@@ -106,6 +160,36 @@
             loading={$syncParticipantsReq.status === "loading"}
             errorMsg={$syncParticipantsReq.result?.error?.message ?? ""}
             action={syncParticipants}>Sync participants</Button
+          >
+          <Button
+            loading={$syncVaccinationReq.status === "loading"}
+            errorMsg={$syncVaccinationReq.result?.error?.message ?? ""}
+            action={syncVaccination}>Sync vaccination</Button
+          >
+          <Button
+            loading={$syncScheduleReq.status === "loading"}
+            errorMsg={$syncScheduleReq.result?.error?.message ?? ""}
+            action={syncSchedule}>Sync schedule</Button
+          >
+          <Button
+            loading={$syncWeeklySurveyReq.status === "loading"}
+            errorMsg={$syncWeeklySurveyReq.result?.error?.message ?? ""}
+            action={syncWeeklySurvey}>Sync weekly surveys</Button
+          >
+          <Button
+            loading={$syncWithdrawnReq.status === "loading"}
+            errorMsg={$syncWithdrawnReq.result?.error?.message ?? ""}
+            action={syncWithdrawn}>Sync withdrawn</Button
+          >
+          <Button
+            loading={$syncConsentReq.status === "loading"}
+            errorMsg={$syncConsentReq.result?.error?.message ?? ""}
+            action={syncConsent}>Sync consent</Button
+          >
+          <Button
+            loading={$syncYearChangeReq.status === "loading"}
+            errorMsg={$syncYearChangeReq.result?.error?.message ?? ""}
+            action={syncYearChange}>Sync year-change</Button
           >
         {/if}
       </Popover>
