@@ -1,6 +1,14 @@
 <script lang="ts">
   import { page } from "$app/stores"
-  import { loginReq, theme, token } from "$lib/state"
+  import {
+    loginReq,
+    theme,
+    token,
+    syncUsersReq,
+    usersReq,
+    participantsReq,
+    syncParticipantsReq,
+  } from "$lib/state"
   import { apiReq } from "$lib/util"
   import type { ApiResponseError, AsyncStatus } from "$lib/util"
   import Home from "./icons/Report.svelte"
@@ -18,13 +26,6 @@
 
   $: darkMode = $theme === "dark"
 
-  let syncUsersStatus: {
-    status: AsyncStatus
-    error: ApiResponseError | null
-  } = {
-    status: "not-requested",
-    error: null,
-  }
   async function syncUsers() {
     if (
       $loginReq.status !== "success" ||
@@ -33,22 +34,16 @@
     ) {
       return
     }
-    syncUsersStatus.status = "loading"
-    syncUsersStatus.error = null
+    await syncUsersReq.execute({ token: $token })
+    await usersReq.execute({ token: $token })
+  }
 
-    const res = await apiReq({
-      url: "users/redcap/sync",
-      method: "PUT",
-      token: $token,
-      expectContent: "none",
-    })
-
-    if (res.error !== null) {
-      syncUsersStatus.status = "error"
-      syncUsersStatus.error = res.error
-    } else {
-      syncUsersStatus.status = "success"
+  async function syncParticipants() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
     }
+    await syncParticipantsReq.execute({ token: $token })
+    await participantsReq.execute({ token: $token })
   }
 </script>
 
@@ -101,9 +96,16 @@
         >
         {#if $loginReq.result?.data?.access_group === "Admin"}
           <Button
-            loading={syncUsersStatus.status === "loading"}
-            errorMsg={syncUsersStatus.error?.message ?? ""}
+            loading={$syncUsersReq.status === "loading"}
+            errorMsg={$syncUsersReq.result?.error?.message ?? ""}
             action={syncUsers}>Sync users</Button
+          >
+        {/if}
+        {#if $loginReq.status === "success"}
+          <Button
+            loading={$syncParticipantsReq.status === "loading"}
+            errorMsg={$syncParticipantsReq.result?.error?.message ?? ""}
+            action={syncParticipants}>Sync participants</Button
           >
         {/if}
       </Popover>

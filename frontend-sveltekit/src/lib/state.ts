@@ -82,6 +82,25 @@ function createApiStore<A, R>(argsToReq: (x: A) => ApiRequest) {
   }
 }
 
+export const syncUsersReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
+    method: "PUT",
+    token: token,
+    url: "users/redcap/sync",
+    expectContent: "none",
+  })
+)
+
+export const syncParticipantsReq = createApiStore<
+  { token: string | null },
+  User
+>(({ token }) => ({
+  method: "PUT",
+  token: token,
+  url: "participants/redcap/sync",
+  expectContent: "none",
+}))
+
 export const loginReq = createApiStore<{ token: string | null }, User>(
   ({ token }) => ({
     method: "GET",
