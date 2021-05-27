@@ -40,7 +40,11 @@ function createLocalStore<T>(
     useLocalStorage: () => {
       const json = localStorage.getItem(key)
       if (json) {
-        set(JSON.parse(json))
+        let contents = null
+        try {
+          contents = JSON.parse(json)
+        } catch (e) {}
+        set(contents)
       }
 
       subscribe((current) => {
