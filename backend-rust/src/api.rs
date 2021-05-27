@@ -23,12 +23,7 @@ pub fn routes(
     opt: Opt,
     mailer: Mailer,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    let cors = warp::cors()
-        .allow_any_origin()
-        .allow_methods(&[Method::GET, Method::POST, Method::DELETE, Method::PUT])
-        .allow_headers(vec!["Authorization", "Content-Type"]);
-    let log = warp::log("api");
-    get_users(db.clone())
+    let base_routes = get_users(db.clone())
         .or(get_year_change(db.clone()))
         .or(year_change_redcap_sync(db.clone(), opt.clone()))
         .or(get_consent(db.clone()))
@@ -49,7 +44,18 @@ pub fn routes(
         .or(users_redcap_sync(db.clone(), opt.clone()))
         .or(auth_token_verify(db.clone()))
         .or(auth_token_send(db.clone(), opt.clone(), mailer))
-        .or(auth_token_refresh(db, opt))
+        .or(auth_token_refresh(db, opt));
+
+    let base_routes_with_prefix = warp::path("api").and(base_routes);
+
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_methods(&[Method::GET, Method::POST, Method::DELETE, Method::PUT])
+        .allow_headers(vec!["Authorization", "Content-Type"]);
+
+    let log = warp::log("api");
+
+    base_routes_with_prefix
         .recover(handle_rejection)
         .with(cors)
         .with(log)
