@@ -20,7 +20,8 @@
     await login()
     // Attempt to pull token from url
     if ($loginReq.status === "error") {
-      const newToken = $page.query.get("token") ?? null
+      const newToken =
+        new URLSearchParams(document.location.search).get("token") ?? null
       if (newToken !== null && newToken !== $token) {
         token.set(newToken)
         await login()
