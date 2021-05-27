@@ -4,7 +4,7 @@ import staticAdapter from "@sveltejs/adapter-static"
 const apiRoot =
   process.env.NODE_ENV === "development"
     ? JSON.stringify("http://localhost:7300/api")
-    : JSON.stringify("https://reports.hcwflustudy.com/api")
+    : JSON.stringify("https://reports2.hcwflustudy.com/api")
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
