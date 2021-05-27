@@ -221,11 +221,12 @@ fn auth_token_verify(db: Db) -> impl Filter<Extract = impl Reply, Error = Reject
 // Users ==========================================================================================
 
 fn get_users(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    async fn handler(db: Db) -> Result<impl Reply, Infallible> {
+    async fn handler(_u: current::User, db: Db) -> Result<impl Reply, Infallible> {
         Ok(warp::reply::json(&db.lock().await.users.current.data))
     }
     warp::path!("users")
         .and(warp::get())
+        .and(sufficient_access(db.clone(), current::AccessGroup::Admin))
         .and(with_db(db))
         .and_then(handler)
 }
