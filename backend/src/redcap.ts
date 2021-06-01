@@ -522,9 +522,7 @@ export const RedcapVaccinationCovidV = t.type({
 })
 export type RedcapVaccinationCovid = t.TypeOf<typeof RedcapVaccinationCovidV>
 
-export async function exportWeeklySurvey(
-  config: RedcapConfig
-): Promise<{
+export async function exportWeeklySurvey(config: RedcapConfig): Promise<{
   weeklySurvey: RedcapWeeklySurvey[]
   vaccinationCovid: RedcapVaccinationCovid[]
 }> {
@@ -632,28 +630,49 @@ export async function sendCovidVaccination(
   data: RedcapVaccinationCovid[]
 ) {
   const before = new Date()
+  function getCovidBrand(brand: CovidVaccineBrand | null) {
+    if (brand === null) {
+      return null
+    }
+    return brand === "pfizer" ? "1" : brand === "astra" ? "2" : "3"
+  }
+  function getRow(r: RedcapVaccinationCovid) {
+    if (r.dose === null) {
+      return null
+    }
+    return r.dose === 1
+      ? {
+          record_id: r.redcapRecordId,
+          redcap_event_name: "vaccination_arm_1",
+          covid_vac_brand: getCovidBrand(r.brand),
+          other_covax_brand: r.brandOther,
+          covid_vac_dose1_rec: "1",
+          covid_vacc_date1: justDateString(r.date),
+          covid_vac_batch1: r.batch,
+          covid_vac_survey_index: r.surveyIndex,
+        }
+      : {
+          record_id: r.redcapRecordId,
+          redcap_event_name: "vaccination_arm_1",
+          covid_vac_brand2: getCovidBrand(r.brand),
+          other_covax_brand2: r.brandOther,
+          covid_vac_dose2_rec: "1",
+          covid_vacc_date2: justDateString(r.date),
+          covid_vac_batch2: r.batch,
+          covid_vac_survey_index2: r.surveyIndex,
+        }
+  }
+
+  console.log(data)
+  console.log(data.map(getRow))
+
   const res = await axios.post(
     config.url,
     new URLSearchParams({
       token: config.token2021,
       format: "json",
       content: "record",
-      data: JSON.stringify(
-        data.map((r, i) => ({
-          record_id: r.redcapRecordId,
-          redcap_event_name: "vaccination_arm_1",
-          covid_vac_brand:
-            r.brand === "pfizer" ? 1 : r.brand === "astra" ? 2 : 3,
-          other_covax_brand: r.brandOther,
-          covid_vac_dose1_rec: r.dose === 1 ? "1" : "",
-          covid_vac_dose2_rec: r.dose === 2 ? "2" : "",
-          covid_vacc_date1: r.dose === 1 ? justDateString(r.date) : "",
-          covid_vacc_date2: r.dose === 2 ? justDateString(r.date) : "",
-          covid_vac_batch1: r.dose === 1 ? r.batch : "",
-          covid_vac_batch2: r.dose === 2 ? r.batch : "",
-          covid_vac_survey_index: r.surveyIndex,
-        }))
-      ),
+      data: JSON.stringify(data.map(getRow).filter((x) => x !== null)),
     }),
     { validateStatus: () => true }
   )
