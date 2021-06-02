@@ -1216,22 +1216,32 @@ pub async fn export_weekly_survey(
 }
 
 #[derive(serde_derive::Serialize)]
-struct RedcapVaccinationCovid {
+struct RedcapVaccinationCovid1 {
     record_id: String,
     redcap_event_name: String,
     covid_vac_brand: String,
     other_covax_brand: String,
     covid_vac_dose1_rec: String,
-    covid_vac_dose2_rec: String,
     covid_vacc_date1: String,
-    covid_vacc_date2: String,
     covid_vac_batch1: String,
-    covid_vac_batch2: String,
     covid_vac_survey_index: String,
 }
 
+#[derive(serde_derive::Serialize)]
+struct RedcapVaccinationCovid2 {
+    record_id: String,
+    redcap_event_name: String,
+    covid_vac_brand2: String,
+    other_covax_brand2: String,
+    covid_vac_dose2_rec: String,
+    covid_vacc_date2: String,
+    covid_vac_batch2: String,
+    covid_vac_survey_index2: String,
+}
+
 async fn send_covid_vaccination(opt: &Opt, data_raw: &[serde_json::Value]) -> Result<()> {
-    let mut data_to_send: Vec<RedcapVaccinationCovid> = Vec::new();
+    let mut data_to_send1: Vec<RedcapVaccinationCovid1> = Vec::new();
+    let mut data_to_send2: Vec<RedcapVaccinationCovid2> = Vec::new();
 
     for value in data_raw {
         let v = value.try_as_object()?;
@@ -1242,47 +1252,62 @@ async fn send_covid_vaccination(opt: &Opt, data_raw: &[serde_json::Value]) -> Re
         }
         let date = v.try_get("covax_date")?.try_as_str()?.to_string();
         let batch = v.try_get("covax_batch")?.try_as_str()?.to_string();
-        let v = RedcapVaccinationCovid {
-            record_id: v.try_get("record_id")?.try_as_str()?.to_string(),
-            redcap_event_name: "vaccination_arm_1".to_string(),
-            covid_vac_brand: v.try_get("covax_rec")?.try_as_str()?.to_string(),
-            other_covax_brand: v.try_get("covax_rec_other")?.try_as_str()?.to_string(),
-            covid_vac_dose1_rec: if dose == "1" {
-                "1".to_string()
-            } else {
-                "".to_string()
-            },
-            covid_vac_dose2_rec: if dose == "2" {
-                "1".to_string()
-            } else {
-                "".to_string()
-            },
-            covid_vacc_date1: if dose == "1" {
-                date.clone()
-            } else {
-                "".to_string()
-            },
-            covid_vacc_date2: if dose == "2" { date } else { "".to_string() },
-            covid_vac_batch1: if dose == "1" {
-                batch.clone()
-            } else {
-                "".to_string()
-            },
-            covid_vac_batch2: if dose == "2" { batch } else { "".to_string() },
-            covid_vac_survey_index: v
-                .try_get("redcap_event_name")?
-                .try_as_str()?
-                .replace("weekly_survey_", "")
-                .replace("_arm_1", "")
-                .to_string(),
-        };
-        data_to_send.push(v);
+
+        let record_id = v.try_get("record_id")?.try_as_str()?.to_string();
+        let redcap_event_name = "vaccination_arm_1".to_string();
+        let covid_vac_brand = v.try_get("covax_rec")?.try_as_str()?.to_string();
+        let other_covax_brand = v.try_get("covax_rec_other")?.try_as_str()?.to_string();
+        let covid_vac_survey_index = v
+            .try_get("redcap_event_name")?
+            .try_as_str()?
+            .replace("weekly_survey_", "")
+            .replace("_arm_1", "")
+            .to_string();
+
+        if dose == "1" {
+            let v = RedcapVaccinationCovid1 {
+                record_id,
+                redcap_event_name,
+                covid_vac_brand,
+                other_covax_brand,
+                covid_vac_survey_index,
+                covid_vac_dose1_rec: "1".to_string(),
+                covid_vacc_date1: date,
+                covid_vac_batch1: batch.clone(),
+            };
+            data_to_send1.push(v);
+        } else {
+            let v = RedcapVaccinationCovid2 {
+                record_id,
+                redcap_event_name,
+                covid_vac_brand2: covid_vac_brand,
+                other_covax_brand2: other_covax_brand,
+                covid_vac_survey_index2: covid_vac_survey_index,
+                covid_vac_dose2_rec: "1".to_string(),
+                covid_vacc_date2: date.clone(),
+                covid_vac_batch2: batch.clone(),
+            };
+            data_to_send2.push(v);
+        }
     }
 
-    if data_to_send.is_empty() {
+    if data_to_send1.is_empty() && data_to_send2.is_empty() {
         log::info!("no covid vaccination information to send");
         return Ok(());
     }
+
+    let data_to_send1: std::result::Result<Vec<serde_json::Value>, _> = data_to_send1
+        .into_iter()
+        .map(serde_json::to_value)
+        .collect();
+
+    let data_to_send2: std::result::Result<Vec<serde_json::Value>, _> = data_to_send2
+        .into_iter()
+        .map(serde_json::to_value)
+        .collect();
+
+    let mut data_to_send = data_to_send1?;
+    data_to_send.append(&mut data_to_send2?);
 
     let client = reqwest::Client::new();
     let data_string = serde_json::to_string(&data_to_send)?;
