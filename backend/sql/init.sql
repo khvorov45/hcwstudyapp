@@ -97,7 +97,7 @@ CREATE TABLE "VaccinationCovid" (
     "brandOther" text CHECK("brand" != 'other' and "brandOther" = null),
     "batch" text,
     "surveyIndex" int,
-    PRIMARY KEY ("pid", "year")
+    PRIMARY KEY ("pid", "year", "dose")
 );
 
 CREATE TABLE "Schedule" (
