@@ -663,9 +663,6 @@ export async function sendCovidVaccination(
         }
   }
 
-  console.log(data)
-  console.log(data.map(getRow))
-
   const res = await axios.post(
     config.url,
     new URLSearchParams({
