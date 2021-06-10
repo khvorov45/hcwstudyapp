@@ -323,26 +323,21 @@ export function getRoutes(
   routes.get(
     "/weekly-survey/send-summaries",
     async (req: Request, res: Response) => {
-      const {
-        surveys,
-        withdrawn,
-        redcapIds,
-        participants,
-        bloodSamples,
-      } = await transaction(db, async (tsk) => {
-        await validateAdmin(req, tsk)
-        return {
-          surveys: await getWeeklySurveySubset(tsk, "admin"),
-          withdrawn: await getWithdrawnSubset(tsk, "admin"),
-          redcapIds: await getYearChangeSubset(tsk, "admin"),
-          participants: await getParticipantsSubset(tsk, "admin"),
-          bloodSamples: await getTableSubset<BloodSample>(
-            tsk,
-            "admin",
-            "BloodSample"
-          ),
-        }
-      })
+      const { surveys, withdrawn, redcapIds, participants, bloodSamples } =
+        await transaction(db, async (tsk) => {
+          await validateAdmin(req, tsk)
+          return {
+            surveys: await getWeeklySurveySubset(tsk, "admin"),
+            withdrawn: await getWithdrawnSubset(tsk, "admin"),
+            redcapIds: await getYearChangeSubset(tsk, "admin"),
+            participants: await getParticipantsSubset(tsk, "admin"),
+            bloodSamples: await getTableSubset<BloodSample>(
+              tsk,
+              "admin",
+              "BloodSample"
+            ),
+          }
+        })
 
       const relevantYear = 2021
 
@@ -486,7 +481,7 @@ Incomplete weeks:\n\n${links
           .map(createEmail)
       )
       if (emails.length > 0) {
-        const emailSendLimit = 20
+        const emailSendLimit = 29
         if (emails.length <= emailSendLimit) {
           await Promise.all(emails.map(sendEmail))
         } else {
@@ -494,7 +489,7 @@ Incomplete weeks:\n\n${links
             await Promise.all(
               emails.slice(i, i + emailSendLimit).map(sendEmail)
             )
-            await sleep(11000)
+            await sleep(65_000)
           }
         }
       }
