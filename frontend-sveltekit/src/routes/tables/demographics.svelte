@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ParticipantExtra } from "$lib/state"
   import {
     loginReq,
     token,
@@ -9,48 +10,45 @@
     participantsSummary,
   } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
-  import { fetchTable, FetchTableStatus } from "$lib/util"
-  import type { Site, Gender, Occupation } from "$lib/data"
+  import { fetchTable } from "$lib/util"
+  import type { Site, Gender, VaccinationHistory, Participant } from "$lib/data"
   import { onMount } from "svelte"
   import Summary from "$lib/components/Summary.svelte"
   import Button from "$lib/components/Button.svelte"
+  import MultipleChoice from "$lib/components/MultipleChoice.svelte"
 
   let mounted = false
   onMount(() => (mounted = true))
 
-  let needToRegenExtra = false
   async function fetchTables(
     token: string | null,
     loginStatus: AsyncStatus,
     mounted: boolean
   ) {
-    const statuses = await Promise.all([
+    await Promise.all([
       fetchTable(participantsReq, token, loginStatus, mounted),
       fetchTable(vaccinationHistoryReq, token, loginStatus, mounted),
     ])
-    if (statuses.find((s) => s === FetchTableStatus.Fetched) !== undefined) {
-      needToRegenExtra = true
-    }
   }
 
-  let needToRegenSummary = false
-  function regenExtra(need: boolean) {
-    if (!need && $participantsExtra.init) {
-      return
-    }
-    needToRegenExtra = false
-    needToRegenSummary = true
-    const participants = $participantsReq.result?.data ?? []
-    const vaccinations = $vaccinationHistoryReq.result?.data ?? []
+  function regenExtra(
+    participants: Participant[],
+    vaccinations: VaccinationHistory[]
+  ) {
     participantsExtra.gen({ participants, vaccinations })
   }
 
-  function regenSummary(need: boolean) {
-    if (!need && $participantsSummary.init) {
-      return
-    }
-    needToRegenSummary = false
-    participantsSummary.gen($participantsExtra.result)
+  function regenFilter(
+    participantsExtra: ParticipantExtra[],
+    recruitmentYear: number
+  ) {
+    return participantsExtra.filter(
+      (x) => new Date(x.date_screening).getFullYear() === recruitmentYear
+    )
+  }
+
+  function regenSummary(participantsExtraFiltered: ParticipantExtra[]) {
+    participantsSummary.gen(participantsExtraFiltered ?? [])
   }
 
   let priorVacs = [0, 1, 2, 3, 4, 5]
@@ -75,10 +73,19 @@
   ]
 
   let split: "Site" | "PriorVacs" = "PriorVacs"
+  let recruitmentYearString = "2020"
+  $: recruitmentYear = parseInt(recruitmentYearString)
 
   $: fetchTables($token, $loginReq.status, mounted)
-  $: regenExtra(needToRegenExtra)
-  $: regenSummary(needToRegenSummary)
+  $: regenExtra(
+    $participantsReq.result?.data ?? [],
+    $vaccinationHistoryReq.result?.data ?? []
+  )
+  $: participantsExtraFiltered = regenFilter(
+    $participantsExtra.result ?? [],
+    recruitmentYear
+  )
+  $: regenSummary(participantsExtraFiltered)
 </script>
 
 <div class="control">
@@ -88,6 +95,11 @@
     width="150px"
     >Split: {split === "PriorVacs" ? "Vaccinations" : "Site"}</Button
   >
+  <MultipleChoice
+    question="Year"
+    options={["2020", "2021"]}
+    bind:selected={recruitmentYearString}
+  />
 </div>
 
 <div class="table-container" style="--scrollbar-width: {$scrollbarWidth}px;">
