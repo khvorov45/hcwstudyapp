@@ -214,7 +214,7 @@ impl ToCurrent<current::Participant> for previous::Participant {
             height: self.height,
             weight: self.weight,
             bmi: self.bmi,
-            gender: self.gender.clone().map(|g| g.to_current()),
+            gender: self.gender.map(|g| g.to_current()),
             occupation: self.occupation.clone().map(|o| o.to_current()),
         }
     }
