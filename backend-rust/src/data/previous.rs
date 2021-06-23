@@ -163,7 +163,7 @@ pub enum StudyGroup {
     MainAndNested,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ConsentDisease {
     Flu,
     Covid,
@@ -190,4 +190,12 @@ pub struct YearChange {
     pub year: u32,
     pub pid: Option<String>,
     pub pid_preformat: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Bleed {
+    pub pid: String,
+    pub year: u32,
+    pub day: u32,
+    pub date: Option<DateTime<Utc>>,
 }

@@ -22,6 +22,7 @@ pub struct Db {
     pub serology: Table<previous::Serology, current::Serology>,
     pub consent: Table<previous::Consent, current::Consent>,
     pub year_change: Table<previous::YearChange, current::YearChange>,
+    pub bleed: Table<previous::Bleed, current::Bleed>,
 }
 
 pub struct DbDirs {
@@ -129,6 +130,7 @@ impl Db {
             serology: Table::new("Serology", &dirs)?,
             consent: Table::new("Consent", &dirs)?,
             year_change: Table::new("YearChange", &dirs)?,
+            bleed: Table::new("Bleed", &dirs)?,
             dirs,
         };
 
@@ -179,6 +181,7 @@ impl Db {
         self.serology.read(version)?;
         self.consent.read(version)?;
         self.year_change.read(version)?;
+        self.bleed.read(version)?;
         Ok(())
     }
     pub fn write(&self) -> Result<()> {
@@ -194,6 +197,7 @@ impl Db {
         self.serology.write()?;
         self.consent.write()?;
         self.year_change.write()?;
+        self.bleed.write()?;
         Ok(())
     }
     pub fn convert(&mut self) {
@@ -209,6 +213,7 @@ impl Db {
         self.serology.convert();
         self.consent.convert();
         self.year_change.convert();
+        self.bleed.convert();
     }
     pub fn find_table_issues(&mut self, access_group: current::AccessGroup) -> TableIssues {
         log::debug!("verifying db");
@@ -493,6 +498,12 @@ impl Db {
     ) -> Result<()> {
         self.year_change.current.data = redcap_year_change;
         self.year_change.write()?;
+        Ok(())
+    }
+
+    pub fn sync_redcap_bleed(&mut self, redcap_bleed: Vec<current::Bleed>) -> Result<()> {
+        self.bleed.current.data = redcap_bleed;
+        self.bleed.write()?;
         Ok(())
     }
 }

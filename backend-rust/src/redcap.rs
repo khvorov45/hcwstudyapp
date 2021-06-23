@@ -173,6 +173,7 @@ trait TryAs {
         form: current::ConsentForm,
     ) -> Result<current::Consent>;
     fn try_as_year_change(&self, year: u32) -> Result<current::YearChange>;
+    fn try_as_bleed(&self, year: u32, day: u32) -> Result<current::Bleed>;
 }
 
 impl TryAs for serde_json::Value {
@@ -681,6 +682,22 @@ impl TryAs for serde_json::Value {
         };
 
         Ok(year_change)
+    }
+    fn try_as_bleed(&self, year: u32, day: u32) -> Result<current::Bleed> {
+        let var_name = match day {
+            0 => "date_baseline_blood".to_string(),
+            7 | 14 => format!("date_{}d_blood", day),
+            _ => "date_end_season_blood".to_string(),
+        };
+        let v = self.try_as_object()?;
+        let bleed = current::Bleed {
+            pid: v.try_get("pid")?.try_as_pid()?,
+            year,
+            day,
+            date: v.try_get(var_name.as_str())?.try_as_date_or_null()?,
+        };
+
+        Ok(bleed)
     }
 }
 
@@ -1533,4 +1550,72 @@ pub async fn export_year_change(opt: &Opt) -> Result<Vec<current::YearChange>> {
     log_time_elapsed("Year change parsed", now);
 
     Ok(year_change)
+}
+
+pub(crate) async fn export_bleeds(opt: &Opt) -> Result<Vec<current::Bleed>> {
+    let (bleed2020, bleed2021) = redcap_api_request(
+        opt,
+        &[
+            ("content", "record"),
+            (
+                "fields",
+                [
+                    "record_id",
+                    "pid",
+                    "date_baseline_blood",
+                    "date_7d_blood",
+                    "date_14d_blood",
+                    "date_end_season_blood",
+                ]
+                .join(",")
+                .as_str(),
+            ),
+            ("events", "baseline_arm_1"),
+        ],
+    )
+    .await?;
+
+    let now = chrono::Utc::now();
+    let mut bleed: Vec<current::Bleed> = Vec::new();
+    let mut counts = ExtractionCounts::new(&["parsed and added", "empty pid"]);
+
+    let mut add = |v: &serde_json::Value, year: u32| {
+        match pid_is_empty(v) {
+            Ok(empty) => {
+                if empty {
+                    counts.add(1, year);
+                    return;
+                }
+            }
+            Err(e) => {
+                log::error!("failed to pull pid: {}, {:?}", e, v);
+                return;
+            }
+        }
+        for day in [0, 7, 14, 280] {
+            let value = match v.try_as_bleed(year, day) {
+                Ok(v) => {
+                    counts.add(0, year);
+                    v
+                }
+                Err(e) => {
+                    log_full_error(
+                        format!("Failed to parse bleed for year {}", year).as_str(),
+                        e.to_string(),
+                        v,
+                    );
+                    return;
+                }
+            };
+            bleed.push(value);
+        }
+    };
+
+    bleed2020.iter().for_each(|y| add(y, 2020));
+    bleed2021.iter().for_each(|y| add(y, 2021));
+
+    counts.log("Bleed");
+    log_time_elapsed("Bleed parsed", now);
+
+    Ok(bleed)
 }

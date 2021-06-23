@@ -191,3 +191,11 @@ pub struct YearChange {
     pub pid: Option<String>,
     pub pid_preformat: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Bleed {
+    pub pid: String,
+    pub year: u32,
+    pub day: u32,
+    pub date: Option<DateTime<Utc>>,
+}

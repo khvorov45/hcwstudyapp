@@ -24,6 +24,8 @@ pub fn routes(
     mailer: Mailer,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     let base_routes = get_users(db.clone())
+        .or(get_bleed(db.clone()))
+        .or(bleed_redcap_sync(db.clone(), opt.clone()))
         .or(get_year_change(db.clone()))
         .or(year_change_redcap_sync(db.clone(), opt.clone()))
         .or(get_consent(db.clone()))
@@ -650,6 +652,52 @@ fn year_change_redcap_sync(
                 Err(e) => return Err(reject(e)),
             };
             match db.lock().await.sync_redcap_year_change(redcap_year_change) {
+                Ok(()) => Ok(reply_no_content()),
+                Err(e) => Err(reject(e)),
+            }
+        })
+}
+
+// Year change ======================================================================================
+
+fn get_bleed(db: Db) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    async fn handler(u: current::User, db: Db) -> Result<impl Reply, Infallible> {
+        let db = db.lock().await;
+        let data = &db.bleed.current.data;
+        if let current::AccessGroup::Site(site) = u.access_group {
+            let participants = db.get_participants_subset(site);
+            Ok(warp::reply::json(
+                &data
+                    .iter()
+                    .filter(|v| participants.iter().any(|p| p.pid == v.pid))
+                    .collect::<Vec<&current::Bleed>>(),
+            ))
+        } else {
+            Ok(warp::reply::json(data))
+        }
+    }
+    warp::path!("bleed")
+        .and(warp::get())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and_then(handler)
+}
+
+fn bleed_redcap_sync(
+    db: Db,
+    opt: Opt,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path!("bleed" / "redcap" / "sync")
+        .and(warp::put())
+        .and(user_from_token(db.clone()))
+        .and(with_db(db))
+        .and(with_opt(opt))
+        .and_then(move |_u: current::User, db: Db, opt: Opt| async move {
+            let redcap_bleed = match redcap::export_bleeds(&opt).await {
+                Ok(u) => u,
+                Err(e) => return Err(reject(e)),
+            };
+            match db.lock().await.sync_redcap_bleed(redcap_bleed) {
                 Ok(()) => Ok(reply_no_content()),
                 Err(e) => Err(reject(e)),
             }

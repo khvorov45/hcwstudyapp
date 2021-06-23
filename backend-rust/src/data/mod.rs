@@ -376,3 +376,14 @@ impl ToCurrent<current::YearChange> for previous::YearChange {
         }
     }
 }
+
+impl ToCurrent<current::Bleed> for previous::Bleed {
+    fn to_current(&self) -> current::Bleed {
+        current::Bleed {
+            pid: self.pid.clone(),
+            year: self.year,
+            day: self.day,
+            date: self.date,
+        }
+    }
+}
