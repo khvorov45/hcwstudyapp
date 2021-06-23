@@ -167,6 +167,13 @@ export type YearChange = {
   pid_preformat: string | null
 }
 
+export type Bleed = {
+  pid: string
+  year: number
+  day: number
+  date: string | null
+}
+
 export type KeyIssue<K, T> = {
   value: K
   rows: T[]

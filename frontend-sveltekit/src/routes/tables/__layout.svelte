@@ -32,6 +32,11 @@
       width: 100,
     },
     {
+      link: "/tables/bleed",
+      title: "Bleeds",
+      width: 100,
+    },
+    {
       link: "/tables/weekly-survey",
       title: "Weekly survey",
       width: 150,

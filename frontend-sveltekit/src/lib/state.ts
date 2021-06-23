@@ -12,6 +12,7 @@ import type {
   DataQuality,
   Consent,
   YearChange,
+  Bleed,
 } from "$lib/data"
 import { isOccupationNotOther } from "$lib/data"
 import {
@@ -274,6 +275,15 @@ export const yearChangeReq = createApiStore<
   url: "year-change",
   expectContent: "json",
 }))
+
+export const bleedReq = createApiStore<{ token: string | null }, Bleed[]>(
+  ({ token }) => ({
+    method: "GET",
+    token,
+    url: "bleed",
+    expectContent: "json",
+  })
+)
 
 function createTableExtraStore<T, A>(gen: (args: A) => T[]) {
   const { subscribe, set, update } = writable<{
