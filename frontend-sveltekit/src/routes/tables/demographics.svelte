@@ -6,6 +6,7 @@
     participantsReq,
     scrollbarWidth,
     vaccinationHistoryReq,
+    bleedReq,
     participantsExtra,
     participantsSummary,
   } from "$lib/state"
@@ -28,6 +29,7 @@
     await Promise.all([
       fetchTable(participantsReq, token, loginStatus, mounted),
       fetchTable(vaccinationHistoryReq, token, loginStatus, mounted),
+      fetchTable(bleedReq, token, loginStatus, mounted),
     ])
   }
 
@@ -40,13 +42,23 @@
 
   function regenFilter(
     participantsExtra: ParticipantExtra[],
-    recruitmentYear: number | null
+    recruitmentYear: number | null,
+    pidsWithBleeds: string[],
+    currentlyActive: boolean | null
   ) {
-    if (recruitmentYear === null) {
+    if (recruitmentYear === null && currentlyActive === null) {
       return participantsExtra
     }
     return participantsExtra.filter(
-      (x) => new Date(x.date_screening).getFullYear() === recruitmentYear
+      (x) =>
+        (recruitmentYear
+          ? new Date(x.date_screening).getFullYear() === recruitmentYear
+          : true) &&
+        (currentlyActive === null
+          ? true
+          : currentlyActive
+          ? pidsWithBleeds.includes(x.pid)
+          : !pidsWithBleeds.includes(x.pid))
     )
   }
 
@@ -77,15 +89,23 @@
 
   let split: "Site" | "PriorVacs" = "PriorVacs"
   let recruitmentYear = null
+  let currentlyActive = null
+
+  const thisYear = new Date().getFullYear()
 
   $: fetchTables($token, $loginReq.status, mounted)
   $: regenExtra(
     $participantsReq.result?.data ?? [],
     $vaccinationHistoryReq.result?.data ?? []
   )
+  $: pidsWithBleeds = $bleedReq.result?.data
+    ?.filter((p) => p.date !== null && p.year == thisYear)
+    .map((p) => p.pid)
   $: participantsExtraFiltered = regenFilter(
     $participantsExtra.result ?? [],
-    recruitmentYear
+    recruitmentYear,
+    pidsWithBleeds,
+    currentlyActive ? currentlyActive === "yes" : null
   )
   $: regenSummary(participantsExtraFiltered)
 </script>
@@ -102,6 +122,15 @@
     options={[2020, 2021]}
     bind:selected={recruitmentYear}
     width="160px"
+    top="var(--size-nav)"
+    left="-50px"
+    placeholder="any"
+  />
+  <Select
+    label="Bled this year:"
+    options={["yes", "no"]}
+    bind:selected={currentlyActive}
+    width="130px"
     top="var(--size-nav)"
     left="-50px"
     placeholder="any"
