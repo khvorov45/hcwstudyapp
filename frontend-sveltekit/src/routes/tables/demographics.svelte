@@ -15,7 +15,7 @@
   import { onMount } from "svelte"
   import Summary from "$lib/components/Summary.svelte"
   import Button from "$lib/components/Button.svelte"
-  import MultipleChoice from "$lib/components/MultipleChoice.svelte"
+  import Select from "$lib/components/Select.svelte"
 
   let mounted = false
   onMount(() => (mounted = true))
@@ -40,8 +40,11 @@
 
   function regenFilter(
     participantsExtra: ParticipantExtra[],
-    recruitmentYear: number
+    recruitmentYear: number | null
   ) {
+    if (recruitmentYear === null) {
+      return participantsExtra
+    }
     return participantsExtra.filter(
       (x) => new Date(x.date_screening).getFullYear() === recruitmentYear
     )
@@ -73,8 +76,7 @@
   ]
 
   let split: "Site" | "PriorVacs" = "PriorVacs"
-  let recruitmentYearString = "2020"
-  $: recruitmentYear = parseInt(recruitmentYearString)
+  let recruitmentYear = null
 
   $: fetchTables($token, $loginReq.status, mounted)
   $: regenExtra(
@@ -95,10 +97,14 @@
     width="150px"
     >Split: {split === "PriorVacs" ? "Vaccinations" : "Site"}</Button
   >
-  <MultipleChoice
-    question="Year"
-    options={["2020", "2021"]}
-    bind:selected={recruitmentYearString}
+  <Select
+    label="Recruitment year:"
+    options={[2020, 2021]}
+    bind:selected={recruitmentYear}
+    width="160px"
+    top="var(--size-nav)"
+    left="-50px"
+    placeholder="any"
   />
 </div>
 

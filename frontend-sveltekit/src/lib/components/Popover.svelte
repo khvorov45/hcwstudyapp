@@ -2,10 +2,11 @@
   export let visible = false
   export let top = "0px"
   export let left = "0px"
+  export let cursor = "pointer"
 </script>
 
 {#if visible}
-  <div class="popover-container">
+  <div class="popover-container" style="cursor: {cursor}">
     <div class="popover-content" style="top: {top}; left: {left}"><slot /></div>
   </div>
 {/if}
