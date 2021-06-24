@@ -161,7 +161,7 @@ trait TryAs {
     fn try_as_schedule(&self, year: u32, day: u32, var_name: &str) -> Result<current::Schedule>;
     fn try_as_swab_result(&self) -> Result<current::SwabResult>;
     fn try_as_weekly_survey(&self, pid: &str, year: u32) -> Result<current::WeeklySurvey>;
-    fn try_as_withdrawn(&self, pid: &str) -> Result<current::Withdrawn>;
+    fn try_as_withdrawn(&self, pid: &str, year: u32) -> Result<current::Withdrawn>;
     fn try_as_study_group_or_null_flu_paper(&self) -> Result<Option<current::StudyGroup>>;
     fn try_as_study_group_or_null_flu_electronic(&self) -> Result<Option<current::StudyGroup>>;
     fn try_as_study_group_or_null_covid_paper(&self) -> Result<Option<current::StudyGroup>>;
@@ -545,10 +545,11 @@ impl TryAs for serde_json::Value {
         };
         Ok(weekly_survey)
     }
-    fn try_as_withdrawn(&self, pid: &str) -> Result<current::Withdrawn> {
+    fn try_as_withdrawn(&self, pid: &str, year: u32) -> Result<current::Withdrawn> {
         let v = self.try_as_object()?;
         let withdrawn = current::Withdrawn {
             pid: pid.to_string(),
+            year,
             date: v.try_get("withdrawal_date")?.try_as_date_or_null()?,
             reason: v
                 .try_get("withdrawal_reason")?
@@ -1402,7 +1403,7 @@ pub async fn export_withdrawn(
                 return;
             }
         };
-        let value = match v.try_as_withdrawn(pid.as_str()) {
+        let value = match v.try_as_withdrawn(pid.as_str(), year) {
             Ok(v) => {
                 counts.add(0, year);
                 v

@@ -297,8 +297,10 @@ impl ToCurrent<current::WeeklySurvey> for previous::WeeklySurvey {
 
 impl ToCurrent<current::Withdrawn> for previous::Withdrawn {
     fn to_current(&self) -> current::Withdrawn {
+        use chrono::Datelike;
         current::Withdrawn {
             pid: self.pid.clone(),
+            year: self.date.map(|date| date.year()).unwrap_or(0) as u32,
             date: self.date,
             reason: self.reason.clone(),
         }

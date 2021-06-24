@@ -137,6 +137,7 @@ pub struct WeeklySurvey {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Withdrawn {
     pub pid: String,
+    pub year: u32,
     pub date: Option<DateTime<Utc>>,
     pub reason: Option<String>,
 }
