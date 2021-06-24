@@ -125,6 +125,15 @@ export const syncScheduleReq = createApiStore<{ token: string | null }, User>(
   })
 )
 
+export const syncBleedReq = createApiStore<{ token: string | null }, User>(
+  ({ token }) => ({
+    method: "PUT",
+    token: token,
+    url: "bleed/redcap/sync",
+    expectContent: "none",
+  })
+)
+
 export const syncWeeklySurveyReq = createApiStore<
   { token: string | null },
   User

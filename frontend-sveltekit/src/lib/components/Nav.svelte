@@ -20,6 +20,8 @@
     consentReq,
     syncYearChangeReq,
     yearChangeReq,
+    syncBleedReq,
+    bleedReq,
   } from "$lib/state"
   import Home from "./icons/Report.svelte"
   import Settings from "./icons/Settings.svelte"
@@ -70,6 +72,13 @@
     }
     await syncScheduleReq.execute({ token: $token })
     await scheduleReq.execute({ token: $token })
+  }
+  async function syncBleed() {
+    if ($loginReq.status !== "success" || $token === null) {
+      return
+    }
+    await syncBleedReq.execute({ token: $token })
+    await bleedReq.execute({ token: $token })
   }
   async function syncWeeklySurvey() {
     if ($loginReq.status !== "success" || $token === null) {
@@ -176,6 +185,11 @@
             loading={$syncScheduleReq.status === "loading"}
             errorMsg={$syncScheduleReq.result?.error?.message ?? ""}
             action={syncSchedule}>Sync schedule</Button
+          >
+          <Button
+            loading={$syncBleedReq.status === "loading"}
+            errorMsg={$syncBleedReq.result?.error?.message ?? ""}
+            action={syncBleed}>Sync bleed</Button
           >
           <Button
             loading={$syncWeeklySurveyReq.status === "loading"}
