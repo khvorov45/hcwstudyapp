@@ -24,10 +24,16 @@
 
   $: fetchThisTable($token, $loginReq.status, mounted)
 
-  const headers: TableDisplayHeader<Withdrawn>[] = [
+  const headers: TableDisplayHeader<Withdrawn, string>[] = [
     {
       title: "PID",
       accessor: (p) => p.pid,
+      width: 100,
+      filter: tableFilterStartsWith,
+    },
+    {
+      title: "Year",
+      accessor: (p) => p.year.toString(),
       width: 100,
       filter: tableFilterStartsWith,
     },

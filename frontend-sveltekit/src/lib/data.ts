@@ -128,6 +128,7 @@ export type WeeklySurvey = {
 
 export type Withdrawn = {
   pid: string
+  year: number
   date: string | null
   reason: string | null
 }
