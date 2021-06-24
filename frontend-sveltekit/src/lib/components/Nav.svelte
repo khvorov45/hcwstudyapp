@@ -31,6 +31,7 @@
   import Switch from "./Switch.svelte"
   import Users from "./icons/Users.svelte"
   import Attention from "./icons/Attention.svelte"
+  import Chart from "./icons/Chart.svelte"
 
   let settingsVisible = false
 
@@ -111,6 +112,11 @@
       <div class="element">
         <a class:active={$page.path.startsWith("/tables")} href="/tables"
           ><Table /></a
+        >
+      </div>
+      <div class="element">
+        <a class:active={$page.path.startsWith("/plots")} href="/plots"
+          ><Chart /></a
         >
       </div>
       <div class="element">
