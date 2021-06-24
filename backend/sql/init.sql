@@ -78,7 +78,7 @@ CREATE TABLE "YearChange" (
 
 CREATE TABLE "Withdrawn" (
     "pid" text PRIMARY KEY REFERENCES "Participant"("pid") ON DELETE CASCADE ON UPDATE CASCADE,
-    "date" timestamptz NOT NULL
+    "date" timestamptz
 );
 
 CREATE TABLE "Vaccination" (

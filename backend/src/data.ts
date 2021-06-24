@@ -148,7 +148,7 @@ export type YearChange = t.TypeOf<typeof YearChangeV>
 
 export const WithdrawnV = t.type({
   pid: t.string,
-  date: MyDateV,
+  date: t.union([MyDateV, t.null]),
 })
 export type Withdrawn = t.TypeOf<typeof WithdrawnV>
 

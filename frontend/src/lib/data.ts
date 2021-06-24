@@ -148,7 +148,7 @@ export type YearChange = t.TypeOf<typeof YearChangeV>
 
 export const WithdrawnV = t.type({
   pid: t.string,
-  date: MyDateV,
+  date: t.union([MyDateV, t.null]),
 })
 export type Withdrawn = t.TypeOf<typeof WithdrawnV>
 
@@ -214,3 +214,19 @@ export const RegistrationOfInterestV = t.type({
   date: MyDateV,
 })
 export type RegistrationOfInterest = t.TypeOf<typeof RegistrationOfInterestV>
+
+export const TimepointV = t.keyof({
+  prevax: null,
+  postvax7d: null,
+  postvax14d: null,
+  postseason: null,
+})
+export type Timepoint = t.TypeOf<typeof TimepointV>
+
+export const BloodSampleV = t.type({
+  pid: t.string,
+  year: t.number,
+  timepoint: TimepointV,
+  date: MyDateV,
+})
+export type BloodSample = t.TypeOf<typeof BloodSampleV>
