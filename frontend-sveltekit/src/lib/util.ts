@@ -457,3 +457,17 @@ export function summariseNumeric(ns: (number | null)[]) {
     high: getMax(ns),
   }
 }
+
+export type Pad = {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+export type PlotPad = {
+  axis: Pad
+  data: Pad
+  yTitle: number
+  xTitle: number
+}
