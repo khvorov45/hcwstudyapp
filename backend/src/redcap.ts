@@ -354,7 +354,7 @@ export async function exportYearChanges(
 const RedcapWithdrawnV = t.type({
   redcapRecordId: t.string,
   redcapProjectYear: t.number,
-  date: DateFromISOString,
+  date: t.union([DateFromISOString, t.null]),
 })
 type RedcapWithdrawn = t.TypeOf<typeof RedcapWithdrawnV>
 
