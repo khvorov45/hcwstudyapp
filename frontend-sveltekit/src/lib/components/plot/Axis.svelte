@@ -1,28 +1,44 @@
 <script lang="ts">
   import type { PlotPad } from "$lib/util"
+  import { defaultPlotPad, scaleLinear } from "$lib/util"
   import StraightLine from "$lib/components/plot/StraightLine.svelte"
 
-  export let pad: PlotPad = {
-    axis: { top: 0, bottom: 0, left: 0, right: 0 },
-    data: { top: 0, bottom: 0, left: 0, right: 0 },
-    yTitle: 0,
-    xTitle: 0,
-  }
+  export let pad: PlotPad = defaultPlotPad()
   export let plotWidth = 0
   export let plotHeight = 0
   export let label = ""
   export let ticks: any[] = []
-  export let scale: (x: any) => number
+
   export let orientation: "h" | "v" = "h"
   export let drawGrid = true
   export let angle = 0
 
   export let tickLength = 5
   export let tickLabelDistanceFromTick = 5
-  export let maxTickDistance = 10
-  export let color = "gray"
+  export let minTickDistance = 10
+
+  export let colorLine = "var(--color-font-2)"
+  export let colorTitle = "var(--color-font-1)"
+  export let colorText = "var(--color-font-2)"
+  export let colorTicks = "var(--color-font-2)"
+  export let colorGrid = "var(--color-bg-2)"
 
   let isX = orientation == "h"
+
+  export let scale: (x: any, i: number) => number = (x, i) =>
+    scaleLinear(
+      i,
+      [0, ticks.length - 1],
+      isX
+        ? [
+            pad.axis.left + pad.data.left,
+            plotWidth - pad.axis.right - pad.data.right,
+          ]
+        : [
+            plotHeight - pad.axis.bottom - pad.data.bottom,
+            pad.axis.top + pad.data.top,
+          ]
+    )
 
   const axisTitleCoords = [
     isX
@@ -33,8 +49,8 @@
       : (plotHeight - pad.axis.top - pad.axis.bottom) / 2 + pad.axis.top,
   ]
 
-  let tickCoordinates = ticks.map((tick) => {
-    const coordinate = scale(tick)
+  $: tickCoordinates = ticks.map((tick, i) => {
+    const coordinate = scale(tick, i)
     if (isX) {
       return {
         x: coordinate,
@@ -49,24 +65,21 @@
     }
   })
 
-  let tickDistances = tickCoordinates.reduce((distances, coords) => {
-    let coordinate = isX ? coords.x : coords.y
-    if (distances.length === 0) {
-      distances.push(coordinate)
-    } else {
-      distances.push(coordinate - distances[distances.length - 1])
+  // Make sure the minTickDistance is respected
+  $: if (tickCoordinates.length > 0) {
+    let tickCoordinatesDistanceFiltered = [tickCoordinates[0]]
+    let lastAcceptedTickCoord = isX
+      ? tickCoordinates[0].x
+      : tickCoordinates[0].y
+    for (let coords of tickCoordinates.slice(1)) {
+      let coord = isX ? coords.x : coords.y
+      if (Math.abs(coord - lastAcceptedTickCoord) > minTickDistance) {
+        lastAcceptedTickCoord = coord
+        tickCoordinatesDistanceFiltered.push(coords)
+      }
     }
-    return distances
-  }, [])
-
-  tickCoordinates = tickCoordinates.filter((coords, index) => {
-    let coordinate = isX ? coords.x : coords.y
-    const maxAllowedCoordinate = isX ? plotWidth - pad.axis.right : pad.axis.top
-    return (
-      tickDistances[index] < maxTickDistance &&
-      coordinate < maxAllowedCoordinate
-    )
-  })
+    tickCoordinates = tickCoordinatesDistanceFiltered
+  }
 </script>
 
 <!-- Line -->
@@ -77,14 +90,14 @@
   y={isX ? plotHeight - pad.axis.bottom : undefined}
   y1={isX ? undefined : plotHeight - pad.axis.bottom}
   y2={isX ? undefined : pad.axis.top}
-  {color}
+  color={colorLine}
 />
 
 <!-- Name -->
 <text
   x={axisTitleCoords[0]}
   y={axisTitleCoords[1]}
-  fill="var(--color-font-1)"
+  fill={colorTitle}
   text-anchor="middle"
   transform={isX
     ? ""
@@ -94,18 +107,18 @@
 </text>
 
 <!-- Ticks -->
-{#each tickCoordinates as tickCoordinate}
+{#each tickCoordinates as tickCoordinate, i}
   <g>
     <!-- Number -->
     <text
-      fill="var(--color-font-2)"
+      fill={colorText}
       x={tickCoordinate.x}
       y={tickCoordinate.y}
       text-anchor={isX ? (angle !== 0 ? "start" : "middle") : "end"}
       dominant-baseline={isX ? "hanging" : "middle"}
       transform={`rotate(${angle}, ${tickCoordinate.x}, ${tickCoordinate.y})`}
     >
-      {0}
+      {ticks[i]}
     </text>
     <!-- Tick -->
     <StraightLine
@@ -115,7 +128,7 @@
       x={isX ? tickCoordinate.x : undefined}
       y1={isX ? plotHeight - pad.axis.bottom : undefined}
       y2={isX ? plotHeight - pad.axis.bottom + tickLength : undefined}
-      color="var(--color-font-1)"
+      color={colorTicks}
     />
     <!-- Grid line -->
     {#if drawGrid}
@@ -126,7 +139,7 @@
         x={isX ? tickCoordinate.x : undefined}
         y1={isX ? plotHeight - pad.axis.bottom : undefined}
         y2={isX ? pad.axis.top : undefined}
-        color="var(color-font-2)"
+        color={colorGrid}
       />
     {/if}
   </g>

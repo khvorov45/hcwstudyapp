@@ -12,7 +12,8 @@
   } from "$lib/state"
   import type { AsyncStatus } from "$lib/util"
   import { fetchTable } from "$lib/util"
-  import type { Site, Gender, VaccinationHistory, Participant } from "$lib/data"
+  import type { VaccinationHistory, Participant } from "$lib/data"
+  import { SITES, OCCUPATIONS, GENDERS } from "$lib/data"
   import { onMount } from "svelte"
   import Summary from "$lib/components/Summary.svelte"
   import Button from "$lib/components/Button.svelte"
@@ -67,25 +68,6 @@
   }
 
   let priorVacs = [0, 1, 2, 3, 4, 5]
-  let sites: Site[] = [
-    "Adelaide",
-    "Brisbane",
-    "Melbourne",
-    "Newcastle",
-    "Perth",
-    "Sydney",
-  ]
-  let genders: Gender[] = ["Female", "Male", "Other"]
-  let occupations = [
-    "Administrative",
-    "AlliedHealth",
-    "Ancillary",
-    "Laboratory",
-    "Medical",
-    "Nursing",
-    "Research",
-    "Other",
-  ]
 
   let split: "Site" | "PriorVacs" = "PriorVacs"
   let recruitmentYear = null
@@ -152,7 +134,7 @@
       <div class="tr header-row">
         <div class="th" />
         {#if split === "Site"}
-          {#each sites as site}
+          {#each SITES as site}
             <div class="th">{site}</div>
           {/each}
         {:else}
@@ -168,7 +150,7 @@
       <div class="tr data-row start-row">
         <div class="td">Count</div>
         {#if split === "Site"}
-          {#each sites as site}
+          {#each SITES as site}
             <div class="td">
               {$participantsSummary.result?.site.find((r) => r.site == site)
                 ?.count.n ?? 0}
@@ -192,7 +174,7 @@
         {#each priorVacs as priorVac}
           <div class="tr">
             <div class="td">{priorVac + " prior"}</div>
-            {#each sites as site}
+            {#each SITES as site}
               <div class="td">
                 {$participantsSummary.result?.sitePriorVacCounts.find(
                   (x) =>
@@ -209,7 +191,7 @@
           </div>
         {/each}
       {:else}
-        {#each sites as site}
+        {#each SITES as site}
           <div class="tr">
             <div class="td">{site}</div>
             {#each priorVacs as priorVac}
@@ -232,11 +214,11 @@
       <div class="tr label-row start-row">
         <div class="td">Gender</div>
       </div>
-      {#each genders as gender}
+      {#each GENDERS as gender}
         <div class="tr data-row">
           <div class="td">{gender}</div>
           {#if split === "Site"}
-            {#each sites as site}
+            {#each SITES as site}
               <div class="td">
                 {$participantsSummary.result?.site
                   .find((r) => r.site == site)
@@ -263,11 +245,11 @@
       <div class="tr label-row start-row">
         <div class="td">Occupation</div>
       </div>
-      {#each occupations as occupation}
+      {#each OCCUPATIONS as occupation}
         <div class="tr data-row">
           <div class="td">{occupation}</div>
           {#if split === "Site"}
-            {#each sites as site}
+            {#each SITES as site}
               <div class="td">
                 {$participantsSummary.result?.site
                   .find((r) => r.site == site)
@@ -298,7 +280,7 @@
           />
         </div>
         {#if split === "Site"}
-          {#each sites as site}
+          {#each SITES as site}
             <div class="td">
               <Summary
                 summary={$participantsSummary.result?.site.find(
@@ -335,7 +317,7 @@
           />
         </div>
         {#if split === "Site"}
-          {#each sites as site}
+          {#each SITES as site}
             <div class="td">
               <Summary
                 summary={$participantsSummary.result?.site.find(
@@ -372,7 +354,7 @@
           />
         </div>
         {#if split === "Site"}
-          {#each sites as site}
+          {#each SITES as site}
             <div class="td">
               <Summary
                 summary={$participantsSummary.result?.site.find(
@@ -409,7 +391,7 @@
           />
         </div>
         {#if split === "Site"}
-          {#each sites as site}
+          {#each SITES as site}
             <div class="td">
               <Summary
                 summary={$participantsSummary.result?.site.find(

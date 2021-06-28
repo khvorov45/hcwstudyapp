@@ -6,6 +6,15 @@ export type Site =
   | "Brisbane"
   | "Newcastle"
 
+export const SITES: Site[] = [
+  "Adelaide",
+  "Brisbane",
+  "Melbourne",
+  "Newcastle",
+  "Perth",
+  "Sydney",
+]
+
 export type AccessGroup = "Admin" | "Unrestricted" | { Site: Site }
 
 export function accessGroupToString(a: AccessGroup): string {
@@ -29,6 +38,17 @@ export type Occupation =
   | "Research"
   | { Other: string }
 
+export const OCCUPATIONS = [
+  "Administrative",
+  "AlliedHealth",
+  "Ancillary",
+  "Laboratory",
+  "Medical",
+  "Nursing",
+  "Research",
+  "Other",
+]
+
 export function isOccupationNotOther(a: Occupation): boolean {
   return (
     a === "Medical" ||
@@ -47,6 +67,7 @@ export function occupationToString(a: Occupation): string {
 }
 
 export type Gender = "Male" | "Female" | "Other"
+export const GENDERS: Gender[] = ["Female", "Male", "Other"]
 
 export type Participant = {
   pid: string

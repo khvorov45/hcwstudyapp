@@ -471,3 +471,27 @@ export type PlotPad = {
   yTitle: number
   xTitle: number
 }
+
+export function defaultPlotPad(): PlotPad {
+  return {
+    axis: { top: 20, bottom: 40, left: 60, right: 20 },
+    data: { top: 0, bottom: 0, left: 20, right: 0 },
+    yTitle: 15,
+    xTitle: 5,
+  }
+}
+
+export function scaleLinear(
+  x: number,
+  from: [number, number],
+  to: [number, number]
+): number {
+  if (from[0] === from[1]) {
+    return (to[0] + to[1]) / 2
+  }
+  return (x - from[0]) * ((to[1] - to[0]) / (from[1] - from[0])) + to[0]
+}
+
+export function max(a: number[]) {
+  return a.reduce((x, y) => (x > y ? x : y), -Infinity)
+}
