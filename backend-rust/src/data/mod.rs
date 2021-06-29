@@ -200,7 +200,7 @@ impl ToCurrent<current::Participant> for previous::Participant {
         current::Participant {
             pid: self.pid.clone(),
             site: self.site.to_current(),
-            email: self.email.clone(),
+            email: self.email.clone().map(|x| x.to_lowercase()),
             mobile: self.mobile.clone(),
             date_screening: self.date_screening,
             date_birth: self.date_birth,

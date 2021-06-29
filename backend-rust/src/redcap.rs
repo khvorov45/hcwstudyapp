@@ -448,7 +448,7 @@ impl TryAs for serde_json::Value {
             email: v
                 .try_get("email")?
                 .try_as_str_or_null()?
-                .map(|s| s.to_string()),
+                .map(|s| s.to_string().to_lowercase()),
             mobile: v
                 .try_get("mobile_number")?
                 .try_as_str_or_null()?
