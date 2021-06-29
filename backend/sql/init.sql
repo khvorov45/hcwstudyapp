@@ -50,7 +50,7 @@ CREATE TABLE "Participant" (
     "site" hfs_site NOT NULL,
     "dateScreening" timestamptz,
     "email" text CHECK ("email" = lower("email")),
-    "mobile" text UNIQUE,
+    "mobile" text,
     "dob" timestamptz,
     "gender" hfs_gender,
     "heightCM" real,
