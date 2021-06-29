@@ -49,7 +49,7 @@ CREATE TABLE "Participant" (
     "pid" text PRIMARY KEY,
     "site" hfs_site NOT NULL,
     "dateScreening" timestamptz,
-    "email" text UNIQUE CHECK ("email" = lower("email")),
+    "email" text CHECK ("email" = lower("email")),
     "mobile" text UNIQUE,
     "dob" timestamptz,
     "gender" hfs_gender,
