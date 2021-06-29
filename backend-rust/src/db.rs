@@ -61,12 +61,18 @@ pub enum Version {
 
 #[derive(serde_derive::Serialize)]
 pub struct TableIssues {
+    participant: ParticipantTableIssues,
     schedule: ScheduleTableIssues,
     weekly_survey: WeeklySurveyTableIssues,
     virus: VirusTableIssues,
     serology: SerologyTableIssues,
     consent: ConsentTableIssues,
     year_changes: YearChangeTableIssues,
+}
+
+#[derive(serde_derive::Serialize)]
+pub struct ParticipantTableIssues {
+    duplicate_email: Vec<Duplicate<String, String>>,
 }
 
 #[derive(serde_derive::Serialize)]
@@ -233,6 +239,15 @@ impl Db {
         allowed_pid.sort();
 
         TableIssues {
+            participant: ParticipantTableIssues {
+                duplicate_email: find_duplicates(
+                    self.participants.filter_and_collect(|p| {
+                        allowed_pid.binary_search(&p.pid).is_ok() && p.email.is_some()
+                    }),
+                    |p| p.email.as_ref().unwrap().clone(),
+                    |p| p.pid.clone(),
+                ),
+            },
             schedule: ScheduleTableIssues {
                 pk: self
                     .schedule
@@ -779,4 +794,51 @@ pub trait ToCurrent<C> {
 pub trait PrimaryKey {
     type K: std::fmt::Debug + PartialEq + PartialOrd + Ord + serde::Serialize;
     fn get_pk(&self) -> Self::K;
+}
+
+#[derive(serde_derive::Serialize, Clone)]
+pub struct Duplicate<T, A> {
+    value: T,
+    associates: Vec<A>,
+}
+
+fn find_duplicates<V: Sized, T: Ord + Clone, A: Clone, FT: FnMut(&V) -> T, FA: Fn(&V) -> A>(
+    mut values: Vec<V>,
+    mut get_key: FT,
+    get_associates: FA,
+) -> Vec<Duplicate<T, A>> {
+    let mut result = Vec::new();
+
+    if values.len() <= 1 {
+        return result;
+    }
+
+    values.sort_by_key(|v| get_key(v));
+
+    let mut prev_value = &values[0];
+    let mut prev_key = get_key(prev_value);
+    let mut duplicate: Option<Duplicate<T, A>> = None;
+    for value in &values[1..] {
+        let key = get_key(value);
+        if key == prev_key {
+            match &mut duplicate {
+                Some(d) => d.associates.push(get_associates(value)),
+                None => {
+                    duplicate = Some(Duplicate {
+                        value: key.clone(),
+                        associates: vec![get_associates(prev_value), get_associates(value)],
+                    })
+                }
+            }
+        } else {
+            if let Some(duplicate) = duplicate {
+                result.push(duplicate.clone());
+            }
+            duplicate = None;
+        }
+        prev_value = value;
+        prev_key = key;
+    }
+
+    result
 }

@@ -201,7 +201,15 @@ export type KeyIssue<K, T> = {
   rows: T[]
 }
 
+export type Duplicate<T, A> = {
+  value: T
+  associates: A[]
+}
+
 export type DataQuality = {
+  participant: {
+    duplicate_email: Duplicate<String, String>[]
+  }
   schedule: {
     pk: KeyIssue<[string, number, number], Schedule>[]
   }

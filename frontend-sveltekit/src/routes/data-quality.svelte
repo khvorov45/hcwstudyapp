@@ -19,6 +19,9 @@
 
   $: problems = $checkQualityReq.result?.data
 
+  $: participantProblems = problems?.participant ?? null
+  $: participantsOk = participantProblems?.duplicate_email.length === 0
+
   $: serologyProblems = problems?.serology ?? null
   $: serologyOk =
     serologyProblems?.pk.length === 0 &&
@@ -41,19 +44,22 @@
   $: yearChangeOk = yearChangeProblems?.duplicate_pid.length === 0
 
   $: anyNull =
+    participantProblems === null ||
     serologyProblems === null ||
     virusProblems === null ||
     scheduleProblems === null ||
     weeklySurveyProblems === null ||
     consentProblems === null ||
     yearChangeProblems === null
+
   $: allOk =
     serologyOk &&
     virusOk &&
     scheduleOk &&
     weeklySurveyOk &&
     consentOk &&
-    yearChangeOk
+    yearChangeOk &&
+    participantsOk
 </script>
 
 <div class="vscroll">
@@ -62,6 +68,18 @@
   {:else if allOk}
     <div class="no-problems">No problems found</div>
   {:else}
+    {#if !participantsOk}
+      <div class="card">
+        <div class="table-name">Participants</div>
+        <div class="subtitle">Duplicate email</div>
+        {#each participantProblems?.duplicate_email as duplicateEmail}
+          <div class="pk-problem">
+            {duplicateEmail.value}: {duplicateEmail.associates.join(", ")}
+          </div>
+        {/each}
+      </div>
+    {/if}
+
     {#if !weeklySurveyOk}
       <div class="card">
         <div class="table-name">Weekly Survey</div>
