@@ -569,7 +569,7 @@ export async function exportWeeklySurvey(config: RedcapConfig): Promise<{
   const vaccinationCovid = decode(
     t.array(RedcapVaccinationCovidV),
     surv
-      .filter((s) => s.covidVaccineReceived)
+      .filter((s) => s.covidVaccineReceived && s.dose !== null)
       .map((s) => ({
         redcapRecordId: s.redcapRecordId,
         redcapProjectYear: s.redcapProjectYear,
